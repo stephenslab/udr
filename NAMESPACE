@@ -2,5 +2,6 @@
 
 export(datasim.ed)
 export(mvebnm)
+export(mvebnm_control_default)
 importFrom(Rcpp,evalCpp)
 useDynLib(mvebnm)

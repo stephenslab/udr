@@ -3,23 +3,62 @@
 # to EM.R, 1) Input exactly matches ed.R; 2) eps(epsilon) added to
 # resolve numerical issues in estimation.
 
-
 ## This is the main function for running the EM algorithm to fit the
 ## "extreme deconvolution" mixture model.
 
-#' @title Title Goes Here.
+#' @title Fit Empirical Bayes Multivariate Normal Means Model
 #'
-#' @description Description goes here.
+#' @description [Give the model that is fit.] Closely connected to the
+#' multivariate density deconvolution problem (Sarkar \emph{et al},
+#' 2018), and in fact this model is a special case of the "Extreme
+#' Deconvolution" model described in Bovy \emph{et al} (2011).
+#' [Describe exactly how this is a special case.]
 #'
-#' @param X Describe input argument "X" here.
+#' @details EM algorithm for fitting an "extreme deconvolution" model
+#' to an n x m data matrix, where n is the number of samples, and m is
+#' the number of outcomes per sample. Inputs w, U and S are initial
+#' estimates of the model parameters (note that S is not estimated).
 #'
-#' @param w Describe input argument "U" here.
+#' Two variants of the EM algorithm are implemented: "bovy", the EM
+#' algorithm given in Bovy et al (2011); and "eigenvalue", in which
+#' the M-step update for the covariance matrices U are derived from an
+#' eigenvalue decomposition of the covariance matrices U + S. The
+#' latter provides greater freedom in the updates for U, and should
+#' yield better fits. The choice of M-step update is specified by the
+#' "cov.update" input argument.
 #'
-#' @param S Describe input argument "S" here.
+#' Using this function requires some care; currently only minimal
+#' argument checking is performed. See the documentation and examples
+#' for guidance.
+#' 
+#' @param X The n x m data matrix, in which each row is an
+#'   m-dimensional observation.
+#'
+#' @param U Describe input argument "U" here.
+#' 
+#' @param w Describe input argument "w" here.
+#'
+#' @param S An 
+#'
+#' @param control A list of parameters controlling the behaviour of
+#'   the fitting algorithm. See \sQuote{Details}.
 #' 
 #' @references
 #'
-#' Add references here.
+#' J. Bovy, D. W. Hogg and S. T. Roweis (2011). Extreme Deconvolution:
+#' inferring complete distribution functions from noisy, heterogeneous
+#' and incomplete observations. \emph{Annals of Applied Statistics},
+#' \bold{5}, 1657–1677. doi:10.1214/10-AOAS439
+#'
+#' A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
+#' (2018). Bayesian semiparametric multivariate density
+#' deconvolution. \emph{Journal of the American Statistical
+#' Association} \bold{113}, 401–416. doi:10.1080/01621459.2016.1260467
+#'
+#' J. Won, J. Lim, S. Kim and B. Rajaratnam
+#' (2013). Condition-number-regularized covariance estimation.
+#' \emph{Journal of the Royal Statistical Society, Series B} \bold{75},
+#' 427–450. doi:10.1111/j.1467-9868.2012.01049.x
 #' 
 #' @useDynLib mvebnm
 #'
@@ -27,17 +66,17 @@
 #' 
 #' @export
 #' 
-mvebnm <- function (X, w, U, S, eps, maxiter, tol = 1e-6, verbose = TRUE) {
+# Input parameters:
+# w: input weights for k mixture components, k by 1 vector.
+# U: initial estimates for covariance matrices, list of m by m matrices.
+# S: T = U + S, where T is the covariance matrix for zscore_hat. And in TEEM, S = I(identity matrix)
+# eps: we usually specify a small number for eps, say 1e-8, used to resolve numerical issues.
+# maxiter: maximum number of iterations
+# tol: criteria for convergence
+#
+mvebnm <- function (X, k, U, w, S = diag(), control = list(),
+                    verbose = TRUE) {
     
-  # Input parameters:
-  # X: n by m data matrix, n is number of samples, m is the number of outcomes per sample.
-  # w: input weights for k mixture components, k by 1 vector.
-  # U: initial estimates for covariance matrices, list of m by m matrices.
-  # S: T = U + S, where T is the covariance matrix for zscore_hat. And in TEEM, S = I(identity matrix)
-  # eps: we usually specify a small number for eps, say 1e-8, used to resolve numerical issues.
-  # maxiter: maximum number of iterations
-  # tol: criteria for convergence
-
   # initialize progress to store progress at each iteration
   progress = data.frame(iter = 1:maxiter,
                         obj  = rep(0,maxiter),
@@ -99,3 +138,15 @@ mvebnm <- function (X, w, U, S, eps, maxiter, tol = 1e-6, verbose = TRUE) {
   }
   return(list(w = w, U = U, progress = progress[1:iter, ]))
 }
+
+#' @rdname mvebnm
+#'
+#' @export
+#' 
+mvebnm_control_default <- function()
+  list(update.U = "",    # Either "em", "teem" or "none".
+       update.w = "em",  # Either "em" or "none".
+       update.S = "em",  # Either "em" or "none".
+       maxiter  = 100,
+       eps      = 1e-15,
+       tol      = 1e-6)

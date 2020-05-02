@@ -2,20 +2,64 @@
 % Please edit documentation in R/mvebnm.R
 \name{mvebnm}
 \alias{mvebnm}
-\title{Title Goes Here.}
+\alias{mvebnm_control_default}
+\title{Fit Empirical Bayes Multivariate Normal Means Model}
 \usage{
-mvebnm(X, w, U, S, eps, maxiter, tol = 1e-06, verbose = TRUE)
+mvebnm(X, k, U, w, S = diag(), control = list(), verbose = TRUE)
+
+mvebnm_control_default()
 }
 \arguments{
-\item{X}{Describe input argument "X" here.}
+\item{X}{The n x m data matrix, in which each row is an
+m-dimensional observation.}
 
-\item{w}{Describe input argument "U" here.}
+\item{U}{Describe input argument "U" here.}
 
-\item{S}{Describe input argument "S" here.}
+\item{w}{Describe input argument "w" here.}
+
+\item{S}{An}
+
+\item{control}{A list of parameters controlling the behaviour of
+the fitting algorithm. See \sQuote{Details}.}
 }
 \description{
-Description goes here.
+[Give the model that is fit.] Closely connected to the
+multivariate density deconvolution problem (Sarkar \emph{et al},
+2018), and in fact this model is a special case of the "Extreme
+Deconvolution" model described in Bovy \emph{et al} (2011).
+[Describe exactly how this is a special case.]
+}
+\details{
+EM algorithm for fitting an "extreme deconvolution" model
+to an n x m data matrix, where n is the number of samples, and m is
+the number of outcomes per sample. Inputs w, U and S are initial
+estimates of the model parameters (note that S is not estimated).
+
+Two variants of the EM algorithm are implemented: "bovy", the EM
+algorithm given in Bovy et al (2011); and "eigenvalue", in which
+the M-step update for the covariance matrices U are derived from an
+eigenvalue decomposition of the covariance matrices U + S. The
+latter provides greater freedom in the updates for U, and should
+yield better fits. The choice of M-step update is specified by the
+"cov.update" input argument.
+
+Using this function requires some care; currently only minimal
+argument checking is performed. See the documentation and examples
+for guidance.
 }
 \references{
-Add references here.
+J. Bovy, D. W. Hogg and S. T. Roweis (2011). Extreme Deconvolution:
+inferring complete distribution functions from noisy, heterogeneous
+and incomplete observations. \emph{Annals of Applied Statistics},
+\bold{5}, 1657–1677. doi:10.1214/10-AOAS439
+
+A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
+(2018). Bayesian semiparametric multivariate density
+deconvolution. \emph{Journal of the American Statistical
+Association} \bold{113}, 401–416. doi:10.1080/01621459.2016.1260467
+
+J. Won, J. Lim, S. Kim and B. Rajaratnam
+(2013). Condition-number-regularized covariance estimation.
+\emph{Journal of the Royal Statistical Society, Series B} \bold{75},
+427–450. doi:10.1111/j.1467-9868.2012.01049.x
 }
