@@ -36,10 +36,11 @@ the number of outcomes per sample. Inputs w, U and S are initial
 estimates of the model parameters (note that S is not estimated).
 
 Two variants of the EM algorithm are implemented: "bovy", the EM
-algorithm given in Bovy et al (2011); and "eigenvalue", in which
-the M-step update for the covariance matrices U are derived from an
-eigenvalue decomposition of the covariance matrices U + S. The
-latter provides greater freedom in the updates for U, and should
+algorithm given in Bovy et al (2011); and "teem" (truncated
+eigenvalue expectation-maximization), in which the M-step update
+for the covariance matrices U is derived from an eigenvalue
+decomposition of the covariance matrices T = U + S. The latter
+method provides greater freedom in the updates for U, and should
 yield better fits. The choice of M-step update is specified by the
 "cov.update" input argument.
 

@@ -1,10 +1,4 @@
-# This file contains the code for “TEEM", truncated eigenvalue
-# expectation-maximization algorithm.  Major modifications comparing
-# to EM.R, 1) Input exactly matches ed.R; 2) eps(epsilon) added to
-# resolve numerical issues in estimation.
-
-## This is the main function for running the EM algorithm to fit the
-## "extreme deconvolution" mixture model.
+# This file contains the code for “TEEM", 
 
 #' @title Fit Empirical Bayes Multivariate Normal Means Model
 #'
@@ -20,10 +14,11 @@
 #' estimates of the model parameters (note that S is not estimated).
 #'
 #' Two variants of the EM algorithm are implemented: "bovy", the EM
-#' algorithm given in Bovy et al (2011); and "eigenvalue", in which
-#' the M-step update for the covariance matrices U are derived from an
-#' eigenvalue decomposition of the covariance matrices U + S. The
-#' latter provides greater freedom in the updates for U, and should
+#' algorithm given in Bovy et al (2011); and "teem" (truncated
+#' eigenvalue expectation-maximization), in which the M-step update
+#' for the covariance matrices U is derived from an eigenvalue
+#' decomposition of the covariance matrices T = U + S. The latter
+#' method provides greater freedom in the updates for U, and should
 #' yield better fits. The choice of M-step update is specified by the
 #' "cov.update" input argument.
 #'
@@ -100,7 +95,9 @@ mvebnm <- function (X, k, U, w, S = diag(), control = list(),
     w0  <- w
     T0  <- T
 
-    # E-step: calculate posterior probabilities using the current mu and sigmas
+    # E-step
+    # ------
+    # Calculate posterior probabilities using the current mu and sigmas.
     logP = matrix(0, nrow = n, ncol = k)
     for (j in 1:k){
       # log-density
@@ -108,9 +105,10 @@ mvebnm <- function (X, k, U, w, S = diag(), control = list(),
     }
     P = t(apply(logP, 1, function(x) normalizelogweights(x)))
 
-    # M-step:
+    # M-step
+    # ------
     # update covariance matrix with constraints
-    for (j in 1:k){
+    for (j in 1:k) {
       T[[j]] = t(X)%*%(P[,j]*(X))/sum(P[,j])
       T[[j]] = shrink.cov(T[[j]], eps)
     }
@@ -144,9 +142,9 @@ mvebnm <- function (X, k, U, w, S = diag(), control = list(),
 #' @export
 #' 
 mvebnm_control_default <- function()
-  list(update.U = "",    # Either "em", "teem" or "none".
-       update.w = "em",  # Either "em" or "none".
-       update.S = "em",  # Either "em" or "none".
-       maxiter  = 100,
+  list(update.U = "teem",  # One of "em", "teem" or "none".
+       update.w = "em",    # Either "em" or "none".
+       update.S = "em",    # Either "em" or "none".
+       maxiter  = 1000,
        eps      = 1e-15,
        tol      = 1e-6)
