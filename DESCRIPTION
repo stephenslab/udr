@@ -1,0 +1,16 @@
+Encoding: UTF-8
+Type: Package
+Package: mvebnm
+Version: 0.1-1
+Date: 2020-05-02
+Title: Empirical Bayes Methods for Multivariate Normal Means
+Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
+                    email="peter.carbonetto@gmail.com"),
+             person("Yunqi","Yang",role="aut"),
+             person("Matthew","Stephens",role="aut"))
+URL: https://github.com/stephenslab/mvebnm
+BugReports: https://github.com/stephenslab/mvebnm/issues
+Description: Add description here.
+License: MIT + file LICENSE
+LazyData: true
+NeedsCompilation: yes
