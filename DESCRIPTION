@@ -14,3 +14,4 @@ Description: Add description here.
 License: MIT + file LICENSE
 LazyData: true
 NeedsCompilation: yes
+RoxygenNote: 7.1.0

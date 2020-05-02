@@ -34,7 +34,6 @@ mvebnm <- function (X, w, U, S, eps, maxiter, tol = 1e-6, verbose = TRUE) {
   progress = data.frame(iter = 1:maxiter,
                         obj  = rep(0,maxiter),
                         maxd = rep(0,maxiter))
-
                         
   n <- nrow(X)
   k <- length(w)
@@ -42,14 +41,14 @@ mvebnm <- function (X, w, U, S, eps, maxiter, tol = 1e-6, verbose = TRUE) {
   T = c()
   
   # get a list of T. (T = U + S)
-  for (i in 1:k){
+  for (i in 1:k)
     T[[i]] = U[[i]] + S
-  }
 
   if (verbose)
     cat("iter         objective max.diff\n")
 
   for (iter in 1:maxiter){
+      
     # store parameters and likelihood in the previous step
     w0  <- w
     T0  <- T
