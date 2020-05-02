@@ -17,6 +17,14 @@
 #'
 #' @param S Describe input argument "S" here.
 #' 
+#' @references
+#'
+#' Add references here.
+#' 
+#' @useDynLib mvebnm
+#'
+#' @importFrom Rcpp evalCpp
+#' 
 #' @export
 #' 
 mvebnm <- function (X, w, U, S, eps, maxiter, tol = 1e-6, verbose = TRUE) {

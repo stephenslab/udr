@@ -12,6 +12,11 @@ URL: https://github.com/stephenslab/mvebnm
 BugReports: https://github.com/stephenslab/mvebnm/issues
 Description: Add description here.
 License: MIT + file LICENSE
+Imports: 
+    Rcpp (>= 1.0.3)
+LinkingTo: 
+    Rcpp, 
+    RcppArmadillo
 LazyData: true
 NeedsCompilation: yes
 RoxygenNote: 7.1.0

@@ -7,6 +7,72 @@
 using namespace Rcpp;
 using namespace arma;
 
+const double LOG_2PI = std::log(2.0 * M_PI);
+
+// Softmax functions: yi = exp(xi) / sum(exp(xj))
+inline arma::vec
+softmax(const arma::vec & x)
+{
+    // Calculate exp()
+    // Subtract the max - this prevents overflow, which happens for x ~ 1000
+    arma::vec y = arma::exp(x - arma::max(x));
+    // Renormalise
+    y /= arma::sum(y);
+    return y;
+}
+
+// function for "shrinking" the covariance matrix, to get $\hat U_k$.
+inline arma::mat
+shrink_cov(const arma::mat & V, const double & eps)
+{
+    arma::vec eigval;
+    arma::mat eigvec;
+    eig_sym(eigval, eigvec, V);
+    for (arma::uword i = 0; i < eigval.n_elem; ++i) {
+        eigval(i) = (eigval(i) > 1.0) ? eigval(i) : (1.0 + eps);
+    }
+    return eigvec * diagmat(eigval) * trans(eigvec);
+}
+
+inline arma::vec
+dmvnorm_mat(const arma::mat & x,
+  const arma::vec           & mean,
+  const arma::mat           & sigma,
+  bool                      logd     = false,
+  bool                      inversed = false)
+{
+    double xdim = static_cast<double>(x.n_rows);
+
+    arma::vec out(x.n_cols);
+    arma::mat rooti;
+
+    // we have previously computed rooti
+    // in R eg rooti <- backsolve(chol(sigma), diag(ncol(x)))
+    if (inversed) { rooti = sigma; } else {
+        try {
+            rooti = arma::trans(arma::inv(arma::trimatu(arma::chol(sigma))));
+        } catch (const std::runtime_error & error) {
+            if (logd) out.fill(-arma::datum::inf);
+            else out.fill(0.0);
+            for (arma::uword i = 0; i < x.n_cols; ++i)
+                if (arma::accu(arma::abs(x.col(i) - mean)) < 1e-6) out.at(i) = arma::datum::inf;
+            return out;
+        }
+    }
+    double rootisum  = arma::sum(arma::log(rooti.diag()));
+    double constants = -(xdim / 2.0) * LOG_2PI;
+
+    for (unsigned i = 0; i < x.n_cols; i++) {
+        arma::vec z = rooti * (x.col(i) - mean);
+        out.at(i) = constants - 0.5 * arma::sum(z % z) + rootisum;
+    }
+
+    if (logd == false) {
+        out = arma::exp(out);
+    }
+    return out;
+}
+
 // Truncated Eigenvalue Extreme deconvolution
 class TEEM
 {

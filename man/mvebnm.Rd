@@ -16,3 +16,6 @@ mvebnm(X, w, U, S, eps, maxiter, tol = 1e-06, verbose = TRUE)
 \description{
 Description goes here.
 }
+\references{
+Add references here.
+}
