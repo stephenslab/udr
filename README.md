@@ -1,4 +1,4 @@
-# mvebnm: Empirical Bayes Methods for Multivariate Normal Means
+# mvebnm: empirical Bayes for multivariate normal means
 
 R package implementing empirical Bayes methods for multivariate normal
 means.
