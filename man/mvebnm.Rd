@@ -39,20 +39,31 @@ A list object with the following elements:
 \item{item2}{Describe "item2" here.}
 }
 \description{
-[Give the model that is fit.] Closely connected to the
-multivariate density deconvolution problem (Sarkar \emph{et al},
-2018), and in fact this model is a special case of the "Extreme
-Deconvolution" model described in Bovy \emph{et al} (2011).
-[Describe exactly how this is a special case.]
+This function implements an empirical Bayes method for
+fitting a multivariate normal means model. This method is closely
+related to approaches for multivariate density deconvolution
+(Sarkar \emph{et al}, 2018), so it can also be viewed as a method
+for multivariate density deconvolution, In the model, each
+m-dimensional observation \eqn{x} is drawn from a mixture of
+multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0,
+T_k)}, where \eqn{k} is the number of mixture components, the
+\eqn{w_j}'s are the ixture weights, and each \eqn{T_j = S + U_j} is
+a covariance matrix. This is the marginal density derived from a
+model in which each \eqn{x} is multivariate normal with mean
+\eqn{y} and covariance \eqn{S}, and the underlying, or "latent",
+signal \eqn{y} is in turn modeled by a mixture prior in which each
+mixture component \eqn{j} is multivariate normal with zero mean and
+covariance matrix \eqn{S_j}. The "Extreme Deconvolution" model
+(Bovy \emph{et al}, 2011) is a slight generalization of this
+multivariate normal means model; it allows for the mixture
+components to have nonzero means, and it allows one to specify a
+linear projection of the underlying signal onto the observed
+signal. Therefore, this method also implements a useful special
+case of Extreme Deconvolution.
 }
 \details{
-EM algorithm for fitting an "extreme deconvolution" model
-to an n x m data matrix, where n is the number of samples, and m is
-the number of outcomes per sample. Inputs w, U and S are initial
-estimates of the model parameters (note that S is not estimated).
-
-Two variants of the EM algorithm are implemented: "bovy", the EM
-algorithm given in Bovy et al (2011); and "teem" (truncated
+Two variants of the EM algorithm are implemented: the EM
+algorithm described by Bovy \emph{et al} (2011); and "teem" (truncated
 eigenvalue expectation-maximization), in which the M-step update
 for the covariance matrices U is derived from an eigenvalue
 decomposition of the covariance matrices T = U + S. The latter

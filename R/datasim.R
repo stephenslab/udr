@@ -5,7 +5,7 @@
 #'
 #' @export
 #' 
-datasim.ed <- function (n, w, U, S) {
+simulate_mvnm_data <- function (n, w, U, S) {
 
   # Get the number of outcomes (m) and the number of mixture
   # components (k).
