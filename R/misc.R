@@ -8,10 +8,9 @@ loglik.compute <- function (X, w, T) {
   return(sum(log(y)))
 }
 
-
-
-## This function takes as input an array of unnormalized log-probabilities logw
-## and returns normalized probabilities such that the sum is equal to 1.
+## This function takes as input an array of unnormalized
+## log-probabilities logw and returns normalized probabilities such
+## that the sum is equal to 1.
 normalizelogweights <- function (logw){
   # Guard against underflow or overflow by adjusting the
   # log-probabilities so that the largest probability is 1.
@@ -21,9 +20,9 @@ normalizelogweights <- function (logw){
   return(w/sum(w))
 }
 
-
-## This is the function for "shrinking" the covariance matrix T to get $\hat T_k$. Setting eigenvalues <1 to 1+eps.
-## eps resolves the numerical issues, ensuring chol() works for the output matrices.
+## This is the function for "shrinking" the covariance matrix T to get
+## $\hat T_k$. Setting eigenvalues <1 to 1+eps.  eps resolves the
+## numerical issues, ensuring chol() works for the output matrices.
 shrink.cov = function(T, eps){
   evd = eigen(T)
   shrink_eigen = ifelse(evd$values > 1, evd$values, 1+eps)
@@ -31,4 +30,22 @@ shrink.cov = function(T, eps){
   return(T.new)
 }
 
+# Randomly generate initial estimates of the prior covariance matrices
+# U by computing the sample covariances of random subsets of the data.
+#
+#' @importFrom stats cov
+generate.random.covariances <- function (X, k) {
 
+  # Select the size of the random subsets.
+  n  <- nrow(X)
+  n0 <- min(20,floor(n/2))
+    
+  # Generate random covariance matrices by randomly selecting small
+  # subsets of the data, and computing the sample covariance from
+  # these subsets.
+  U        <- vector("list",k)
+  names(U) <- paste0("k",1:k)
+  for (i in 1:k)
+    U[[i]] <- cov(X[sample(n,n0),])
+  return(U)
+}
