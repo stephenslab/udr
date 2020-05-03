@@ -22,14 +22,18 @@
 #' signal. Therefore, this method also implements a useful special
 #' case of Extreme Deconvolution.
 #'
-#' @details Two variants of the EM algorithm are implemented: the EM
-#' algorithm described by Bovy \emph{et al} (2011); and "teem" (truncated
-#' eigenvalue expectation-maximization), in which the M-step update
-#' for the covariance matrices U is derived from an eigenvalue
-#' decomposition of the covariance matrices T = U + S. The latter
-#' method provides greater freedom in the updates for U, and should
-#' yield better fits. The choice of M-step update is specified by the
-#' "cov.update" input argument.
+#' @details The multivariate normal means model is fit using an
+#' expectation-maximization (EM) algorithm. Two EM variants are
+#' implemented: the EM algorithm described by Bovy \emph{et al}
+#' (2011); and \code{"teem"} (truncated eigenvalue
+#' expectation-maximization), in which the M-step update for each
+#' covariance matrix \code{U[[j]]} is solved by truncating the
+#' eigenvalues in a spectral decomposition of the (unconstrained)
+#' maximimum likelihood estimaer (MLE). The latter method provides
+#' greater freedom in the updates for U, and is expected to yield
+#' better fits. The choice of M-step update is specified by the
+#' \code{control$update.U} optimization setting; continuing reading
+#' for details.
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
