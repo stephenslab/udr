@@ -41,7 +41,8 @@
 #'
 #' @param U Describe input argument "U" here.
 #' 
-#' @param S An 
+#' @param S An m x m matrix giving the initial estimate of the
+#'   residual covariance matrix.
 #'
 #' @param control A list of parameters controlling the behaviour of
 #'   the fitting algorithm. See \sQuote{Details}.
@@ -76,7 +77,7 @@
 # maxiter: maximum number of iterations
 # tol: criteria for convergence
 #
-mvebnm <- function (X, k, w, U, S = diag(), control = list(),
+mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
                     verbose = TRUE) {
     
   # CHECK & PROCESS INPUTS
@@ -84,8 +85,6 @@ mvebnm <- function (X, k, w, U, S = diag(), control = list(),
   # Check the input data matrix, X.
   if (!(is.numeric(X) & is.matrix(X)))
     stop("Input argument \"X\" should be a numeric matrix")
-  if (is.integer(X))
-    storage.mode(X) <- "double"
 
   # Get the number of rows (n) and columns (m) of the data matrix,
   n <- nrow(X)
@@ -115,8 +114,13 @@ mvebnm <- function (X, k, w, U, S = diag(), control = list(),
   w <- w/sum(w)
   
   # Check and process input argument "U".
-  # TO DO.      
+  # TO DO.
 
+  # Check input argument "S" giving the initial estimate of the
+  # residual covariance matrix.
+  if (!(is.matrix(S) & nrow(S) == m & ncol(S) == m))
+    stop("Input argument \"S\" should be an m x m matrix")
+  
   return(0)
   
   # initialize progress to store progress at each iteration

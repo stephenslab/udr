@@ -5,7 +5,7 @@
 \alias{mvebnm_control_default}
 \title{Fit Empirical Bayes Multivariate Normal Means Model}
 \usage{
-mvebnm(X, k, w, U, S = diag(), control = list(), verbose = TRUE)
+mvebnm(X, k, w, U, S = diag(ncol(X)), control = list(), verbose = TRUE)
 
 mvebnm_control_default()
 }
@@ -25,7 +25,8 @@ uniform.}
 
 \item{U}{Describe input argument "U" here.}
 
-\item{S}{An}
+\item{S}{An m x m matrix giving the initial estimate of the
+residual covariance matrix.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the fitting algorithm. See \sQuote{Details}.}
