@@ -45,7 +45,13 @@
 #'   residual covariance matrix.
 #'
 #' @param control A list of parameters controlling the behaviour of
-#'   the fitting algorithm. See \sQuote{Details}.
+#'   the model fitting algorithm. See \sQuote{Details}.
+#'
+#' @return A list object with the following elements:
+#'
+#' \item{item1}{Describe "item1" here.}
+#' 
+#' \item{item2}{Describe "item2" here.}
 #' 
 #' @references
 #'
@@ -66,6 +72,7 @@
 #' 
 #' @useDynLib mvebnm
 #'
+#' @importFrom utils modifyList
 #' @importFrom Rcpp evalCpp
 #' 
 #' @export
@@ -114,12 +121,18 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   w <- w/sum(w)
   
   # Check and process input argument "U".
-  # TO DO.
-
+  #
+  # TO DO: Here it is particularly important to make sure that the U's
+  # yield valid marginal covariance matrices (the T's).
+  #
+  
   # Check input argument "S" giving the initial estimate of the
   # residual covariance matrix.
   if (!(is.matrix(S) & nrow(S) == m & ncol(S) == m))
     stop("Input argument \"S\" should be an m x m matrix")
+
+  # Check and process the optimization settings.
+  control <- modifyList(mvebnm_control_default(),control,keep.null = TRUE)
   
   return(0)
   
@@ -128,9 +141,6 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
                         obj  = rep(0,maxiter),
                         maxd = rep(0,maxiter))
                         
-  n <- nrow(X)
-  k <- length(w)
-  m <- ncol(X)
   T = c()
   
   # get a list of T. (T = U + S)

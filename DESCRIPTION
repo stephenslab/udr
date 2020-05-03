@@ -1,7 +1,7 @@
 Encoding: UTF-8
 Type: Package
 Package: mvebnm
-Version: 0.1-5
+Version: 0.1-6
 Date: 2020-05-02
 Title: Empirical Bayes Methods for Multivariate Normal Means
 Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
@@ -13,6 +13,7 @@ BugReports: https://github.com/stephenslab/mvebnm/issues
 Description: Add description here.
 License: MIT + file LICENSE
 Imports: 
+    utils,
     Rcpp (>= 1.0.3)
 LinkingTo: 
     Rcpp, 

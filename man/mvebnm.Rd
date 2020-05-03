@@ -29,7 +29,14 @@ uniform.}
 residual covariance matrix.}
 
 \item{control}{A list of parameters controlling the behaviour of
-the fitting algorithm. See \sQuote{Details}.}
+the model fitting algorithm. See \sQuote{Details}.}
+}
+\value{
+A list object with the following elements:
+
+\item{item1}{Describe "item1" here.}
+
+\item{item2}{Describe "item2" here.}
 }
 \description{
 [Give the model that is fit.] Closely connected to the
