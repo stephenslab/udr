@@ -5,7 +5,7 @@
 \alias{mvebnm_control_default}
 \title{Fit Empirical Bayes Multivariate Normal Means Model}
 \usage{
-mvebnm(X, k, U, w, S = diag(), control = list(), verbose = TRUE)
+mvebnm(X, k, w, U, S = diag(), control = list(), verbose = TRUE)
 
 mvebnm_control_default()
 }
@@ -13,9 +13,17 @@ mvebnm_control_default()
 \item{X}{The n x m data matrix, in which each row is an
 m-dimensional observation.}
 
-\item{U}{Describe input argument "U" here.}
+\item{k}{An integer 2 or greater specifying the number of
+components in the mixture-of-normals prior. This only needs to be
+provided if neither \code{U} nor \code{w} are provided.}
 
-\item{w}{Describe input argument "w" here.}
+\item{w}{A numeric vector of length k giving initial estimates of
+the prior mixture weights. All entries must be non-negative, but
+need not sum to 1; the mixture weights are automatically normalized
+to sum to 1. If not provided, the mixture weights are set to
+uniform.}
+
+\item{U}{Describe input argument "U" here.}
 
 \item{S}{An}
 

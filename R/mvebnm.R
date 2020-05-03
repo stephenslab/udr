@@ -29,10 +29,18 @@
 #' @param X The n x m data matrix, in which each row is an
 #'   m-dimensional observation.
 #'
+#' @param k An integer 2 or greater specifying the number of
+#'   components in the mixture-of-normals prior. This only needs to be
+#'   provided if neither \code{U} nor \code{w} are provided.
+#'
+#' @param w A numeric vector of length k giving initial estimates of
+#'   the prior mixture weights. All entries must be non-negative, but
+#'   need not sum to 1; the mixture weights are automatically normalized
+#'   to sum to 1. If not provided, the mixture weights are set to
+#'   uniform.
+#'
 #' @param U Describe input argument "U" here.
 #' 
-#' @param w Describe input argument "w" here.
-#'
 #' @param S An 
 #'
 #' @param control A list of parameters controlling the behaviour of
@@ -62,16 +70,55 @@
 #' @export
 #' 
 # Input parameters:
-# w: input weights for k mixture components, k by 1 vector.
 # U: initial estimates for covariance matrices, list of m by m matrices.
 # S: T = U + S, where T is the covariance matrix for zscore_hat. And in TEEM, S = I(identity matrix)
 # eps: we usually specify a small number for eps, say 1e-8, used to resolve numerical issues.
 # maxiter: maximum number of iterations
 # tol: criteria for convergence
 #
-mvebnm <- function (X, k, U, w, S = diag(), control = list(),
+mvebnm <- function (X, k, w, U, S = diag(), control = list(),
                     verbose = TRUE) {
     
+  # CHECK & PROCESS INPUTS
+  # ----------------------
+  # Check the input data matrix, X.
+  if (!(is.numeric(X) & is.matrix(X)))
+    stop("Input argument \"X\" should be a numeric matrix")
+  if (is.integer(X))
+    storage.mode(X) <- "double"
+
+  # Get the number of rows (n) and columns (m) of the data matrix,
+  n <- nrow(X)
+  m <- ncol(X)
+  
+  # Check and process input argument "k" specifying the number of
+  # components in the mixture-of-normals prior.
+  if (missing(k)) {
+    if (missing(w) & missing(U))
+      stop("At least one of \"k\", \"w\" and \"U\" should be provided")
+    else if (missing(w))
+      k <- length(U)
+    else
+      k <- length(w)
+  }
+  if (k < 2)
+    stop("The number of prior mixture components (k) should be 2 or greater")
+        
+  # Check and process input argument "w" giving the initial estimates
+  # of the mixture weights. Make sure the mixture weights are all
+  # non-negative and sum to 1.
+  if (missing(w))
+    w <- rep(1,k)
+  if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
+    stop("Input argument \"w\" should be a vector of non-negative weights ",
+         "of length \"k\"")
+  w <- w/sum(w)
+  
+  # Check and process input argument "U".
+  # TO DO.      
+
+  return(0)
+  
   # initialize progress to store progress at each iteration
   progress = data.frame(iter = 1:maxiter,
                         obj  = rep(0,maxiter),
