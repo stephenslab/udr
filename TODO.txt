@@ -1,0 +1,13 @@
+to do
+=====
+
++ Implement a few simple tests of mvebnm.
+
++ Write a small vignette to demonstrate the method.
+
++ Describe mvebnm optimization settings in roxygen2 docs.
+
++ Implement Travis CI, Appveyor & CircleCI testing.
+
++ Create pkgdown site.
+

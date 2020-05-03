@@ -22,18 +22,17 @@
 #' signal. Therefore, this method also implements a useful special
 #' case of Extreme Deconvolution.
 #'
-#' @details The multivariate normal means model is fit using an
-#' expectation-maximization (EM) algorithm. Two EM variants are
-#' implemented: the EM algorithm described by Bovy \emph{et al}
-#' (2011); and \code{"teem"} (truncated eigenvalue
-#' expectation-maximization), in which the M-step update for each
-#' covariance matrix \code{U[[j]]} is solved by truncating the
-#' eigenvalues in a spectral decomposition of the (unconstrained)
-#' maximimum likelihood estimaer (MLE). The latter method provides
-#' greater freedom in the updates for U, and is expected to yield
-#' better fits. The choice of M-step update is specified by the
-#' \code{control$update.U} optimization setting; continuing reading
-#' for details.
+#' @details The multivariate normal means model is fit by
+#' expectation-maximization (EM). Two EM variants are implemented: the
+#' EM algorithm described by Bovy \emph{et al} (2011); and
+#' \code{"teem"} (truncated eigenvalue expectation-maximization), in
+#' which the M-step update for each covariance matrix \code{U[[j]]} is
+#' solved by truncating the eigenvalues in a spectral decomposition of
+#' the (unconstrained) maximimum likelihood estimate (MLE) of
+#' \code{U[j]]}. The latter method provides greater freedom in the
+#' updates for U, and is expected to yield better fits. The choice of
+#' M-step update is specified by the \code{control$update.U}
+#' optimization setting; continuing reading for details.
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
@@ -135,14 +134,19 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   
   # Check and process input argument "U".
   U.is.valid <- FALSE
-  if (is.list(U)) {
-      
+  if (is.missing(U)) {
+    # TO DO.
   }
+  if (is.list(U))
+    if (all(sapply(U,is.matrix))) {
+      #
+      # TO DO: It is important to check that the U's yield valid
+      # marginal covariance matrices (the T's).
+      #
+      U.is.valid <- TRUE
+    }
   if (!U.is.valid)
-    stop("Input argument \"U\" should be list in which each ")
-  # TO DO: Here it is particularly important to make sure that the U's
-  # yield valid marginal covariance matrices (the T's).
-  #
+    stop("Input argument \"U\" should be list in which ...")
   
   # Check input argument "S" giving the initial estimate of the
   # residual covariance matrix.
@@ -152,7 +156,18 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   # Check and process the optimization settings.
   control <- modifyList(mvebnm_control_default(),control,keep.null = TRUE)
   
-  return(0)
+  # Output the mixture weights (w), the prior covariance matrices (U),
+  # and the residual covariance (S).
+  for (i in 1:k) {
+    rownames(U[[i]]) <- colnames(X)
+    colnames(U[[i]]) <- colnames(X)
+  }
+  names(w)    <- names(U)
+  rownames(S) <- colnames(X)
+  colnames(S) <- colnames(X)
+  fit         <- list(w = w,U = U,S = S)
+  class(fit)  <- c("mvebnm_fit","list")
+  return(fit)
   
   # initialize progress to store progress at each iteration
   progress = data.frame(iter = 1:maxiter,
