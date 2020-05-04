@@ -30,16 +30,33 @@ shrink.cov = function(T, eps){
   return(T.new)
 }
 
+# Returns TRUE if and only if all marginal covariances T = S + U are
+# s.p.d. (symmetric positive definite).
+verify.marginal.covariances <- function (U, S) {
+  k   <- length(U)
+  out <- TRUE  
+  for (i in 1:k)
+    out <- out & is.matrix(tryCatch(chol(S + U[[i]]),
+                                    error = function (e) NULL))
+  return(out)
+}
+
 # Randomly generate initial estimates of the prior covariance matrices
 # U by computing the sample covariances of random subsets of the data.
 #
 #' @importFrom stats cov
 generate.random.covariances <- function (X, k) {
 
+  # Get the number of data samples (n) and their dimension (m).
+  n <- nrow(X)
+  m <- ncol(X)
+  
   # Select the size of the random subsets.
-  n  <- nrow(X)
-  n0 <- min(20,floor(n/2))
-    
+  n0 <- max(20,m + 2)
+  if (n0 >= n)
+    stop("Cannot generate random initial estimates of prior covariance ",
+         "matrices; more data points are needed")
+  
   # Generate random covariance matrices by randomly selecting small
   # subsets of the data, and computing the sample covariance from
   # these subsets.

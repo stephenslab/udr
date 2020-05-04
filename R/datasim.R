@@ -17,24 +17,39 @@
 #' @return Describe output here.
 #' 
 #' @seealso \code{\link{mvebnm}}
+#'
+#' @importFrom mvtnorm rmvnorm
 #' 
 #' @export
 #' 
-simulate_ebmvnm_data <- function (n, w, U, S) {
+simulate_ebmvnm_data <- function (n, w, U, S = diag()) {
 
-  # Get the number of outcomes (m) and the number of mixture
-  # components (k).
+  # Get the dimension of the data points (m) and the number of
+  # mixture components (k).
   m <- nrow(S)
   k <- length(w)
 
-  # Check that all the (marginal) covariance matrices are s.p.d.
-  for (j in 1:k)
-    tryCatch(R <- chol(S + U[[j]]),
-             error = function (e)
-               stop(paste("One or more covariance matrices S + U are not",
-                          "symmetric positive definite")))
+  # Check the residual covariance matrix, S.
+  if (!(is.matrix(S) & nrow(S) == m & ncol(S) == m))
+    stop("Input argument \"S\" should be an m x m matrix")
   
-  # Initialize the n x m output matrix.
+  # Check the prior covariance matrices, U.
+  U.is.valid <- FALSE
+  if (is.list(U))
+    if (all(sapply(U,is.matrix))) 
+      U.is.valid <- verify.marginal.covariances(U,S)
+  if (!U.is.valid)
+    stop("Input argument \"U\" should be list in which each list element ",
+         "U[[i]] is a matrix such that S + U[[i]] is symmetric positive ",
+         "definite")
+
+  # Check the mixture weights, w.
+  if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
+    stop("Input argument \"w\" should be a vector of non-negative weights ",
+         "of length \"k\"")
+  w <- w/sum(w)
+  
+  # Initialize storage for the data.
   X <- matrix(0,n,m)
 
   # Repeat for each sample.
@@ -44,9 +59,8 @@ simulate_ebmvnm_data <- function (n, w, U, S) {
     j <- sample(k,1,prob = w)
     
     # Draw the data point.
-    T     <- S + U[[j]]
-    X[i,] <- rmvnorm(1,sigma = T)
+    X[i,] <- rmvnorm(1,sigma = S + U[[j]])
   }
-
+  
   return(X)
 }
