@@ -4,7 +4,7 @@
 #' fitting a multivariate normal means model. This method is closely
 #' related to approaches for multivariate density deconvolution
 #' (Sarkar \emph{et al}, 2018), so it can also be viewed as a method
-#' for multivariate density deconvolution, In the multivariate normal
+#' for multivariate density deconvolution. In the multivariate normal
 #' means model, each m-dimensional observation \eqn{x} is drawn from a
 #' mixture of multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k
 #' N(0, T_k)}, where \eqn{k} is the number of mixture components, the
