@@ -1,8 +1,8 @@
 Encoding: UTF-8
 Type: Package
 Package: mvebnm
-Version: 0.1-14
-Date: 2020-05-03
+Version: 0.1-15
+Date: 2020-05-07
 Title: Empirical Bayes Methods for Multivariate Normal Means
 Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
                     email="peter.carbonetto@gmail.com"),

@@ -22,7 +22,7 @@
 #' 
 #' @export
 #' 
-simulate_ebmvnm_data <- function (n, w, U, S = diag()) {
+simulate_ebmvnm_data <- function (n, w, U, S) {
 
   # Get the dimension of the data points (m) and the number of
   # mixture components (k).
@@ -52,15 +52,16 @@ simulate_ebmvnm_data <- function (n, w, U, S = diag()) {
   # Initialize storage for the data.
   X <- matrix(0,n,m)
 
-  # Repeat for each sample.
-  for (i in 1:n) {
-
-    # Draw a mixture component according to the mixture weights.
-    j <- sample(k,1,prob = w)
-    
-    # Draw the data point.
-    X[i,] <- rmvnorm(1,sigma = S + U[[j]])
-  }
+  # Draw mixture components according to the mixture weights.
+  z <- sample(k,n,replace = TRUE,prob = w)
   
+  # Draw the data points.
+  for (j in 1:k) {
+    i     <- which(z == j)
+    n     <- length(i)
+    X[i,] <- rmvnorm(n,sigma = S + U[[j]])
+  }
+
+  colnames(X) <- rownames(S)
   return(X)
 }

@@ -243,6 +243,7 @@ mvebnm_control_default <- function()
   list(update.U = "teem",  # One of "em", "teem" or "none".
        update.w = "em",    # Either "em" or "none".
        update.S = "em",    # Either "em" or "none".
+       version  = "Rcpp",  # Either "R" or "Rcpp".
        maxiter  = 1000,
        eps      = 1e-15,
        tol      = 1e-6)
