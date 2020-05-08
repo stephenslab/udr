@@ -164,12 +164,9 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("iter log-likelihood |w-w'| |U-U'| |S-S'|\n")
   fit <- mvebnm_main_loop(X,w,U,S,control,verbose)
   
-  # Output the updated mixture weights (w), prior covariance matrices (U),
-  # and residual covariance (S).
-  #
-  # TO DO: Compute log-likelihood at current estimates, and output the
-  # log-likelihood as fit$loglik.
-  #
+  # Output the parameters of the updated model (w, U, S), and the
+  # log-likelihood of the updated model.
+  fit$loglik <- loglik_mvebnm(X,fit$w,fit$U,fit$S,control$version)
   for (i in 1:k) {
     rownames(fit$U[[i]]) <- colnames(X)
     colnames(fit$U[[i]]) <- colnames(X)
@@ -188,6 +185,9 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
   progress <- as.data.frame(matrix(as.numeric(NA),control$maxiter,6))
   names(progress) <- c("iter","loglik","delta.w","delta-U","delta.S","timing")
   progress[,"iter"] <- 1:control$maxiter
+
+  # Output the parameters of the updated model (w, U, S).
+  return(list(w = w,U = U,S = S))
   
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {

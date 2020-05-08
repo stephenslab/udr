@@ -1,13 +1,3 @@
-## This function computes loglikelihood
-loglik.compute <- function (X, w, T) {
-  n <- nrow(X)
-  k <- length(w)
-  y <- rep(0,n)
-  for (j in 1:k)
-    y <- y + w[j] * dmvnorm(X, sigma = T[[j]])
-  return(sum(log(y)))
-}
-
 ## This function takes as input an array of unnormalized
 ## log-probabilities logw and returns normalized probabilities such
 ## that the sum is equal to 1.

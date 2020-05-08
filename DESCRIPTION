@@ -7,7 +7,8 @@ Title: Empirical Bayes Methods for Multivariate Normal Means
 Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
                     email="peter.carbonetto@gmail.com"),
              person("Yunqi","Yang",role="aut"),
-             person("Matthew","Stephens",role="aut"))
+             person("Matthew","Stephens",role="aut"),
+             person("Gao","Wang",role="ctb"))
 URL: https://github.com/stephenslab/mvebnm
 BugReports: https://github.com/stephenslab/mvebnm/issues
 Description: Implements fast algorithms for solving the multivariate

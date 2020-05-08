@@ -1,6 +1,8 @@
 to do
 =====
 
++ Implement Rcpp version of log-likelihood calculation.
+
 + Implement a few simple tests of mvebnm.
 
 + Write a small vignette to demonstrate the method.
