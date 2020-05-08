@@ -4,7 +4,7 @@
 \alias{simulate_ebmvnm_data}
 \title{Simulate Data from Multivariate Normal Means Model}
 \usage{
-simulate_ebmvnm_data(n, w, U, S = diag())
+simulate_ebmvnm_data(n, w, U, S)
 }
 \arguments{
 \item{w}{A numeric vector of length k specifying the prior mixture
@@ -19,7 +19,8 @@ component.}
 \item{S}{The m x m residual covariance matrix.}
 }
 \value{
-Describe output here.
+An n x m matrix in which each row is a draw from the
+  multivariate normal means model.
 }
 \description{
 Simulate n data points from the multivariate normal

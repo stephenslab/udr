@@ -30,14 +30,18 @@ shrink.cov = function(T, eps){
   return(T.new)
 }
 
-# Returns TRUE if and only if all marginal covariances T = S + U are
-# s.p.d. (symmetric positive definite).
-verify.marginal.covariances <- function (U, S) {
+# Returns TRUE if and only if all prior covariances U are positive
+# semi-definite, and all marginal covariances T = S + U are positive
+# definite.
+verify.prior.covariances <- function (U, S, e = 1e-8) {
   k   <- length(U)
   out <- TRUE  
-  for (i in 1:k)
-    out <- out & is.matrix(tryCatch(chol(S + U[[i]]),
-                                    error = function (e) NULL))
+  for (i in 1:k) {
+    out <- out &
+           all(eigen(U[[1]])$values > -e) &
+           is.matrix(tryCatch(chol(S + U[[i]]),
+                                   error = function (e) NULL))
+  }
   return(out)
 }
 

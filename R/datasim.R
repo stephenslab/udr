@@ -14,7 +14,8 @@
 #' 
 #' @param S The m x m residual covariance matrix.
 #'
-#' @return Describe output here.
+#' @return An n x m matrix in which each row is a draw from the
+#'   multivariate normal means model.
 #' 
 #' @seealso \code{\link{mvebnm}}
 #'
@@ -37,11 +38,11 @@ simulate_ebmvnm_data <- function (n, w, U, S) {
   U.is.valid <- FALSE
   if (is.list(U))
     if (all(sapply(U,is.matrix))) 
-      U.is.valid <- verify.marginal.covariances(U,S)
+      U.is.valid <- verify.prior.covariances(U,S)
   if (!U.is.valid)
     stop("Input argument \"U\" should be list in which each list element ",
-         "U[[i]] is a matrix such that S + U[[i]] is symmetric positive ",
-         "definite")
+         "U[[i]] is a (symmetric) positive semi-definite matrix, and",
+         "S + U[[i]] is symmetric positive definite")
 
   # Check the mixture weights, w.
   if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
