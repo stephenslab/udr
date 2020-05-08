@@ -40,6 +40,9 @@ rownames(X) <- paste0("s",1:n)
 # ---------
 # TO DO: Explain these lines of code in greater detail.
 fit1 <- mvebnm(X,k,control = list(update.U = "em",version = "R"))
+# fit2 <- mvebnm(X,k,control = list(update.U = "em",version = "Rcpp"))
 
-
-
+T  <- S + U$shared
+f1 <- dmvnorm(X[1,],mean = c(0,0),sigma = T,log = TRUE)
+f2 <- ldmvnorm_rcpp(X[1,],T)
+print(f1 - f2)

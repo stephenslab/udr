@@ -34,45 +34,6 @@ shrink_cov(const arma::mat & V, const double & eps)
     return eigvec * diagmat(eigval) * trans(eigvec);
 }
 
-inline arma::vec
-dmvnorm_mat(const arma::mat & x,
-  const arma::vec           & mean,
-  const arma::mat           & sigma,
-  bool                      logd     = false,
-  bool                      inversed = false)
-{
-    double xdim = static_cast<double>(x.n_rows);
-
-    arma::vec out(x.n_cols);
-    arma::mat rooti;
-
-    // we have previously computed rooti
-    // in R eg rooti <- backsolve(chol(sigma), diag(ncol(x)))
-    if (inversed) { rooti = sigma; } else {
-        try {
-            rooti = arma::trans(arma::inv(arma::trimatu(arma::chol(sigma))));
-        } catch (const std::runtime_error & error) {
-            if (logd) out.fill(-arma::datum::inf);
-            else out.fill(0.0);
-            for (arma::uword i = 0; i < x.n_cols; ++i)
-                if (arma::accu(arma::abs(x.col(i) - mean)) < 1e-6) out.at(i) = arma::datum::inf;
-            return out;
-        }
-    }
-    double rootisum  = arma::sum(arma::log(rooti.diag()));
-    double constants = -(xdim / 2.0) * LOG_2PI;
-
-    for (unsigned i = 0; i < x.n_cols; i++) {
-        arma::vec z = rooti * (x.col(i) - mean);
-        out.at(i) = constants - 0.5 * arma::sum(z % z) + rootisum;
-    }
-
-    if (logd == false) {
-        out = arma::exp(out);
-    }
-    return out;
-}
-
 // Truncated Eigenvalue Extreme deconvolution
 class TEEM
 {
@@ -130,8 +91,8 @@ public:
             // arma::mat logP = mat(n, k, arma::fill::zeros); // n by k matrix;
             arma::mat logP = arma::zeros<arma::mat>(n, k); // n by k matrix
             for (unsigned j = 0; j < k; ++j) {
-                logP.col(j) = log(w_vec(j)) + dmvnorm_mat(trans(X_mat), arma::zeros<arma::vec>(
-                        X_mat.n_cols), T_cube.slice(j), true); // ??
+                // logP.col(j) = log(w_vec(j)) + dmvnorm_mat(trans(X_mat), arma::zeros<arma::vec>(
+                //        X_mat.n_cols), T_cube.slice(j), true); // ??
             }
             // softmax for renormalization
             // arma::mat P_mat = mat(k, n, arma::fill::zeros); // k by n matrix. because of row/col vec converting
@@ -152,7 +113,8 @@ public:
             w_vec = arma::conv_to<arma::colvec>::from(sum(P_mat, 0)) / n; // 0:sum by column;
 
             // Compute log-likelihood at the current estimates
-            double f = compute_loglik();
+            // double f = compute_loglik();
+	    double f = 0;
 
             // Check stopping criterion
             double d = max(abs(w_vec - w0_vec));
@@ -175,18 +137,6 @@ private:
     arma::cube T_cube;
     arma::vec objective;
     arma::vec maxd;
-    double
-    compute_loglik()
-    {
-        int n = X_mat.n_rows;
-        int k = w_vec.size();
-
-        arma::vec y = arma::zeros<arma::vec>(n);
-        for (unsigned j = 0; j < k; ++j) {
-            y = y + w_vec(j) * dmvnorm_mat(trans(X_mat), arma::zeros<arma::vec>(X_mat.n_cols), T_cube.slice(j));
-        }
-        return (sum(log(y)));
-    }
 };
 
 // [[Rcpp::depends(RcppArmadillo)]]

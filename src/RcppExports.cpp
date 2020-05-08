@@ -6,6 +6,18 @@
 
 using namespace Rcpp;
 
+// ldmvnorm_rcpp
+double ldmvnorm_rcpp(const arma::vec& x, const arma::mat& S);
+RcppExport SEXP _mvebnm_ldmvnorm_rcpp(SEXP xSEXP, SEXP SSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    rcpp_result_gen = Rcpp::wrap(ldmvnorm_rcpp(x, S));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fit_teem_rcpp
 Rcpp::List fit_teem_rcpp(Rcpp::NumericMatrix X_mat, Rcpp::NumericVector w_vec, Rcpp::NumericVector U_3d, int maxiter, double converge_tol, double eigen_tol, bool verbose);
 RcppExport SEXP _mvebnm_fit_teem_rcpp(SEXP X_matSEXP, SEXP w_vecSEXP, SEXP U_3dSEXP, SEXP maxiterSEXP, SEXP converge_tolSEXP, SEXP eigen_tolSEXP, SEXP verboseSEXP) {
@@ -25,6 +37,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_mvebnm_ldmvnorm_rcpp", (DL_FUNC) &_mvebnm_ldmvnorm_rcpp, 2},
     {"_mvebnm_fit_teem_rcpp", (DL_FUNC) &_mvebnm_fit_teem_rcpp, 7},
     {NULL, NULL, 0}
 };
