@@ -158,38 +158,45 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   # Check and process the optimization settings.
   control <- modifyList(mvebnm_control_default(),control,keep.null = TRUE)
 
-  # Output the mixture weights (w), the prior covariance matrices (U),
-  # and the residual covariance (S).
-  for (i in 1:k) {
-    rownames(U[[i]]) <- colnames(X)
-    colnames(U[[i]]) <- colnames(X)
-  }
-  names(w)    <- names(U)
-  rownames(S) <- colnames(X)
-  colnames(S) <- colnames(X)
-  fit         <- list(w = w,U = U,S = S)
-  class(fit)  <- c("mvebnm_fit","list")
-  return(fit)
-  
-  # initialize progress to store progress at each iteration
-  progress = data.frame(iter = 1:maxiter,
-                        obj  = rep(0,maxiter),
-                        maxd = rep(0,maxiter))
-                        
-  T = c()
-  
-  # get a list of T. (T = U + S)
-  for (i in 1:k)
-    T[[i]] = U[[i]] + S
-
+  # RUN UPDATES
+  # -----------
   if (verbose)
-    cat("iter         objective max.diff\n")
+    cat("iter log-likelihood |w-w'| |U-U'| |S-S'|\n")
+  fit <- mvebnm_main_loop(X,w,U,S,control,verbose)
+  
+  # Output the updated mixture weights (w), prior covariance matrices (U),
+  # and residual covariance (S).
+  #
+  # TO DO: Compute log-likelihood at current estimates, and output the
+  # log-likelihood as fit$loglik.
+  #
+  for (i in 1:k) {
+    rownames(fit$U[[i]]) <- colnames(X)
+    colnames(fit$U[[i]]) <- colnames(X)
+  }
+  names(fit$w)    <- names(fit$U)
+  rownames(fit$S) <- colnames(X)
+  colnames(fit$S) <- colnames(X)
+  class(fit)      <- c("mvebnm_fit","list")
+  return(fit)
+}
 
-  for (iter in 1:maxiter){
+# This implements the core part of mvebnm.
+mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
+
+  # Set up data structures used in main loop.
+  progress <- as.data.frame(matrix(as.numeric(NA),control$maxiter,6))
+  names(progress) <- c("iter","loglik","delta.w","delta-U","delta.S","timing")
+  progress[,"iter"] <- 1:control$maxiter
+  
+  # Iterate the EM updates.
+  for (iter in 1:control$maxiter) {
       
-    # store parameters and likelihood in the previous step
-    w0  <- w
-    T0  <- T
+    # Store the current estimates of the parameters.
+    w0 <- w
+    U0 <- U
+    S0 <- S
+    t1 <- proc.time()
 
     # E-step
     # ------
@@ -230,7 +237,6 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   for (i in 1:k){
     U[[i]] = T[[i]] - S
   }
-  return(list(w = w, U = U, progress = progress[1:iter, ]))
 }
 
 #' @rdname mvebnm
