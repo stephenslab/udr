@@ -5,6 +5,10 @@ ldmvnorm_rcpp <- function(x, S) {
     .Call('_mvebnm_ldmvnorm_rcpp', PACKAGE = 'mvebnm', x, S)
 }
 
+loglik_mvebnm_rcpp <- function(X, w, U, S) {
+    .Call('_mvebnm_loglik_mvebnm_rcpp', PACKAGE = 'mvebnm', X, w, U, S)
+}
+
 fit_teem_rcpp <- function(X_mat, w_vec, U_3d, maxiter, converge_tol, eigen_tol, verbose) {
     .Call('_mvebnm_fit_teem_rcpp', PACKAGE = 'mvebnm', X_mat, w_vec, U_3d, maxiter, converge_tol, eigen_tol, verbose)
 }
