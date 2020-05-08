@@ -70,7 +70,7 @@ generate.random.covariances <- function (X, k) {
   # Generate random covariance matrices by randomly selecting small
   # subsets of the data, and computing the sample covariance from
   # these subsets.
-  U        <- vector("list",k)
+  U <- vector("list",k)
   names(U) <- paste0("k",1:k)
   for (i in 1:k)
     U[[i]] <- cov(X[sample(n,n0),])

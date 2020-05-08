@@ -30,11 +30,9 @@ simulate_ebmvnm_data <- function (n, w, U, S) {
     stop("Input argument \"S\" should be a positive semi-definite matrix")
   
   # Check the prior covariance matrices, U.
-  U.is.valid <- FALSE
-  if (is.list(U))
-    if (all(sapply(U,is.matrix))) 
-      U.is.valid <- verify.prior.covariances(U,S)
-  if (!U.is.valid)
+  if (!(is.list(U) &&
+        all(sapply(U,is.matrix)) &&
+        verify.prior.covariances(U,S)))
     stop("Input argument \"U\" should be list in which each list element ",
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
          "S + U[[i]] is symmetric positive definite")

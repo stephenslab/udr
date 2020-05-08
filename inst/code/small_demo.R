@@ -38,7 +38,8 @@ rownames(X) <- paste0("s",1:n)
 
 # FIT MODEL
 # ---------
-fit1 <- mvebnm(X,k,control = list(version = "R"))
+# TO DO: Explain these lines of code in greater detail.
+fit1 <- mvebnm(X,k,control = list(update.U = "em",version = "R"))
 
 
 
