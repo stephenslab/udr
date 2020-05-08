@@ -30,18 +30,24 @@ shrink.cov = function(T, eps){
   return(T.new)
 }
 
+# Returns TRUE if and only if the matrix is symmetric positive
+# definite.
+is.posdef <- function (X)
+  is.matrix(tryCatch(chol(X),error = function (e) NULL))
+
+# Returns TRUE if and only if the matrix is (symmetric) positive
+# semi-definite.
+is.semidef <- function (X, e = 1e-8) 
+  all(eigen(X)$values > -e)
+
 # Returns TRUE if and only if all prior covariances U are positive
 # semi-definite, and all marginal covariances T = S + U are positive
 # definite.
 verify.prior.covariances <- function (U, S, e = 1e-8) {
   k   <- length(U)
   out <- TRUE  
-  for (i in 1:k) {
-    out <- out &
-           all(eigen(U[[1]])$values > -e) &
-           is.matrix(tryCatch(chol(S + U[[i]]),
-                                   error = function (e) NULL))
-  }
+  for (i in 1:k)
+    out <- out & is.semidef(U[[i]]) & is.posdef(S + U[[i]])
   return(out)
 }
 

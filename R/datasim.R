@@ -25,14 +25,9 @@
 #' 
 simulate_ebmvnm_data <- function (n, w, U, S) {
 
-  # Get the dimension of the data points (m) and the number of
-  # mixture components (k).
-  m <- nrow(S)
-  k <- length(w)
-
   # Check the residual covariance matrix, S.
-  if (!(is.matrix(S) & nrow(S) == m & ncol(S) == m))
-    stop("Input argument \"S\" should be an m x m matrix")
+  if (!(is.matrix(S) && is.semidef(S)))
+    stop("Input argument \"S\" should be a positive semi-definite matrix")
   
   # Check the prior covariance matrices, U.
   U.is.valid <- FALSE
@@ -44,13 +39,18 @@ simulate_ebmvnm_data <- function (n, w, U, S) {
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
          "S + U[[i]] is symmetric positive definite")
 
+  # Get the dimension of the data points (m) and the number of
+  # mixture components (k).
+  m <- nrow(S)
+  k <- length(U)
+
   # Check the mixture weights, w.
   if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
-    stop("Input argument \"w\" should be a vector of non-negative weights ",
-         "of length \"k\"")
+    stop("Input argument \"w\" should be a vector of length \"k\" ",
+         "containing non-negative weights")
   w <- w/sum(w)
   
-  # Initialize storage for the data.
+  # Initialize storage for the data points.
   X <- matrix(0,n,m)
 
   # Draw mixture components according to the mixture weights.
@@ -59,10 +59,8 @@ simulate_ebmvnm_data <- function (n, w, U, S) {
   # Draw the data points.
   for (j in 1:k) {
     i     <- which(z == j)
-    n     <- length(i)
-    X[i,] <- rmvnorm(n,sigma = S + U[[j]])
+    X[i,] <- rmvnorm(length(i),sigma = S + U[[j]])
   }
-
   colnames(X) <- rownames(S)
   return(X)
 }

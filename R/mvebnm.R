@@ -96,7 +96,6 @@
 #' 
 # Input parameters:
 # U: initial estimates for covariance matrices, list of m by m matrices.
-# S: T = U + S, where T is the covariance matrix for zscore_hat. And in TEEM, S = I(identity matrix)
 # eps: we usually specify a small number for eps, say 1e-8, used to resolve numerical issues.
 # maxiter: maximum number of iterations
 # tol: criteria for convergence
@@ -113,6 +112,8 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   # Get the number of rows (n) and columns (m) of the data matrix,
   n <- nrow(X)
   m <- ncol(X)
+
+  browser()
   
   # Check and process input argument "k" specifying the number of
   # components in the mixture-of-normals prior.
@@ -141,11 +142,11 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     U <- generate.random.covariances(X,k)
   if (is.list(U))
     if (all(sapply(U,is.matrix))) 
-      U.is.valid <- verify.marginal.covariances(U,S)
+      U.is.valid <- verify.prior.covariances(U,S)
   if (!U.is.valid)
     stop("Input argument \"U\" should be list in which each list element ",
-         "U[[i]] is a matrix such that S + U[[i]] is symmetric positive ",
-         "definite")
+         "U[[i]] is a (symmetric) positive semi-definite matrix, and",
+         "S + U[[i]] is symmetric positive definite")
         
   # Check and process input argument "w" giving the initial estimates
   # of the mixture weights. Make sure the mixture weights are all
@@ -241,9 +242,9 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
 #' 
 mvebnm_control_default <- function()
   list(update.U = "teem",  # One of "em", "teem" or "none".
-       update.w = "em",    # Either "em" or "none".
-       update.S = "em",    # Either "em" or "none".
-       version  = "Rcpp",  # Either "R" or "Rcpp".
+       update.w = "em",    # One or "em" or "none".
+       update.S = "em",    # One of "em" or "none".
+       version  = "Rcpp",  # One of "R" or "Rcpp".
        maxiter  = 1000,
        eps      = 1e-15,
        tol      = 1e-6)
