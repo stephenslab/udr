@@ -158,8 +158,22 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   # Check and process the optimization settings.
   control <- modifyList(mvebnm_control_default(),control,keep.null = TRUE)
 
+  # Give an overview of the optimization settings.
+  if (verbose) {
+    cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",
+                k,n,m))
+    cat("with these settings:\n")
+    cat(sprintf("Running max %d updates with ",control$maxiter))
+    cat(sprintf("conv tol %0.1e ",control$tol))
+    cat(sprintf("(mvebnm 0.1-22, \"%s\").\n",control$version))
+    cat(sprintf("updates: mixture weights (w) = %s; ",control$update.w))
+    cat(sprintf("prior covs (U) = %s; ",control$update.U))
+    cat(sprintf("res cov (S) = %s\n",control$update.S))
+  }
+  
   # RUN UPDATES
   # -----------
+  # TO DO: Explain here what these lines of code do.
   if (verbose)
     cat("iter          log-likelihood |w - w'| |U - U'| |S - S'|\n")
   fit <- mvebnm_main_loop(X,w,U,S,control,verbose)
