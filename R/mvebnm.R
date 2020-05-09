@@ -257,7 +257,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.U"] <- dU 
     progress[iter,"delta.S"] <- dS 
-    progress[i,"timing"]     <- t2["elapsed"] - t1["elapsed"]
+    progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
       cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dS))
     if (max(dw,dU,dS) < control$tol)
@@ -266,7 +266,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
   # Output the parameters of the updated model (w, U, S) and a record
   # of the algorithm's progress over time ("progress").
-  return(list(w = w,U = U,S = S,progress = progress))
+  return(list(w = w,U = U,S = S,progress = progress[1:iter,]))
 }
 
 #' @rdname mvebnm

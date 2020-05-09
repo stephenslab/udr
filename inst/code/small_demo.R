@@ -41,6 +41,7 @@ rownames(X) <- paste0("s",1:n)
 # TO DO: Explain these lines of code in greater detail.
 set.seed(1)
 fit1 <- mvebnm(X,k,control = list(update.U = "em",version = "R"))
+cat("\n")
 set.seed(1)
 fit2 <- mvebnm(X,k,control = list(update.U = "em",version = "Rcpp"))
 print(fit1$loglik - fit2$loglik)
