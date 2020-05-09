@@ -215,13 +215,15 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
     # E-step
     # ------
-    # Calculate posterior probabilities using the current mu and sigmas.
-    # logP = matrix(0, nrow = n, ncol = k)
-    # for (j in 1:k){
-    #   # log-density
-    #   logP[,j] = log(w[j]) + dmvnorm(X, sigma = T[[j]], log = TRUE)
-    # }
-    # P = t(apply(logP, 1, function(x) normalizelogweights(x)))
+    # TO DO: Explain here what these lines of code do.
+    P <- compute_posterior_probs(X,w,U,S,version) {
+    
+    logP = matrix(0, nrow = n, ncol = k)
+    for (j in 1:k){
+      # log-density
+      logP[,j] = log(w[j]) + dmvnorm(X, sigma = T[[j]], log = TRUE)
+    }
+    P = t(apply(logP, 1, function(x) normalizelogweights(x)))
 
     # M-step
     # ------
@@ -267,6 +269,34 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
   # Output the parameters of the updated model (w, U, S) and a record
   # of the algorithm's progress over time ("progress").
   return(list(w = w,U = U,S = S,progress = progress[1:iter,]))
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+compute_posterior_probs <- function (X, w, U, S, version = c("Rcpp","R")) {
+  version <- match.arg(version)
+  if (version == "Rcpp") {
+    # TO DO.
+  } else if (version == "R")
+    P <- compute_posterior_probs_helper(X,w,U,S)    
+  }
+  return(P)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+compute_posterior_probs_helper  <- function (X, w, U, S) {
+      
+  # Get the number of samples (n) and the number of components in the
+  # mixture prior (k).
+  n <- nrow(X)
+  k <- length(U)
+
+  # Compute the log-probabilities, stored in an n x k matrix.
+  P <- matrix(0,n,k)
+  for (i in 1:k)
+    P[,i] = log(w[i]) + dmvnorm(X,sigma = S + U[[i]],log = TRUE)
+
+  # Normalize the probabilities so that each row of P sums to 1.
+  return(t(apply(logP, 1, function(x) normalizelogweights(x))))
 }
 
 #' @rdname mvebnm
