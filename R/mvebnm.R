@@ -161,11 +161,12 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   # RUN UPDATES
   # -----------
   if (verbose)
-    cat("iter log-likelihood |w-w'| |U-U'| |S-S'|\n")
+    cat("iter          log-likelihood |w - w'| |U - U'| |S - S'|\n")
   fit <- mvebnm_main_loop(X,w,U,S,control,verbose)
   
-  # Output the parameters of the updated model (w, U, S), and the
-  # log-likelihood of the updated model.
+  # Output the parameters of the updated model (w, U, S), the
+  # log-likelihood of the updated model (loglik), and a record of the
+  # algorithm's progress over time (progress).
   fit$loglik <- loglik_mvebnm(X,fit$w,fit$U,fit$S,control$version)
   for (i in 1:k) {
     rownames(fit$U[[i]]) <- colnames(X)
@@ -181,14 +182,14 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
 # This implements the core part of mvebnm.
 mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
+  # Get the number of components in the mixture prior.
+  k <- length(U)
+    
   # Set up data structures used in main loop.
   progress <- as.data.frame(matrix(as.numeric(NA),control$maxiter,6))
-  names(progress) <- c("iter","loglik","delta.w","delta-U","delta.S","timing")
+  names(progress) <- c("iter","loglik","delta.w","delta.U","delta.S","timing")
   progress[,"iter"] <- 1:control$maxiter
 
-  # Output the parameters of the updated model (w, U, S).
-  return(list(w = w,U = U,S = S))
-  
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
       
@@ -201,42 +202,57 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     # E-step
     # ------
     # Calculate posterior probabilities using the current mu and sigmas.
-    logP = matrix(0, nrow = n, ncol = k)
-    for (j in 1:k){
-      # log-density
-      logP[,j] = log(w[j]) + dmvnorm(X, sigma = T[[j]], log = TRUE)
-    }
-    P = t(apply(logP, 1, function(x) normalizelogweights(x)))
+    # logP = matrix(0, nrow = n, ncol = k)
+    # for (j in 1:k){
+    #   # log-density
+    #   logP[,j] = log(w[j]) + dmvnorm(X, sigma = T[[j]], log = TRUE)
+    # }
+    # P = t(apply(logP, 1, function(x) normalizelogweights(x)))
 
     # M-step
     # ------
-    # update covariance matrix with constraints
-    for (j in 1:k) {
-      T[[j]] = t(X)%*%(P[,j]*(X))/sum(P[,j])
-      T[[j]] = shrink.cov(T[[j]], eps)
-    }
-
     # update mixture weight
-    w = colSums(P)/n
-
-    # Compute log-likelihood at the current estimates
-    f = loglik.compute(X, w, T)
+    if (control$update.w == "em") {
+      # w = colSums(P)/n
+    }
     
-    d = max(abs(w - w0))
-    progress[iter,"obj"]  <- f
-    progress[iter,"maxd"] <- d
-
-
+    # update covariance matrix with constraints
+    if (control$update.U == "teem") {
+      # for (j in 1:k) {
+      #   T[[j]] = t(X)%*%(P[,j]*(X))/sum(P[,j])
+      #   T[[j]] = shrink.cov(T[[j]], eps)
+      # }
+    }
+    
+    # Update the residual covariance, if requested.
+    if (control$update.S == "em") {
+      # TO DO.
+    }
+    
+    # Update the "progress" data frame with the log-likelihood and
+    # other quantities, and report the algorithm's progress to the
+    # console if requested.
+    loglik <- loglik_mvebnm(X,w,U,S,control$version)
+    dw     <- max(abs(w - w0))
+    dS     <- max(abs(S - S0))
+    dU     <- 0
+    for (i in 1:k)
+      dU <- max(dU,max(abs(U[[i]] - U0[[i]])))
+    t2 <- proc.time()
+    progress[iter,"loglik"]  <- loglik
+    progress[iter,"delta.w"] <- dw 
+    progress[iter,"delta.U"] <- dU 
+    progress[iter,"delta.S"] <- dS 
+    progress[i,"timing"]     <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
-      cat(sprintf("%4d %+0.10e %0.2e\n",iter,f,d))
-
-    if (d < tol)
+      cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dS))
+    if (max(dw,dU,dS) < control$tol)
       break
   }
-  
-  for (i in 1:k){
-    U[[i]] = T[[i]] - S
-  }
+
+  # Output the parameters of the updated model (w, U, S) and a record
+  # of the algorithm's progress over time ("progress").
+  return(list(w = w,U = U,S = S,progress = progress))
 }
 
 #' @rdname mvebnm
