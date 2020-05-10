@@ -1,3 +1,23 @@
+# TO DO: Explain here what this function does, and how to use it.
+array2list <- function (x) {
+  n <- dim(x)[3]
+  m <- dim(x)[1]
+  y <- vector("list",n)
+  for (i in 1:n)
+    y[[i]] <- x[,,i]
+return(y)
+}
+
+# Returns TRUE if and only if the matrix is symmetric positive
+# definite.
+is.posdef <- function (X)
+  is.matrix(tryCatch(chol(X),error = function (e) NULL))
+
+# Returns TRUE if and only if the matrix is (symmetric) positive
+# semi-definite.
+is.semidef <- function (X, e = 1e-15) 
+  all(eigen(X)$values > -e)
+
 # This function takes as input a matrix of unnormalized
 # log-probabilities, and returns normalized probabilities such that
 # each row sums to 1.
@@ -25,20 +45,10 @@ shrink.cov <- function (T, e) {
   return(U)
 }
 
-# Returns TRUE if and only if the matrix is symmetric positive
-# definite.
-is.posdef <- function (X)
-  is.matrix(tryCatch(chol(X),error = function (e) NULL))
-
-# Returns TRUE if and only if the matrix is (symmetric) positive
-# semi-definite.
-is.semidef <- function (X, e = 1e-8) 
-  all(eigen(X)$values > -e)
-
 # Returns TRUE if and only if all prior covariances U are positive
 # semi-definite, and all marginal covariances T = S + U are positive
 # definite.
-verify.prior.covariances <- function (U, S, e = 1e-8) {
+verify.prior.covariances <- function (U, S, e = 1e-15) {
   k   <- length(U)
   out <- TRUE  
   for (i in 1:k)

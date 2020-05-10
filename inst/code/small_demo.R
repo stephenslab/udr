@@ -40,7 +40,15 @@ rownames(X) <- paste0("s",1:n)
 # ---------
 # TO DO: Explain these lines of code in greater detail.
 set.seed(1)
-fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = 40))
+fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = 20))
+set.seed(1)
+fit2 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",maxiter = 20))
+print(fit1$loglik - fit2$loglik)
+print(range(fit1$progress$loglik - fit2$progress$loglik))
+print(range(fit1$w - fit2$w))
+print(range(fit1$S - fit2$S))
+for (i in 1:k)
+  print(range(fit1$U[[i]] - fit2$U[[i]]))
 y <- fit1$progress$loglik
 plot(fit1$progress$iter,max(y) - y + 0.01,col = "dodgerblue",type = "l",
      log = "y",lwd = 2,xlab = "iteration",ylab = "dist. from best loglik")

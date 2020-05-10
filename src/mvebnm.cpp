@@ -7,7 +7,51 @@
 using namespace Rcpp;
 using namespace arma;
 
-const double LOG_2PI = std::log(2.0 * M_PI);
+// FUNCTION DECLARATIONS
+// ---------------------
+void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
+			      const mat& S, mat& P);
+
+// FUNCTION DEFINITIONS
+// --------------------
+// Compute the n x k matrix of posterior mixture assignment
+// probabilities given current estimates of the model parameters.
+//
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+arma::mat compute_posterior_probs_rcpp (const arma::mat& X,
+					const arma::vec& w,
+					const arma::cube& U,
+					const arma::mat& S) {
+  unsigned int n = X.n_rows;
+  unsigned int k = w.n_elem;
+  mat          P(n,k);
+  compute_posterior_probs(X,w,U,S,P);
+  return P;
+}
+
+// Compute the n x k matrix of posterior mixture assignment
+// probabilities given current estimates of the model parameters.
+void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
+			      const mat& S, mat& P) {
+}
+
+//   arma::mat logP = mat(n, k, arma::fill::zeros); // n by k matrix;
+//   arma::mat logP = arma::zeros<arma::mat>(n, k); // n by k matrix
+//   for (unsigned j = 0; j < k; ++j) {
+//     logP.col(j) = log(w_vec(j)) + dmvnorm_mat(trans(X_mat),
+//        arma::zeros<arma::vec>(X_mat.n_cols), T_cube.slice(j), true);
+//   }
+
+// // softmax for renormalization
+// arma::mat P_mat = mat(k, n, arma::fill::zeros);
+// arma::mat P_mat = arma::zeros<arma::mat>(k, n);
+
+// for (arma::uword i = 0; i < n; ++i) {
+//   arma::colvec y = arma::conv_to<arma::colvec>::from(logP.row(i));
+//   P_mat.col(i) = softmax(y);
+//  }
+// P_mat = trans(P_mat); // n by k matrix
 
 // Softmax functions: yi = exp(xi) / sum(exp(xj))
 inline arma::vec

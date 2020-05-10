@@ -145,6 +145,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
          "S + U[[i]] is symmetric positive definite")
   mixture.labels <- names(U)
+  U <- array(simplify2array(U),c(m,m,k))  
   
   # Check and process input argument "w" giving the initial estimates
   # of the mixture weights. Make sure the mixture weights are all
@@ -181,6 +182,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   # log-likelihood of the updated model (loglik), and a record of the
   # algorithm's progress over time (progress).
   fit$loglik <- loglik_mvebnm(X,fit$w,fit$U,fit$S,control$version)
+  fit$U      <- array2list(fit$U)
   for (i in 1:k) {
     rownames(fit$U[[i]]) <- colnames(X)
     colnames(fit$U[[i]]) <- colnames(X)
@@ -197,8 +199,8 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
 mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
   # Get the number of components in the mixture prior.
-  k <- length(U)
-    
+  k <- length(w)
+
   # Set up data structures used in main loop.
   progress <- as.data.frame(matrix(as.numeric(NA),control$maxiter,6))
   names(progress) <- c("iter","loglik","delta.w","delta.U","delta.S","timing")
@@ -236,16 +238,14 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     if (control$update.S == "em") {
       # TO DO.
     }
-    
+
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
     loglik <- loglik_mvebnm(X,w,U,S,control$version)
     dw     <- max(abs(w - w0))
     dS     <- max(abs(S - S0))
-    dU     <- 0
-    for (i in 1:k)
-      dU <- max(dU,max(abs(U[[i]] - U0[[i]])))
+    dU     <- max(abs(U - U0))
     t2 <- proc.time()
     progress[iter,"loglik"]  <- loglik
     progress[iter,"delta.w"] <- dw 
@@ -269,10 +269,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 # (version = "Rcpp").
 compute_posterior_probs <- function (X, w, U, S, version = c("Rcpp","R")) {
   version <- match.arg(version)
-  if (version == "Rcpp") {
-    # TO DO.
-  } else if (version == "R")
-    P <- compute_posterior_probs_helper(X,w,U,S)    
+  P <- compute_posterior_probs_helper(X,w,U,S)    
   return(P)
 }
 
@@ -284,12 +281,12 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
   # Get the number of samples (n) and the number of components in the
   # mixture prior (k).
   n <- nrow(X)
-  k <- length(U)
+  k <- length(w)
 
   # Compute the log-probabilities, stored in an n x k matrix.
   P <- matrix(0,n,k)
   for (i in 1:k)
-    P[,i] = log(w[i]) + dmvnorm(X,sigma = S + U[[i]],log = TRUE)
+    P[,i] = log(w[i]) + dmvnorm(X,sigma = S + U[,,i],log = TRUE)
 
   # Normalize the probabilities so that each row of P sums to 1.
   return(normalizelogweights(P))
@@ -298,14 +295,11 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 # TO DO: Explain here what this function does, and how to use it.
 update_prior_covariances <- function (X, S, P, e, version = c("Rcpp","R")) {
   version <- match.arg(version)
-  if (version == "Rcpp") {
-    # TO DO.
-  } else if (version == "R") {
-    k <- ncol(P)
-    U <- vector("list",k)
-    for (i in 1:k)
-      U[[i]] <- update_prior_covariance(X,S,P[,i],e)
-  }
+  m <- ncol(X)
+  k <- ncol(P)
+  U <- array(0,dim = c(m,m,k))
+  for (i in 1:k)
+    U[,,i] <- update_prior_covariance(X,S,P[,i],e)
   return(U)
 }
 
