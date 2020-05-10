@@ -9,7 +9,7 @@ set.seed(1)
 #
 #   w[1]*N(0,S + U[[1]]) + ... + w[4]*N(0,S + U[[4]]).
 #
-n <- 2000
+n <- 4000
 S <- rbind(c(0.8,0.4),
            c(0.4,1.2))
 U <- list(none   = rbind(c(0,0),
@@ -40,9 +40,13 @@ rownames(X) <- paste0("s",1:n)
 # ---------
 # TO DO: Explain these lines of code in greater detail.
 set.seed(1)
-fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = 20))
+t1 <- system.time(
+  fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = 20)))
 set.seed(1)
-fit2 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",maxiter = 20))
+t2 <- system.time(
+  fit2 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",maxiter = 20)))
+print(t1)
+print(t2)
 print(fit1$loglik - fit2$loglik)
 print(range(fit1$progress$loglik - fit2$progress$loglik))
 print(range(fit1$w - fit2$w))

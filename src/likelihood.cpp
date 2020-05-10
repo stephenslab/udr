@@ -23,9 +23,9 @@ double loglik_mvebnm_rcpp (const arma::mat& X, const arma::vec& w,
 }
 
 // Compute the log-probability of x, where x is multivariate normal
-// with mean zero and covariance matrix S.
-double ldmvnorm (const vec& x, const mat& S) {
-  mat    L = chol(S,"lower");
+// with mean zero and covariance matrix S. Input argument should be L
+// be the Cholesky factor of S; L = chol(S,"lower").
+double ldmvnorm (const vec& x, const mat& L) {
   double d = norm(solve(L,x),2);
   return -d*d/2 - sum(log(sqrt(2*M_PI)*L.diag()));
 }
@@ -41,20 +41,20 @@ double loglik_mvebnm (const mat& X, const vec& w, const cube& U,
   unsigned int m = X.n_cols;
   unsigned int k = w.n_elem;
 
-  double y = 0;
-  double t;
-  mat    T(m,m);
-  vec    x(m);
-
+  mat T(m,m);
+  mat L(m,m);
+  vec x(m);
+  vec y(n,fill::zeros);
+  
   // Compute the log-likelihood for each sample (row of X).
-  for (unsigned int i = 0; i < n; i++) {
-    x = trans(X.row(i));
-    t = 0;
-    for (unsigned int j = 0; j < k; j++) {
-      T  = S + U.slice(j);
-      t += w(j) * exp(ldmvnorm(x,T));
+  for (unsigned int j = 0; j < k; j++) {
+    T = S + U.slice(j);
+    L = chol(T,"lower");      
+    for (unsigned int i = 0; i < n; i++) {
+      x     = trans(X.row(i));
+      y(i) += w(j) * exp(ldmvnorm(x,L));
     }
-    y += log(t);
   }
-  return(y);
+  
+  return(sum(log(y)));
 }

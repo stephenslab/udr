@@ -233,7 +233,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     if (control$update.U  == "em") {
       # TO DO.
     } else if (control$update.U == "teem")
-      U <- update_prior_covariances(X,S,P,control$eps,control$version)
+      U <- update_prior_cov_teem(X,S,P,control$eps,control$version)
     
     
     # Update the residual covariance (S), if requested.
@@ -272,7 +272,10 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 # "R") and C++ (version = "Rcpp").
 compute_posterior_probs <- function (X, w, U, S, version = c("Rcpp","R")) {
   version <- match.arg(version)
-  P <- compute_posterior_probs_helper(X,w,U,S)    
+  if (version == "R")
+    P <- compute_posterior_probs_helper(X,w,U,S)
+  else if (version == "Rcpp")
+    P <- compute_posterior_probs_rcpp(X,w,U,S);
   return(P)
 }
 
@@ -298,13 +301,13 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 # Perform an the M-step update for the covariance matrices in the
 # mixture-of-multivariate-normals prior. This is implemented
 # inboth R (version = "R") and C++ (version = "Rcpp").
-update_prior_covariances <- function (X, S, P, e, version = c("Rcpp","R")) {
+update_prior_cov_teem <- function (X, S, P, e, version = c("Rcpp","R")) {
   version <- match.arg(version)
   m <- ncol(X)
   k <- ncol(P)
   U <- array(0,dim = c(m,m,k))
   for (i in 1:k)
-    U[,,i] <- update_prior_covariance(X,S,P[,i],e)
+    U[,,i] <- update_prior_cov_teem_helper(X,S,P[,i],e)
   return(U)
 }
 
@@ -312,7 +315,7 @@ update_prior_covariances <- function (X, S, P, e, version = c("Rcpp","R")) {
 # matrices. Here, p is a vector, with one entry per row of X, giving
 # the posterior assignment probabilities for one of the mixture
 # components.
-update_prior_covariance <- function (X, S, p, e) {
+update_prior_cov_teem_helper <- function (X, S, p, e) {
     
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.

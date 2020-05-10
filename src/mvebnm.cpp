@@ -3,6 +3,8 @@
 #define ARMA_DONT_PRINT_ERRORS
 
 #include <RcppArmadillo.h>
+#include "misc.h"
+#include "likelihood.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -34,35 +36,30 @@ arma::mat compute_posterior_probs_rcpp (const arma::mat& X,
 // probabilities given current estimates of the model parameters.
 void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
 			      const mat& S, mat& P) {
-}
+  unsigned int n = X.n_rows;
+  unsigned int m = X.n_cols;
+  unsigned int k = w.n_elem;
+  mat T(m,m);
+  mat L(m,m);
+  vec x(m);
+  vec p(k);
 
-//   arma::mat logP = mat(n, k, arma::fill::zeros); // n by k matrix;
-//   arma::mat logP = arma::zeros<arma::mat>(n, k); // n by k matrix
-//   for (unsigned j = 0; j < k; ++j) {
-//     logP.col(j) = log(w_vec(j)) + dmvnorm_mat(trans(X_mat),
-//        arma::zeros<arma::vec>(X_mat.n_cols), T_cube.slice(j), true);
-//   }
+  // Compute the log-probabilities, stored in an n x k matrix.
+  for (unsigned int j = 0; j < k; j++) {
+    T = S + U.slice(j);
+    L = chol(T,"lower");
+    for (unsigned int i = 0; i < n; i++) {
+      x      = trans(X.row(i));
+      P(i,j) = log(w(j)) + ldmvnorm(x,L);
+    }
+  }
 
-// // softmax for renormalization
-// arma::mat P_mat = mat(k, n, arma::fill::zeros);
-// arma::mat P_mat = arma::zeros<arma::mat>(k, n);
-
-// for (arma::uword i = 0; i < n; ++i) {
-//   arma::colvec y = arma::conv_to<arma::colvec>::from(logP.row(i));
-//   P_mat.col(i) = softmax(y);
-//  }
-// P_mat = trans(P_mat); // n by k matrix
-
-// Softmax functions: yi = exp(xi) / sum(exp(xj))
-inline arma::vec
-softmax(const arma::vec & x)
-{
-    // Calculate exp()
-    // Subtract the max - this prevents overflow, which happens for x ~ 1000
-    arma::vec y = arma::exp(x - arma::max(x));
-    // Renormalise
-    y /= arma::sum(y);
-    return y;
+  // Normalize the probabilities so that each row of P sums to 1.
+  for (unsigned int i = 0; i < n; i++) {
+    p        = trans(P.row(i));
+    p        = softmax(p);
+    P.row(i) = trans(p);
+  }
 }
 
 // function for "shrinking" the covariance matrix, to get $\hat U_k$.
