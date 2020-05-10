@@ -224,8 +224,10 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     # M-step
     # ------
     # Update the mixture weights (w), if requested.
-    if (control$update.w == "em")
-      w <- colMeans(P)
+    if (control$update.w == "em") {
+      w <- colSums(P)
+      w <- w/sum(w)  
+    }
     
     # Update the prior covariance matrices (U), if requested.
     if (control$update.U  == "em") {
@@ -246,7 +248,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     dw     <- max(abs(w - w0))
     dS     <- max(abs(S - S0))
     dU     <- max(abs(U - U0))
-    t2 <- proc.time()
+    t2     <- proc.time()
     progress[iter,"loglik"]  <- loglik
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.U"] <- dU 
@@ -264,9 +266,10 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 }
 
 # Compute the n x k matrix of posterior mixture assignment
-# probabilities given current estimates of the model parameters. These
-# posterior computations are implemented in R (version = "R") and C++
-# (version = "Rcpp").
+# probabilities given current estimates of the model parameters. This
+# implements the "E step" in the EM algorithm for fitting the mvebnm
+# model. These posterior computations are implemented in R (version =
+# "R") and C++ (version = "Rcpp").
 compute_posterior_probs <- function (X, w, U, S, version = c("Rcpp","R")) {
   version <- match.arg(version)
   P <- compute_posterior_probs_helper(X,w,U,S)    
@@ -289,10 +292,12 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
     P[,i] = log(w[i]) + dmvnorm(X,sigma = S + U[,,i],log = TRUE)
 
   # Normalize the probabilities so that each row of P sums to 1.
-  return(normalizelogweights(P))
+  return(softmax(P))
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Perform an the M-step update for the covariance matrices in the
+# mixture-of-multivariate-normals prior. This is implemented
+# inboth R (version = "R") and C++ (version = "Rcpp").
 update_prior_covariances <- function (X, S, P, e, version = c("Rcpp","R")) {
   version <- match.arg(version)
   m <- ncol(X)
@@ -303,19 +308,23 @@ update_prior_covariances <- function (X, S, P, e, version = c("Rcpp","R")) {
   return(U)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Perform an M-step update for one of the prior covariance
+# matrices. Here, p is a vector, with one entry per row of X, giving
+# the posterior assignment probabilities for one of the mixture
+# components.
 update_prior_covariance <- function (X, S, p, e) {
     
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
+  p <- p/sum(p)  
   R <- chol(S)
-  T <- crossprod((sqrt(p/sum(p)) * X) %*% solve(R))
+  T <- crossprod((sqrt(p)*X) %*% solve(R))
   
   # Find U maximizing the expected complete log-likelihood subject to
   # U being positive definite. This update for U is based on the fact
   # that the covariance matrix that minimizes the likelihood subject
   # to the constraint that U is positive definite is obtained by
-  # truncating any eigenvalues of T = U + I less than 1 to be 1; see
+  # truncating the eigenvalues of T = U + I less than 1 to be 1; see
   # Won et al (2013), p. 434, the sentence just after equation (16).
   U <- shrink.cov(T,e)
   

@@ -1,9 +1,8 @@
-# Convert an m x m x n array to a list of m x m matrices.
+# Convert an n x m x k array into a list of n x m matrices.
 array2list <- function (x) {
-  n <- dim(x)[3]
-  m <- dim(x)[1]
-  y <- vector("list",n)
-  for (i in 1:n)
+  k <- dim(x)[3]
+  y <- vector("list",k)
+  for (i in 1:k)
     y[[i]] <- x[,,i]
   return(y)
 }
@@ -18,30 +17,25 @@ is.posdef <- function (X)
 is.semidef <- function (X, e = 1e-15) 
   all(eigen(X)$values > -e)
 
-# This function takes as input a matrix of unnormalized
-# log-probabilities, and returns normalized probabilities such that
-# each row sums to 1.
-normalizelogweights <- function (W) {
-
-  # Guard against underflow or overflow by adjusting the
-  # log-probabilities so that the largest probability is 1.
+# Compute the softmax of each row of W in a way that guards against
+# numerical underflow or overflow. The return value is a matrix of the
+# same dimension in which the entries in each row sum to 1.
+softmax <- function (W) {
   a <- apply(W,1,max)
   W <- exp(W - a)
-  
-  # Normalize the probabilities.
   return(W / rowSums(W))
 }
 
 # "Shrink" matrix T = U + I; that is, find the "best" matrix T
 # satisfying the constraint that U is positive definite. This is
-# achieved by setting any eigenvalues of T less than 1 to 1+e or,
-# equivalently, setting any eigenvalues of U less than 0 to be e.
-# The return value is the positive definite matrix U.
+# achieved by setting any eigenvalues of T less than 1 to 1 + e,
+# or, equivalently, setting any eigenvalues of U less than 0 to be e.
+# The output is a positive definite matrix, U.
 shrink.cov <- function (T, e) {
-  out    <- eigen(T)
-  values <- out$values
-  values <- pmax(values - 1,e)
-  U      <- tcrossprod(out$vectors %*% diag(sqrt(values)))
+  out <- eigen(T)
+  d   <- out$values
+  d   <- pmax(d - 1,e)
+  U   <- tcrossprod(out$vectors %*% diag(sqrt(d)))
   return(U)
 }
 
