@@ -12,14 +12,17 @@ normalizelogweights <- function (W) {
   return(W / rowSums(W))
 }
 
-## This is the function for "shrinking" the covariance matrix T to get
-## $\hat T_k$. Setting eigenvalues <1 to 1+eps.  eps resolves the
-## numerical issues, ensuring chol() works for the output matrices.
-shrink.cov = function(T, eps){
-  evd = eigen(T)
-  shrink_eigen = ifelse(evd$values > 1, evd$values, 1+eps)
-  T.new = tcrossprod(evd$vectors %*% diag(sqrt(shrink_eigen)))
-  return(T.new)
+# "Shrink" matrix T = U + I; that is, find the "best" matrix T
+# satisfying the constraint that U is positive definite. This is
+# achieved by setting any eigenvalues of T less than 1 to 1+e or,
+# equivalently, setting any eigenvalues of U less than 0 to be e.
+# The return value is the positive definite matrix U.
+shrink.cov <- function (T, e) {
+  out    <- eigen(T)
+  values <- out$values
+  values <- pmax(values - 1,e)
+  U      <- tcrossprod(out$vectors %*% diag(sqrt(values)))
+  return(U)
 }
 
 # Returns TRUE if and only if the matrix is symmetric positive

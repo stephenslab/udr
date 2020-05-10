@@ -9,7 +9,7 @@ set.seed(1)
 #
 #   w[1]*N(0,S + U[[1]]) + ... + w[4]*N(0,S + U[[4]]).
 #
-n <- 800
+n <- 2000
 S <- rbind(c(0.8,0.4),
            c(0.4,1.2))
 U <- list(none   = rbind(c(0,0),
@@ -40,8 +40,7 @@ rownames(X) <- paste0("s",1:n)
 # ---------
 # TO DO: Explain these lines of code in greater detail.
 set.seed(1)
-fit1 <- mvebnm(X,w = w,U = U,S = S,
-               control = list(version = "R",maxiter = 40))
+fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = 40))
 y <- fit1$progress$loglik
 plot(fit1$progress$iter,max(y) - y + 0.01,col = "dodgerblue",type = "l",
      log = "y",lwd = 2,xlab = "iteration",ylab = "dist. from best loglik")

@@ -144,6 +144,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     stop("Input argument \"U\" should be list in which each list element ",
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
          "S + U[[i]] is symmetric positive definite")
+  mixture.labels <- names(U)
   
   # Check and process input argument "w" giving the initial estimates
   # of the mixture weights. Make sure the mixture weights are all
@@ -184,7 +185,8 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     rownames(fit$U[[i]]) <- colnames(X)
     colnames(fit$U[[i]]) <- colnames(X)
   }
-  names(fit$w)    <- names(fit$U)
+  names(fit$w)    <- mixture.labels
+  names(fit$U)    <- mixture.labels
   rownames(fit$S) <- colnames(X)
   colnames(fit$S) <- colnames(X)
   class(fit)      <- c("mvebnm_fit","list")
@@ -219,21 +221,18 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
     # M-step
     # ------
-    # Update the mixture weights, if requested.
+    # Update the mixture weights (w), if requested.
     if (control$update.w == "em")
       w <- colMeans(P)
     
-    # update covariance matrix with constraints
+    # Update the prior covariance matrices (U), if requested.
     if (control$update.U  == "em") {
       # TO DO.
-    } else if (control$update.U == "teem") {
-      # for (j in 1:k) {
-      #   T[[j]] = t(X)%*%(P[,j]*(X))/sum(P[,j])
-      #   T[[j]] = shrink.cov(T[[j]], eps)
-      # }
-    } 
+    } else if (control$update.U == "teem")
+      U <- update_prior_covariances(X,S,P,control$eps,control$version)
     
-    # Update the residual covariance, if requested.
+    
+    # Update the residual covariance (S), if requested.
     if (control$update.S == "em") {
       # TO DO.
     }
@@ -264,8 +263,10 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
   return(list(w = w,U = U,S = S,progress = progress[1:iter,]))
 }
 
-# Compute the n x k matrix of posterior mixture assignment probabilities
-# given current estimates of the model parameters.
+# Compute the n x k matrix of posterior mixture assignment
+# probabilities given current estimates of the model parameters. These
+# posterior computations are implemented in R (version = "R") and C++
+# (version = "Rcpp").
 compute_posterior_probs <- function (X, w, U, S, version = c("Rcpp","R")) {
   version <- match.arg(version)
   if (version == "Rcpp") {
@@ -292,6 +293,40 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 
   # Normalize the probabilities so that each row of P sums to 1.
   return(normalizelogweights(P))
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+update_prior_covariances <- function (X, S, P, e, version = c("Rcpp","R")) {
+  version <- match.arg(version)
+  if (version == "Rcpp") {
+    # TO DO.
+  } else if (version == "R") {
+    k <- ncol(P)
+    U <- vector("list",k)
+    for (i in 1:k)
+      U[[i]] <- update_prior_covariance(X,S,P[,i],e)
+  }
+  return(U)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+update_prior_covariance <- function (X, S, p, e) {
+    
+  # Transform the data so that the residual covariance is I, then
+  # compute the maximum-likelhood estimate (MLE) for T = U + I.
+  R <- chol(S)
+  T <- crossprod((sqrt(p/sum(p)) * X) %*% solve(R))
+  
+  # Find U maximizing the expected complete log-likelihood subject to
+  # U being positive definite. This update for U is based on the fact
+  # that the covariance matrix that minimizes the likelihood subject
+  # to the constraint that U is positive definite is obtained by
+  # truncating any eigenvalues of T = U + I less than 1 to be 1; see
+  # Won et al (2013), p. 434, the sentence just after equation (16).
+  U <- shrink.cov(T,e)
+  
+  # Recover the solution for the original (untransformed) data.
+  return(t(R) %*% U %*% R)
 }
 
 #' @rdname mvebnm
