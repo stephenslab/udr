@@ -12,7 +12,8 @@ double ldmvnorm_rcpp (const arma::vec& x, const arma::mat& S) {
   return ldmvnorm(x,S);
 }
 
-// TO DO: Explain here what this function does, and how to use it.
+// Compute the log-likelihood for the mvebnm model. See the mvebnm R
+// function for a description of the inputs.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -21,15 +22,16 @@ double loglik_mvebnm_rcpp (const arma::mat& X, const arma::vec& w,
   return loglik_mvebnm(X,w,U,S);
 }
 
-// Compute the log-probability density of the multivariate normal
-// distribution with zero mean and covariance matrix S.
+// Compute the log-probability of x, where x is multivariate normal
+// with mean zero and covariance matrix S.
 double ldmvnorm (const vec& x, const mat& S) {
   mat    L = chol(S,"lower");
   double d = norm(solve(L,x),2);
   return -d*d/2 - sum(log(sqrt(2*M_PI)*L.diag()));
 }
 
-// TO DO: Explain here what this function does, and how to use it.
+// Compute the log-likelihood for the mvebnm model. See the mvebnm R
+// function for description of the inputs.
 double loglik_mvebnm (const mat& X, const vec& w, const cube& U, 
 		      const mat& S) {
   

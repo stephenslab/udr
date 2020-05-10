@@ -1,13 +1,15 @@
-## This function takes as input an array of unnormalized
-## log-probabilities logw and returns normalized probabilities such
-## that the sum is equal to 1.
-normalizelogweights <- function (logw){
+# This function takes as input a matrix of unnormalized
+# log-probabilities, and returns normalized probabilities such that
+# each row sums to 1.
+normalizelogweights <- function (W) {
+
   # Guard against underflow or overflow by adjusting the
   # log-probabilities so that the largest probability is 1.
-  c <- max(logw)
-  w <- exp(logw - c)
+  a <- apply(W,1,max)
+  W <- exp(W - a)
+  
   # Normalize the probabilities.
-  return(w/sum(w))
+  return(W / rowSums(W))
 }
 
 ## This is the function for "shrinking" the covariance matrix T to get

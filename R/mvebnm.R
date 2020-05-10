@@ -160,20 +160,18 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
 
   # Give an overview of the optimization settings.
   if (verbose) {
-    cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",
-                k,n,m))
+    cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",k,n,m))
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
     cat(sprintf("(mvebnm 0.1-22, \"%s\").\n",control$version))
-    cat(sprintf("updates: mixture weights (w) = %s; ",control$update.w))
-    cat(sprintf("prior covs (U) = %s; ",control$update.U))
-    cat(sprintf("res cov (S) = %s\n",control$update.S))
+    cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
+    cat(sprintf("U (prior cov) = %s; ",control$update.U))
+    cat(sprintf("S (resid cov) = %s\n",control$update.S))
   }
   
   # RUN UPDATES
   # -----------
-  # TO DO: Explain here what these lines of code do.
   if (verbose)
     cat("iter          log-likelihood |w - w'| |U - U'| |S - S'|\n")
   fit <- mvebnm_main_loop(X,w,U,S,control,verbose)
@@ -215,30 +213,25 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
     # E-step
     # ------
-    # TO DO: Explain here what these lines of code do.
-    P <- compute_posterior_probs(X,w,U,S,version) {
-    
-    logP = matrix(0, nrow = n, ncol = k)
-    for (j in 1:k){
-      # log-density
-      logP[,j] = log(w[j]) + dmvnorm(X, sigma = T[[j]], log = TRUE)
-    }
-    P = t(apply(logP, 1, function(x) normalizelogweights(x)))
+    # Compute the n x k matrix of posterior mixture assignment
+    # probabilities given current estimates of the model parameters.
+    P <- compute_posterior_probs(X,w,U,S,control$version)
 
     # M-step
     # ------
-    # update mixture weight
-    if (control$update.w == "em") {
-      # w = colSums(P)/n
-    }
+    # Update the mixture weights, if requested.
+    if (control$update.w == "em")
+      w <- colMeans(P)
     
     # update covariance matrix with constraints
-    if (control$update.U == "teem") {
+    if (control$update.U  == "em") {
+      # TO DO.
+    } else if (control$update.U == "teem") {
       # for (j in 1:k) {
       #   T[[j]] = t(X)%*%(P[,j]*(X))/sum(P[,j])
       #   T[[j]] = shrink.cov(T[[j]], eps)
       # }
-    }
+    } 
     
     # Update the residual covariance, if requested.
     if (control$update.S == "em") {
@@ -271,19 +264,21 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
   return(list(w = w,U = U,S = S,progress = progress[1:iter,]))
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Compute the n x k matrix of posterior mixture assignment probabilities
+# given current estimates of the model parameters.
 compute_posterior_probs <- function (X, w, U, S, version = c("Rcpp","R")) {
   version <- match.arg(version)
   if (version == "Rcpp") {
     # TO DO.
   } else if (version == "R")
     P <- compute_posterior_probs_helper(X,w,U,S)    
-  }
   return(P)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
-compute_posterior_probs_helper  <- function (X, w, U, S) {
+# This implements the calculations for compute_posterior_probs.
+#
+#' @importFrom mvtnorm dmvnorm
+compute_posterior_probs_helper <- function (X, w, U, S) {
       
   # Get the number of samples (n) and the number of components in the
   # mixture prior (k).
@@ -296,7 +291,7 @@ compute_posterior_probs_helper  <- function (X, w, U, S) {
     P[,i] = log(w[i]) + dmvnorm(X,sigma = S + U[[i]],log = TRUE)
 
   # Normalize the probabilities so that each row of P sums to 1.
-  return(t(apply(logP, 1, function(x) normalizelogweights(x))))
+  return(normalizelogweights(P))
 }
 
 #' @rdname mvebnm
