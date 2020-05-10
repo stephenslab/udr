@@ -1,11 +1,11 @@
-# TO DO: Explain here what this function does, and how to use it.
+# Convert an m x m x n array to a list of m x m matrices.
 array2list <- function (x) {
   n <- dim(x)[3]
   m <- dim(x)[1]
   y <- vector("list",n)
   for (i in 1:n)
     y[[i]] <- x[,,i]
-return(y)
+  return(y)
 }
 
 # Returns TRUE if and only if the matrix is symmetric positive
