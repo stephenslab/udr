@@ -18,7 +18,7 @@ void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
 void update_prior_covariances_ed (const mat& X, cube& U, const mat& S, 
 				  const mat& P);
 
-void update_prior_cov_ed (mat& X, mat& U, const mat& S, const vec& p);
+void update_prior_covariance_ed (mat& X, mat& U, const mat& S, const vec& p);
 
 // INLINE FUNCTION DEFINITIONS
 // ---------------------------
@@ -54,8 +54,10 @@ arma::mat compute_posterior_probs_rcpp (const arma::mat& X,
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-arma::cube update_prior_cov_ed_rcpp (const arma::mat& X, const arma::cube& U, 
-				     const arma::mat& S, const arma::mat& P) {
+arma::cube update_prior_covariances_ed_rcpp (const arma::mat& X, 
+					     const arma::cube& U, 
+					     const arma::mat& S, 
+					     const arma::mat& P) {
   cube Unew = U;
   update_prior_covariances_ed(X,Unew,S,P);
   return Unew;
@@ -98,21 +100,19 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& S,
   mat Y(n,m);
   mat Ui(m,m);
   for (unsigned int i = 0; i < k; i++) {
-    Ui = U.slice(i);
     Y = X;
-    update_prior_cov_ed(Y,Ui,S,P.col(i));
-    U.slice(i) = Ui;
+    update_prior_covariance_ed(Y,U.slice(i),S,P.col(i));
   }
 }
 
 // Perform an M-step update for one of the prior covariance matrices
 // using the update formula derived in Bovy et al (2011). 
-void update_prior_cov_ed (mat& X, mat& U, const mat& S, const vec& p) {
+void update_prior_covariance_ed (mat& X, mat& U, const mat& S, const vec& p) {
   mat T = S + U;
   mat B = solve(T,U);
   scalerows(X,sqrt(p/sum(p)));
   X *= B;
-  U -= U * B + trans(X) * X;
+  U += trans(X)* X - U*B;
 }
 
 // Scale each row A[i,] by b[i].

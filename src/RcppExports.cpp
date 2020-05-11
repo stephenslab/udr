@@ -46,9 +46,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// update_prior_cov_ed_rcpp
-arma::cube update_prior_cov_ed_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& S, const arma::mat& P);
-RcppExport SEXP _mvebnm_update_prior_cov_ed_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
+// update_prior_covariances_ed_rcpp
+arma::cube update_prior_covariances_ed_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& S, const arma::mat& P);
+RcppExport SEXP _mvebnm_update_prior_covariances_ed_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -56,7 +56,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type P(PSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_prior_cov_ed_rcpp(X, U, S, P));
+    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_ed_rcpp(X, U, S, P));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -82,7 +82,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mvebnm_ldmvnorm_rcpp", (DL_FUNC) &_mvebnm_ldmvnorm_rcpp, 2},
     {"_mvebnm_loglik_mvebnm_rcpp", (DL_FUNC) &_mvebnm_loglik_mvebnm_rcpp, 4},
     {"_mvebnm_compute_posterior_probs_rcpp", (DL_FUNC) &_mvebnm_compute_posterior_probs_rcpp, 4},
-    {"_mvebnm_update_prior_cov_ed_rcpp", (DL_FUNC) &_mvebnm_update_prior_cov_ed_rcpp, 4},
+    {"_mvebnm_update_prior_covariances_ed_rcpp", (DL_FUNC) &_mvebnm_update_prior_covariances_ed_rcpp, 4},
     {"_mvebnm_fit_teem_rcpp", (DL_FUNC) &_mvebnm_fit_teem_rcpp, 7},
     {NULL, NULL, 0}
 };

@@ -231,9 +231,9 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     
     # Update the prior covariance matrices (U), if requested.
     if (control$update.U  == "em")
-      U <- update_prior_cov_ed(X,U,S,P,control$version)
+      U <- update_prior_covariance_ed(X,U,S,P,control$version)
     else if (control$update.U == "teem")
-      U <- update_prior_cov_teem(X,S,P,control$eps,control$version)
+      U <- update_prior_covariance_teem(X,S,P,control$eps,control$version)
     
     # Update the residual covariance (S), if requested.
     if (control$update.S == "em") {
@@ -300,29 +300,29 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 # Perform an M-step update for the prior covariance matrices using the
 # update formla derived in Bovy et al (2011). The calculations are
 # implemented in both R (version = "R") and C++ (version = "Rcpp").
-update_prior_cov_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
+update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
   U0 <- U
   if (version == "R") {
     k <- ncol(P)
     for (i in 1:k)
-      U[,,i] <- update_prior_cov_ed_helper(X,U[,,i],S,P[,i])
+      U[,,i] <- update_prior_covariance_ed_helper(X,U[,,i],S,P[,i])
   } else if (version == "Rcpp")
-    U <- update_prior_cov_ed_rcpp(X,U,S,P)
-  browser()
+    U <- update_prior_covariances_ed_rcpp(X,U,S,P)
   return(U)
 }
 
 # Perform an M-step update for the covariance matrices in the
 # mixture-of-multivariate-normals prior. The calculations are
 # implemented in both R (version = "R") and C++ (version = "Rcpp").
-update_prior_cov_teem <- function (X, S, P, e, version = c("Rcpp","R")) {
+update_prior_covariance_teem <- function (X, S, P, e,
+                                          version = c("Rcpp","R")) {
   version <- match.arg(version)
   m <- ncol(X)
   k <- ncol(P)
   U <- array(0,dim = c(m,m,k))
   for (i in 1:k)
-    U[,,i] <- update_prior_cov_teem_helper(X,S,P[,i],e)
+    U[,,i] <- update_prior_covariance_teem_helper(X,S,P[,i],e)
   return(U)
 }
 
@@ -330,7 +330,7 @@ update_prior_cov_teem <- function (X, S, P, e, version = c("Rcpp","R")) {
 # using the update formula derived in Bovy et al (2011). Here, p is a
 # vector, with one entry per row of X, giving the posterior assignment
 # probabilities for the mixture component being updated.
-update_prior_cov_ed_helper <- function (X, U, S, p) {
+update_prior_covariance_ed_helper <- function (X, U, S, p) {
   T <- S + U
   B <- solve(T,U)
   p <- p/sum(p)
@@ -342,7 +342,7 @@ update_prior_cov_ed_helper <- function (X, U, S, p) {
 # Here, p is a vector, with one entry per row of X, giving the
 # posterior assignment probabilities for the mixture components being
 # updated.
-update_prior_cov_teem_helper <- function (X, S, p, e) {
+update_prior_covariance_teem_helper <- function (X, S, p, e) {
     
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
