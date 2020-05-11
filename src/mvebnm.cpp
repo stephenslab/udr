@@ -3,7 +3,6 @@
 #define ARMA_DONT_PRINT_ERRORS
 
 #include <RcppArmadillo.h>
-#include "misc.h"
 #include "likelihood.h"
 
 using namespace Rcpp;
@@ -13,6 +12,17 @@ using namespace arma;
 // ---------------------
 void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
 			      const mat& S, mat& P);
+
+// INLINE FUNCTION DEFINITIONS
+// ---------------------------
+// Return the "softmax" of vector x, y(i) = exp(x(i))/sum(exp(x)), in
+// a way that guards against numerical underflow or overflow. The
+// return value is a vector with entries that sum to 1.
+inline rowvec softmax (const rowvec & x) {
+  rowvec y = exp(x - max(x));
+  y /= sum(y);
+  return y;
+}
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -55,11 +65,8 @@ void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
   }
 
   // Normalize the probabilities so that each row of P sums to 1.
-  for (unsigned int i = 0; i < n; i++) {
-    p        = trans(P.row(i));
-    p        = softmax(p);
-    P.row(i) = trans(p);
-  }
+  for (unsigned int i = 0; i < n; i++)
+    P.row(i) = softmax(P.row(i));
 }
 
 // function for "shrinking" the covariance matrix, to get $\hat U_k$.

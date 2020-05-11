@@ -40,22 +40,40 @@ rownames(X) <- paste0("s",1:n)
 # ---------
 # TO DO: Explain these lines of code in greater detail.
 set.seed(1)
+numiter <- 100
 t1 <- system.time(
-  fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = 20)))
+  fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",update.U = "em",
+                                              maxiter = numiter)))
 set.seed(1)
 t2 <- system.time(
-  fit2 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",maxiter = 20)))
+  fit2 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",update.U = "em",
+                                              maxiter = numiter)))
+set.seed(1)
+t3 <- system.time(
+  fit3 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = numiter)))
+set.seed(1)
+t4 <- system.time(
+  fit4 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",maxiter = numiter)))
 print(t1)
 print(t2)
+print(t3)
+print(t4)
 print(fit1$loglik - fit2$loglik)
 print(range(fit1$progress$loglik - fit2$progress$loglik))
 print(range(fit1$w - fit2$w))
 print(range(fit1$S - fit2$S))
 for (i in 1:k)
   print(range(fit1$U[[i]] - fit2$U[[i]]))
-y <- fit1$progress$loglik
-plot(fit1$progress$iter,max(y) - y + 0.01,col = "dodgerblue",type = "l",
-     log = "y",lwd = 2,xlab = "iteration",ylab = "dist. from best loglik")
+y1 <- fit1$progress$loglik
+y2 <- fit2$progress$loglik
+y3 <- fit3$progress$loglik
+y4 <- fit4$progress$loglik
+y  <- max(c(y1,y2,y3,y4))
+plot(1:numiter,y - y1 + 0.01,col = "dodgerblue",type = "l",log = "y",lwd = 2,
+     xlab = "iteration",ylab = "dist. from best loglik",ylim = c(0.01,500))
+lines(1:numiter,y - y2 + 0.01,col = "darkblue",lwd = 2,lty = "dashed")
+lines(1:numiter,y - y3 + 0.01,col = "darkorange",lwd = 2)
+lines(1:numiter,y - y4 + 0.01,col = "gold",lwd = 2,lty = "dashed")
 # fit1 <- mvebnm(X,k,control = list(update.U = "em",version = "R"))
 # cat("\n")
 # set.seed(1)

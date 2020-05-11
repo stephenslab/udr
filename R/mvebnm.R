@@ -230,11 +230,10 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     }
     
     # Update the prior covariance matrices (U), if requested.
-    if (control$update.U  == "em") {
-      # TO DO.
-    } else if (control$update.U == "teem")
+    if (control$update.U  == "em")
+      U <- update_prior_cov_ed(X,U,S,P,control$version)
+    else if (control$update.U == "teem")
       U <- update_prior_cov_teem(X,S,P,control$eps,control$version)
-    
     
     # Update the residual covariance (S), if requested.
     if (control$update.S == "em") {
@@ -298,9 +297,20 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
   return(softmax(P))
 }
 
-# Perform an the M-step update for the covariance matrices in the
-# mixture-of-multivariate-normals prior. This is implemented
-# inboth R (version = "R") and C++ (version = "Rcpp").
+# Perform an M-step update for the prior covariance matrices using the
+# update formla derived in Bovy et al (2011). The calculations are
+# implemented in both R (version = "R") and C++ (version = "Rcpp").
+update_prior_cov_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
+  version <- match.arg(version)
+  k <- ncol(P)
+  for (i in 1:k)
+    U[,,i] <- update_prior_cov_ed_helper(X,U[,,i],S,P[,i])
+  return(U)
+}
+
+# Perform an M-step update for the covariance matrices in the
+# mixture-of-multivariate-normals prior. The calculations are
+# implemented in both R (version = "R") and C++ (version = "Rcpp").
 update_prior_cov_teem <- function (X, S, P, e, version = c("Rcpp","R")) {
   version <- match.arg(version)
   m <- ncol(X)
@@ -311,10 +321,22 @@ update_prior_cov_teem <- function (X, S, P, e, version = c("Rcpp","R")) {
   return(U)
 }
 
-# Perform an M-step update for one of the prior covariance
-# matrices. Here, p is a vector, with one entry per row of X, giving
-# the posterior assignment probabilities for one of the mixture
-# components.
+# Perform an M-step update for one of the prior covariance matrices
+# using the update formula derived in Bovy et al (2011). Here, p is a
+# vector, with one entry per row of X, giving the posterior assignment
+# porbabilities for the mixture component being updated.
+update_prior_cov_ed_helper <- function (X, U, S, p) {
+  p <- p/sum(p)
+  T <- S + U
+  B <- solve(T,U)
+  Y <- (sqrt(p) * X) %*% B
+  return(U - U %*% B + crossprod(Y))
+}
+
+# Perform an M-step update for one of the prior covariance matrices.
+# Here, p is a vector, with one entry per row of X, giving the
+# posterior assignment probabilities for the mixture components being
+# updated.
 update_prior_cov_teem_helper <- function (X, S, p, e) {
     
   # Transform the data so that the residual covariance is I, then
