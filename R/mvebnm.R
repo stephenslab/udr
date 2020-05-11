@@ -306,16 +306,9 @@ update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
   if (version == "R") {
     k <- ncol(P)
     for (i in 1:k)
-<<<<<<< HEAD
       U[,,i] <- update_prior_covariance_ed_helper(X,U[,,i],S,P[,i])
   } else if (version == "Rcpp")
     U <- update_prior_covariances_ed_rcpp(X,U,S,P)
-=======
-      U[,,i] <- update_prior_cov_ed_helper(X,U[,,i],S,P[,i])
-  } else if (version == "Rcpp")
-    U <- update_prior_cov_ed_rcpp(X,U,S,P)
-  browser()
->>>>>>> 74db44c035093f10c4efd819a43b34c16dc3a8c6
   return(U)
 }
 
