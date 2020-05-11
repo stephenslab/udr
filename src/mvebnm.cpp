@@ -206,5 +206,14 @@ void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double e) {
   eig_sym(d,V,T);
   for (unsigned int i = 0; i < m; i++)
     d(i) = max(d(i) - 1,e);
-  U = V * diagmat(d) * trans(V);
+
+  // These next few lines are equivalent to
+  //
+  //   U = V * diagmat(d) * trans(V)
+  //
+  // but slightly more efficient because they avoid an extra
+  // matrix-matrix multiplication.
+  inplace_trans(V);
+  scale_rows(V,sqrt(d));
+  U = crossprod(V);
 }
