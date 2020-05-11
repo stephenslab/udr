@@ -54,16 +54,26 @@ t3 <- system.time(
 set.seed(1)
 t4 <- system.time(
   fit4 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",maxiter = numiter)))
+
 print(t1)
 print(t2)
 print(t3)
 print(t4)
+
 print(fit1$loglik - fit2$loglik)
 print(range(fit1$progress$loglik - fit2$progress$loglik))
 print(range(fit1$w - fit2$w))
 print(range(fit1$S - fit2$S))
 for (i in 1:k)
   print(range(fit1$U[[i]] - fit2$U[[i]]))
+
+print(fit3$loglik - fit4$loglik)
+print(range(fit3$progress$loglik - fit4$progress$loglik))
+print(range(fit3$w - fit4$w))
+print(range(fit3$S - fit4$S))
+for (i in 1:k)
+  print(range(fit3$U[[i]] - fit4$U[[i]]))
+
 y1 <- fit1$progress$loglik
 y2 <- fit2$progress$loglik
 y3 <- fit3$progress$loglik
