@@ -13,6 +13,10 @@ compute_posterior_probs_rcpp <- function(X, w, U, S) {
     .Call('_mvebnm_compute_posterior_probs_rcpp', PACKAGE = 'mvebnm', X, w, U, S)
 }
 
+update_prior_cov_ed_rcpp <- function(X, U, S, P) {
+    .Call('_mvebnm_update_prior_cov_ed_rcpp', PACKAGE = 'mvebnm', X, U, S, P)
+}
+
 fit_teem_rcpp <- function(X_mat, w_vec, U_3d, maxiter, converge_tol, eigen_tol, verbose) {
     .Call('_mvebnm_fit_teem_rcpp', PACKAGE = 'mvebnm', X_mat, w_vec, U_3d, maxiter, converge_tol, eigen_tol, verbose)
 }

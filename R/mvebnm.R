@@ -302,9 +302,14 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 # implemented in both R (version = "R") and C++ (version = "Rcpp").
 update_prior_cov_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
-  k <- ncol(P)
-  for (i in 1:k)
-    U[,,i] <- update_prior_cov_ed_helper(X,U[,,i],S,P[,i])
+  U0 <- U
+  if (version == "R") {
+    k <- ncol(P)
+    for (i in 1:k)
+      U[,,i] <- update_prior_cov_ed_helper(X,U[,,i],S,P[,i])
+  } else if (version == "Rcpp")
+    U <- update_prior_cov_ed_rcpp(X,U,S,P)
+  browser()
   return(U)
 }
 
@@ -324,11 +329,11 @@ update_prior_cov_teem <- function (X, S, P, e, version = c("Rcpp","R")) {
 # Perform an M-step update for one of the prior covariance matrices
 # using the update formula derived in Bovy et al (2011). Here, p is a
 # vector, with one entry per row of X, giving the posterior assignment
-# porbabilities for the mixture component being updated.
+# probabilities for the mixture component being updated.
 update_prior_cov_ed_helper <- function (X, U, S, p) {
-  p <- p/sum(p)
   T <- S + U
   B <- solve(T,U)
+  p <- p/sum(p)
   Y <- (sqrt(p) * X) %*% B
   return(U - U %*% B + crossprod(Y))
 }
