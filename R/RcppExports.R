@@ -21,7 +21,3 @@ update_prior_covariance_teem_rcpp <- function(X, S, p, e) {
     .Call('_mvebnm_update_prior_covariance_teem_rcpp', PACKAGE = 'mvebnm', X, S, p, e)
 }
 
-fit_teem_rcpp <- function(X_mat, w_vec, U_3d, maxiter, converge_tol, eigen_tol, verbose) {
-    .Call('_mvebnm_fit_teem_rcpp', PACKAGE = 'mvebnm', X_mat, w_vec, U_3d, maxiter, converge_tol, eigen_tol, verbose)
-}
-
