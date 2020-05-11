@@ -10,8 +10,15 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
+void scalerows (mat& A, const vec& b);
+
 void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
 			      const mat& S, mat& P);
+
+void update_prior_covariances_ed (const mat& X, cube& U, const mat& S, 
+				  const mat& P);
+
+void update_prior_cov_ed (mat& X, mat& U, const mat& S, const vec& p);
 
 // INLINE FUNCTION DEFINITIONS
 // ---------------------------
@@ -42,6 +49,18 @@ arma::mat compute_posterior_probs_rcpp (const arma::mat& X,
   return P;
 }
 
+// Perform an M-step update for the prior covariance matrices using the
+// update formla derived in Bovy et al (2011).
+//
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+arma::cube update_prior_cov_ed_rcpp (const arma::mat& X, const arma::cube& U, 
+				     const arma::mat& S, const arma::mat& P) {
+  cube Unew = U;
+  update_prior_covariances_ed(X,Unew,S,P);
+  return Unew;
+}
+
 // Compute the n x k matrix of posterior mixture assignment
 // probabilities given current estimates of the model parameters.
 void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
@@ -67,6 +86,39 @@ void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
   // Normalize the probabilities so that each row of P sums to 1.
   for (unsigned int i = 0; i < n; i++)
     P.row(i) = softmax(P.row(i));
+}
+
+// Perform an M-step update for the prior covariance matrices using the
+// update formla derived in Bovy et al (2011).
+void update_prior_covariances_ed (const mat& X, cube& U, const mat& S, 
+				  const mat& P) {
+  unsigned int n = X.n_rows;
+  unsigned int m = X.n_cols;
+  unsigned int k = P.n_cols;
+  mat Y(n,m);
+  mat Ui(m,m);
+  for (unsigned int i = 0; i < k; i++) {
+    Ui = U.slice(i);
+    Y = X;
+    update_prior_cov_ed(Y,Ui,S,P.col(i));
+    U.slice(i) = Ui;
+  }
+}
+
+// Perform an M-step update for one of the prior covariance matrices
+// using the update formula derived in Bovy et al (2011). 
+void update_prior_cov_ed (mat& X, mat& U, const mat& S, const vec& p) {
+  mat T = S + U;
+  mat B = solve(T,U);
+  scalerows(X,sqrt(p/sum(p)));
+  X *= B;
+  U -= U * B + trans(X) * X;
+}
+
+// Scale each row A[i,] by b[i].
+void scalerows (mat& A, const vec& b) {
+  vec c = b;
+  A.each_col() %= c;
 }
 
 // function for "shrinking" the covariance matrix, to get $\hat U_k$.
