@@ -348,9 +348,6 @@ update_prior_covariance_ed_helper <- function (X, U, S, p) {
 # being updated.
 update_prior_covariance_teem_helper <- function (X, S, p, e) {
 
-  U2 <- update_prior_covariance_teem_rcpp(X,S,p,e)
-  browser()
-  
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
   R <- chol(S)

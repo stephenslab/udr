@@ -50,10 +50,12 @@ t2 <- system.time(
                                               maxiter = numiter)))
 set.seed(1)
 t3 <- system.time(
-  fit3 <- mvebnm(X,k = k,S = S,control = list(version = "R",maxiter = numiter)))
+  fit3 <- mvebnm(X,k = k,S = S,control = list(version = "R",
+                                              maxiter = numiter)))
 set.seed(1)
 t4 <- system.time(
-  fit4 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",maxiter = numiter)))
+  fit4 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",
+                                              maxiter = numiter)))
 
 print(t1)
 print(t2)
