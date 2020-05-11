@@ -312,21 +312,21 @@ update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
   return(U)
 }
 
-# Perform an M-step update for the covariance matrices in the
-# mixture-of-multivariate-normals prior. The calculations are
-# implemented in both R (version = "R") and C++ (version = "Rcpp").
+# Perform an M-step update for the prior covariance matrices using the
+# eigenvalue-truncation technique described in Won et al (2013). The
+# calculations are implemented in both R (version = "R") and C++
+# (version = "Rcpp").
 update_prior_covariance_teem <- function (X, S, P, e,
                                           version = c("Rcpp","R")) {
   version <- match.arg(version)
-  # if (version == "R") {
+  if (version == "R") {
     m <- ncol(X)
     k <- ncol(P)
     U <- array(0,dim = c(m,m,k))
     for (i in 1:k)
       U[,,i] <- update_prior_covariance_teem_helper(X,S,P[,i],e)
-  # } else if (version == "Rcpp") {
-    # TO DO.
-  # }
+  } else if (version == "Rcpp")
+    U <- update_prior_covariances_teem_rcpp(X,S,P,e)
   return(U)
 }
 
@@ -337,22 +337,24 @@ update_prior_covariance_teem <- function (X, S, P, e,
 update_prior_covariance_ed_helper <- function (X, U, S, p) {
   T <- S + U
   B <- solve(T,U)
-  p <- p/sum(p)
-  Y <- (sqrt(p) * X) %*% B
-  return(U - U %*% B + crossprod(Y))
+  Y <- crossprod((sqrt(p/sum(p)) * X) %*% B)
+  return(U - U %*% B + Y)
 }
 
-# Perform an M-step update for one of the prior covariance matrices.
-# Here, p is a vector, with one entry per row of X, giving the
-# posterior assignment probabilities for the mixture components being
-# updated.
+# Perform an M-step update for one of the prior covariance matrices
+# using the eigenvalue-truncation technique described in Won et al
+# (2013). Input p is a vector, with one entry per row of X, giving
+# the posterior assignment probabilities for the mixture components
+# being updated.
 update_prior_covariance_teem_helper <- function (X, S, p, e) {
-    
+
+  U2 <- update_prior_covariance_teem_rcpp(X,S,p,e)
+  browser()
+  
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
-  p <- p/sum(p)  
   R <- chol(S)
-  T <- crossprod((sqrt(p)*X) %*% solve(R))
+  T <- crossprod((sqrt(p/sum(p))*X) %*% solve(R))
   
   # Find U maximizing the expected complete log-likelihood subject to
   # U being positive definite. This update for U is based on the fact
@@ -361,7 +363,7 @@ update_prior_covariance_teem_helper <- function (X, S, p, e) {
   # truncating the eigenvalues of T = U + I less than 1 to be 1; see
   # Won et al (2013), p. 434, the sentence just after equation (16).
   U <- shrink.cov(T,e)
-  
+
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
 }

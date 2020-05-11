@@ -13,10 +13,15 @@ void scale_rows (mat& A, const vec& b) {
 // Return the "softmax" of vector x, y(i) = exp(x(i))/sum(exp(x)), in
 // a way that guards against numerical underflow or overflow. The
 // return value is a vector with entries that sum to 1.
-rowvec softmax (const rowvec & x) {
+rowvec softmax (const rowvec& x) {
   rowvec y = exp(x - max(x));
   y /= sum(y);
   return y;
+}
+
+// Return the cross-product of matrix X, i.e., X'*X.
+mat crossprod (const mat& X) {
+  return trans(X) * X;
 }
 
 // Compute the log-probability of x, where x is multivariate normal

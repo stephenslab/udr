@@ -16,7 +16,14 @@ void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
 void update_prior_covariances_ed (const mat& X, cube& U, const mat& S, 
 				  const mat& P);
 
-void update_prior_covariance_ed (mat& X, mat& U, const mat& S, const vec& p);
+void update_prior_covariances_teem (const mat& X, const mat& S, const mat& P, 
+				    cube& U, double e);
+
+void update_prior_covariance_ed (mat& X, mat& U, const mat& S, 
+				 const vec& p, mat& T, mat& B);
+
+void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, 
+				   mat& U, double e);
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -48,6 +55,21 @@ arma::cube update_prior_covariances_ed_rcpp (const arma::mat& X,
   cube Unew = U;
   update_prior_covariances_ed(X,Unew,S,P);
   return Unew;
+}
+
+// Perform an M-step update for the covariance matrices in the
+// mixture-of-multivariate-normals prior.
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+arma::cube update_prior_covariances_teem_rcpp (const arma::mat& X, 
+					       const arma::mat& S,
+					       const arma::mat& P,
+					       double e) {
+  unsigned int m = X.n_cols;
+  unsigned int k = P.n_cols;
+  cube U(m,m,k);
+  update_prior_covariances_teem(X,S,P,U,e);
+  return U;
 }
 
 // Compute the n x k matrix of posterior mixture assignment
@@ -85,20 +107,80 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& S,
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
   mat Y(n,m);
+  mat T(m,m);
+  mat B(m,m);
   for (unsigned int i = 0; i < k; i++) {
     Y = X;
-    update_prior_covariance_ed(Y,U.slice(i),S,P.col(i));
+    update_prior_covariance_ed(Y,U.slice(i),S,P.col(i),T,B);
+  }
+}
+
+// Perform an M-step update for the prior covariance matrices, using
+// the eigenvalue-truncation technique described in Won et al (2013).
+void update_prior_covariances_teem (const mat& X, const mat& S, const mat& P, 
+				    cube& U, double e) {
+  unsigned int n = X.n_rows;
+  unsigned int m = X.n_cols;
+  unsigned int k = P.n_cols;
+  mat R = chol(S,"upper");
+  mat Y(n,m);
+  for (unsigned int i = 0; i < k; i++) {
+    Y = X;
+    update_prior_covariance_teem(Y,R,P.col(i),U.slice(i),e);
   }
 }
 
 // Perform an M-step update for one of the prior covariance matrices
 // using the update formula derived in Bovy et al (2011). 
-void update_prior_covariance_ed (mat& X, mat& U, const mat& S, const vec& p) {
-  mat T = S + U;
-  mat B = solve(T,U);
+void update_prior_covariance_ed (mat& X, mat& U, const mat& S, 
+				 const vec& p, mat& T, mat& B) {
   scale_rows(X,sqrt(p/sum(p)));
+  T  = S + U;
+  B  = solve(T,U);
   X *= B;
-  U += trans(X)* X - U*B;
+  U += crossprod(X) - U*B;
+}
+
+// For testing only.
+//
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+arma::mat update_prior_covariance_teem_rcpp (const arma::mat& X, 
+					     const arma::mat& S,
+					     const arma::vec& p,
+					     double e) {
+  unsigned int m = X.n_cols;
+  mat U(m,m);
+  mat Y = X;
+  mat R = chol(S,"upper");
+  update_prior_covariance_teem(Y,R,p,U,e);
+  return U;
+}
+
+// Perform an M-step update for one of the prior covariance matrices
+// using the eigenvalue-truncation technique described in Won et al
+// (2013). Input R should be R = chol(S,"upper"). 
+void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, 
+				   mat& U, double e) {
+
+  // Transform the data so that the residual covariance is I, then
+  // compute the maximum-likelhood estimate (MLE) for T = U + I.
+  scale_rows(X,sqrt(p/sum(p)));
+  X *= inv(R);
+  U  = crossprod(X);
+
+  // Find U maximizing the expected complete log-likelihood subject to
+  // U being positive definite. This update for U is based on the fact
+  // that the covariance matrix that minimizes the likelihood subject
+  // to the constraint that U is positive definite is obtained by
+  // truncating the eigenvalues of T = U + I less than 1 to be 1; see
+  // Won et al (2013), p. 434, the sentence just after equation (16).
+  //
+  // TO DO.
+  //
+
+  // Recover the solution for the original (untransformed) data.
+  U = trans(R) * U * R;
 }
 
 // function for "shrinking" the covariance matrix, to get $\hat U_k$.

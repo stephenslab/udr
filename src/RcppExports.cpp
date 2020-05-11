@@ -48,6 +48,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// update_prior_covariances_teem_rcpp
+arma::cube update_prior_covariances_teem_rcpp(const arma::mat& X, const arma::mat& S, const arma::mat& P, double e);
+RcppExport SEXP _mvebnm_update_prior_covariances_teem_rcpp(SEXP XSEXP, SEXP SSEXP, SEXP PSEXP, SEXP eSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type P(PSEXP);
+    Rcpp::traits::input_parameter< double >::type e(eSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_teem_rcpp(X, S, P, e));
+    return rcpp_result_gen;
+END_RCPP
+}
+// update_prior_covariance_teem_rcpp
+arma::mat update_prior_covariance_teem_rcpp(const arma::mat& X, const arma::mat& S, const arma::vec& p, double e);
+RcppExport SEXP _mvebnm_update_prior_covariance_teem_rcpp(SEXP XSEXP, SEXP SSEXP, SEXP pSEXP, SEXP eSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type e(eSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_prior_covariance_teem_rcpp(X, S, p, e));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fit_teem_rcpp
 Rcpp::List fit_teem_rcpp(Rcpp::NumericMatrix X_mat, Rcpp::NumericVector w_vec, Rcpp::NumericVector U_3d, int maxiter, double converge_tol, double eigen_tol, bool verbose);
 RcppExport SEXP _mvebnm_fit_teem_rcpp(SEXP X_matSEXP, SEXP w_vecSEXP, SEXP U_3dSEXP, SEXP maxiterSEXP, SEXP converge_tolSEXP, SEXP eigen_tolSEXP, SEXP verboseSEXP) {
@@ -70,6 +98,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_mvebnm_loglik_mvebnm_rcpp", (DL_FUNC) &_mvebnm_loglik_mvebnm_rcpp, 4},
     {"_mvebnm_compute_posterior_probs_rcpp", (DL_FUNC) &_mvebnm_compute_posterior_probs_rcpp, 4},
     {"_mvebnm_update_prior_covariances_ed_rcpp", (DL_FUNC) &_mvebnm_update_prior_covariances_ed_rcpp, 4},
+    {"_mvebnm_update_prior_covariances_teem_rcpp", (DL_FUNC) &_mvebnm_update_prior_covariances_teem_rcpp, 4},
+    {"_mvebnm_update_prior_covariance_teem_rcpp", (DL_FUNC) &_mvebnm_update_prior_covariance_teem_rcpp, 4},
     {"_mvebnm_fit_teem_rcpp", (DL_FUNC) &_mvebnm_fit_teem_rcpp, 7},
     {NULL, NULL, 0}
 };
