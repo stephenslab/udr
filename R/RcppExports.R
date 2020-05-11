@@ -17,7 +17,3 @@ update_prior_covariances_teem_rcpp <- function(X, S, P, e) {
     .Call('_mvebnm_update_prior_covariances_teem_rcpp', PACKAGE = 'mvebnm', X, S, P, e)
 }
 
-update_prior_covariance_teem_rcpp <- function(X, S, p, e) {
-    .Call('_mvebnm_update_prior_covariance_teem_rcpp', PACKAGE = 'mvebnm', X, S, p, e)
-}
-

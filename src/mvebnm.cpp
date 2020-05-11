@@ -58,7 +58,7 @@ arma::mat compute_posterior_probs_rcpp (const arma::mat& X,
 }
 
 // Perform an M-step update for the prior covariance matrices using the
-// update formla derived in Bovy et al (2011).
+// update formula derived in Bovy et al (2011).
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -71,8 +71,9 @@ arma::cube update_prior_covariances_ed_rcpp (const arma::mat& X,
   return Unew;
 }
 
-// Perform an M-step update for the covariance matrices in the
-// mixture-of-multivariate-normals prior.
+// Perform an M-step update for the prior covariance matrices using
+// the eigenvalue-truncation technique described in Won et al (2013).
+//
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 arma::cube update_prior_covariances_teem_rcpp (const arma::mat& X, 
@@ -149,6 +150,9 @@ void update_prior_covariances_teem (const mat& X, const mat& S, const mat& P,
 
 // Perform an M-step update for one of the prior covariance matrices
 // using the update formula derived in Bovy et al (2011). 
+// 
+// Note that data matrix X is modified to perform the update, so
+// should not be reused.
 void update_prior_covariance_ed (mat& X, mat& U, const mat& S, 
 				 const vec& p, mat& T, mat& B) {
   scale_rows(X,sqrt(p/sum(p)));
@@ -158,30 +162,19 @@ void update_prior_covariance_ed (mat& X, mat& U, const mat& S,
   U += crossprod(X) - U*B;
 }
 
-// For testing only.
-//
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export]]
-arma::mat update_prior_covariance_teem_rcpp (const arma::mat& X, 
-					     const arma::mat& S,
-					     const arma::vec& p,
-					     double e) {
-  unsigned int m = X.n_cols;
-  mat U(m,m);
-  mat T(m,m);
-  mat V(m,m);
-  vec d(m);
-  mat Y = X;
-  mat R = chol(S,"upper");
-  update_prior_covariance_teem(Y,R,p,U,T,V,d,e);
-  return U;
-}
-
 // Perform an M-step update for one of the prior covariance matrices
 // using the eigenvalue-truncation technique described in Won et al
-// (2013). Input R should be R = chol(S,"upper"). 
+// (2013). 
+//
+// Input R should be R = chol(S,"upper"). Inputs T and V are matrices
+// of the same dimension as S and U storing intermediate calculations,
+// and d is a vector of length m also storing an intermediate result.
+//
+// Note that data matrix X is modified to perform the update, so
+// should not be reused.
 void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, 
-  mat& U, mat& T, mat& V, vec& d, double e) {
+				   mat& U, mat& T, mat& V, vec& d, 
+				   double e) {
 
   // Transform the data so that the residual covariance is I, then
   // compute the maximum-likelhood estimate (MLE) for T = U + I.
@@ -205,6 +198,9 @@ void update_prior_covariance_teem (mat& X, const mat& R, const vec& p,
 // satisfying the constraint that U is positive definite. This is
 // achieved by setting any eigenvalues of T less than 1 to 1 + e,
 // or, equivalently, setting any eigenvalues of U less than 0 to be e.
+//
+// Inputs d and V are used to store the eigenvalue decomposition of T;
+// these will store the eigenvalues and eigenvectors, respectively.
 void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double e) {
   unsigned int m = T.n_rows;
   eig_sym(d,V,T);
