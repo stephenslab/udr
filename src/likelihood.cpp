@@ -1,17 +1,14 @@
-#include "likelihood.h"
+#include "misc.h"
 
 using namespace arma;
 
+// FUNCTION DECLARATIONS
+// ---------------------
+double loglik_mvebnm (const mat& X, const vec& w, const cube& U, 
+		      const mat& S);
+
 // FUNCTION DEFINITIONS
 // --------------------
-// This is mainly used for testing the ldmvnorm C++ function.
-//
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export]]
-double ldmvnorm_rcpp (const arma::vec& x, const arma::mat& S) {
-  return ldmvnorm(x,S);
-}
-
 // Compute the log-likelihood for the mvebnm model. See the mvebnm R
 // function for a description of the inputs.
 //
@@ -20,14 +17,6 @@ double ldmvnorm_rcpp (const arma::vec& x, const arma::mat& S) {
 double loglik_mvebnm_rcpp (const arma::mat& X, const arma::vec& w, 
 			   const arma::cube& U, const arma::mat& S) {
   return loglik_mvebnm(X,w,U,S);
-}
-
-// Compute the log-probability of x, where x is multivariate normal
-// with mean zero and covariance matrix S. Input argument should be L
-// be the Cholesky factor of S; L = chol(S,"lower").
-double ldmvnorm (const vec& x, const mat& L) {
-  double d = norm(solve(L,x),2);
-  return -d*d/2 - sum(log(sqrt(2*M_PI)*L.diag()));
 }
 
 // Compute the log-likelihood for the mvebnm model. See the mvebnm R

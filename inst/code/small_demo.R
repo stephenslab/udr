@@ -82,7 +82,7 @@ y  <- max(c(y1,y2,y3,y4))
 plot(1:numiter,y - y1 + 0.01,col = "dodgerblue",type = "l",log = "y",lwd = 2,
      xlab = "iteration",ylab = "dist. from best loglik",ylim = c(0.01,500))
 lines(1:numiter,y - y2 + 0.01,col = "darkblue",lwd = 2,lty = "dashed")
-lines(1:numiter,y - y3 + 0.01,col = "darkorange",lwd = 2)
+lines(1:numiter,y - y3 + 0.01,col = "magenta",lwd = 2)
 lines(1:numiter,y - y4 + 0.01,col = "gold",lwd = 2,lty = "dashed")
 # fit1 <- mvebnm(X,k,control = list(update.U = "em",version = "R"))
 # cat("\n")

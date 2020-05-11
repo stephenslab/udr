@@ -318,11 +318,15 @@ update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
 update_prior_covariance_teem <- function (X, S, P, e,
                                           version = c("Rcpp","R")) {
   version <- match.arg(version)
-  m <- ncol(X)
-  k <- ncol(P)
-  U <- array(0,dim = c(m,m,k))
-  for (i in 1:k)
-    U[,,i] <- update_prior_covariance_teem_helper(X,S,P[,i],e)
+  # if (version == "R") {
+    m <- ncol(X)
+    k <- ncol(P)
+    U <- array(0,dim = c(m,m,k))
+    for (i in 1:k)
+      U[,,i] <- update_prior_covariance_teem_helper(X,S,P[,i],e)
+  # } else if (version == "Rcpp") {
+    # TO DO.
+  # }
   return(U)
 }
 

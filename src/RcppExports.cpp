@@ -6,18 +6,6 @@
 
 using namespace Rcpp;
 
-// ldmvnorm_rcpp
-double ldmvnorm_rcpp(const arma::vec& x, const arma::mat& S);
-RcppExport SEXP _mvebnm_ldmvnorm_rcpp(SEXP xSEXP, SEXP SSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(ldmvnorm_rcpp(x, S));
-    return rcpp_result_gen;
-END_RCPP
-}
 // loglik_mvebnm_rcpp
 double loglik_mvebnm_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
 RcppExport SEXP _mvebnm_loglik_mvebnm_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
@@ -79,7 +67,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_mvebnm_ldmvnorm_rcpp", (DL_FUNC) &_mvebnm_ldmvnorm_rcpp, 2},
     {"_mvebnm_loglik_mvebnm_rcpp", (DL_FUNC) &_mvebnm_loglik_mvebnm_rcpp, 4},
     {"_mvebnm_compute_posterior_probs_rcpp", (DL_FUNC) &_mvebnm_compute_posterior_probs_rcpp, 4},
     {"_mvebnm_update_prior_covariances_ed_rcpp", (DL_FUNC) &_mvebnm_update_prior_covariances_ed_rcpp, 4},

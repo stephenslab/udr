@@ -3,15 +3,13 @@
 #define ARMA_DONT_PRINT_ERRORS
 
 #include <RcppArmadillo.h>
-#include "likelihood.h"
+#include "misc.h"
 
 using namespace Rcpp;
 using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-void scalerows (mat& A, const vec& b);
-
 void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
 			      const mat& S, mat& P);
 
@@ -19,17 +17,6 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& S,
 				  const mat& P);
 
 void update_prior_covariance_ed (mat& X, mat& U, const mat& S, const vec& p);
-
-// INLINE FUNCTION DEFINITIONS
-// ---------------------------
-// Return the "softmax" of vector x, y(i) = exp(x(i))/sum(exp(x)), in
-// a way that guards against numerical underflow or overflow. The
-// return value is a vector with entries that sum to 1.
-inline rowvec softmax (const rowvec & x) {
-  rowvec y = exp(x - max(x));
-  y /= sum(y);
-  return y;
-}
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -98,7 +85,6 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& S,
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
   mat Y(n,m);
-  mat Ui(m,m);
   for (unsigned int i = 0; i < k; i++) {
     Y = X;
     update_prior_covariance_ed(Y,U.slice(i),S,P.col(i));
@@ -110,15 +96,9 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& S,
 void update_prior_covariance_ed (mat& X, mat& U, const mat& S, const vec& p) {
   mat T = S + U;
   mat B = solve(T,U);
-  scalerows(X,sqrt(p/sum(p)));
+  scale_rows(X,sqrt(p/sum(p)));
   X *= B;
   U += trans(X)* X - U*B;
-}
-
-// Scale each row A[i,] by b[i].
-void scalerows (mat& A, const vec& b) {
-  vec c = b;
-  A.each_col() %= c;
 }
 
 // function for "shrinking" the covariance matrix, to get $\hat U_k$.
