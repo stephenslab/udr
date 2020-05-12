@@ -229,17 +229,26 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
       w <- w/sum(w)  
     }
     
+    # Compute the M-step update for the residual covariance (S), if
+    # relevant.
+    if (control$update.S == "em") {
+      #
+      # TO DO.
+      #
+      Snew <- S
+    }
+
     # Update the prior covariance matrices (U), if requested.
     if (control$update.U  == "em")
       U <- update_prior_covariance_ed(X,U,S,P,control$version)
     else if (control$update.U == "teem")
       U <- update_prior_covariance_teem(X,S,P,control$eps,control$version)
-    
-    # Update the residual covariance (S), if requested.
-    if (control$update.S == "em") {
-      # TO DO.
-    }
 
+    # Apply the update for the residual covariance matrix, if
+    # requested.
+    if (control$update.S == "em")
+      S <- Snew
+    
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
@@ -330,6 +339,21 @@ update_prior_covariance_teem <- function (X, S, P, e,
   return(U)
 }
 
+# Perform an M-step update for the residual covariance matrix, S.
+update_resid_covariance <- function (X, U, S, P) {
+  n <- nrow(X)
+  m <- ncol(X)
+  S <- matrix(0,m,m)
+  for (i in 1:n) {
+    x   <- X[i,]
+    out <- compute_posterior_mvtnorm_mix(x,P[i,],U,S)
+    mu1 <- out$mu1
+    S1  <- out$s1
+    S   <- S + S1 + tcrossprod(x - mu1)
+  }
+  return(S/n)
+}
+
 # Perform an M-step update for one of the prior covariance matrices
 # using the update formula derived in Bovy et al (2011). Here, p is a
 # vector, with one entry per row of X, giving the posterior assignment
@@ -363,6 +387,36 @@ update_prior_covariance_teem_helper <- function (X, S, p, e) {
 
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
+}
+
+# Suppose x is drawn from a multivariate normal distribution with mean
+# z and covariance S, and z is drawn from a mixture of multivariate
+# normals, each with zero mean, covariance V[,,i] and weight w[i].
+# Return the posterior mean (mu1) and covariance (S1) of z. Note that
+# input w1 must be the vector of *posterior* mixture weights.
+compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
+  m   <- length(m)
+  k   <- length(V)
+  mu1 <- rep(0,m)
+  S1  <- matrix(0,m,m)
+  for (i in 1:k) {
+    w   <- w1[i]
+    out <- compute_posterior_mvtnorm(V[,,i],S)
+    mu  <- out$mu1
+    S   <- out$S1
+    mu1 <- mu1 + w*mu
+    S1  <- S1 + w*(S + tcrossprod(mu))
+  }
+  S1 <- S1 - tcrossprod(mu1)
+  return(list(mu1 = mu1,S1 = S1))
+}
+
+# Suppose x is drawn from a multivariate normal distribution with mean
+# z and covariance S, and z is drawn from a multivariate normal
+# distribution with mean zero and covariance V. Return the posterior
+# mean (mu1) and covariance (S1) of z.
+compute_posterior_mvtnorm <- function (V, S) {
+  # TO DO.
 }
 
 #' @rdname mvebnm
