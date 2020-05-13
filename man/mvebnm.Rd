@@ -41,18 +41,18 @@ A list object with the following elements:
 
 \item{w}{A vector containing the estimated prior mixture
   weights. When \code{control$update.w = FALSE}, this will be the
-  same as \code{w} provided at input.}
+  same as the \code{w} provided at input.}
 
 \item{U}{A list containing the estimated prior covariance matrices. When
-  \code{control$update.U = FALSE}, this will be the same as \code{U}
+  \code{control$update.U = FALSE}, this will be the same as the \code{U}
   provided at input.}
 
 \item{S}{The estimated residual covariance matrix. When
-  \code{control$update.S = FALSE}, this will be the same as \code{S}
+  \code{control$update.S = FALSE}, this will be the same as the \code{S}
   provided at input.}
 
 \item{loglik}{The log-likelihood at the current settings of the
-  model parameters, \code{w}, \code{U} and \item{S}; see
+  model parameters, \code{w}, \code{U} and \code{S}; see
   \code{\link{loglik_mvebnm}}.}
   
 \item{progress}{A data frame containing detailed information about
@@ -69,16 +69,19 @@ This function implements an empirical Bayes method for
 fitting a multivariate normal means model. This method is closely
 related to approaches for multivariate density deconvolution
 (Sarkar \emph{et al}, 2018), so it can also be viewed as a method
-for multivariate density deconvolution. In the multivariate normal
-means model, each m-dimensional observation \eqn{x} is drawn from a
-mixture of multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k
-N(0, T_k)}, where \eqn{k} is the number of mixture components, the
-\eqn{w_j}'s are the mixture weights, and each \eqn{T_j = S + U_j}
-is a covariance matrix. This is the marginal density derived from a
-model in which each \eqn{x} is multivariate normal with mean
-\eqn{y} and covariance \eqn{S}, and the underlying, or "latent",
-signal \eqn{y} is in turn modeled by a mixture prior in which each
-mixture component \eqn{j} is multivariate normal with zero mean and
+for multivariate density deconvolution.
+}
+\details{
+In the multivariate normal means model, each m-dimensional
+observation \eqn{x} is drawn from a mixture of multivariate
+normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0, T_k)}, where
+\eqn{k} is the number of mixture components, the \eqn{w_j}'s are
+the mixture weights, and each \eqn{T_j = S + U_j} is a covariance
+matrix. This is the marginal density derived from a model in which
+each \eqn{x} is multivariate normal with mean \eqn{y} and
+covariance \eqn{S}, and the underlying, or "latent", signal \eqn{y}
+is in turn modeled by a mixture prior in which each mixture
+component \eqn{j} is multivariate normal with zero mean and
 covariance matrix \eqn{S_j}. The "Extreme Deconvolution" (ED) model
 (Bovy \emph{et al}, 2011) is a slight generalization of this
 multivariate normal means model; the ED model allows for the
@@ -87,8 +90,7 @@ covariances, and it allows one to specify a linear projection of
 the underlying signal onto the observed signal. Therefore, this
 method also implements a useful special case of Extreme
 Deconvolution.
-}
-\details{
+
 The multivariate normal means model is fit by
 expectation-maximization (EM). Two EM variants are implemented: the
 EM algorithm described by Bovy \emph{et al} (2011); and
@@ -97,9 +99,30 @@ which the M-step update for each covariance matrix \code{U[[j]]} is
 solved by truncating the eigenvalues in a spectral decomposition of
 the (unconstrained) maximimum likelihood estimate (MLE) of
 \code{U[j]]}. The latter method provides greater freedom in the
-updates for U, and is expected to yield better fits. The choice of
-M-step update is specified by the \code{control$update.U}
-optimization setting; continuing reading for details.
+updates for U, and is expected to yield better fits, and converge
+more quickly to a good fit. The choice of M-step update is
+specified by the \code{control$update.U} optimization setting 
+(see below for details).
+
+The \code{control} argument is a list in which any of the following
+named components will override the default optimization algorithm
+settings (as they are defined by \code{mvebnm_control_default}):
+
+\describe{
+
+\item{\code{update.w}}{Describe "update.w" here.}
+
+\item{\code{update.U}}{Describe "update.U" here.}
+
+\item{\code{update.S}}{Describe "update.S" here.}
+
+\item{\code{version}}{Describe "version" here.}
+
+\item{\code{maxiter}}{Describe "maxiter" here.}
+
+\item{\code{tol}}{Describe "tol" here.}
+
+\item{\code{eps}}{Describe "eps" here.}}
 
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples

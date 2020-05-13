@@ -1,6 +1,8 @@
 to do
 =====
 
++ Fill out "Quick Start" in README.
+
 + Implement a few simple tests of mvebnm.
 
 + Write a small vignette to demonstrate the method.
