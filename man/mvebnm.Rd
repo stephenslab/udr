@@ -52,19 +52,20 @@ for multivariate density deconvolution. In the multivariate normal
 means model, each m-dimensional observation \eqn{x} is drawn from a
 mixture of multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k
 N(0, T_k)}, where \eqn{k} is the number of mixture components, the
-\eqn{w_j}'s are the mixture weights, and each \eqn{T_j = S + U_j} is
-a covariance matrix. This is the marginal density derived from a
+\eqn{w_j}'s are the mixture weights, and each \eqn{T_j = S + U_j}
+is a covariance matrix. This is the marginal density derived from a
 model in which each \eqn{x} is multivariate normal with mean
 \eqn{y} and covariance \eqn{S}, and the underlying, or "latent",
 signal \eqn{y} is in turn modeled by a mixture prior in which each
 mixture component \eqn{j} is multivariate normal with zero mean and
-covariance matrix \eqn{S_j}. The "Extreme Deconvolution" model
+covariance matrix \eqn{S_j}. The "Extreme Deconvolution" (ED) model
 (Bovy \emph{et al}, 2011) is a slight generalization of this
-multivariate normal means model; it allows for the mixture
-components to have nonzero means, and it allows one to specify a
-linear projection of the underlying signal onto the observed
-signal. Therefore, this method also implements a useful special
-case of Extreme Deconvolution.
+multivariate normal means model; the ED model allows for the
+mixture components to have nonzero means, sample-specific residual
+covariances, and it allows one to specify a linear projection of
+the underlying signal onto the observed signal. Therefore, this
+method also implements a useful special case of Extreme
+Deconvolution.
 }
 \details{
 The multivariate normal means model is fit by

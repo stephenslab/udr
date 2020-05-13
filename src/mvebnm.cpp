@@ -203,17 +203,23 @@ void update_prior_covariance_teem (mat& X, const mat& R, const vec& p,
 // these will store the eigenvalues and eigenvectors, respectively.
 void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double e) {
   unsigned int m = T.n_rows;
-  eig_sym(d,V,T);
-  for (unsigned int i = 0; i < m; i++)
-    d(i) = max(d(i) - 1,e);
+  if (m == 1)
+    
+    // Handle univariate case (m = 1).
+    U(0) = max(T(0) - 1,e);
+  else {
+    eig_sym(d,V,T);
+    for (unsigned int i = 0; i < m; i++)
+      d(i) = max(d(i) - 1,e);
 
-  // These next few lines are equivalent to
-  //
-  //   U = V * diagmat(d) * trans(V)
-  //
-  // but slightly more efficient because they avoid an extra
-  // matrix-matrix multiplication.
-  inplace_trans(V);
-  scale_rows(V,sqrt(d));
-  U = crossprod(V);
+    // These next few lines are equivalent to
+    //
+    //   U = V * diagmat(d) * trans(V)
+    //
+    // but implemented in a slightly more efficient way because they
+    // avoid an extra matrix-matrix multiplication.
+    inplace_trans(V);
+    scale_rows(V,sqrt(d));
+    U = crossprod(V);
+  }
 }

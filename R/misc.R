@@ -32,10 +32,16 @@ softmax <- function (W) {
 # or, equivalently, setting any eigenvalues of U less than 0 to be e.
 # The output is a positive definite matrix, U.
 shrink.cov <- function (T, e) {
-  out <- eigen(T)
-  d   <- out$values
-  d   <- pmax(d - 1,e)
-  U   <- tcrossprod(out$vectors %*% diag(sqrt(d)))
+  if (length(T) == 1)
+
+    # Handle univariate case (m = 1).
+    U <- pmax(T - 1,e)  
+  else {
+    out <- eigen(T)
+    d   <- out$values
+    d   <- pmax(d - 1,e)
+    U   <- tcrossprod(out$vectors %*% diag(sqrt(d)))
+  }
   return(U)
 }
 
