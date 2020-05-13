@@ -94,19 +94,14 @@
 #' 
 #' @export
 #' 
-# Input parameters:
-# U: initial estimates for covariance matrices, list of m by m matrices.
-# eps: we usually specify a small number for eps, say 1e-8, used to resolve numerical issues.
-# maxiter: maximum number of iterations
-# tol: criteria for convergence
-#
 mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
                     verbose = TRUE) {
     
   # CHECK & PROCESS INPUTS
   # ----------------------
   # Check the input data matrix, X.
-  if (!(is.numeric(X) & is.matrix(X)))
+  X <- as.matrix(X)  
+  if (!is.numeric(X))
     stop("Input argument \"X\" should be a numeric matrix")
 
   # Get the number of rows (n) and columns (m) of the data matrix,
@@ -125,10 +120,11 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   }
   if (k < 2)
     stop("The number of prior mixture components (k) should be 2 or greater")
-  
+
   # Check input argument "S" giving the initial estimate of the
   # residual covariance matrix.
-  if (!(is.matrix(S) & nrow(S) == m & ncol(S) == m && is.semidef(S)))
+  S <- as.matrix(S)
+  if (!(nrow(S) == m & ncol(S) == m && is.semidef(S)))
     stop("Input argument \"S\" should be an m x m positive semi-definite ",
          "matrix, where m is the number of columns in \"X\"")
 
@@ -138,15 +134,14 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
   # covariances on random subsets of the data.
   if (missing(U))
     U <- generate.random.covariances(X,k)
-  if (!(is.list(U) &&
-        all(sapply(U,is.matrix)) &&
-        verify.prior.covariances(U,S)))
+  U <- lapply(U,as.matrix)
+  if (!(all(sapply(U,is.matrix)) && verify.prior.covariances(U,S)))
     stop("Input argument \"U\" should be list in which each list element ",
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
          "S + U[[i]] is symmetric positive definite")
   mixture.labels <- names(U)
   U <- array(simplify2array(U),c(m,m,k))  
-  
+
   # Check and process input argument "w" giving the initial estimates
   # of the mixture weights. Make sure the mixture weights are all
   # non-negative and sum to 1.
@@ -166,25 +161,24 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-22, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-44, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
   }
 
-  browser()
-  
   # RUN UPDATES
   # -----------
   if (verbose)
     cat("iter          log-likelihood |w - w'| |U - U'| |S - S'|\n")
   fit <- mvebnm_main_loop(X,w,U,S,control,verbose)
-  
+
   # Output the parameters of the updated model (w, U, S), the
   # log-likelihood of the updated model (loglik), and a record of the
   # algorithm's progress over time (progress).
   fit$loglik <- loglik_mvebnm(X,fit$w,fit$U,fit$S,control$version)
   fit$U      <- array2list(fit$U)
+  fit$S      <- drop(fit$S)
   for (i in 1:k) {
     rownames(fit$U[[i]]) <- colnames(X)
     colnames(fit$U[[i]]) <- colnames(X)

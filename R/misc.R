@@ -72,6 +72,6 @@ generate.random.covariances <- function (X, k) {
   U <- vector("list",k)
   names(U) <- paste0("k",1:k)
   for (i in 1:k)
-    U[[i]] <- cov(X[sample(n,n0),])
+    U[[i]] <- cov(X[sample(n,n0),,drop = FALSE])
   return(U)
 }
