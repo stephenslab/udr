@@ -53,7 +53,6 @@ t3 <- system.time(
   fit3 <- mvebnm(X,k = k,S = S,control = list(version = "R",
                                               maxiter = numiter)))
 print(lapply(fit3$U,function (x) eigen(x)$values))
-stop()
 set.seed(1)
 t4 <- system.time(
   fit4 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",

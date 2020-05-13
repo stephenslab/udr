@@ -5,7 +5,7 @@ to do
 
 + Write a small vignette to demonstrate the method.
 
-+ Describe mvebnm optimization settings in roxygen2 docs.
++ Render vignette as HTML, and make available via GitHub Pages.
 
 + Implement Travis CI, Appveyor & CircleCI testing.
 

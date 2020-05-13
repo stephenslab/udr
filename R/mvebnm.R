@@ -26,40 +26,49 @@
 #' Deconvolution.
 #'
 #' The multivariate normal means model is fit by
-#' expectation-maximization (EM). Two EM variants are implemented: the
-#' EM algorithm described by Bovy \emph{et al} (2011); and
-#' \code{"teem"} (truncated eigenvalue expectation-maximization), in
-#' which the M-step update for each covariance matrix \code{U[[j]]} is
-#' solved by truncating the eigenvalues in a spectral decomposition of
-#' the (unconstrained) maximimum likelihood estimate (MLE) of
-#' \code{U[j]]}. The latter method provides greater freedom in the
-#' updates for U, and is expected to yield better fits, and converge
-#' more quickly to a good fit. The choice of M-step update is
-#' specified by the \code{control$update.U} optimization setting 
-#' (see below for details).
-#'
-#' The \code{control} argument is a list in which any of the following
-#' named components will override the default optimization algorithm
-#' settings (as they are defined by \code{mvebnm_control_default}):
+#' expectation-maximization (EM). The \code{control} argument is a
+#' list in which any of the following named components will override
+#' the default optimization algorithm settings (as they are defined by
+#' \code{mvebnm_control_default}):
 #' 
 #' \describe{
 #'
-#' \item{\code{update.w}}{When \code{update.w = "em"}, maximum-likelihood}
+#' \item{\code{update.w}}{When \code{update.w = "em"},
+#' maximum-likelihood estimates of the mixture weights are computed
+#' via an EM algorithm; when \code{update.w = "none"}, the mixture
+#' weights are not updated.}
 #'
-#' \item{\code{update.U}}{Describe "update.U" here.}
+#' \item{\code{update.U}}{This setting determines the algorithm used
+#' to estimate the prior covariance matrices. Two EM variants are
+#' implemented: \code{update.S = "em"}, the EM algorithm described by
+#' Bovy \emph{et al} (2011); and \code{update.S = "teem"} (truncated
+#' eigenvalue expectation-maximization), in which the M-step update
+#' for each covariance matrix \code{U[[j]]} is solved by truncating
+#' the eigenvalues in a spectral decomposition of the (unconstrained)
+#' maximimum likelihood estimate (MLE) of \code{U[j]]}. The latter
+#' method provides greater freedom in the updates for U, and is
+#' expected to yield better fits, and converge more quickly to a good
+#' fit.}
 #'
-#' \item{\code{update.S}}{Describe "update.S" here.}
+#' \item{\code{update.S}}{When \code{update.S = "em"},
+#' maximum-likelihood estimate of the residual covariance matrix is
+#' computed via EM; when \code{update.S = "none", the residual
+#' covariance parameter is not updated.}}
 #' 
-#' \item{\code{version}}{Describe "version" here.}
+#' \item{\code{version}}{R and C++ implementations of the model
+#' fitting algorithm are provided; these are selected with
+#' \code{version = "R"} and \code{version = "Rcpp"}.}
 #' 
 #' \item{\code{maxiter}}{The upper limit on the number of EM updates
-#'   to perform.}
+#' to perform.}
 #'
 #' \item{\code{tol}}{Convergence tolerance for the EM algorithm; the
-#'   updates are halted when the largest change in the model parameters
-#'   between two successive iterations of EM is less than \code{tol}.}
+#' updates are halted when the largest change in the model parameters
+#' between two successive iterations of EM is less than \code{tol}.}
 #'
-#' \item{\code{minval}}{.}}
+#' \item{\code{minval}}{A small, non-negative number specifying the
+#' lower bound on the eigenvalues of the prior covariance matrices
+#' \code{U}.}}
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
@@ -209,7 +218,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-50, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-51, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -476,7 +485,7 @@ compute_posterior__mvtnorm <- function (x, V, S) {
 mvebnm_control_default <- function()
   list(update.w = "em",    # One or "em" or "none"
        update.U = "teem",  # One of "em", "teem" or "none".
-       update.S = "em",    # One of "em" or "none".
+       update.S = "none",  # One of "em" or "none".
        version  = "Rcpp",  # One of "R" or "Rcpp".
        maxiter  = 1000,
        minval   = 1e-15,
