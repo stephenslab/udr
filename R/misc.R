@@ -28,18 +28,18 @@ softmax <- function (W) {
 
 # "Shrink" matrix T = U + I; that is, find the "best" matrix T
 # satisfying the constraint that U is positive definite. This is
-# achieved by setting any eigenvalues of T less than 1 to 1 + e,
-# or, equivalently, setting any eigenvalues of U less than 0 to be e.
-# The output is a positive definite matrix, U.
-shrink.cov <- function (T, e) {
+# achieved by setting any eigenvalues of T less than 1 to 1 + minval,
+# or, equivalently, setting any eigenvalues of U less than 0 to be
+# minval.  The output is a positive definite matrix, U.
+shrink.cov <- function (T, minval) {
   if (length(T) == 1)
 
     # Handle univariate case (m = 1).
-    U <- pmax(T - 1,e)  
+    U <- pmax(T - 1,minval)  
   else {
     out <- eigen(T)
     d   <- out$values
-    d   <- pmax(d - 1,e)
+    d   <- pmax(d - 1,minval)
     U   <- tcrossprod(out$vectors %*% diag(sqrt(d)))
   }
   return(U)

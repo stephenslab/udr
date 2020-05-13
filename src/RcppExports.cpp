@@ -49,16 +49,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // update_prior_covariances_teem_rcpp
-arma::cube update_prior_covariances_teem_rcpp(const arma::mat& X, const arma::mat& S, const arma::mat& P, double e);
-RcppExport SEXP _mvebnm_update_prior_covariances_teem_rcpp(SEXP XSEXP, SEXP SSEXP, SEXP PSEXP, SEXP eSEXP) {
+arma::cube update_prior_covariances_teem_rcpp(const arma::mat& X, const arma::mat& S, const arma::mat& P, double minval);
+RcppExport SEXP _mvebnm_update_prior_covariances_teem_rcpp(SEXP XSEXP, SEXP SSEXP, SEXP PSEXP, SEXP minvalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type P(PSEXP);
-    Rcpp::traits::input_parameter< double >::type e(eSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_teem_rcpp(X, S, P, e));
+    Rcpp::traits::input_parameter< double >::type minval(minvalSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_teem_rcpp(X, S, P, minval));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -17,15 +17,15 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& S,
 				  const mat& P);
 
 void update_prior_covariances_teem (const mat& X, const mat& S, const mat& P, 
-				    cube& U, double e);
+				    cube& U, double minval);
 
 void update_prior_covariance_ed (mat& X, mat& U, const mat& S, 
 				 const vec& p, mat& T, mat& B);
 
 void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, mat& U, 
-				   mat& T, mat& V, vec& d, double e);
+				   mat& T, mat& V, vec& d, double minval);
 
-void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double e);
+void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double minval);
 
 // INLINE FUNCTION DEFINITIONS
 // ---------------------------
@@ -79,11 +79,11 @@ arma::cube update_prior_covariances_ed_rcpp (const arma::mat& X,
 arma::cube update_prior_covariances_teem_rcpp (const arma::mat& X, 
 					       const arma::mat& S,
 					       const arma::mat& P,
-					       double e) {
+					       double minval) {
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
   cube U(m,m,k);
-  update_prior_covariances_teem(X,S,P,U,e);
+  update_prior_covariances_teem(X,S,P,U,minval);
   return U;
 }
 
@@ -133,7 +133,7 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& S,
 // Perform an M-step update for the prior covariance matrices, using
 // the eigenvalue-truncation technique described in Won et al (2013).
 void update_prior_covariances_teem (const mat& X, const mat& S, const mat& P, 
-				    cube& U, double e) {
+				    cube& U, double minval) {
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
@@ -144,7 +144,7 @@ void update_prior_covariances_teem (const mat& X, const mat& S, const mat& P,
   vec d(m);
   for (unsigned int i = 0; i < k; i++) {
     Y = X;
-    update_prior_covariance_teem(Y,R,P.col(i),U.slice(i),T,V,d,e);
+    update_prior_covariance_teem(Y,R,P.col(i),U.slice(i),T,V,d,minval);
   }
 }
 
@@ -174,7 +174,7 @@ void update_prior_covariance_ed (mat& X, mat& U, const mat& S,
 // should not be reused.
 void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, 
 				   mat& U, mat& T, mat& V, vec& d, 
-				   double e) {
+				   double minval) {
 
   // Transform the data so that the residual covariance is I, then
   // compute the maximum-likelhood estimate (MLE) for T = U + I.
@@ -188,7 +188,7 @@ void update_prior_covariance_teem (mat& X, const mat& R, const vec& p,
   // to the constraint that U is positive definite is obtained by
   // truncating the eigenvalues of T = U + I less than 1 to be 1; see
   // Won et al (2013), p. 434, the sentence just after equation (16).
-  shrink_cov(T,U,V,d,e);
+  shrink_cov(T,U,V,d,minval);
 
   // Recover the solution for the original (untransformed) data.
   U = trans(R) * U * R;
@@ -196,21 +196,22 @@ void update_prior_covariance_teem (mat& X, const mat& R, const vec& p,
 
 // "Shrink" matrix T = U + I; that is, find the "best" matrix T
 // satisfying the constraint that U is positive definite. This is
-// achieved by setting any eigenvalues of T less than 1 to 1 + e,
-// or, equivalently, setting any eigenvalues of U less than 0 to be e.
+// achieved by setting any eigenvalues of T less than 1 to 1 + minval,
+// or, equivalently, setting any eigenvalues of U less than 0 to be
+// minval.
 //
 // Inputs d and V are used to store the eigenvalue decomposition of T;
 // these will store the eigenvalues and eigenvectors, respectively.
-void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double e) {
+void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double minval) {
   unsigned int m = T.n_rows;
   if (m == 1)
     
     // Handle univariate case (m = 1).
-    U(0) = max(T(0) - 1,e);
+    U(0) = max(T(0) - 1,minval);
   else {
     eig_sym(d,V,T);
     for (unsigned int i = 0; i < m; i++)
-      d(i) = max(d(i) - 1,e);
+      d(i) = max(d(i) - 1,minval);
 
     // These next few lines are equivalent to
     //

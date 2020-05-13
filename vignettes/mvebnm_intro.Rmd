@@ -1,0 +1,23 @@
+---
+title: An introduction to mvebnm, empirical Bayes for multivariate normal means
+author: Peter Carbonetto
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{mvebnm intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r knitr-opts, include=FALSE}
+knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
+                      fig.align = "center")
+```
+
+*Add introductory text here.*
+
+```{r load-pkgs}
+library(mvebnm)
+```
+
+*Add more content here.*

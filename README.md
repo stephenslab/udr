@@ -25,6 +25,7 @@ Work through the introductory vignette illustrating the methods on a
 small simulated data set:
 
 ```R
+vignette("mvebnm_intro")
 ```
 
 ## Credits

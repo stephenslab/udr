@@ -44,7 +44,7 @@
 #' 
 #' \describe{
 #'
-#' \item{\code{update.w}}{Describe "update.w" here.}
+#' \item{\code{update.w}}{When \code{update.w = "em"}, maximum-likelihood}
 #'
 #' \item{\code{update.U}}{Describe "update.U" here.}
 #'
@@ -52,11 +52,14 @@
 #' 
 #' \item{\code{version}}{Describe "version" here.}
 #' 
-#' \item{\code{maxiter}}{Describe "maxiter" here.}
+#' \item{\code{maxiter}}{The upper limit on the number of EM updates
+#'   to perform.}
 #'
-#' \item{\code{tol}}{Describe "tol" here.}
+#' \item{\code{tol}}{Convergence tolerance for the EM algorithm; the
+#'   updates are halted when the largest change in the model parameters
+#'   between two successive iterations of EM is less than \code{tol}.}
 #'
-#' \item{\code{eps}}{Describe "eps" here.}}
+#' \item{\code{minval}}{.}}
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
@@ -206,7 +209,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-48, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-49, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -283,7 +286,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     if (control$update.U  == "em")
       U <- update_prior_covariance_ed(X,U,S,P,control$version)
     else if (control$update.U == "teem")
-      U <- update_prior_covariance_teem(X,S,P,control$eps,control$version)
+      U <- update_prior_covariance_teem(X,S,P,control$minval,control$version)
 
     # Apply the update for the residual covariance matrix, if
     # requested.
@@ -366,7 +369,7 @@ update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
 # eigenvalue-truncation technique described in Won et al (2013). The
 # calculations are implemented in both R (version = "R") and C++
 # (version = "Rcpp").
-update_prior_covariance_teem <- function (X, S, P, e,
+update_prior_covariance_teem <- function (X, S, P, minval,
                                           version = c("Rcpp","R")) {
   version <- match.arg(version)
   if (version == "R") {
@@ -374,9 +377,9 @@ update_prior_covariance_teem <- function (X, S, P, e,
     k <- ncol(P)
     U <- array(0,dim = c(m,m,k))
     for (i in 1:k)
-      U[,,i] <- update_prior_covariance_teem_helper(X,S,P[,i],e)
+      U[,,i] <- update_prior_covariance_teem_helper(X,S,P[,i],minval)
   } else if (version == "Rcpp")
-    U <- update_prior_covariances_teem_rcpp(X,S,P,e)
+    U <- update_prior_covariances_teem_rcpp(X,S,P,minval)
   return(U)
 }
 
@@ -411,7 +414,7 @@ update_prior_covariance_ed_helper <- function (X, U, S, p) {
 # (2013). Input p is a vector, with one entry per row of X, giving
 # the posterior assignment probabilities for the mixture components
 # being updated.
-update_prior_covariance_teem_helper <- function (X, S, p, e) {
+update_prior_covariance_teem_helper <- function (X, S, p, minval) {
 
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
@@ -424,7 +427,7 @@ update_prior_covariance_teem_helper <- function (X, S, p, e) {
   # to the constraint that U is positive definite is obtained by
   # truncating the eigenvalues of T = U + I less than 1 to be 1; see
   # Won et al (2013), p. 434, the sentence just after equation (16).
-  U <- shrink.cov(T,e)
+  U <- shrink.cov(T,minval)
 
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
@@ -456,7 +459,7 @@ compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
 # z and covariance S, and z is drawn from a multivariate normal
 # distribution with mean zero and covariance V. Return the posterior
 # mean (mu1) and covariance (S1) of z.
-compute_posterior_mvtnorm <- function (V, S) {
+compute_posterior_mvtnorm <- function (x, V, S) {
   # TO DO.
 }
 
@@ -470,5 +473,5 @@ mvebnm_control_default <- function()
        update.S = "em",    # One of "em" or "none".
        version  = "Rcpp",  # One of "R" or "Rcpp".
        maxiter  = 1000,
-       eps      = 1e-15,
+       minval   = 1e-15,
        tol      = 1e-6)

@@ -110,7 +110,7 @@ settings (as they are defined by \code{mvebnm_control_default}):
 
 \describe{
 
-\item{\code{update.w}}{Describe "update.w" here.}
+\item{\code{update.w}}{When \code{update.w = "em"}, maximum-likelihood}
 
 \item{\code{update.U}}{Describe "update.U" here.}
 
@@ -118,11 +118,14 @@ settings (as they are defined by \code{mvebnm_control_default}):
 
 \item{\code{version}}{Describe "version" here.}
 
-\item{\code{maxiter}}{Describe "maxiter" here.}
+\item{\code{maxiter}}{The upper limit on the number of EM updates
+  to perform.}
 
-\item{\code{tol}}{Describe "tol" here.}
+\item{\code{tol}}{Convergence tolerance for the EM algorithm; the
+  updates are halted when the largest change in the model parameters
+  between two successive iterations of EM is less than \code{tol}.}
 
-\item{\code{eps}}{Describe "eps" here.}}
+\item{\code{minval}}{.}}
 
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples
