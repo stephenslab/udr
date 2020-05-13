@@ -39,9 +39,30 @@ the model fitting algorithm. See \sQuote{Details}.}
 \value{
 A list object with the following elements:
 
-\item{item1}{Describe "item1" here.}
+\item{w}{A vector containing the estimated prior mixture
+  weights. When \code{control$update.w = FALSE}, this will be the
+  same as \code{w} provided at input.}
 
-\item{item2}{Describe "item2" here.}
+\item{U}{A list containing the estimated prior covariance matrices. When
+  \code{control$update.U = FALSE}, this will be the same as \code{U}
+  provided at input.}
+
+\item{S}{The estimated residual covariance matrix. When
+  \code{control$update.S = FALSE}, this will be the same as \code{S}
+  provided at input.}
+
+\item{loglik}{The log-likelihood at the current settings of the
+  model parameters, \code{w}, \code{U} and \item{S}; see
+  \code{\link{loglik_mvebnm}}.}
+  
+\item{progress}{A data frame containing detailed information about
+  the algorithm's progress. The columns of the data frame are:
+  "iter", the iteration number; "loglik", the log-likelihood at the
+  current estimates of the model parameters; "delta.w", the largest
+  change in the mixture weights; "delta.u", the largest change in the
+  prior covariance matrices; "delta.s", the largest change in the
+  residual covariance matrix; and "timing", the elapsed time in
+  seconds (recorded using \code{\link{proc.time}}).}
 }
 \description{
 This function implements an empirical Bayes method for

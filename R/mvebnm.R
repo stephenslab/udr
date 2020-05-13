@@ -67,9 +67,30 @@
 #'
 #' @return A list object with the following elements:
 #'
-#' \item{item1}{Describe "item1" here.}
+#' \item{w}{A vector containing the estimated prior mixture
+#'   weights. When \code{control$update.w = FALSE}, this will be the
+#'   same as \code{w} provided at input.}
+#'
+#' \item{U}{A list containing the estimated prior covariance matrices. When
+#'   \code{control$update.U = FALSE}, this will be the same as \code{U}
+#'   provided at input.}
 #' 
-#' \item{item2}{Describe "item2" here.}
+#' \item{S}{The estimated residual covariance matrix. When
+#'   \code{control$update.S = FALSE}, this will be the same as \code{S}
+#'   provided at input.}
+#'
+#' \item{loglik}{The log-likelihood at the current settings of the
+#'   model parameters, \code{w}, \code{U} and \item{S}; see
+#'   \code{\link{loglik_mvebnm}}.}
+#'   
+#' \item{progress}{A data frame containing detailed information about
+#'   the algorithm's progress. The columns of the data frame are:
+#'   "iter", the iteration number; "loglik", the log-likelihood at the
+#'   current estimates of the model parameters; "delta.w", the largest
+#'   change in the mixture weights; "delta.u", the largest change in the
+#'   prior covariance matrices; "delta.s", the largest change in the
+#'   residual covariance matrix; and "timing", the elapsed time in
+#'   seconds (recorded using \code{\link{proc.time}}).}
 #' 
 #' @references
 #'
@@ -162,7 +183,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-44, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-46, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -200,7 +221,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
   # Set up data structures used in main loop.
   progress <- as.data.frame(matrix(as.numeric(NA),control$maxiter,6))
-  names(progress) <- c("iter","loglik","delta.w","delta.U","delta.S","timing")
+  names(progress) <- c("iter","loglik","delta.w","delta.u","delta.s","timing")
   progress[,"iter"] <- 1:control$maxiter
 
   # Iterate the EM updates.
@@ -256,8 +277,8 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     t2     <- proc.time()
     progress[iter,"loglik"]  <- loglik
     progress[iter,"delta.w"] <- dw 
-    progress[iter,"delta.U"] <- dU 
-    progress[iter,"delta.S"] <- dS 
+    progress[iter,"delta.u"] <- dU 
+    progress[iter,"delta.s"] <- dS 
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
       cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dS))

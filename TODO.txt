@@ -5,8 +5,6 @@ to do
 
 + Write a small vignette to demonstrate the method.
 
-+ Describe mvebnm return value in roxygen2 docs.
-
 + Describe mvebnm optimization settings in roxygen2 docs.
 
 + Implement Travis CI, Appveyor & CircleCI testing.
