@@ -33,6 +33,7 @@ The mvebnm R package was developed by [Yunqi Yang][yunqi] and
 [Peter Carbonetto][peter] at the [University of Chicago][uchicago],
 with contributions from [Matthew Stephens][matthew].
 
+[cran]: https://cran.r-project.org
 [uchicago]: https://www.uchicago.edu
 [yunqi]: https://github.com/Nicholeyang0215
 [peter]: https://pcarbo.github.io
