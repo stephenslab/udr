@@ -9,9 +9,9 @@ set.seed(1)
 #
 #   w[1]*N(0,S + U[[1]]) + ... + w[4]*N(0,S + U[[4]]).
 #
-n <- 1000
-S <- rbind(c(0.8,0.4),
-           c(0.4,1))
+n <- 4000
+S <- rbind(c(0.8,0.2),
+           c(0.2,1.5))
 U <- list(none   = rbind(c(0,0),
                          c(0,0)),
           shared = rbind(c(1.0,0.9),
@@ -52,6 +52,8 @@ set.seed(1)
 t3 <- system.time(
   fit3 <- mvebnm(X,k = k,S = S,control = list(version = "R",
                                               maxiter = numiter)))
+print(lapply(fit3$U,function (x) eigen(x)$values))
+stop()
 set.seed(1)
 t4 <- system.time(
   fit4 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",

@@ -209,7 +209,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-49, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-50, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -252,11 +252,6 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
-      
-    # Store the current estimates of the parameters.
-    w0 <- w
-    U0 <- U
-    S0 <- S
     t1 <- proc.time()
 
     # E-step
@@ -268,10 +263,10 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     # M-step
     # ------
     # Update the mixture weights (w), if requested.
-    if (control$update.w == "em") {
-      w <- colSums(P)
-      w <- w/sum(w)  
-    }
+    if (control$update.w == "em")
+      wnew <- update_mixture_weights(P)
+    else
+      wnew <- w
     
     # Compute the M-step update for the residual covariance (S), if
     # relevant.
@@ -280,26 +275,25 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
       # TO DO.
       #
       Snew <- S
-    }
+    } else
+      Snew <- S
 
     # Update the prior covariance matrices (U), if requested.
     if (control$update.U  == "em")
-      U <- update_prior_covariance_ed(X,U,S,P,control$version)
+      Unew <- update_prior_covariance_ed(X,U,S,P,control$version)
     else if (control$update.U == "teem")
-      U <- update_prior_covariance_teem(X,S,P,control$minval,control$version)
-
-    # Apply the update for the residual covariance matrix, if
-    # requested.
-    if (control$update.S == "em")
-      S <- Snew
+      Unew <- update_prior_covariance_teem(X,S,P,control$minval,
+                                           control$version)
+    else
+      Unew <- U
     
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
-    loglik <- loglik_mvebnm(X,w,U,S,control$version)
-    dw     <- max(abs(w - w0))
-    dS     <- max(abs(S - S0))
-    dU     <- max(abs(U - U0))
+    loglik <- loglik_mvebnm(X,wnew,Unew,Snew,control$version)
+    dw     <- max(abs(wnew - w))
+    dS     <- max(abs(Snew - S))
+    dU     <- max(abs(Unew - U))
     t2     <- proc.time()
     progress[iter,"loglik"]  <- loglik
     progress[iter,"delta.w"] <- dw 
@@ -308,6 +302,11 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
       cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dS))
+
+    # Apply the parameter updates, and check convergencce.
+    w <- wnew
+    U <- Unew
+    S <- Snew
     if (max(dw,dU,dS) < control$tol)
       break
   }
@@ -350,8 +349,15 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
   return(softmax(P))
 }
 
+# Perform an M-step update for the mixture weights in the
+# mixture-of-multivariate-normals prior.
+update_mixture_weights <- function (P) {
+  w <- colSums(P)
+  return(w/sum(w))
+}
+
 # Perform an M-step update for the prior covariance matrices using the
-# update formla derived in Bovy et al (2011). The calculations are
+# update forumla derived in Bovy et al (2011). The calculations are
 # implemented in both R (version = "R") and C++ (version = "Rcpp").
 update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
@@ -459,7 +465,7 @@ compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
 # z and covariance S, and z is drawn from a multivariate normal
 # distribution with mean zero and covariance V. Return the posterior
 # mean (mu1) and covariance (S1) of z.
-compute_posterior_mvtnorm <- function (x, V, S) {
+compute_posterior__mvtnorm <- function (x, V, S) {
   # TO DO.
 }
 
