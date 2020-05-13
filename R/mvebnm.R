@@ -171,6 +171,8 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
   }
+
+  browser()
   
   # RUN UPDATES
   # -----------

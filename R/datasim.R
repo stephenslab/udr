@@ -1,7 +1,8 @@
 #' @title Simulate Data from Multivariate Normal Means Model
 #'
 #' @description Simulate n data points from the multivariate normal
-#'   means model. See \code{\link{mvebnm}} for the model definition.
+#'   means model. The univariate case (m = 1) is also handled. See
+#'   \code{\link{mvebnm}} for the model definition.
 #'
 #' @param w A numeric vector of length k specifying the prior mixture
 #'   weights. All entries must be non-negative, but need not sum to 1;
@@ -15,7 +16,8 @@
 #' @param S The m x m residual covariance matrix.
 #'
 #' @return An n x m matrix in which each row is a draw from the
-#'   multivariate normal means model.
+#'   multivariate normal means model. For the univariate case (m = 1), a
+#'   vector is returned.
 #' 
 #' @seealso \code{\link{mvebnm}}
 #'
@@ -24,15 +26,15 @@
 #' @export
 #' 
 simulate_ebmvnm_data <- function (n, w, U, S) {
-
+      
   # Check the residual covariance matrix, S.
-  if (!(is.matrix(S) && is.semidef(S)))
+  S <- as.matrix(S)
+  if (!is.semidef(S))
     stop("Input argument \"S\" should be a positive semi-definite matrix")
   
   # Check the prior covariance matrices, U.
-  if (!(is.list(U) &&
-        all(sapply(U,is.matrix)) &&
-        verify.prior.covariances(U,S)))
+  U <- lapply(U,as.matrix)
+  if (!(is.list(U) && verify.prior.covariances(U,S)))
     stop("Input argument \"U\" should be list in which each list element ",
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
          "S + U[[i]] is symmetric positive definite")
@@ -47,7 +49,7 @@ simulate_ebmvnm_data <- function (n, w, U, S) {
     stop("Input argument \"w\" should be a vector of length \"k\" ",
          "containing non-negative weights")
   w <- w/sum(w)
-  
+
   # Initialize storage for the data points.
   X <- matrix(0,n,m)
 
@@ -60,5 +62,5 @@ simulate_ebmvnm_data <- function (n, w, U, S) {
     X[i,] <- rmvnorm(length(i),sigma = S + U[[j]])
   }
   colnames(X) <- rownames(S)
-  return(X)
+  return(drop(X))
 }

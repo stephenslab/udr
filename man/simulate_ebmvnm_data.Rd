@@ -20,11 +20,13 @@ component.}
 }
 \value{
 An n x m matrix in which each row is a draw from the
-  multivariate normal means model.
+  multivariate normal means model. For the univariate case (m = 1), a
+  vector is returned.
 }
 \description{
 Simulate n data points from the multivariate normal
-  means model. See \code{\link{mvebnm}} for the model definition.
+  means model. The univariate case (m = 1) is also handled. See
+  \code{\link{mvebnm}} for the model definition.
 }
 \seealso{
 \code{\link{mvebnm}}
