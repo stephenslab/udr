@@ -1,13 +1,11 @@
 to do
 =====
 
-+ Implement Rcpp version of log-likelihood calculation.
-
-+ Make sure that mvebnm suitably handles univariate (m = 1) case.
-
 + Implement a few simple tests of mvebnm.
 
 + Write a small vignette to demonstrate the method.
+
++ Describe mvebnm return value in roxygen2 docs.
 
 + Describe mvebnm optimization settings in roxygen2 docs.
 
