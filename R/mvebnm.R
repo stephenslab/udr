@@ -224,7 +224,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-53, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-54, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -277,12 +277,6 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
 
     # M-step
     # ------
-    # Update the mixture weights (w), if requested.
-    if (control$update.w == "em")
-      wnew <- update_mixture_weights(P)
-    else
-      wnew <- w
-    
     # Compute the M-step update for the residual covariance (S), if
     # relevant.
     if (control$update.S == "em")
@@ -298,6 +292,17 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
                                            control$version)
     else
       Unew <- U
+
+    # Update the mixture weights (w), if requested. Since the "mixsqp"
+    # update does not use the posterior probabilities computed in the
+    # E-step, it can make use of the new estimates of the other model
+    # parameters.
+    if (control$update.w == "em")
+      wnew <- update_mixture_weights_em(P)
+    else if (control$update.w == "mixsqp")
+      wnew <- update_mixture_weights_mixsqp(X,S,U)
+    else
+      wnew <- w
     
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
@@ -363,8 +368,24 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 
 # Perform an M-step update for the mixture weights in the
 # mixture-of-multivariate-normals prior.
-update_mixture_weights <- function (P) {
+update_mixture_weights_em <- function (P) {
   w <- colSums(P)
+  return(w/sum(w))
+}
+
+# Update the mixture weights using the "mix-SQP" algorithm.
+#'
+#' @importFrom mvtnorm dmvnorm
+#' @importFrom mixsqp mixsqp
+#' 
+update_mixture_weights_mixsqp <- function (X, S, U) {
+  n <- nrow(X)
+  k <- dim(U)[3]
+  L <- matrix(0,n,k)
+  for (i in 1:k)
+    L[,i] <- dmvnorm(X,sigma = S + U[,,i],log = TRUE)
+  out <- mixsqp(L,log = TRUE,control = list(verbose = FALSE))
+  w <- pmax(out$x,1e-4)
   return(w/sum(w))
 }
 
@@ -463,8 +484,8 @@ compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
   S1  <- matrix(0,m,m)
   for (i in 1:k) {
     out <- compute_posterior_mvtnorm(x,V[,,i],S)
-    mu1 <- mu1 + w1[i]*out$mu
-    S1  <- S1  + w1[i]*(out$S + tcrossprod(out$mu))
+    mu1 <- mu1 + w1[i] * out$mu
+    S1  <- S1  + w1[i] * (out$S + tcrossprod(out$mu))
   }
   S1 <- S1 - tcrossprod(mu1)
   return(list(mu1 = mu1,S1 = S1))

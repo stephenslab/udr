@@ -62,6 +62,20 @@ t4 <- system.time(
                  control = list(version = "Rcpp",update.U = "teem",
                                 update.S = "em",tol = 0,maxiter = numiter)))
 
+set.seed(1)
+t5 <- system.time(
+  fit5 <- mvebnm(X,k = k,S = S,
+                 control = list(version = "R",update.U = "teem",
+                                tol = 0,maxiter = numiter)))
+print(lapply(fit5$U,function (x) eigen(x)$values))
+
+set.seed(1)
+t6 <- system.time(
+  fit6 <- mvebnm(X,k = k,w = fit5$w,U = fit5$U,S = S,
+                 control = list(version = "Rcpp",update.U = "teem",
+                                update.w = "mixsqp",tol = 0,
+                                maxiter = numiter)))
+
 print(t1)
 print(t2)
 print(t3)
