@@ -126,6 +126,12 @@
 #'   prior covariance matrices; "delta.s", the largest change in the
 #'   residual covariance matrix; and "timing", the elapsed time in
 #'   seconds (recorded using \code{\link{proc.time}}).}
+#'
+#' @examples
+#' library(mvtnorm)
+#' set.seed(1)
+#' X   <- rmvt(1000,diag(2),df = 4)
+#' fit <- mvebnm(X,k = 10,S = diag(2))
 #' 
 #' @references
 #'
@@ -218,7 +224,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-51, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-52, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -487,6 +493,6 @@ mvebnm_control_default <- function()
        update.U = "teem",  # One of "em", "teem" or "none".
        update.S = "none",  # One of "em" or "none".
        version  = "Rcpp",  # One of "R" or "Rcpp".
-       maxiter  = 1000,
+       maxiter  = 100,
        minval   = 1e-15,
        tol      = 1e-6)

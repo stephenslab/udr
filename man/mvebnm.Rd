@@ -140,6 +140,13 @@ Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples
 for guidance.
 }
+\examples{
+library(mvtnorm)
+set.seed(1)
+X   <- rmvt(1000,diag(2),df = 4)
+fit <- mvebnm(X,k = 10,S = diag(2))
+
+}
 \references{
 J. Bovy, D. W. Hogg and S. T. Roweis (2011). Extreme Deconvolution:
 inferring complete distribution functions from noisy, heterogeneous
