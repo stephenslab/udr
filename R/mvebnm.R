@@ -224,7 +224,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-52, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-53, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -285,12 +285,9 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     
     # Compute the M-step update for the residual covariance (S), if
     # relevant.
-    if (control$update.S == "em") {
-      #
-      # TO DO.
-      #
-      Snew <- S
-    } else
+    if (control$update.S == "em")
+      Snew <- update_resid_covariance(X,U,S,P)
+    else
       Snew <- S
 
     # Update the prior covariance matrices (U), if requested.
@@ -406,17 +403,17 @@ update_prior_covariance_teem <- function (X, S, P, minval,
 
 # Perform an M-step update for the residual covariance matrix, S.
 update_resid_covariance <- function (X, U, S, P) {
-  n <- nrow(X)
-  m <- ncol(X)
-  S <- matrix(0,m,m)
+  n    <- nrow(X)
+  m    <- ncol(X)
+  Snew <- matrix(0,m,m)
   for (i in 1:n) {
-    x   <- X[i,]
-    out <- compute_posterior_mvtnorm_mix(x,P[i,],U,S)
-    mu1 <- out$mu1
-    S1  <- out$s1
-    S   <- S + S1 + tcrossprod(x - mu1)
+    x    <- X[i,]
+    out  <- compute_posterior_mvtnorm_mix(x,P[i,],U,S)
+    mu1  <- out$mu1
+    S1   <- out$S1
+    Snew <- Snew + S1 + tcrossprod(x - mu1)
   }
-  return(S/n)
+  return(Snew/n)
 }
 
 # Perform an M-step update for one of the prior covariance matrices
@@ -460,17 +457,14 @@ update_prior_covariance_teem_helper <- function (X, S, p, minval) {
 # Return the posterior mean (mu1) and covariance (S1) of z. Note that
 # input w1 must be the vector of *posterior* mixture weights.
 compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
-  m   <- length(m)
-  k   <- length(V)
+  m   <- length(x)
+  k   <- length(w1)
   mu1 <- rep(0,m)
   S1  <- matrix(0,m,m)
   for (i in 1:k) {
-    w   <- w1[i]
-    out <- compute_posterior_mvtnorm(V[,,i],S)
-    mu  <- out$mu1
-    S   <- out$S1
-    mu1 <- mu1 + w*mu
-    S1  <- S1 + w*(S + tcrossprod(mu))
+    out <- compute_posterior_mvtnorm(x,V[,,i],S)
+    mu1 <- mu1 + w1[i]*out$mu
+    S1  <- S1  + w1[i]*(out$S + tcrossprod(out$mu))
   }
   S1 <- S1 - tcrossprod(mu1)
   return(list(mu1 = mu1,S1 = S1))
@@ -480,8 +474,12 @@ compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
 # z and covariance S, and z is drawn from a multivariate normal
 # distribution with mean zero and covariance V. Return the posterior
 # mean (mu1) and covariance (S1) of z.
-compute_posterior__mvtnorm <- function (x, V, S) {
-  # TO DO.
+compute_posterior_mvtnorm <- function (x, V, S) {
+  m   <- length(x)
+  I   <- diag(m)
+  S1  <- solve(V %*% solve(S) + I) %*% V
+  mu1 <- drop(S1 %*% solve(S,x))
+  return(list(mu1 = mu1,S1 = S1))
 }
 
 #' @rdname mvebnm

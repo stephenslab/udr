@@ -40,23 +40,27 @@ rownames(X) <- paste0("s",1:n)
 # ---------
 # TO DO: Explain these lines of code in greater detail.
 set.seed(1)
-numiter <- 100
+numiter <- 20
 t1 <- system.time(
-  fit1 <- mvebnm(X,k = k,S = S,control = list(version = "R",update.U = "em",
-                                              maxiter = numiter)))
+  fit1 <- mvebnm(X,k = k,S = S,
+                 control = list(version = "R",update.U = "em",update.S = "em",
+                                tol = 0,maxiter = numiter)))
 set.seed(1)
 t2 <- system.time(
-  fit2 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",update.U = "em",
-                                              maxiter = numiter)))
+  fit2 <- mvebnm(X,k = k,S = S,
+                 control = list(version = "Rcpp",update.U = "em",
+                                update.S = "em",tol = 0,maxiter = numiter)))
 set.seed(1)
 t3 <- system.time(
-  fit3 <- mvebnm(X,k = k,S = S,control = list(version = "R",
-                                              maxiter = numiter)))
+  fit3 <- mvebnm(X,k = k,S = S,
+                 control = list(version = "R",update.U = "teem",
+                                update.S = "em",tol = 0,maxiter = numiter)))
 print(lapply(fit3$U,function (x) eigen(x)$values))
 set.seed(1)
 t4 <- system.time(
-  fit4 <- mvebnm(X,k = k,S = S,control = list(version = "Rcpp",
-                                              maxiter = numiter)))
+  fit4 <- mvebnm(X,k = k,S = S,
+                 control = list(version = "Rcpp",update.U = "teem",
+                                update.S = "em",tol = 0,maxiter = numiter)))
 
 print(t1)
 print(t2)
