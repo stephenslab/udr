@@ -7,6 +7,8 @@
 simulate_ebmvnm_data(n, w, U, S)
 }
 \arguments{
+\item{n}{Number of data points to simulate.}
+
 \item{w}{A numeric vector of length k specifying the prior mixture
 weights. All entries must be non-negative, but need not sum to 1;
 the mixture weights are automatically normalized to sum to 1.}
@@ -24,7 +26,7 @@ An n x m matrix in which each row is a draw from the
   vector is returned.
 }
 \description{
-Simulate n data points from the multivariate normal
+Simulate data points from the multivariate normal
   means model. The univariate case (m = 1) is also handled. See
   \code{\link{mvebnm}} for the model definition.
 }

@@ -1,9 +1,11 @@
 #' @title Simulate Data from Multivariate Normal Means Model
 #'
-#' @description Simulate n data points from the multivariate normal
+#' @description Simulate data points from the multivariate normal
 #'   means model. The univariate case (m = 1) is also handled. See
 #'   \code{\link{mvebnm}} for the model definition.
 #'
+#' @param n Number of data points to simulate.
+#' 
 #' @param w A numeric vector of length k specifying the prior mixture
 #'   weights. All entries must be non-negative, but need not sum to 1;
 #'   the mixture weights are automatically normalized to sum to 1.

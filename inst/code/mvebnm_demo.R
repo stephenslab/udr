@@ -61,10 +61,12 @@ t4 <- system.time(
                  control = list(version = "Rcpp",update.U = "teem",
                                 tol = 0,maxiter = numiter)))
 
-fit5 <- mvebnm(X,w = fit4$w,U = fit4$U,S = S,
+fit5 <- mvebnm(X,fit0 = fit4,
                control = list(version = "Rcpp",update.U = "teem",
                               update.w = "mixsqp",tol = 0,
                               maxiter = 20))
+print(fit4$loglik,digits = 12)
+print(fit5$loglik,digits = 12)
 
 print(t1)
 print(t2)

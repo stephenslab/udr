@@ -5,7 +5,7 @@
 \alias{mvebnm_control_default}
 \title{Fit Empirical Bayes Multivariate Normal Means Model}
 \usage{
-mvebnm(X, k, w, U, S = diag(ncol(X)), control = list(), verbose = TRUE)
+mvebnm(X, k, fit0, w, U, S = diag(ncol(X)), control = list(), verbose = TRUE)
 
 mvebnm_control_default()
 }
@@ -16,6 +16,10 @@ m-dimensional observation.}
 \item{k}{An integer 2 or greater specifying the number of
 components in the mixture-of-normals prior. This only needs to be
 provided if neither \code{U} nor \code{w} are provided.}
+
+\item{fit0}{A previous mvebnm fit. This is useful for "re-fitting"
+the model. When a value for this argument is given, the other
+inputs \code{k}, \code{w}, \code{U} and \code{S} are not needed.}
 
 \item{w}{A numeric vector of length k giving initial estimates of
 the prior mixture weights. All entries must be non-negative, but
@@ -35,6 +39,11 @@ residual covariance matrix.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model fitting algorithm. See \sQuote{Details}.}
+
+\item{verbose}{When \code{verbose = TRUE}, information about the
+algorithm's progress is printed to the console at each
+iteration. For interpretation of the columns, see the description
+of the \code{progress} return value.}
 }
 \value{
 A list object with the following elements:
@@ -52,8 +61,7 @@ A list object with the following elements:
   provided at input.}
 
 \item{loglik}{The log-likelihood at the current settings of the
-  model parameters, \code{w}, \code{U} and \code{S}; see
-  \code{\link{loglik_mvebnm}}.}
+  model parameters, \code{w}, \code{U} and \code{S}.}
   
 \item{progress}{A data frame containing detailed information about
   the algorithm's progress. The columns of the data frame are:
