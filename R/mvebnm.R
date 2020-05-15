@@ -35,8 +35,10 @@
 #'
 #' \item{\code{update.w}}{When \code{update.w = "em"},
 #' maximum-likelihood estimates of the mixture weights are computed
-#' via an EM algorithm; when \code{update.w = "none"}, the mixture
-#' weights are not updated.}
+#' via an EM algorithm; when \code{update.w = "mixsqp"}, the mix-SQP
+#' solver is used to update the mixture weights by maximizing the
+#' likelihood with the other parameters fixed; when \code{update.w =
+#' "none"}, the mixture weights are not updated.}
 #'
 #' \item{\code{update.U}}{This setting determines the algorithm used
 #' to estimate the prior covariance matrices. Two EM variants are
@@ -224,7 +226,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-55, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-56, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -281,7 +283,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     # relevant.
     if (control$update.S == "em")
       Snew <- update_resid_covariance(X,U,S,P)
-    else
+    else if (control$update.S == "none")
       Snew <- S
 
     # Update the prior covariance matrices (U), if requested.
@@ -290,7 +292,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     else if (control$update.U == "teem")
       Unew <- update_prior_covariance_teem(X,S,P,control$minval,
                                            control$version)
-    else
+    else if (control$update.U == "none")
       Unew <- U
 
     # Update the mixture weights (w), if requested. Since the "mixsqp"
@@ -301,7 +303,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
       wnew <- update_mixture_weights_em(P)
     else if (control$update.w == "mixsqp")
       wnew <- update_mixture_weights_mixsqp(X,S,U)
-    else
+    else if (control$update.w == "none")
       wnew <- w
     
     # Update the "progress" data frame with the log-likelihood and
@@ -508,7 +510,7 @@ compute_posterior_mvtnorm <- function (x, V, S) {
 #' @export
 #' 
 mvebnm_control_default <- function()
-  list(update.w = "em",    # One or "em" or "none"
+  list(update.w = "em",    # One or "em", "mixsqp" or "none".
        update.U = "teem",  # One of "em", "teem" or "none".
        update.S = "none",  # One of "em" or "none".
        version  = "Rcpp",  # One of "R" or "Rcpp".

@@ -101,8 +101,10 @@ the default optimization algorithm settings (as they are defined by
 
 \item{\code{update.w}}{When \code{update.w = "em"},
 maximum-likelihood estimates of the mixture weights are computed
-via an EM algorithm; when \code{update.w = "none"}, the mixture
-weights are not updated.}
+via an EM algorithm; when \code{update.w = "mixsqp"}, the mix-SQP
+solver is used to update the mixture weights by maximizing the
+likelihood with the other parameters fixed; when \code{update.w =
+"none"}, the mixture weights are not updated.}
 
 \item{\code{update.U}}{This setting determines the algorithm used
 to estimate the prior covariance matrices. Two EM variants are

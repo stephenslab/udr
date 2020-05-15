@@ -38,43 +38,35 @@ rownames(X) <- paste0("s",1:n)
 
 # FIT MODEL
 # ---------
-# TO DO: Explain these lines of code in greater detail.
 set.seed(1)
-numiter <- 20
+numiter <- 100
 t1 <- system.time(
   fit1 <- mvebnm(X,k = k,S = S,
-                 control = list(version = "R",update.U = "em",update.S = "em",
+                 control = list(version = "R",update.U = "em",
                                 tol = 0,maxiter = numiter)))
 set.seed(1)
 t2 <- system.time(
   fit2 <- mvebnm(X,k = k,S = S,
                  control = list(version = "Rcpp",update.U = "em",
-                                update.S = "em",tol = 0,maxiter = numiter)))
+                                tol = 0,maxiter = numiter)))
 set.seed(1)
 t3 <- system.time(
   fit3 <- mvebnm(X,k = k,S = S,
                  control = list(version = "R",update.U = "teem",
-                                update.S = "em",tol = 0,maxiter = numiter)))
+                                tol = 0,maxiter = numiter)))
 print(lapply(fit3$U,function (x) eigen(x)$values))
 set.seed(1)
 t4 <- system.time(
   fit4 <- mvebnm(X,k = k,S = S,
                  control = list(version = "Rcpp",update.U = "teem",
-                                update.S = "em",tol = 0,maxiter = numiter)))
-
-set.seed(1)
-t5 <- system.time(
-  fit5 <- mvebnm(X,k = k,S = S,
-                 control = list(version = "R",update.U = "teem",
                                 tol = 0,maxiter = numiter)))
-print(lapply(fit5$U,function (x) eigen(x)$values))
 
-set.seed(1)
-t6 <- system.time(
-  fit6 <- mvebnm(X,k = k,w = fit5$w,U = fit5$U,S = S,
-                 control = list(version = "Rcpp",update.U = "teem",
-                                update.w = "mixsqp",tol = 0,
-                                maxiter = numiter)))
+# set.seed(1)
+# t6 <- system.time(
+#   fit6 <- mvebnm(X,k = k,w = fit5$w,U = fit5$U,S = S,
+#                  control = list(version = "Rcpp",update.U = "teem",
+#                                 update.w = "mixsqp",tol = 0,
+#                                 maxiter = numiter)))
 
 print(t1)
 print(t2)
@@ -105,8 +97,4 @@ plot(1:numiter,y - y1 + 0.01,col = "dodgerblue",type = "l",log = "y",lwd = 2,
 lines(1:numiter,y - y2 + 0.01,col = "darkblue",lwd = 2,lty = "dashed")
 lines(1:numiter,y - y3 + 0.01,col = "magenta",lwd = 2)
 lines(1:numiter,y - y4 + 0.01,col = "gold",lwd = 2,lty = "dashed")
-# fit1 <- mvebnm(X,k,control = list(update.U = "em",version = "R"))
-# cat("\n")
-# set.seed(1)
-# fit2 <- mvebnm(X,k,control = list(update.U = "em",version = "Rcpp"))
-# print(fit1$loglik - fit2$loglik)
+
