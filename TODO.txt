@@ -1,7 +1,7 @@
 to do
 =====
 
-+ Implement EM update of residual covariance matrix (S) in C++.
++ Fix name of simulate_ebmvnm_data.
 
 + Implement a few basic tests of mvebnm.
 
