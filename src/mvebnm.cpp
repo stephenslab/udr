@@ -240,20 +240,24 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& S,
 // input w1 must be the vector of *posterior* mixture weights (see
 // compute_posterior_probs).
 //
-// Input I should be the identity matrix of the same dimension as S.
+// Input I should be the identity matrix of the same dimension as
+// S. Inputs mut1 and St are used to store intermediate calculations;
+// they are, respectively, a vector and matrix of the same size as mu1
+// and S1.
 //
-void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const cube& V,
-				    const mat& S, const mat& I, vec& mu1, 
-				    mat& S1, vec& mut, mat& St) {
+void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, 
+				    const cube& V, const mat& S, 
+				    const mat& I, vec& mu1, mat& S1, 
+				    vec& mut, mat& St) {
   unsigned int k = w1.n_elem;
   mu1.fill(0);
   S1.fill(0);
   for (unsigned int i = 0; i < k; i++) {
     compute_posterior_mvtnorm(x,V.slice(i),S,I,mut,St);
     mu1 += w1(i) * mut;
-    S1  += w1(i) * (St + mut*trans(mut));
+    S1  += w1(i) * (St + mut * trans(mut));
   }
-  S1 -= mu1*trans(mu1);
+  S1 -= mu1 * trans(mu1);
 }
 
 // Suppose x is drawn from a multivariate normal distribution with mean
