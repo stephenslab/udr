@@ -25,6 +25,13 @@ void update_prior_covariance_ed (mat& X, mat& U, const mat& S,
 void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, mat& U, 
 				   mat& T, mat& V, vec& d, double minval);
 
+void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const cube& V,
+				    const mat& S, const mat& I, vec& mu1, 
+				    mat& S1, vec& mut, mat& St);
+
+void compute_posterior_mvtnorm (const vec& x, const mat& V, const mat& S,
+				const mat& I, vec& mu1, mat& S1);
+
 void shrink_cov (const mat& T, mat& U, mat& V, vec& d, double minval);
 
 // INLINE FUNCTION DEFINITIONS
@@ -85,6 +92,19 @@ arma::cube update_prior_covariances_teem_rcpp (const arma::mat& X,
   cube U(m,m,k);
   update_prior_covariances_teem(X,S,P,U,minval);
   return U;
+}
+
+// Perform an M-step update for the residual covariance matrix, S.
+//
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+arma::mat update_resid_covariance_rcpp (const arma::mat& X, 
+					const arma::cube& U, 
+					const arma::mat& S, 
+					const arma::mat& P) {
+  unsigned int m = X.n_cols;
+  mat Snew(m,m);
+  return Snew;
 }
 
 // Compute the n x k matrix of posterior mixture assignment
@@ -192,6 +212,63 @@ void update_prior_covariance_teem (mat& X, const mat& R, const vec& p,
 
   // Recover the solution for the original (untransformed) data.
   U = trans(R) * U * R;
+}
+
+// Perform an M-step update for the residual covariance matrix, S.
+void update_resid_covariance (const mat& X, const cube& U, const mat& S,
+			      const mat& P, mat& Snew) {
+  unsigned int n = X.n_rows;
+  unsigned int m = X.n_cols;
+  vec mu1(m);
+  vec mut(m);
+  mat S1(m,m);
+  mat St(m,m);
+  Snew.fill(0);
+  for (unsigned int i = 0; i < n; i++) {
+    // out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,S)
+    //Snew <- Snew + out$S1 + tcrossprod(X[i,] - out$mu1)
+    Snew += S1;
+  }
+  
+  Snew /= n;
+}
+
+// Suppose x is drawn from a multivariate normal distribution with mean
+// z and covariance S, and z is drawn from a mixture of multivariate
+// normals, each with zero mean, covariance V[,,i] and weight w[i].
+// Return the posterior mean (mu1) and covariance (S1) of z. Note that
+// input w1 must be the vector of *posterior* mixture weights (see
+// compute_posterior_probs).
+//
+// Input I should be the identity matrix of the same dimension as S.
+//
+void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const cube& V,
+				    const mat& S, const mat& I, vec& mu1, 
+				    mat& S1, vec& mut, mat& St) {
+  unsigned int k = w1.n_elem;
+  mu1.fill(0);
+  S1.fill(0);
+  for (unsigned int i = 0; i < k; i++) {
+    compute_posterior_mvtnorm(x,V.slice(i),S,I,mut,St);
+    mu1 += w1(i) * mut;
+    S1  += w1(i) * (St + mut*trans(mut));
+  }
+  S1 -= mu1*trans(mu1);
+}
+
+// Suppose x is drawn from a multivariate normal distribution with mean
+// z and covariance S, and z is drawn from a multivariate normal
+// distribution with mean zero and covariance V. Return the posterior
+// mean (mu1) and covariance (S1) of z. These calculations will only
+// work if S is positive definite. 
+//
+// Input I should be the identity matrix of the same dimension as S
+// and V.
+//
+void compute_posterior_mvtnorm (const vec& x, const mat& V, const mat& S,
+				const mat& I, vec& mu1, mat& S1) {
+  S1  = inv(V*inv(S) + I)*V;
+  mu1 = S1 * solve(S,x);
 }
 
 // "Shrink" matrix T = U + I; that is, find the "best" matrix T

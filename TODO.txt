@@ -5,6 +5,8 @@ to do
 
 + Implement a few basic tests of mvebnm.
 
++ Implement a few basic tests for mvebnm in the univariate (m=1) case.
+
 + Write a small vignette to demonstrate the method.
 
 + Render vignette as HTML, and make available via GitHub Pages.

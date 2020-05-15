@@ -18,7 +18,6 @@ names(X) <- paste0("s",1:n)
 
 # FIT MODEL
 # ---------
-# TO DO: Explain these lines of code in greater detail.
 set.seed(1)
 numiter <- 100
 t1 <- system.time(
@@ -42,15 +41,15 @@ set.seed(1)
 t3 <- system.time(
   fit3 <- mvebnm(X,k = k,S = S,verbose = TRUE,
                  control = list(version = "R",maxiter = numiter,tol = 0,
-                                update.w = "em",update.S = "em")))
+                                update.S = "em")))
 set.seed(1)
 t4 <- system.time({
   fit4 <- mvebnm(X,k = k,S = S,verbose = TRUE,
-                 control = list(version = "Rcpp",tol = 0,maxiter = 20,
-                                update.w = "em",update.S = "em"))
+                 control = list(version = "Rcpp",tol = 0,maxiter = 50,
+                                update.S = "em"))
   fit4 <- mvebnm(X,fit0 = fit4,verbose = TRUE,
-                 control = list(version = "Rcpp",tol = 0,maxiter = 20,
-                                update.w = "em",update.S = "em"))
+                 control = list(version = "Rcpp",tol = 0,maxiter = 50,
+                                update.S = "em"))
 })
 
 print(fit3$loglik - fit4$loglik)
