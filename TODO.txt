@@ -1,6 +1,12 @@
 to do
 =====
 
++ Add "fit0" argument to mvebnm.
+
++ Implement EM update of residual covariance matrix (S) in C++.
+
++ Document update.w = "mixsqp" option in roxygen2 docs.
+
 + Implement a few basic tests of mvebnm.
 
 + Write a small vignette to demonstrate the method.
