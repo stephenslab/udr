@@ -2,7 +2,7 @@
 
 # SIMULATE DATA
 # -------------
-n <- 2000
+n <- 800
 S <- 2
 U <- list(0,0.1,1,10)
 w <- c(0.8,0.1,0.075,0.025)
@@ -20,17 +20,17 @@ names(X) <- paste0("s",1:n)
 # ---------
 # TO DO: Explain these lines of code in greater detail.
 set.seed(1)
-numiter <- 1000
+numiter <- 100
 t1 <- system.time(
-  fit1 <- mvebnm(X,k = k,S = S,verbose = FALSE,
+  fit1 <- mvebnm(X,k = k,S = S,verbose = TRUE,
                  control = list(version = "R",update.U = "em",
-                                maxiter = numiter)))
+                                update.S = "em",maxiter = numiter)))
 
 set.seed(1)
 t2 <- system.time(
-  fit2 <- mvebnm(X,k = k,S = S,verbose = FALSE,
+  fit2 <- mvebnm(X,k = k,S = S,verbose = TRUE,
                  control = list(version = "Rcpp",update.U = "em",
-                                maxiter = numiter)))
+                                update.S = "em",maxiter = numiter)))
 
 print(fit1$loglik - fit2$loglik)
 print(range(fit1$progress$loglik - fit2$progress$loglik))
@@ -40,12 +40,18 @@ print(range(unlist(fit1$U) - unlist(fit2$U)))
 
 set.seed(1)
 t3 <- system.time(
-  fit3 <- mvebnm(X,k = k,S = S,verbose = FALSE,
-                 control = list(version = "R",maxiter = numiter,tol = 0)))
+  fit3 <- mvebnm(X,k = k,S = S,verbose = TRUE,
+                 control = list(version = "R",maxiter = numiter,tol = 0,
+                                update.w = "em",update.S = "em")))
 set.seed(1)
-t4 <- system.time(
-  fit4 <- mvebnm(X,k = k,S = S,verbose = FALSE,
-                 control = list(version = "Rcpp",tol = 0,maxiter = numiter)))
+t4 <- system.time({
+  fit4 <- mvebnm(X,k = k,S = S,verbose = TRUE,
+                 control = list(version = "Rcpp",tol = 0,maxiter = 20,
+                                update.w = "em",update.S = "em"))
+  fit4 <- mvebnm(X,fit0 = fit4,verbose = TRUE,
+                 control = list(version = "Rcpp",tol = 0,maxiter = 20,
+                                update.w = "em",update.S = "em"))
+})
 
 print(fit3$loglik - fit4$loglik)
 print(range(fit3$progress$loglik - fit4$progress$loglik))

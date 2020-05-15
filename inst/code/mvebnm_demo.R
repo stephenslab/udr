@@ -59,14 +59,16 @@ set.seed(1)
 t4 <- system.time(
   fit4 <- mvebnm(X,k = k,S = S,
                  control = list(version = "Rcpp",update.U = "teem",
-                                tol = 0,maxiter = numiter)))
+                                tol = 0,maxiter = 50)))
 
-fit5 <- mvebnm(X,fit0 = fit4,
+fit4a <- mvebnm(X,fit0 = fit4,
+               control = list(version = "Rcpp",update.U = "teem",
+                              tol = 0,maxiter = 50))
+
+fit4b <- mvebnm(X,fit0 = fit4,
                control = list(version = "Rcpp",update.U = "teem",
                               update.w = "mixsqp",tol = 0,
-                              maxiter = 20))
-print(fit4$loglik,digits = 12)
-print(fit5$loglik,digits = 12)
+                              maxiter = 50))
 
 print(t1)
 print(t2)
@@ -87,14 +89,16 @@ print(range(fit3$S - fit4$S))
 for (i in 1:k)
   print(range(fit3$U[[i]] - fit4$U[[i]]))
 
-y1 <- fit1$progress$loglik
-y2 <- fit2$progress$loglik
-y3 <- fit3$progress$loglik
-y4 <- fit4$progress$loglik
-y  <- max(c(y1,y2,y3,y4))
+y1  <- fit1$progress$loglik
+y2  <- fit2$progress$loglik
+y3  <- fit3$progress$loglik
+y4a <- fit4a$progress$loglik
+y4b <- fit4b$progress$loglik
+y  <- max(c(y1,y2,y3,y4a,y4b))
 plot(1:numiter,y - y1 + 0.01,col = "dodgerblue",type = "l",log = "y",lwd = 2,
      xlab = "iteration",ylab = "dist. from best loglik",ylim = c(0.01,500))
 lines(1:numiter,y - y2 + 0.01,col = "darkblue",lwd = 2,lty = "dashed")
 lines(1:numiter,y - y3 + 0.01,col = "magenta",lwd = 2)
-lines(1:numiter,y - y4 + 0.01,col = "gold",lwd = 2,lty = "dashed")
+lines(1:numiter,y - y4a + 0.01,col = "gold",lwd = 2,lty = "dashed")
+lines(1:numiter,y - y4b + 0.01,col = "darkorange",lwd = 2,lty = "dashed")
 
