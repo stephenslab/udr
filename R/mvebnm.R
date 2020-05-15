@@ -182,7 +182,9 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
       k <- length(U)
     else
       k <- length(w)
-  }
+  } else
+    if (!(missing(w) & missing(U)))
+     stop("Do not specify \"k\" if \"U\" and/or \"w\" are already given")
   if (k < 2)
     stop("The number of prior mixture components (k) should be 2 or greater")
 
@@ -226,7 +228,7 @@ mvebnm <- function (X, k, w, U, S = diag(ncol(X)), control = list(),
     cat("with these settings:\n")
     cat(sprintf("Running max %d updates with ",control$maxiter))
     cat(sprintf("conv tol %0.1e ",control$tol))
-    cat(sprintf("(mvebnm 0.1-56, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-57, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mixture weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -302,7 +304,7 @@ mvebnm_main_loop <- function (X, w, U, S, control, verbose) {
     if (control$update.w == "em")
       wnew <- update_mixture_weights_em(P)
     else if (control$update.w == "mixsqp")
-      wnew <- update_mixture_weights_mixsqp(X,S,U)
+      wnew <- update_mixture_weights_mixsqp(X,Snew,Unew)
     else if (control$update.w == "none")
       wnew <- w
     
@@ -369,13 +371,18 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 }
 
 # Perform an M-step update for the mixture weights in the
-# mixture-of-multivariate-normals prior.
+# mixture-of-multivariate-normals prior. Odd things can happen if the
+# mixture weights are too small, so we avoid this by adding a small
+# positive scalar to all the weights.
 update_mixture_weights_em <- function (P) {
-  w <- colSums(P)
+  w <- colSums(P)/n
+  w <- pmax(w,1e-4)  
   return(w/sum(w))
 }
 
-# Update the mixture weights using the "mix-SQP" algorithm.
+# Update the mixture weights using the "mix-SQP" algorithm. Odd things
+# can happen if the mixture weights are too small, so we avoid this by
+# adding a small positive scalar to all the weights.
 #'
 #' @importFrom mvtnorm dmvnorm
 #' @importFrom mixsqp mixsqp
@@ -387,7 +394,7 @@ update_mixture_weights_mixsqp <- function (X, S, U) {
   for (i in 1:k)
     L[,i] <- dmvnorm(X,sigma = S + U[,,i],log = TRUE)
   out <- mixsqp(L,log = TRUE,control = list(verbose = FALSE))
-  w <- pmax(out$x,1e-4)
+  w   <- pmax(out$x,1e-4)
   return(w/sum(w))
 }
 
@@ -430,11 +437,8 @@ update_resid_covariance <- function (X, U, S, P) {
   m    <- ncol(X)
   Snew <- matrix(0,m,m)
   for (i in 1:n) {
-    x    <- X[i,]
-    out  <- compute_posterior_mvtnorm_mix(x,P[i,],U,S)
-    mu1  <- out$mu1
-    S1   <- out$S1
-    Snew <- Snew + S1 + tcrossprod(x - mu1)
+    out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,S)
+    Snew <- Snew + out$S1 + tcrossprod(X[i,] - out$mu1)
   }
   return(Snew/n)
 }
@@ -478,7 +482,8 @@ update_prior_covariance_teem_helper <- function (X, S, p, minval) {
 # z and covariance S, and z is drawn from a mixture of multivariate
 # normals, each with zero mean, covariance V[,,i] and weight w[i].
 # Return the posterior mean (mu1) and covariance (S1) of z. Note that
-# input w1 must be the vector of *posterior* mixture weights.
+# input w1 must be the vector of *posterior* mixture weights (see
+# compute_posterior_probs).
 compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
   m   <- length(x)
   k   <- length(w1)
@@ -496,11 +501,11 @@ compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
 # Suppose x is drawn from a multivariate normal distribution with mean
 # z and covariance S, and z is drawn from a multivariate normal
 # distribution with mean zero and covariance V. Return the posterior
-# mean (mu1) and covariance (S1) of z.
+# mean (mu1) and covariance (S1) of z. These calculations will only
+# work if S is positive definite.
 compute_posterior_mvtnorm <- function (x, V, S) {
   m   <- length(x)
-  I   <- diag(m)
-  S1  <- solve(V %*% solve(S) + I) %*% V
+  S1  <- solve(V %*% solve(S) + diag(m)) %*% V
   mu1 <- drop(S1 %*% solve(S,x))
   return(list(mu1 = mu1,S1 = S1))
 }
