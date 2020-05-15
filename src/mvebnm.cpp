@@ -25,6 +25,9 @@ void update_prior_covariance_ed (mat& X, mat& U, const mat& S,
 void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, mat& U, 
 				   mat& T, mat& V, vec& d, double minval);
 
+void update_resid_covariance (const mat& X, const cube& U, const mat& S,
+			      const mat& P, mat& Snew);
+
 void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const cube& V,
 				    const mat& S, const mat& I, vec& mu1, 
 				    mat& S1, vec& mut, mat& St);
@@ -104,6 +107,7 @@ arma::mat update_resid_covariance_rcpp (const arma::mat& X,
 					const arma::mat& P) {
   unsigned int m = X.n_cols;
   mat Snew(m,m);
+  update_resid_covariance(X,U,S,P,Snew);
   return Snew;
 }
 
@@ -219,17 +223,23 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& S,
 			      const mat& P, mat& Snew) {
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
+  unsigned int k = P.n_cols;
+  vec x(m);
   vec mu1(m);
   vec mut(m);
+  vec p(k);
   mat S1(m,m);
   mat St(m,m);
+  mat I(m,m,fill::eye);
   Snew.fill(0);
   for (unsigned int i = 0; i < n; i++) {
-    // out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,S)
-    //Snew <- Snew + out$S1 + tcrossprod(X[i,] - out$mu1)
+    x = trans(X.row(i));
+    p = trans(P.row(i));
+    compute_posterior_mvtnorm_mix(x,p,U,S,I,mu1,S1,mut,St);
+    mu1  -= x;
     Snew += S1;
+    Snew += mu1 * trans(mu1);
   }
-  
   Snew /= n;
 }
 

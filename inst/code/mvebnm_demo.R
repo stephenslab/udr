@@ -70,7 +70,14 @@ fit4b <- mvebnm(X,fit0 = fit4,
                               update.w = "mixsqp",tol = 0,
                               maxiter = 50))
 
+set.seed(1)
 fit5 <- mvebnm(X,k = k,S = S,
+               control = list(version = "R",update.U = "teem",
+                              update.S = "em",tol = 0,
+                              maxiter = numiter))
+
+set.seed(1)
+fit6 <- mvebnm(X,k = k,S = S,
                control = list(version = "Rcpp",update.U = "teem",
                               update.S = "em",tol = 0,
                               maxiter = numiter))
@@ -100,12 +107,13 @@ y3  <- fit3$progress$loglik
 y4a <- fit4a$progress$loglik
 y4b <- fit4b$progress$loglik
 y5  <- fit5$progress$loglik
-y   <- max(c(y1,y2,y3,y4a,y4b,y5))
+y6  <- fit6$progress$loglik
+y   <- max(c(y1,y2,y3,y4a,y4b,y5,y6))
 plot(1:numiter,y - y1 + 0.01,col = "dodgerblue",type = "l",log = "y",lwd = 2,
      xlab = "iteration",ylab = "dist. from best loglik",ylim = c(0.01,500))
 lines(1:numiter,y - y2 + 0.01,col = "darkblue",lwd = 2,lty = "dashed")
 lines(1:numiter,y - y3 + 0.01,col = "magenta",lwd = 2)
 lines(1:numiter,y - y4a + 0.01,col = "gold",lwd = 2,lty = "dashed")
 lines(1:numiter,y - y4b + 0.01,col = "darkorange",lwd = 2,lty = "dashed")
-lines(1:numiter,y - y5 + 0.01,col = "limegreen",lwd = 2,lty = "solid")
-
+lines(1:numiter,y - y5 + 0.01,col = "limegreen",lwd = 2)
+lines(1:numiter,y - y5 + 0.01,col = "seagreen",lwd = 2,lty = "dashed")

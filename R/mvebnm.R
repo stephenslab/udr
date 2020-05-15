@@ -260,7 +260,7 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)), control = list(),
     cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",k,n,m))
     cat("with these settings:\n")
     cat(sprintf("max %d updates, conv tol %0.1e ",control$maxiter,control$tol))
-    cat(sprintf("(mvebnm 0.1-61, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-62, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -462,11 +462,10 @@ update_prior_covariance_teem <- function (X, S, P, minval,
 # Perform an M-step update for the residual covariance matrix, S.
 update_resid_covariance <- function (X, U, S, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
-  # if (version == "R")
-  S <- update_resid_covariance_helper(X,U,S,P)
-  # else if (version == "Rcpp") {
-  # TO DO.
-  # }
+  if (version == "R")
+    S <- update_resid_covariance_helper(X,U,S,P)
+  else if (version == "Rcpp")
+    S <- update_resid_covariance_rcpp(X,U,S,P)
   return(S)
 }
 
