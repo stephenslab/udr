@@ -33,7 +33,7 @@ for (i in 1:k) {
 }
   
 # Simulate draws from the multivariate normal means model.
-X           <- simulate_ebmvnm_data(n,w,U,S)
+X           <- simulate_mvebnm_data(n,w,U,S)
 rownames(X) <- paste0("s",1:n)
 
 # FIT MODEL

@@ -260,7 +260,7 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)), control = list(),
     cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",k,n,m))
     cat("with these settings:\n")
     cat(sprintf("max %d updates, conv tol %0.1e ",control$maxiter,control$tol))
-    cat(sprintf("(mvebnm 0.1-63, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-64, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -403,6 +403,7 @@ compute_posterior_probs_helper <- function (X, w, U, S) {
 # mixture weights are too small, so we avoid this by adding a small
 # positive scalar to all the weights.
 update_mixture_weights_em <- function (P) {
+  n <- nrow(P)
   w <- colSums(P)/n
   w <- pmax(w,1e-4)  
   return(w/sum(w))

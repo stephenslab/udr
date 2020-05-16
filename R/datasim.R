@@ -27,7 +27,7 @@
 #' 
 #' @export
 #' 
-simulate_ebmvnm_data <- function (n, w, U, S) {
+simulate_mvebnm_data <- function (n, w, U, S) {
       
   # Check the residual covariance matrix, S.
   S <- as.matrix(S)

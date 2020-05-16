@@ -1,7 +1,7 @@
 to do
 =====
 
-+ Fix name of simulate_ebmvnm_data.
++ Run R CMD check --as-cran.
 
 + Implement a few basic tests of mvebnm.
 

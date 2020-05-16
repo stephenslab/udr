@@ -13,7 +13,7 @@ names(w)    <- paste0("k",1:k)
 names(U)    <- paste0("k",1:k)
   
 # Simulate draws from the normal means model.
-X        <- simulate_ebmvnm_data(n,w,U,S)
+X        <- simulate_mvebnm_data(n,w,U,S)
 names(X) <- paste0("s",1:n)
 
 # FIT MODEL

@@ -2,7 +2,7 @@
 
 export(mvebnm)
 export(mvebnm_control_default)
-export(simulate_ebmvnm_data)
+export(simulate_mvebnm_data)
 importFrom(Rcpp,evalCpp)
 importFrom(mixsqp,mixsqp)
 importFrom(mvtnorm,dmvnorm)
