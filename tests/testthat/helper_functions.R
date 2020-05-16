@@ -23,7 +23,7 @@ simulate_mvebnm_data_2d <- function (n) {
   rownames(S) <- c("d1","d2")
   colnames(S) <- c("d1","d2")
   k           <- length(w)
-  names(w)    <- paste0("k",1:k)
+  names(w)    <- names(U)
   for (i in 1:k) {
     rownames(U[[i]]) <- c("d1","d2")
     colnames(U[[i]]) <- c("d1","d2")
@@ -32,5 +32,8 @@ simulate_mvebnm_data_2d <- function (n) {
   # Simulate draws from the multivariate normal means model.
   X           <- simulate_mvebnm_data(n,w,U,S)
   rownames(X) <- paste0("s",1:n)
-  return(X)
+
+  # Output the data and the model parameters used to simulate the
+  # data.
+  return(list(X = X,w = w,U = U,S = S))
 }
