@@ -22,13 +22,13 @@ set.seed(1)
 numiter <- 100
 t1 <- system.time(
   fit1 <- mvebnm(X,k = k,S = S,verbose = TRUE,
-                 control = list(version = "R",update.U = "em",
+                 control = list(version = "R",update.U = "ed",
                                 update.S = "em",maxiter = numiter)))
 
 set.seed(1)
 t2 <- system.time(
   fit2 <- mvebnm(X,k = k,S = S,verbose = TRUE,
-                 control = list(version = "Rcpp",update.U = "em",
+                 control = list(version = "Rcpp",update.U = "ed",
                                 update.S = "em",maxiter = numiter)))
 
 print(fit1$loglik - fit2$loglik)

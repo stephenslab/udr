@@ -42,11 +42,11 @@
 #'
 #' \item{\code{update.U}}{This setting determines the algorithm used
 #' to estimate the prior covariance matrices. Two EM variants are
-#' implemented: \code{update.S = "em"}, the EM algorithm described by
-#' Bovy \emph{et al} (2011); and \code{update.S = "teem"} (truncated
+#' implemented: \code{update.U = "ed"}, the EM algorithm described by
+#' Bovy \emph{et al} (2011); and \code{update.U = "teem"} (truncated
 #' eigenvalue expectation-maximization), in which the M-step update
 #' for each covariance matrix \code{U[[j]]} is solved by truncating
-#' the eigenvalues in a spectral decomposition of the (unconstrained)
+#' the eigenvalues in a spectral decomposition of the unconstrained
 #' maximimum likelihood estimate (MLE) of \code{U[j]]}. The latter
 #' method provides greater freedom in the updates for U, and is
 #' expected to yield better fits, and converge more quickly to a good
@@ -114,15 +114,15 @@
 #' @return A list object with the following elements:
 #'
 #' \item{w}{A vector containing the estimated prior mixture
-#'   weights. When \code{control$update.w = FALSE}, this will be the
+#'   weights. When \code{control$update.w = "none"}, this will be the
 #'   same as the \code{w} provided at input.}
 #'
 #' \item{U}{A list containing the estimated prior covariance matrices. When
-#'   \code{control$update.U = FALSE}, this will be the same as the \code{U}
+#'   \code{control$update.U = "none"}, this will be the same as the \code{U}
 #'   provided at input.}
 #' 
 #' \item{S}{The estimated residual covariance matrix. When
-#'   \code{control$update.S = FALSE}, this will be the same as the \code{S}
+#'   \code{control$update.S = "none"}, this will be the same as the \code{S}
 #'   provided at input.}
 #'
 #' \item{loglik}{The log-likelihood at the current settings of the
@@ -260,7 +260,7 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)), control = list(),
     cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",k,n,m))
     cat("with these settings:\n")
     cat(sprintf("max %d updates, conv tol %0.1e ",control$maxiter,control$tol))
-    cat(sprintf("(mvebnm 0.1-69, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-70, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -317,7 +317,7 @@ mvebnm_main_loop <- function (X, w, U, S, iter0, progress, control, verbose) {
       Snew <- S
     
     # Update the prior covariance matrices (U), if requested.
-    if (control$update.U  == "em")
+    if (control$update.U == "ed")
       Unew <- update_prior_covariance_ed(X,U,S,P,control$version)
     else if (control$update.U == "teem")
       Unew <- update_prior_covariance_teem(X,S,P,control$minval,
@@ -555,7 +555,7 @@ compute_posterior_mvtnorm <- function (x, V, S) {
 #' 
 mvebnm_control_default <- function()
   list(update.w = "em",    # One or "em", "mixsqp" or "none".
-       update.U = "teem",  # One of "em", "teem" or "none".
+       update.U = "teem",  # One of "ed", "teem" or "none".
        update.S = "none",  # One of "em" or "none".
        version  = "Rcpp",  # One of "R" or "Rcpp".
        maxiter  = 100,

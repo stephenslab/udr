@@ -49,15 +49,15 @@ of the \code{progress} return value.}
 A list object with the following elements:
 
 \item{w}{A vector containing the estimated prior mixture
-  weights. When \code{control$update.w = FALSE}, this will be the
+  weights. When \code{control$update.w = "none"}, this will be the
   same as the \code{w} provided at input.}
 
 \item{U}{A list containing the estimated prior covariance matrices. When
-  \code{control$update.U = FALSE}, this will be the same as the \code{U}
+  \code{control$update.U = "none"}, this will be the same as the \code{U}
   provided at input.}
 
 \item{S}{The estimated residual covariance matrix. When
-  \code{control$update.S = FALSE}, this will be the same as the \code{S}
+  \code{control$update.S = "none"}, this will be the same as the \code{S}
   provided at input.}
 
 \item{loglik}{The log-likelihood at the current settings of the
@@ -116,11 +116,11 @@ likelihood with the other parameters fixed; when \code{update.w =
 
 \item{\code{update.U}}{This setting determines the algorithm used
 to estimate the prior covariance matrices. Two EM variants are
-implemented: \code{update.S = "em"}, the EM algorithm described by
-Bovy \emph{et al} (2011); and \code{update.S = "teem"} (truncated
+implemented: \code{update.U = "ed"}, the EM algorithm described by
+Bovy \emph{et al} (2011); and \code{update.U = "teem"} (truncated
 eigenvalue expectation-maximization), in which the M-step update
 for each covariance matrix \code{U[[j]]} is solved by truncating
-the eigenvalues in a spectral decomposition of the (unconstrained)
+the eigenvalues in a spectral decomposition of the unconstrained
 maximimum likelihood estimate (MLE) of \code{U[j]]}. The latter
 method provides greater freedom in the updates for U, and is
 expected to yield better fits, and converge more quickly to a good

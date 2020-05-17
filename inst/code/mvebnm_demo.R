@@ -42,12 +42,12 @@ set.seed(1)
 numiter <- 100
 t1 <- system.time(
   fit1 <- mvebnm(X,k = k,S = S,
-                 control = list(version = "R",update.U = "em",
+                 control = list(version = "R",update.U = "ed",
                                 tol = 0,maxiter = numiter)))
 set.seed(1)
 t2 <- system.time(
   fit2 <- mvebnm(X,k = k,S = S,
-                 control = list(version = "Rcpp",update.U = "em",
+                 control = list(version = "Rcpp",update.U = "ed",
                                 tol = 0,maxiter = numiter)))
 set.seed(1)
 t3 <- system.time(

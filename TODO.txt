@@ -5,6 +5,7 @@ to do
    (1) Compare update.U = "em" vs. update.U = "teem".
    (2) Compare update.S = "none" vs. update.S = "em".
    (3) Compare version = "R" vs. version = "Rcpp".
+   (4) Re-fit with update.w = "mixsqp".
 
 + Re-build pkgdown site.
 

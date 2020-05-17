@@ -11,11 +11,11 @@ test_that("A few basic tests of mvebnm",{
   capture.output(
     fit1 <- mvebnm(dat$X,U = dat$U,
                    control = list(version = "R",update.S = "em",
-                                  update.U = "em",maxiter = 20)))
+                                  update.U = "ed",maxiter = 20)))
   capture.output(
     fit2 <- mvebnm(dat$X,U = dat$U,
                    control = list(version = "Rcpp",update.S = "em",
-                                  update.U = "em",maxiter = 20)))
+                                  update.U = "ed",maxiter = 20)))
 
   # The likelihood should increase at each iteration.
   expect_nondecreasing(fit1$progress$loglik)
@@ -86,11 +86,11 @@ test_that("A few basic tests of mvebnm for univariate (m = 1) data",{
   capture.output(
     fit1 <- mvebnm(dat$X,U = dat$U,
                    control = list(version = "R",update.S = "em",
-                                  update.U = "em",maxiter = 20)))
+                                  update.U = "ed",maxiter = 20)))
   capture.output(
     fit2 <- mvebnm(dat$X,U = dat$U,
                    control = list(version = "Rcpp",update.S = "em",
-                                  update.U = "em",maxiter = 20)))
+                                  update.U = "ed",maxiter = 20)))
 
   # The likelihood should increase at each iteration.
   expect_nondecreasing(fit1$progress$loglik)
