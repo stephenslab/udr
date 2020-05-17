@@ -62,14 +62,14 @@ update, `update.U = "ed"`.
 First, fit the multivariate normal means model using the original
 "Extreme Deconvolution" updates.
 
-```{r fit-mvebnm-ed}
+```{r fit-mvebnm-ed, results="hide"}
 set.seed(1)
 fit.ed <- mvebnm(X,k = k,S = S,control = list(update.U = "ed"))
 ```
 
 Fit the model a second time using the "truncated eigenvalue" updates.
 
-```{r fit-mvebnm-teem}
+```{r fit-mvebnm-teem, results="hide"}
 set.seed(1)
 fit.teem <- mvebnm(X,k = k,S = S,control = list(update.U = "teem"))
 ```
@@ -93,5 +93,6 @@ print(round(sapply(fit.teem$U,function (x) eigen(x)$values),digits = 6))
 By computing the eigenvalues of each of the 2 x 2 covariance matrices,
 we see that the TEEM updates have shrunk some of the eigenvalues to
 zero, leading to prior covariances with an effective rank of 0, 1 and
-2, whereas the prior covariances estimated by the ED algorithm are all
-full rank.
+2 --- this is the number of non-zero eigenvalues in each column of the
+output above --- whereas the prior covariances estimated by the ED
+algorithm are all full rank.
