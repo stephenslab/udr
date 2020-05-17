@@ -260,7 +260,7 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)), control = list(),
     cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",k,n,m))
     cat("with these settings:\n")
     cat(sprintf("max %d updates, conv tol %0.1e ",control$maxiter,control$tol))
-    cat(sprintf("(mvebnm 0.1-65, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-66, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
