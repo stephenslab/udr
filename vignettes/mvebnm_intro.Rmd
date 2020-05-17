@@ -1,5 +1,5 @@
 ---
-title: An introduction to mvebnm: empirical Bayes for multivariate normal means
+title: "Introduction to mvebnm: empirical Bayes for multivariate normal means"
 author: Peter Carbonetto
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -20,4 +20,34 @@ knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
 library(mvebnm)
 ```
 
-*Add more content here.*
+Simulate data
+-------------
+
+Here we illustrate the mvebnm method in a simulated data set, in which
+the data are simulated from the multivariate normal means model with 4
+mixture components. Specifically, 4,000 data points are simulated from
+the mixture of multivariate normals
+$$
+w_1 N(0,S + U_1) + \cdots + w_4 N(0,S + U_4).
+$$
+
+```{r sim-data-settings}
+n <- 4000
+S <- rbind(c(0.8,0.2),
+           c(0.2,1.5))
+U <- list(none   = rbind(c(0,0),
+                         c(0,0)),
+          shared = rbind(c(1.0,0.9),
+                         c(0.9,1.0)),
+          only1  = rbind(c(1,0),
+                         c(0,0)),
+          only2  = rbind(c(0,0),
+                         c(0,1)))
+w <- c(0.8,0.1,0.075,0.025)
+X <- simulate_mvebnm_data(n,w,U,S)
+```
+
+Truncated-eigenvalue EM algorithm
+---------------------------------
+
+
