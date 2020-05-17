@@ -181,6 +181,9 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)), control = list(),
   n <- nrow(X)
   m <- ncol(X)
 
+  # Check and process the optimization settings.
+  control <- modifyList(mvebnm_control_default(),control,keep.null = TRUE)
+
   # Set up the data structure for keeping track of the algorithm's progress.
   progress <- as.data.frame(matrix(as.numeric(NA),control$maxiter,6))
   names(progress) <- c("iter","loglik","delta.w","delta.u","delta.s","timing")
@@ -252,15 +255,12 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)), control = list(),
          "length \"k\" containing non-negative weights")
   w <- w/sum(w)
   
-  # Check and process the optimization settings.
-  control <- modifyList(mvebnm_control_default(),control,keep.null = TRUE)
-
   # Give an overview of the optimization settings.
   if (verbose) {
     cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",k,n,m))
     cat("with these settings:\n")
     cat(sprintf("max %d updates, conv tol %0.1e ",control$maxiter,control$tol))
-    cat(sprintf("(mvebnm 0.1-67, \"%s\").\n",control$version))
+    cat(sprintf("(mvebnm 0.1-68, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
