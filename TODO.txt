@@ -1,13 +1,11 @@
 to do
 =====
 
-+ Run R CMD check --as-cran.
-
 + Write a small vignette to demonstrate the method.
 
-+ Render vignette as HTML, and make available via GitHub Pages.
++ Re-build pkgdown site.
 
 + Implement Travis CI, Appveyor & CircleCI testing.
 
-+ Create pkgdown site.
+
 

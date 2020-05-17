@@ -1,2 +1,4 @@
 ^TODO\.txt$
+^docs$
+^_pkgdown\.yml$
 

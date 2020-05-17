@@ -1,5 +1,5 @@
 ---
-title: An introduction to mvebnm, empirical Bayes for multivariate normal means
+title: An introduction to mvebnm: empirical Bayes for multivariate normal means
 author: Peter Carbonetto
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
