@@ -135,7 +135,7 @@ t2 <- system.time(
 ```
 
 Indeed, both runs achieve the same likelihood (you can check for
-yourself that the estimates are also the same),
+yourself that the parameter estimates are also the same),
 
 ```{r compare-loglik-3}
 print(fit1$loglik,digits = 12)
@@ -148,6 +148,40 @@ but the C++ implementation achieves the result much more quickly:
 print(t1)
 print(t2)
 ```
+
+Update mixture weights using mix-SQP
+------------------------------------
+
+There is also the potential to use the mix-SQP algorithm to fit the
+mixture weights, with estimates of the other parameters fixed. This
+could be useful as a "re-fitting" step to improve the model after
+first running the EM updates:
+
+```{r fit-mvebnm-mixsqp, results="hide"}
+set.seed(1)
+fit.mixsqp <- mvebnm(X,k = k,S = S,
+                     control = list(maxiter = 80))
+fit.mixsqp <- mvebnm(X,fit0 = fit.mixsqp,
+                     control = list(update.w = "mixsqp",maxiter = 20))
+```
+
+The mix-SQP updates only achieve a slightly higher likelihood,
+
+```{r compare-loglik-4}
+print(fit.teem$loglik,digits = 12)
+print(fit.mixsqp$loglik,digits = 12)
+```
+
+but, perhaps more compellingly, in this example mix-SQP assigns zero
+weight to a redundant mixture component, whereas the EM algorithm does
+not:
+
+```{r compare-mixture-weights}
+print(fit.teem$w,digits = 3)
+print(fit.mixsqp$w,digits = 3)
+```
+
+The benefits of the mix-SQP updates need to be explored further.
 
 Plot improvement in solutions over time
 ---------------------------------------
