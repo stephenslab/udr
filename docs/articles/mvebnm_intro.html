@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>An introduction to mvebnm, empirical Bayes for multivariate normal means • mvebnm</title>
+<title>Introduction to mvebnm: empirical Bayes for multivariate normal means • mvebnm</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="An introduction to mvebnm, empirical Bayes for multivariate normal means">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to mvebnm: empirical Bayes for multivariate normal means">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mvebnm</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.69</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.71</span>
       </span>
     </div>
 
@@ -64,10 +64,10 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>An introduction to mvebnm, empirical Bayes for multivariate normal means</h1>
+      <h1>Introduction to mvebnm: empirical Bayes for multivariate normal means</h1>
                         <h4 class="author">Peter Carbonetto</h4>
             
-            <h4 class="date">2020-05-17</h4>
+            <h4 class="date">2020-05-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/stephenslab/mvebnm/blob/master/vignettes/mvebnm_intro.Rmd"><code>vignettes/mvebnm_intro.Rmd</code></a></small>
       <div class="hidden name"><code>mvebnm_intro.Rmd</code></div>
@@ -76,13 +76,148 @@
 
     
     
-<p><em>Add introductory text here.</em></p>
+<div id="simulate-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#simulate-data" class="anchor"></a>Simulate data</h2>
+<p>Here we illustrate the mvebnm method in a simulated data set, in which the data are simulated from the multivariate normal means model with 4 mixture components.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(mvebnm)</a></code></pre></div>
-<p><em>Add more content here.</em></p>
+<p>We simulate 4,000 data points from a mixture of multivariate normals, <span class="math display">\[
+w_1 N(0,S + U_1) + \cdots + w_4 N(0,S + U_4).
+\]</span></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">n &lt;-<span class="st"> </span><span class="dv">4000</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">k &lt;-<span class="st"> </span><span class="dv">4</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">S &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.8</span>,<span class="fl">0.2</span>),</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">           <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.2</span>,<span class="fl">1.5</span>))</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">U &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">none   =</span> <span class="kw"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">0</span>,<span class="dv">0</span>),</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">                         <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">0</span>,<span class="dv">0</span>)),</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">          <span class="dt">shared =</span> <span class="kw"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1.0</span>,<span class="fl">0.9</span>),</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">                         <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.9</span>,<span class="fl">1.0</span>)),</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">          <span class="dt">only1  =</span> <span class="kw"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">1</span>,<span class="dv">0</span>),</a>
+<a class="sourceLine" id="cb2-11" data-line-number="11">                         <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">0</span>,<span class="dv">0</span>)),</a>
+<a class="sourceLine" id="cb2-12" data-line-number="12">          <span class="dt">only2  =</span> <span class="kw"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">0</span>,<span class="dv">0</span>),</a>
+<a class="sourceLine" id="cb2-13" data-line-number="13">                         <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">0</span>,<span class="dv">1</span>)))</a>
+<a class="sourceLine" id="cb2-14" data-line-number="14">w &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.8</span>,<span class="fl">0.1</span>,<span class="fl">0.075</span>,<span class="fl">0.025</span>)</a>
+<a class="sourceLine" id="cb2-15" data-line-number="15">X &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simulate_mvebnm_data.html">simulate_mvebnm_data</a></span>(n,w,U,S)</a></code></pre></div>
+</div>
+<div id="truncated-eigenvalue-em" class="section level2">
+<h2 class="hasAnchor">
+<a href="#truncated-eigenvalue-em" class="anchor"></a>“Truncated-eigenvalue” EM</h2>
+<p>One innovation in mvebnm is that the M-step update for the prior covariances is solved exactly by truncating the eigenvalues in a spectral decomposition of the unconstrained maximum-likelihood estimate. This provides greater freedom in fitting the model; here we demonstrate this by comparing the new update, <code>update.U = "teem"</code>, against the “Extreme Deconvolution” update, <code>update.U = "ed"</code>.</p>
+<p>First, fit the multivariate normal means model using the original “Extreme Deconvolution” update:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">fit.ed &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mvebnm.html">mvebnm</a></span>(X,<span class="dt">k =</span> k,<span class="dt">S =</span> S,<span class="dt">control =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">update.U =</span> <span class="st">"ed"</span>))</a></code></pre></div>
+<p>Next, fit the model using the “truncated eigenvalue” update:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">fit.teem &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mvebnm.html">mvebnm</a></span>(X,<span class="dt">k =</span> k,<span class="dt">S =</span> S,<span class="dt">control =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">update.U =</span> <span class="st">"teem"</span>))</a></code></pre></div>
+<p>The “truncated eigenvalue” update provides a better fit, as measured by the likelihood:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit.ed<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit.teem<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="co"># [1] -12210.9601056</span></a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="co"># [1] -12199.9654823</span></a></code></pre></div>
+<p>This is because the new update allows for much greater flexibility in the covariance estimates:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(fit.ed<span class="op">$</span>U,<span class="cf">function</span> (x) <span class="kw"><a href="https://rdrr.io/r/base/eigen.html">eigen</a></span>(x)<span class="op">$</span>values),<span class="dt">digits =</span> <span class="dv">6</span>))</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(fit.teem<span class="op">$</span>U,<span class="cf">function</span> (x) <span class="kw"><a href="https://rdrr.io/r/base/eigen.html">eigen</a></span>(x)<span class="op">$</span>values),<span class="dt">digits =</span> <span class="dv">6</span>))</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">#            k1       k2       k3       k4</span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="co"># [1,] 0.310976 0.348350 0.590743 0.189784</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="co"># [2,] 0.099464 0.104345 0.110707 0.078166</span></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="co">#      k1       k2       k3 k4</span></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co"># [1,]  0 0.130364 1.256387  0</span></a>
+<a class="sourceLine" id="cb6-8" data-line-number="8"><span class="co"># [2,]  0 0.000000 0.250080  0</span></a></code></pre></div>
+<p>The output above shows the eigenvalues of each of the four 2 x 2 covariance matrices. The TEEM updates have shrunk some of the eigenvalues to zero, leading to prior covariances with an effective rank of 0, 1 or 2 — this is the number of non-zero eigenvalues in each column of the output above. By contrast, the prior covariances estimated by the ED algorithm are all full rank — all the eigenvalues are greater than zero.</p>
+</div>
+<div id="estimate-the-residual-covariance" class="section level2">
+<h2 class="hasAnchor">
+<a href="#estimate-the-residual-covariance" class="anchor"></a>Estimate the residual covariance</h2>
+<p>In cases where the residual variance-covariance matrix, <span class="math inline">\(S\)</span>, is not known, mvebnm can estimate it from the data:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">fit.teem2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mvebnm.html">mvebnm</a></span>(X,<span class="dt">k =</span> k,<span class="dt">control =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">update.S =</span> <span class="st">"em"</span>,<span class="dt">update.U =</span> <span class="st">"teem"</span>))</a></code></pre></div>
+<p>The resulting likelihood is slightly higher than the fixing the residual covariance to the ground-truth:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit.teem<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit.teem2<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co"># [1] -12199.9654823</span></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="co"># [1] -12199.4837195</span></a></code></pre></div>
+</div>
+<div id="efficient-c-implementation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#efficient-c-implementation" class="anchor"></a>Efficient C++ implementation</h2>
+<p>We provide two implementations of the mvebnm methods: an R version with code that is easier to understand, and simpler to maintain; and a C++ (Rcpp) version that can be much faster. Both implementations should give the same, or nearly the same, output. Here’s an example:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">t1 &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(</a>
+<a class="sourceLine" id="cb9-3" data-line-number="3">  fit1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mvebnm.html">mvebnm</a></span>(X,<span class="dt">k =</span> k,<span class="dt">control =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">update.S =</span> <span class="st">"em"</span>,<span class="dt">version =</span> <span class="st">"R"</span>)))</a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb9-5" data-line-number="5">t2 &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(</a>
+<a class="sourceLine" id="cb9-6" data-line-number="6">  fit2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mvebnm.html">mvebnm</a></span>(X,<span class="dt">k =</span> k,<span class="dt">control =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">update.S =</span> <span class="st">"em"</span>,<span class="dt">version =</span> <span class="st">"Rcpp"</span>)))</a></code></pre></div>
+<p>Indeed, both runs achieve the same likelihood (you can check for yourself that the parameter estimates are also the same),</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit1<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit2<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb10-3" data-line-number="3"><span class="co"># [1] -12199.4837195</span></a>
+<a class="sourceLine" id="cb10-4" data-line-number="4"><span class="co"># [1] -12199.4837195</span></a></code></pre></div>
+<p>but the C++ implementation achieves the result much more quickly:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(t1)</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(t2)</a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="co">#    user  system elapsed </span></a>
+<a class="sourceLine" id="cb11-4" data-line-number="4"><span class="co">#  65.133   0.479  67.741 </span></a>
+<a class="sourceLine" id="cb11-5" data-line-number="5"><span class="co">#    user  system elapsed </span></a>
+<a class="sourceLine" id="cb11-6" data-line-number="6"><span class="co">#   5.416   0.018   5.472</span></a></code></pre></div>
+</div>
+<div id="update-mixture-weights-using-mix-sqp" class="section level2">
+<h2 class="hasAnchor">
+<a href="#update-mixture-weights-using-mix-sqp" class="anchor"></a>Update mixture weights using mix-SQP</h2>
+<p>There is also the potential to use the mix-SQP algorithm to fit the mixture weights, with estimates of the other parameters fixed. This could be useful as a “re-fitting” step to improve the model after first running the EM updates:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">fit.mixsqp &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mvebnm.html">mvebnm</a></span>(X,<span class="dt">k =</span> k,<span class="dt">S =</span> S,</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">                     <span class="dt">control =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">maxiter =</span> <span class="dv">80</span>))</a>
+<a class="sourceLine" id="cb12-4" data-line-number="4">fit.mixsqp &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mvebnm.html">mvebnm</a></span>(X,<span class="dt">fit0 =</span> fit.mixsqp,</a>
+<a class="sourceLine" id="cb12-5" data-line-number="5">                     <span class="dt">control =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="dt">update.w =</span> <span class="st">"mixsqp"</span>,<span class="dt">maxiter =</span> <span class="dv">20</span>))</a></code></pre></div>
+<p>The mix-SQP updates only achieve a slightly higher likelihood,</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit.teem<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(fit.mixsqp<span class="op">$</span>loglik,<span class="dt">digits =</span> <span class="dv">12</span>)</a>
+<a class="sourceLine" id="cb13-3" data-line-number="3"><span class="co"># [1] -12199.9654823</span></a>
+<a class="sourceLine" id="cb13-4" data-line-number="4"><span class="co"># [1] -12199.7233099</span></a></code></pre></div>
+<p>but, perhaps more compellingly, in this example mix-SQP assigns (nearly) zero weight to a redundant mixture component, whereas the EM algorithm does not:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(fit.teem<span class="op">$</span>w,<span class="dt">digits =</span> <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(fit.mixsqp<span class="op">$</span>w,<span class="dt">digits =</span> <span class="dv">3</span>))</a>
+<a class="sourceLine" id="cb14-3" data-line-number="3"><span class="co">#    k1    k2    k3    k4 </span></a>
+<a class="sourceLine" id="cb14-4" data-line-number="4"><span class="co"># 0.255 0.244 0.210 0.290 </span></a>
+<a class="sourceLine" id="cb14-5" data-line-number="5"><span class="co">#    k1    k2    k3    k4 </span></a>
+<a class="sourceLine" id="cb14-6" data-line-number="6"><span class="co"># 0.315 0.531 0.153 0.000</span></a></code></pre></div>
+<p>The benefits of the mix-SQP updates need to be explored further.</p>
+</div>
+<div id="plot-improvement-in-solutions-over-time" class="section level2">
+<h2 class="hasAnchor">
+<a href="#plot-improvement-in-solutions-over-time" class="anchor"></a>Plot improvement in solutions over time</h2>
+<p>Each EM update should improve the log-likelihood. Here we show the improvement in the solution over time for the four variants illustrated above: “Extreme Deconvolution” updates (dark blue); “truncated-eigenvalue” updates with the mix-SQP re-fitting step (dashed, yellow line), and without (solid, orange line); and “truncated-eigenvalue” updates combined with estimating the residual covariance (green line).</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/graphics/par.html">par</a></span>(<span class="dt">mar =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">4</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">2</span>))</a>
+<a class="sourceLine" id="cb15-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span>(fit.ed<span class="op">$</span>progress<span class="op">$</span>loglik,</a>
+<a class="sourceLine" id="cb15-3" data-line-number="3">           fit.teem<span class="op">$</span>progress<span class="op">$</span>loglik,</a>
+<a class="sourceLine" id="cb15-4" data-line-number="4">           fit.teem2<span class="op">$</span>progress<span class="op">$</span>loglik,</a>
+<a class="sourceLine" id="cb15-5" data-line-number="5">           fit.mixsqp<span class="op">$</span>progress<span class="op">$</span>loglik)</a>
+<a class="sourceLine" id="cb15-6" data-line-number="6">y &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>(y) <span class="op">-</span><span class="st"> </span>y <span class="op">+</span><span class="st"> </span><span class="fl">0.01</span></a>
+<a class="sourceLine" id="cb15-7" data-line-number="7"><span class="kw"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="dv">1</span><span class="op">:</span><span class="dv">100</span>,y[,<span class="dv">1</span>],<span class="dt">col =</span> <span class="st">"darkblue"</span>,<span class="dt">type =</span> <span class="st">"l"</span>,<span class="dt">log =</span> <span class="st">"y"</span>,<span class="dt">lwd =</span> <span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb15-8" data-line-number="8">     <span class="dt">xlab =</span> <span class="st">"iteration"</span>,<span class="dt">ylab =</span> <span class="st">"dist. from best loglik"</span>,<span class="dt">ylim =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.01</span>,<span class="dv">500</span>))</a>
+<a class="sourceLine" id="cb15-9" data-line-number="9"><span class="kw"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="dv">1</span><span class="op">:</span><span class="dv">100</span>,y[,<span class="dv">2</span>],<span class="dt">col =</span> <span class="st">"darkorange"</span>,<span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb15-10" data-line-number="10"><span class="kw"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="dv">1</span><span class="op">:</span><span class="dv">100</span>,y[,<span class="dv">3</span>] <span class="op">+</span><span class="st"> </span><span class="fl">0.01</span>,<span class="dt">col =</span> <span class="st">"seagreen"</span>,<span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb15-11" data-line-number="11"><span class="kw"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="dv">1</span><span class="op">:</span><span class="dv">100</span>,y[,<span class="dv">4</span>] <span class="op">+</span><span class="st"> </span><span class="fl">0.01</span>,<span class="dt">col =</span> <span class="st">"gold"</span>,<span class="dt">lwd =</span> <span class="dv">2</span>,<span class="dt">lty =</span> <span class="st">"dashed"</span>)</a></code></pre></div>
+<p><img src="mvebnm_intro_files/figure-html/plot-progress-1.png" width="384" style="display: block; margin: auto;"></p>
+<p>The combination of the “truncated-eigenvalue” updates and estimation of the residual covariance provides the best fit in this case.</p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
 
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li><a href="#simulate-data">Simulate data</a></li>
+      <li><a href="#truncated-eigenvalue-em">“Truncated-eigenvalue” EM</a></li>
+      <li><a href="#estimate-the-residual-covariance">Estimate the residual covariance</a></li>
+      <li><a href="#efficient-c-implementation">Efficient C++ implementation</a></li>
+      <li><a href="#update-mixture-weights-using-mix-sqp">Update mixture weights using mix-SQP</a></li>
+      <li><a href="#plot-improvement-in-solutions-over-time">Plot improvement in solutions over time</a></li>
+      </ul>
+</div>
       </div>
 
 </div>

@@ -1,15 +1,6 @@
 to do
 =====
 
-+ Write a small vignette to demonstrate the method:
-   (1) Compare update.U = "em" vs. update.U = "teem" (DONE).
-   (2) Compare update.S = "none" vs. update.S = "em" (DONE).
-   (3) Compare version = "R" vs. version = "Rcpp" (DONE).
-   (4) Re-fit with update.w = "mixsqp".
-   (5) EM updates monotonically improve likelihood.
-
-+ Re-build pkgdown site.
-
 + Implement Travis CI, Appveyor & CircleCI testing.
 
 

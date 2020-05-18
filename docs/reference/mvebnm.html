@@ -73,7 +73,7 @@ for multivariate density deconvolution." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">mvebnm</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.69</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.71</span>
       </span>
     </div>
 
@@ -183,15 +183,15 @@ of the <code>progress</code> return value.</p></td>
 
     <p>A list object with the following elements:</p>
 <dt>w</dt><dd><p>A vector containing the estimated prior mixture
-  weights. When <code>control$update.w = FALSE</code>, this will be the
+  weights. When <code>control$update.w = "none"</code>, this will be the
   same as the <code>w</code> provided at input.</p></dd>
 
 <dt>U</dt><dd><p>A list containing the estimated prior covariance matrices. When
-  <code>control$update.U = FALSE</code>, this will be the same as the <code>U</code>
+  <code>control$update.U = "none"</code>, this will be the same as the <code>U</code>
   provided at input.</p></dd>
 
 <dt>S</dt><dd><p>The estimated residual covariance matrix. When
-  <code>control$update.S = FALSE</code>, this will be the same as the <code>S</code>
+  <code>control$update.S = "none"</code>, this will be the same as the <code>S</code>
   provided at input.</p></dd>
 
 <dt>loglik</dt><dd><p>The log-likelihood at the current settings of the
@@ -242,11 +242,11 @@ likelihood with the other parameters fixed; when <code>update.w =
 
 <dt><code>update.U</code></dt><dd><p>This setting determines the algorithm used
 to estimate the prior covariance matrices. Two EM variants are
-implemented: <code>update.S = "em"</code>, the EM algorithm described by
-Bovy <em>et al</em> (2011); and <code>update.S = "teem"</code> (truncated
+implemented: <code>update.U = "ed"</code>, the EM algorithm described by
+Bovy <em>et al</em> (2011); and <code>update.U = "teem"</code> (truncated
 eigenvalue expectation-maximization), in which the M-step update
 for each covariance matrix <code>U[[j]]</code> is solved by truncating
-the eigenvalues in a spectral decomposition of the (unconstrained)
+the eigenvalues in a spectral decomposition of the unconstrained
 maximimum likelihood estimate (MLE) of <code>U[j]]</code>. The latter
 method provides greater freedom in the updates for U, and is
 expected to yield better fits, and converge more quickly to a good
@@ -296,7 +296,7 @@ Association</em> <b>113</b>, 401–416. doi:10.1080/01621459.2016.1260467</p>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
 <span class='no'>X</span>   <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/mvtnorm/man/Mvt.html'>rmvt</a></span>(<span class='fl'>1000</span>,<span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fl'>2</span>),<span class='kw'>df</span> <span class='kw'>=</span> <span class='fl'>4</span>)
 <span class='no'>fit</span> <span class='kw'>&lt;-</span> <span class='fu'>mvebnm</span>(<span class='no'>X</span>,<span class='kw'>k</span> <span class='kw'>=</span> <span class='fl'>10</span>,<span class='kw'>S</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fl'>2</span>))</div><div class='output co'>#&gt; Fitting 10-component mvebnm to 1000 x 2 data matrix with these settings:
-#&gt; max 100 updates, conv tol 1.0e-06 (mvebnm 0.1-69, "Rcpp").
+#&gt; max 100 updates, conv tol 1.0e-06 (mvebnm 0.1-71, "Rcpp").
 #&gt; updates: w (mix weights) = em; U (prior cov) = teem; S (resid cov) = none
 #&gt; iter          log-likelihood |w - w'| |U - U'| |S - S'|
 #&gt;    1 -3.4066145888315714e+03 1.38e-02 1.41e+00 0.00e+00
