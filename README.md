@@ -21,7 +21,7 @@ Once you have installed the package, load it into your environment:
 library(mvebnm)
 ```
 
-Work through the introductory vignette illustrating the methods on a
+Work through the [introductory vignette][intro-vignette] illustrating the methods on a
 small simulated data set:
 
 ```R
@@ -39,3 +39,4 @@ with contributions from [Matthew Stephens][matthew].
 [yunqi]: https://github.com/Nicholeyang0215
 [peter]: https://pcarbo.github.io
 [matthew]: http://stephenslab.uchicago.edu
+[intro-vignette]: https://stephenslab.github.io/mvebnm/articles/mvebnm_intro.html
