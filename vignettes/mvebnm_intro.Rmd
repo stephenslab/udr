@@ -172,13 +172,13 @@ print(fit.teem$loglik,digits = 12)
 print(fit.mixsqp$loglik,digits = 12)
 ```
 
-but, perhaps more compellingly, in this example mix-SQP assigns zero
-weight to a redundant mixture component, whereas the EM algorithm does
-not:
+but, perhaps more compellingly, in this example mix-SQP assigns
+(nearly) zero weight to a redundant mixture component, whereas the EM
+algorithm does not:
 
 ```{r compare-mixture-weights}
-print(fit.teem$w,digits = 3)
-print(fit.mixsqp$w,digits = 3)
+print(round(fit.teem$w,digits = 3))
+print(round(fit.mixsqp$w,digits = 3))
 ```
 
 The benefits of the mix-SQP updates need to be explored further.
@@ -186,4 +186,27 @@ The benefits of the mix-SQP updates need to be explored further.
 Plot improvement in solutions over time
 ---------------------------------------
 
-*Add content here.*
+Each EM update should improve the log-likelihood. Here we show the
+improvement in the solution over time for the four variants
+illustrated above: "Extreme Deconvolution" updates (dark blue);
+"truncated-eigenvalue" updates with the mix-SQP re-fitting step
+(dashed, yellow line), and without (solid, orange line); and
+"truncated-eigenvalue" updates combined with estimating the residual
+covariance (green line). 
+
+```{r plot-progress, fig.height=5, fig.width=4}
+par(mar = c(4,4,2,2))
+y <- cbind(fit.ed$progress$loglik,
+           fit.teem$progress$loglik,
+           fit.teem2$progress$loglik,
+           fit.mixsqp$progress$loglik)
+y <- max(y) - y + 0.01
+plot(1:100,y[,1],col = "darkblue",type = "l",log = "y",lwd = 2,
+     xlab = "iteration",ylab = "dist. from best loglik",ylim = c(0.01,500))
+lines(1:100,y[,2],col = "darkorange",lwd = 2)
+lines(1:100,y[,3] + 0.01,col = "seagreen",lwd = 2)
+lines(1:100,y[,4] + 0.01,col = "gold",lwd = 2,lty = "dashed")
+```
+
+The combination of the "truncated-eigenvalue" updates and estimation
+of the residual covariance provides the best fit in this case.
