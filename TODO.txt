@@ -1,6 +1,8 @@
 to do
 =====
 
++ "Un-hide" update.U, update.S and update.w optimization settings.
+
 + Implement Travis CI, Appveyor & CircleCI testing.
 
 

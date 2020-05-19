@@ -167,8 +167,8 @@
 #' 
 #' @export
 #' 
-mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)), control = list(),
-                    verbose = TRUE) {
+mvebnm <- function (X, k, fit, w0, U0, S0 = diag(ncol(X)),
+                    control = list(), verbose = TRUE) {
     
   # CHECK & PROCESS INPUTS
   # ----------------------
