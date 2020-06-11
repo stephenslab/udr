@@ -167,7 +167,7 @@
 #' 
 #' @export
 #' 
-mvebnm <- function (X, k, fit, w0, U0, S0 = diag(ncol(X)),
+mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)),
                     control = list(), verbose = TRUE) {
     
   # CHECK & PROCESS INPUTS
@@ -193,7 +193,7 @@ mvebnm <- function (X, k, fit, w0, U0, S0 = diag(ncol(X)),
   # parameters and other information.
   if (!missing(fit0)) {
     if (!(missing(k) & missing(w) & missing(U) & missing(S)))
-      stop("If \"fit0\" is given, do not also provide \"k\", \"w\", \"U\" ",
+      stop("If \"fit0\" is given, do not also provide \"k0\", \"w\", \"U\" ",
            "and \"S\"")
     if (!(is.list(fit0) & inherits(fit0,"mvebnm_fit")))
        stop("Input argument \"fit0\" should be an object of class ",
@@ -226,7 +226,7 @@ mvebnm <- function (X, k, fit, w0, U0, S0 = diag(ncol(X)),
   # residual covariance matrix.
   S <- as.matrix(S)
   if (!(nrow(S) == m & ncol(S) == m && is.semidef(S)))
-    stop("Input argument \"S\" (or fit$S) should be an m x m positive ",
+    stop("Input argument \"S\" (or fit0$S) should be an m x m positive ",
          "semi-definite matrix, where m is the number of columns in \"X\"")
 
   # Check and process input argument "U" giving the initial estimates

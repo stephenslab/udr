@@ -1,7 +1,9 @@
 to do
 =====
 
-+ "Un-hide" update.U, update.S and update.w optimization settings.
++ Make outputs more consistent with ebnm and/or mashr.
+
++ Output posterior quantities --- see ebnm and mashr.
 
 + Implement Travis CI, Appveyor & CircleCI testing.
 
