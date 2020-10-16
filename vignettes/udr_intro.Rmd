@@ -1,10 +1,10 @@
 ---
-title: "Introduction to mvebnm: empirical Bayes for multivariate normal means"
+title: "Introduction to Ultimate Deconvolution for multivariate normal means"
 author: Peter Carbonetto
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{mvebnm intro}
+  %\VignetteIndexEntry{udr intro}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,12 +17,12 @@ knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
 Simulate data
 -------------
 
-Here we illustrate the mvebnm method in a simulated data set, in which
-the data are simulated from the multivariate normal means model with 4
-mixture components.
+Here we illustrate the Ultimate Deconvolution (UD) method in a simulated
+data set, in which the data are simulated from the multivariate normal
+means model with 4 mixture components.
 
 ```{r load-pkgs}
-library(mvebnm)
+library(udr)
 ```
 
 We simulate 4,000 data points from a mixture of multivariate
@@ -46,13 +46,13 @@ U <- list(none   = rbind(c(0,0),
           only2  = rbind(c(0,0),
                          c(0,1)))
 w <- c(0.8,0.1,0.075,0.025)
-X <- simulate_mvebnm_data(n,w,U,S)
+X <- simulate_ud_data(n,w,U,S)
 ```
 
 "Truncated-eigenvalue" EM
 -------------------------
 
-One innovation in mvebnm is that the M-step update for the prior
+One innovation in UD is that the M-step update for the prior
 covariances is solved exactly by truncating the eigenvalues in a
 spectral decomposition of the unconstrained maximum-likelihood
 estimate. This provides greater freedom in fitting the model; here we
@@ -62,16 +62,16 @@ against the "Extreme Deconvolution" update, `update.U = "ed"`.
 First, fit the multivariate normal means model using the original
 "Extreme Deconvolution" update:
 
-```{r fit-mvebnm-ed, results="hide"}
+```{r fit-ud-ed, results="hide"}
 set.seed(1)
-fit.ed <- mvebnm(X,k = k,S = S,control = list(update.U = "ed"))
+fit.ed <- ud_fit(X,k = k,S = S,control = list(update.U = "ed"))
 ```
 
 Next, fit the model using the "truncated eigenvalue" update:
 
-```{r fit-mvebnm-teem, results="hide"}
+```{r fit-ud-teem, results="hide"}
 set.seed(1)
-fit.teem <- mvebnm(X,k = k,S = S,control = list(update.U = "teem"))
+fit.teem <- ud_fit(X,k = k,S = S,control = list(update.U = "teem"))
 ```
 
 The "truncated eigenvalue" update provides a better fit, as measured
@@ -102,11 +102,11 @@ Estimate the residual covariance
 --------------------------------
 
 In cases where the residual variance-covariance matrix, $S$, is not
-known, mvebnm can estimate it from the data:
+known, UD can estimate it from the data:
 
-```{r fit-mvebnm-estimate-resid-cov, results="hide"}
+```{r fit-ud-estimate-resid-cov, results="hide"}
 set.seed(1)
-fit.teem2 <- mvebnm(X,k = k,control = list(update.S = "em",update.U = "teem"))
+fit.teem2 <- ud_fit(X,k = k,control = list(update.S = "em",update.U = "teem"))
 ```
 
 The resulting likelihood is slightly higher than the fixing the
@@ -120,18 +120,18 @@ print(fit.teem2$loglik,digits = 12)
 Efficient C++ implementation
 ----------------------------
 
-We provide two implementations of the mvebnm methods: an R version
-with code that is easier to understand, and simpler to maintain; and a
-C++ (Rcpp) version that can be much faster. Both implementations
-should give the same, or nearly the same, output. Here's an example:
+We provide two implementations of UD: an R version with code that is
+easier to understand, and simpler to maintain; and a C++ (Rcpp)
+version that can be much faster. Both implementations should give the
+same, or nearly the same, output. Here's an example:
 
 ```{r r-vs-rcpp, results="hide"}
 set.seed(1)
 t1 <- system.time(
-  fit1 <- mvebnm(X,k = k,control = list(update.S = "em",version = "R")))
+  fit1 <- ud_fit(X,k = k,control = list(update.S = "em",version = "R")))
 set.seed(1)
 t2 <- system.time(
-  fit2 <- mvebnm(X,k = k,control = list(update.S = "em",version = "Rcpp")))
+  fit2 <- ud_fit(X,k = k,control = list(update.S = "em",version = "Rcpp")))
 ```
 
 Indeed, both runs achieve the same likelihood (you can check for
@@ -157,11 +157,11 @@ mixture weights, with estimates of the other parameters fixed. This
 could be useful as a "re-fitting" step to improve the model after
 first running the EM updates:
 
-```{r fit-mvebnm-mixsqp, results="hide"}
+```{r fit-ud-mixsqp, results="hide"}
 set.seed(1)
-fit.mixsqp <- mvebnm(X,k = k,S = S,
+fit.mixsqp <- ud_fit(X,k = k,S = S,
                      control = list(maxiter = 80))
-fit.mixsqp <- mvebnm(X,fit0 = fit.mixsqp,
+fit.mixsqp <- ud_fit(X,fit0 = fit.mixsqp,
                      control = list(update.w = "mixsqp",maxiter = 20))
 ```
 

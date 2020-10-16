@@ -1,4 +1,4 @@
-# A test that mvebnm also works for the univariate case.
+# A test that ud_fit also works for the univariate case.
 
 # SIMULATE DATA
 # -------------
@@ -13,7 +13,7 @@ names(w)    <- paste0("k",1:k)
 names(U)    <- paste0("k",1:k)
   
 # Simulate draws from the normal means model.
-X        <- simulate_mvebnm_data(n,w,U,S)
+X        <- simulate_ud_data(n,w,U,S)
 names(X) <- paste0("s",1:n)
 
 # FIT MODEL
@@ -21,13 +21,13 @@ names(X) <- paste0("s",1:n)
 set.seed(1)
 numiter <- 100
 t1 <- system.time(
-  fit1 <- mvebnm(X,k = k,S = S,verbose = TRUE,
+  fit1 <- ud_fit(X,k = k,S = S,verbose = TRUE,
                  control = list(version = "R",update.U = "ed",
                                 update.S = "em",maxiter = numiter)))
 
 set.seed(1)
 t2 <- system.time(
-  fit2 <- mvebnm(X,k = k,S = S,verbose = TRUE,
+  fit2 <- ud_fit(X,k = k,S = S,verbose = TRUE,
                  control = list(version = "Rcpp",update.U = "ed",
                                 update.S = "em",maxiter = numiter)))
 
@@ -39,15 +39,15 @@ print(range(unlist(fit1$U) - unlist(fit2$U)))
 
 set.seed(1)
 t3 <- system.time(
-  fit3 <- mvebnm(X,k = k,S = S,verbose = TRUE,
+  fit3 <- ud_fit(X,k = k,S = S,verbose = TRUE,
                  control = list(version = "R",maxiter = numiter,tol = 0,
                                 update.S = "em")))
 set.seed(1)
 t4 <- system.time({
-  fit4 <- mvebnm(X,k = k,S = S,verbose = TRUE,
+  fit4 <- ud_fit(X,k = k,S = S,verbose = TRUE,
                  control = list(version = "Rcpp",tol = 0,maxiter = 50,
                                 update.S = "em"))
-  fit4 <- mvebnm(X,fit0 = fit4,verbose = TRUE,
+  fit4 <- ud_fit(X,fit0 = fit4,verbose = TRUE,
                  control = list(version = "Rcpp",tol = 0,maxiter = 50,
                                 update.S = "em"))
 })

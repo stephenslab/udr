@@ -1,5 +1,5 @@
 # This is a small demo script to verify initial implementation of the
-# mvebnm methods.
+# Ultimate Deconvolution methods.
 set.seed(1)
 
 # SIMULATE DATA
@@ -33,7 +33,7 @@ for (i in 1:k) {
 }
   
 # Simulate draws from the multivariate normal means model.
-X           <- simulate_mvebnm_data(n,w,U,S)
+X           <- simulate_ud_data(n,w,U,S)
 rownames(X) <- paste0("s",1:n)
 
 # FIT MODEL
@@ -41,43 +41,43 @@ rownames(X) <- paste0("s",1:n)
 set.seed(1)
 numiter <- 100
 t1 <- system.time(
-  fit1 <- mvebnm(X,k = k,S = S,
+  fit1 <- ud_fit(X,k = k,S = S,
                  control = list(version = "R",update.U = "ed",
                                 tol = 0,maxiter = numiter)))
 set.seed(1)
 t2 <- system.time(
-  fit2 <- mvebnm(X,k = k,S = S,
+  fit2 <- ud_fit(X,k = k,S = S,
                  control = list(version = "Rcpp",update.U = "ed",
                                 tol = 0,maxiter = numiter)))
 set.seed(1)
 t3 <- system.time(
-  fit3 <- mvebnm(X,k = k,S = S,
+  fit3 <- ud_fit(X,k = k,S = S,
                  control = list(version = "R",update.U = "teem",
                                 tol = 0,maxiter = numiter)))
 print(lapply(fit3$U,function (x) eigen(x)$values))
 set.seed(1)
 t4 <- system.time(
-  fit4 <- mvebnm(X,k = k,S = S,
+  fit4 <- ud_fit(X,k = k,S = S,
                  control = list(version = "Rcpp",update.U = "teem",
                                 tol = 0,maxiter = 50)))
 
-fit4a <- mvebnm(X,fit0 = fit4,
+fit4a <- ud_fit(X,fit0 = fit4,
                control = list(version = "Rcpp",update.U = "teem",
                               tol = 0,maxiter = 50))
 
-fit4b <- mvebnm(X,fit0 = fit4,
+fit4b <- ud_fit(X,fit0 = fit4,
                control = list(version = "Rcpp",update.U = "teem",
                               update.w = "mixsqp",tol = 0,
                               maxiter = 50))
 
 set.seed(1)
-fit5 <- mvebnm(X,k = k,S = S,
+fit5 <- ud_fit(X,k = k,S = S,
                control = list(version = "R",update.U = "teem",
                               update.S = "em",tol = 0,
                               maxiter = numiter))
 
 set.seed(1)
-fit6 <- mvebnm(X,k = k,S = S,
+fit6 <- ud_fit(X,k = k,S = S,
                control = list(version = "Rcpp",update.U = "teem",
                               update.S = "em",tol = 0,
                               maxiter = numiter))

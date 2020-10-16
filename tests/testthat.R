@@ -1,3 +1,3 @@
 library(testthat)
-library(mvebnm)
-test_check("mvebnm")
+library(udr)
+test_check("udr")
