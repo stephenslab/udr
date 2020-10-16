@@ -1,19 +1,19 @@
-context("mvebnm")
+context("ud_fit")
 
-test_that("A few basic tests of mvebnm",{
+test_that("A few basic tests of ud_fit",{
  
   # Simulate data.
   set.seed(1)
-  dat <- simulate_mvebnm_data_2d(100)
+  dat <- simulate_ud_data_2d(100)
 
   # First, compare the R and C++ implementations of the Bovy et al
   # (2013) EM algorithm.
   capture.output(
-    fit1 <- mvebnm(dat$X,U = dat$U,
+    fit1 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "R",update.S = "em",
                                   update.U = "ed",maxiter = 20)))
   capture.output(
-    fit2 <- mvebnm(dat$X,U = dat$U,
+    fit2 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "Rcpp",update.S = "em",
                                   update.U = "ed",maxiter = 20)))
 
@@ -43,11 +43,11 @@ test_that("A few basic tests of mvebnm",{
   # Next, compare the R and C++ implementations of "truncated
   # eigenvalue" EM updates.
   capture.output(
-    fit3 <- mvebnm(dat$X,U = dat$U,
+    fit3 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "R",update.S = "em",
                                   update.U = "teem",maxiter = 20)))
   capture.output(
-    fit4 <- mvebnm(dat$X,U = dat$U,
+    fit4 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "Rcpp",update.S = "em",
                                   update.U = "teem",maxiter = 20)))
 
@@ -75,7 +75,7 @@ test_that("A few basic tests of mvebnm",{
                attributes(simplify2array(dat$U)))
 })
 
-test_that("A few basic tests of mvebnm for univariate (m = 1) data",{
+test_that("A few basic tests of ud_fit for univariate (m = 1) data",{
 
   # Simulate univariate data.
   set.seed(1)
@@ -84,11 +84,11 @@ test_that("A few basic tests of mvebnm for univariate (m = 1) data",{
   # Compare the R and C++ implementations of the Bovy et al (2013) EM
   # algorithm.
   capture.output(
-    fit1 <- mvebnm(dat$X,U = dat$U,
+    fit1 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "R",update.S = "em",
                                   update.U = "ed",maxiter = 20)))
   capture.output(
-    fit2 <- mvebnm(dat$X,U = dat$U,
+    fit2 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "Rcpp",update.S = "em",
                                   update.U = "ed",maxiter = 20)))
 
@@ -119,11 +119,11 @@ test_that("A few basic tests of mvebnm for univariate (m = 1) data",{
   # Compare the R and C++ implementations of "truncated eigenvalue" EM
   # updates.
   capture.output(
-    fit3 <- mvebnm(dat$X,U = dat$U,
+    fit3 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "R",update.S = "em",
                                   update.U = "teem",maxiter = 20)))
   capture.output(
-    fit4 <- mvebnm(dat$X,U = dat$U,
+    fit4 <- ud_fit(dat$X,U = dat$U,
                    control = list(version = "Rcpp",update.S = "em",
                                   update.U = "teem",maxiter = 20)))
 

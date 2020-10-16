@@ -4,25 +4,24 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-double loglik_mvebnm (const mat& X, const vec& w, const cube& U, 
-		      const mat& S);
+double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& S);
 
 // FUNCTION DEFINITIONS
 // --------------------
-// Compute the log-likelihood for the mvebnm model. See the mvebnm R
-// function for a description of the inputs.
+
+// Compute the log-likelihood for the Ultimate Deconvolution model.
+// See R function "ud_fit" for a description of the inputs.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-double loglik_mvebnm_rcpp (const arma::mat& X, const arma::vec& w, 
-			   const arma::cube& U, const arma::mat& S) {
-  return loglik_mvebnm(X,w,U,S);
+double loglik_ud_rcpp (const arma::mat& X, const arma::vec& w, 
+		       const arma::cube& U, const arma::mat& S) {
+  return loglik_ud(X,w,U,S);
 }
 
-// Compute the log-likelihood for the mvebnm model. See the mvebnm R
-// function for description of the inputs.
-double loglik_mvebnm (const mat& X, const vec& w, const cube& U, 
-		      const mat& S) {
+// Compute the log-likelihood for the Ultimate Deconvolution
+// model. See R "u_fit" for description of the inputs.
+double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& S) {
   
   // Get the number of rows (n) and columns (m) of X, and the number
   // of mixture components (k).

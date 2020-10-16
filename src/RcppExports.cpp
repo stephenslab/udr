@@ -6,20 +6,6 @@
 
 using namespace Rcpp;
 
-// loglik_mvebnm_rcpp
-double loglik_mvebnm_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
-RcppExport SEXP _udr_loglik_mvebnm_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(loglik_mvebnm_rcpp(X, w, U, S));
-    return rcpp_result_gen;
-END_RCPP
-}
 // compute_posterior_probs_rcpp
 arma::mat compute_posterior_probs_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
 RcppExport SEXP _udr_compute_posterior_probs_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
@@ -76,13 +62,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// loglik_ud_rcpp
+double loglik_ud_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
+RcppExport SEXP _udr_loglik_ud_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    rcpp_result_gen = Rcpp::wrap(loglik_ud_rcpp(X, w, U, S));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_udr_loglik_mvebnm_rcpp", (DL_FUNC) &_udr_loglik_mvebnm_rcpp, 4},
     {"_udr_compute_posterior_probs_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_rcpp, 4},
     {"_udr_update_prior_covariances_ed_rcpp", (DL_FUNC) &_udr_update_prior_covariances_ed_rcpp, 4},
     {"_udr_update_prior_covariances_teem_rcpp", (DL_FUNC) &_udr_update_prior_covariances_teem_rcpp, 4},
     {"_udr_update_resid_covariance_rcpp", (DL_FUNC) &_udr_update_resid_covariance_rcpp, 4},
+    {"_udr_loglik_ud_rcpp", (DL_FUNC) &_udr_loglik_ud_rcpp, 4},
     {NULL, NULL, 0}
 };
 

@@ -16,7 +16,7 @@ simulate_ebnm_data <- function (n) {
   names(U) <- paste0("k",1:k)
   
   # Simulate draws from the (univariate) normal means model.
-  X        <- simulate_mvebnm_data(n,w,U,S)
+  X        <- simulate_ud_data(n,w,U,S)
   names(X) <- paste0("s",1:n)
 
   # Output the data, and the parameters of the model used to simulate
@@ -25,7 +25,7 @@ simulate_ebnm_data <- function (n) {
 }
 
 # Simulate bivariate data points drawn from a mixture of four normals.
-simulate_mvebnm_data_2d <- function (n) {
+simulate_ud_data_2d <- function (n) {
     
   # These parameters specify the model used to simulate the data.
   S <- rbind(c(0.8,0.2),
@@ -51,7 +51,7 @@ simulate_mvebnm_data_2d <- function (n) {
   }
 
   # Simulate draws from the multivariate normal means model.
-  X           <- simulate_mvebnm_data(n,w,U,S)
+  X           <- simulate_ud_data(n,w,U,S)
   rownames(X) <- paste0("s",1:n)
 
   # Output the data, and the parameters of the model used to simulate
