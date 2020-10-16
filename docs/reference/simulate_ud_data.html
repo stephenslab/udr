@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>License • udr</title>
+<title>Simulate Data from Multivariate Normal Means Model — simulate_ud_data • udr</title>
 
 
 <!-- jquery -->
@@ -18,8 +18,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
 
 <!-- bootstrap-toc -->
-<link rel="stylesheet" href="bootstrap-toc.css">
-<script src="bootstrap-toc.js"></script>
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
@@ -33,13 +33,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
-<link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script>
+<link href="../pkgdown.css" rel="stylesheet">
+<script src="../pkgdown.js"></script>
 
 
 
 
-<meta property="og:title" content="License" />
+<meta property="og:title" content="Simulate Data from Multivariate Normal Means Model — simulate_ud_data" />
+<meta property="og:description" content="Simulate data points from the multivariate normal
+  means model. The univariate case (m = 1) is also handled. See
+  ud_fit for the model definition." />
 
 
 
@@ -58,7 +61,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-title-body">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -70,7 +73,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="index.html">udr</a>
+        <a class="navbar-link" href="../index.html">udr</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2-3</span>
       </span>
     </div>
@@ -78,13 +81,13 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">Home</a>
+  <a href="../index.html">Home</a>
 </li>
 <li>
-  <a href="articles/index.html">Vignettes</a>
+  <a href="../articles/index.html">Vignettes</a>
 </li>
 <li>
-  <a href="reference/index.html">Functions</a>
+  <a href="../reference/index.html">Functions</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -102,25 +105,63 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>License</h1>
+    <h1>Simulate Data from Multivariate Normal Means Model</h1>
+    <small class="dont-index">Source: <a href='https://github.com/stephenslab/udr/blob/master/R/datasim.R'><code>R/datasim.R</code></a></small>
+    <div class="hidden name"><code>simulate_ud_data.Rd</code></div>
     </div>
 
-<pre>YEAR: 2019-2020
-COPYRIGHT HOLDER: Peter Carbonetto, Yunqi Yang &amp; Matthew Stephens.
-</pre>
+    <div class="ref-description">
+    <p>Simulate data points from the multivariate normal
+  means model. The univariate case (m = 1) is also handled. See
+  <code><a href='ud_fit.html'>ud_fit</a></code> for the model definition.</p>
+    </div>
+
+    <pre class="usage"><span class='fu'>simulate_ud_data</span>(<span class='no'>n</span>, <span class='no'>w</span>, <span class='no'>U</span>, <span class='no'>S</span>)</pre>
+
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>n</th>
+      <td><p>Number of data points to simulate.</p></td>
+    </tr>
+    <tr>
+      <th>w</th>
+      <td><p>A numeric vector of length k specifying the prior mixture
+weights. All entries must be non-negative, but need not sum to 1;
+the mixture weights are automatically normalized to sum to 1.</p></td>
+    </tr>
+    <tr>
+      <th>U</th>
+      <td><p>A list of length k specifying the covariance matrices in
+the mixture-of-multivariate-normals prior; list element
+<code>U[[i]]</code> is the m x m covariance matrix for the ith mixture
+component.</p></td>
+    </tr>
+    <tr>
+      <th>S</th>
+      <td><p>The m x m residual covariance matrix.</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>An n x m matrix in which each row is a draw from the
+  multivariate normal means model. For the univariate case (m = 1), a
+  vector is returned.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='ud_fit.html'>ud_fit</a></code></p></div>
 
   </div>
-
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
     </nav>
   </div>
-
 </div>
-
 
 
       <footer>
