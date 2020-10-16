@@ -2,7 +2,7 @@
 #'
 #' @description Simulate data points from the multivariate normal
 #'   means model. The univariate case (m = 1) is also handled. See
-#'   \code{\link{mvebnm}} for the model definition.
+#'   \code{\link{ud_fit}} for the model definition.
 #'
 #' @param n Number of data points to simulate.
 #' 
@@ -21,13 +21,13 @@
 #'   multivariate normal means model. For the univariate case (m = 1), a
 #'   vector is returned.
 #' 
-#' @seealso \code{\link{mvebnm}}
+#' @seealso \code{\link{ud_fit}}
 #'
 #' @importFrom mvtnorm rmvnorm
 #' 
 #' @export
 #' 
-simulate_mvebnm_data <- function (n, w, U, S) {
+simulate_ud_data <- function (n, w, U, S) {
       
   # Check the residual covariance matrix, S.
   S <- as.matrix(S)

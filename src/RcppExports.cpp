@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // loglik_mvebnm_rcpp
 double loglik_mvebnm_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
-RcppExport SEXP _mvebnm_loglik_mvebnm_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
+RcppExport SEXP _udr_loglik_mvebnm_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,7 +22,7 @@ END_RCPP
 }
 // compute_posterior_probs_rcpp
 arma::mat compute_posterior_probs_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
-RcppExport SEXP _mvebnm_compute_posterior_probs_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
+RcppExport SEXP _udr_compute_posterior_probs_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -36,7 +36,7 @@ END_RCPP
 }
 // update_prior_covariances_ed_rcpp
 arma::cube update_prior_covariances_ed_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& S, const arma::mat& P);
-RcppExport SEXP _mvebnm_update_prior_covariances_ed_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
+RcppExport SEXP _udr_update_prior_covariances_ed_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -50,7 +50,7 @@ END_RCPP
 }
 // update_prior_covariances_teem_rcpp
 arma::cube update_prior_covariances_teem_rcpp(const arma::mat& X, const arma::mat& S, const arma::mat& P, double minval);
-RcppExport SEXP _mvebnm_update_prior_covariances_teem_rcpp(SEXP XSEXP, SEXP SSEXP, SEXP PSEXP, SEXP minvalSEXP) {
+RcppExport SEXP _udr_update_prior_covariances_teem_rcpp(SEXP XSEXP, SEXP SSEXP, SEXP PSEXP, SEXP minvalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -64,7 +64,7 @@ END_RCPP
 }
 // update_resid_covariance_rcpp
 arma::mat update_resid_covariance_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& S, const arma::mat& P);
-RcppExport SEXP _mvebnm_update_resid_covariance_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
+RcppExport SEXP _udr_update_resid_covariance_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -78,15 +78,15 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_mvebnm_loglik_mvebnm_rcpp", (DL_FUNC) &_mvebnm_loglik_mvebnm_rcpp, 4},
-    {"_mvebnm_compute_posterior_probs_rcpp", (DL_FUNC) &_mvebnm_compute_posterior_probs_rcpp, 4},
-    {"_mvebnm_update_prior_covariances_ed_rcpp", (DL_FUNC) &_mvebnm_update_prior_covariances_ed_rcpp, 4},
-    {"_mvebnm_update_prior_covariances_teem_rcpp", (DL_FUNC) &_mvebnm_update_prior_covariances_teem_rcpp, 4},
-    {"_mvebnm_update_resid_covariance_rcpp", (DL_FUNC) &_mvebnm_update_resid_covariance_rcpp, 4},
+    {"_udr_loglik_mvebnm_rcpp", (DL_FUNC) &_udr_loglik_mvebnm_rcpp, 4},
+    {"_udr_compute_posterior_probs_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_rcpp, 4},
+    {"_udr_update_prior_covariances_ed_rcpp", (DL_FUNC) &_udr_update_prior_covariances_ed_rcpp, 4},
+    {"_udr_update_prior_covariances_teem_rcpp", (DL_FUNC) &_udr_update_prior_covariances_teem_rcpp, 4},
+    {"_udr_update_resid_covariance_rcpp", (DL_FUNC) &_udr_update_resid_covariance_rcpp, 4},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_mvebnm(DllInfo *dll) {
+RcppExport void R_init_udr(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

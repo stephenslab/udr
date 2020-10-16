@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 loglik_mvebnm_rcpp <- function(X, w, U, S) {
-    .Call('_mvebnm_loglik_mvebnm_rcpp', PACKAGE = 'mvebnm', X, w, U, S)
+    .Call('_udr_loglik_mvebnm_rcpp', PACKAGE = 'udr', X, w, U, S)
 }
 
 compute_posterior_probs_rcpp <- function(X, w, U, S) {
-    .Call('_mvebnm_compute_posterior_probs_rcpp', PACKAGE = 'mvebnm', X, w, U, S)
+    .Call('_udr_compute_posterior_probs_rcpp', PACKAGE = 'udr', X, w, U, S)
 }
 
 update_prior_covariances_ed_rcpp <- function(X, U, S, P) {
-    .Call('_mvebnm_update_prior_covariances_ed_rcpp', PACKAGE = 'mvebnm', X, U, S, P)
+    .Call('_udr_update_prior_covariances_ed_rcpp', PACKAGE = 'udr', X, U, S, P)
 }
 
 update_prior_covariances_teem_rcpp <- function(X, S, P, minval) {
-    .Call('_mvebnm_update_prior_covariances_teem_rcpp', PACKAGE = 'mvebnm', X, S, P, minval)
+    .Call('_udr_update_prior_covariances_teem_rcpp', PACKAGE = 'udr', X, S, P, minval)
 }
 
 update_resid_covariance_rcpp <- function(X, U, S, P) {
-    .Call('_mvebnm_update_resid_covariance_rcpp', PACKAGE = 'mvebnm', X, U, S, P)
+    .Call('_udr_update_resid_covariance_rcpp', PACKAGE = 'udr', X, U, S, P)
 }
 

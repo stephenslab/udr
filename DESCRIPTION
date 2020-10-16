@@ -1,23 +1,19 @@
 Encoding: UTF-8
 Type: Package
-Package: mvebnm
-Version: 0.1-73
-Date: 2020-06-11
-Title: Empirical Bayes Methods for Multivariate Normal Means
+Package: udr
+Version: 0.2-1
+Date: 2020-10-16
+Title: Ultimate Deconvolution for Multivariate Normal Means
 Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
                     email="peter.carbonetto@gmail.com"),
              person("Yunqi","Yang",role="aut"),
              person("Matthew","Stephens",role="aut"),
              person("Gao","Wang",role="ctb"))
-URL: https://github.com/stephenslab/mvebnm
-BugReports: https://github.com/stephenslab/mvebnm/issues
-Description: Implements fast algorithms for solving the multivariate
-  normal means problem via empirical Bayes. The method is closely
-  related to statistical aapproaches for multivariate density
-  deconvolution, so it can also be viewed as a method for multivariate
-  density deconvolution. The multivariate normal means model is also a
-  useful special case of the "Extreme Deconvolution" model
-  <DOI:10.1214/10-AOAS439>.
+URL: https://github.com/stephenslab/udr
+BugReports: https://github.com/stephenslab/udr/issues
+Description: Implements fast statistical algorithms for solving the
+    multivariate normal means problem via empirical Bayes, building on
+    the "Extreme Deconvolution" method <DOI:10.1214/10-AOAS439>.
 License: MIT + file LICENSE
 Imports: 
     utils,
@@ -34,5 +30,5 @@ Suggests:
     rmarkdown
 LazyData: true
 NeedsCompilation: yes
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 VignetteBuilder: knitr

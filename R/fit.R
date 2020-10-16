@@ -1,10 +1,13 @@
+#' @rdname ud_fit
+#' 
 #' @title Fit Empirical Bayes Multivariate Normal Means Model
 #'
-#' @description This function implements an empirical Bayes method for
-#' fitting a multivariate normal means model. This method is closely
-#' related to approaches for multivariate density deconvolution
-#' (Sarkar \emph{et al}, 2018), so it can also be viewed as a method
-#' for multivariate density deconvolution. 
+#' @description This function implements "Ultimate Deconvolution", an
+#' empirical Bayes method for fitting a multivariate normal means
+#' model. This method is closely related to approaches for
+#' multivariate density deconvolution (Sarkar \emph{et al}, 2018), so
+#' it can also be viewed as a method for multivariate density
+#' deconvolution.
 #'
 #' @details In the multivariate normal means model, each m-dimensional
 #' observation \eqn{x} is drawn from a mixture of multivariate
@@ -29,7 +32,7 @@
 #' expectation-maximization (EM). The \code{control} argument is a
 #' list in which any of the following named components will override
 #' the default optimization algorithm settings (as they are defined by
-#' \code{mvebnm_control_default}):
+#' \code{ud_fit_control_default}):
 #' 
 #' \describe{
 #'
@@ -83,9 +86,10 @@
 #'   components in the mixture-of-normals prior. This only needs to be
 #'   provided if neither \code{U} nor \code{w} are provided.
 #'
-#' @param fit0 A previous mvebnm fit. This is useful for "re-fitting"
-#'   the model. When a value for this argument is given, the other
-#'   inputs \code{k}, \code{w}, \code{U} and \code{S} are not needed.
+#' @param fit0 A previous Ultimate Deconvolution fit. This is useful
+#'   for "re-fitting" the model. When a value for this argument is
+#'   given, the other inputs \code{k}, \code{w}, \code{U} and \code{S}
+#'   are not needed.
 #'
 #' @param w A numeric vector of length k giving initial estimates of
 #'   the prior mixture weights. All entries must be non-negative, but
@@ -141,7 +145,7 @@
 #' library(mvtnorm)
 #' set.seed(1)
 #' X   <- rmvt(1000,diag(2),df = 4)
-#' fit <- mvebnm(X,k = 10,S = diag(2))
+#' fit <- ud_fit(X,k = 10,S = diag(2))
 #' 
 #' @references
 #'
@@ -160,14 +164,14 @@
 #' \emph{Journal of the Royal Statistical Society, Series B} \bold{75},
 #' 427–450. doi:10.1111/j.1467-9868.2012.01049.x
 #' 
-#' @useDynLib mvebnm
+#' @useDynLib udr
 #'
 #' @importFrom utils modifyList
 #' @importFrom Rcpp evalCpp
 #' 
 #' @export
 #' 
-mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)),
+ud_fit <- function (X, k, fit0, w, U, S = diag(ncol(X)),
                     control = list(), verbose = TRUE) {
     
   # CHECK & PROCESS INPUTS
@@ -182,7 +186,7 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)),
   m <- ncol(X)
 
   # Check and process the optimization settings.
-  control <- modifyList(mvebnm_control_default(),control,keep.null = TRUE)
+  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
 
   # Set up the data structure for keeping track of the algorithm's progress.
   progress <- as.data.frame(matrix(as.numeric(NA),control$maxiter,6))
@@ -195,9 +199,9 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)),
     if (!(missing(k) & missing(w) & missing(U) & missing(S)))
       stop("If \"fit0\" is given, do not also provide \"k0\", \"w\", \"U\" ",
            "and \"S\"")
-    if (!(is.list(fit0) & inherits(fit0,"mvebnm_fit")))
+    if (!(is.list(fit0) & inherits(fit0,"ud_fit")))
        stop("Input argument \"fit0\" should be an object of class ",
-            "\"mvbnm_fit\", such as an output of \"mvebnm\"")
+            "\"mvbnm_fit\", such as an output of \"ud_fit\"")
     w             <- fit0$w
     U             <- fit0$U
     S             <- fit0$S
@@ -257,10 +261,11 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)),
   
   # Give an overview of the optimization settings.
   if (verbose) {
-    cat(sprintf("Fitting %d-component mvebnm to %d x %d data matrix ",k,n,m))
+    cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
     cat("with these settings:\n")
+    cat(sprintf("number of components in mixture prior: %d",k))
     cat(sprintf("max %d updates, conv tol %0.1e ",control$maxiter,control$tol))
-    cat(sprintf("(mvebnm 0.1-72, \"%s\").\n",control$version))
+    cat(sprintf("(udr 0.2-1, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -270,12 +275,12 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)),
   # -----------
   if (verbose)
     cat("iter          log-likelihood |w - w'| |U - U'| |S - S'|\n")
-  fit <- mvebnm_main_loop(X,w,U,S,iter0,progress,control,verbose)
+  fit <- ud_fit_main_loop(X,w,U,S,iter0,progress,control,verbose)
 
   # Output the parameters of the updated model (w, U, S), the
   # log-likelihood of the updated model (loglik), and a record of the
   # algorithm's progress over time (progress).
-  fit$loglik <- loglik_mvebnm(X,fit$w,fit$U,fit$S,control$version)
+  fit$loglik <- loglik_ud(X,fit$w,fit$U,fit$S,control$version)
   fit$U      <- array2list(fit$U)
   fit$S      <- drop(fit$S)
   for (i in 1:k) {
@@ -286,12 +291,12 @@ mvebnm <- function (X, k, fit0, w, U, S = diag(ncol(X)),
   names(fit$U)    <- mixture.labels
   rownames(fit$S) <- colnames(X)
   colnames(fit$S) <- colnames(X)
-  class(fit)      <- c("mvebnm_fit","list")
+  class(fit)      <- c("ud_fit","list")
   return(fit)
 }
 
-# This implements the core part of mvebnm.
-mvebnm_main_loop <- function (X, w, U, S, iter0, progress, control, verbose) {
+# This implements the core part of ud_fit.
+ud_fit_main_loop <- function (X, w, U, S, iter0, progress, control, verbose) {
 
   # Get the number of components in the mixture prior.
   k <- length(w)
@@ -339,7 +344,7 @@ mvebnm_main_loop <- function (X, w, U, S, iter0, progress, control, verbose) {
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
-    loglik <- loglik_mvebnm(X,wnew,Unew,Snew,control$version)
+    loglik <- loglik_ud(X,wnew,Unew,Snew,control$version)
     dw     <- max(abs(wnew - w))
     dS     <- max(abs(Snew - S))
     dU     <- max(abs(Unew - U))
@@ -367,9 +372,9 @@ mvebnm_main_loop <- function (X, w, U, S, iter0, progress, control, verbose) {
 
 # Compute the n x k matrix of posterior mixture assignment
 # probabilities given current estimates of the model parameters. This
-# implements the "E step" in the EM algorithm for fitting the mvebnm
-# model. These posterior computations are implemented in R (version =
-# "R") and C++ (version = "Rcpp").
+# implements the "E step" in the EM algorithm for fitting the Ultimate
+# Deconvolution model. These posterior computations are implemented in
+# R (version = "R") and C++ (version = "Rcpp").
 compute_posterior_probs <- function (X, w, U, S, version = c("Rcpp","R")) {
   version <- match.arg(version)
   if (version == "R")
@@ -549,11 +554,11 @@ compute_posterior_mvtnorm <- function (x, V, S) {
   return(list(mu1 = mu1,S1 = S1))
 }
 
-#' @rdname mvebnm
+#' @rdname ud_fit
 #'
 #' @export
 #' 
-mvebnm_control_default <- function()
+ud_fit_control_default <- function()
   list(update.w = "em",    # One or "em", "mixsqp" or "none".
        update.U = "teem",  # One of "ed", "teem" or "none".
        update.S = "none",  # One of "em" or "none".
