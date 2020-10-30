@@ -3,6 +3,7 @@
 export(simulate_ud_data)
 export(ud_fit)
 export(ud_fit_control_default)
+export(ud_init)
 importFrom(Rcpp,evalCpp)
 importFrom(mixsqp,mixsqp)
 importFrom(mvtnorm,dmvnorm)
