@@ -1,11 +1,17 @@
-#' @rdname ud_fit
+#' @title Function Title Goes Here
 #'
+#' @description Description of function goes here.
+#' 
 #' @param X The n x m data matrix, in which each row is an
 #'   m-dimensional observation.
 #'
 #' @param V An m x m matrix giving the initial estimate of the
 #'   residual covariance matrix.
 #'
+#' @param n1 Describe input argument "n1" here.
+#'
+#' @param nf Describe input argument "nf" here.
+#' 
 #' @param U A list of length k giving initial estimates of the
 #'   covariance matrices in the mixture-of-multivariate-normals prior;
 #'   list element \code{U[[i]]} is the m x m covariance matrix for the
@@ -19,10 +25,6 @@
 #'   to sum to 1. If not provided, the mixture weights are set to
 #'   uniform.
 #'
-#' @param k An integer 2 or greater specifying the number of
-#'   components in the mixture-of-normals prior. This only needs to be
-#'   provided if neither \code{U} nor \code{w} are provided.
-#'
 #' @examples
 #'
 #' library(mvtnorm)
@@ -34,29 +36,76 @@
 #'           rank1  = tcrossprod(c(1,2)),
 #'           ed     = crossprod(matrix(rnorm(4),2,2)),
 #'           teem   = crossprod(matrix(rnorm(4),2,2)))
-#' attr(U$fixed,"covtype")  <- "fixed"
 #' attr(U$scaled,"covtype") <- "scaled"
+#' attr(U$scaled,"update")  <- "ed"
 #' attr(U$rank1,"covtype")  <- "rank1"
-#' attr(U$ed,"covtype")     <- "ed"
-#' attr(U$teem,"covtype")   <- "teem"
+#' attr(U$fixed,"covtype")  <- "full"
+#' attr(U$ed,"covtype")     <- "full"
+#' attr(U$teem,"covtype")   <- "full"
 #' fit0 <- ud_init(X,V,U = U)
 #' 
 #' @export
-#' 
-ud_init <- function (X, V = diag(ncol(X)), U, w, k) {
+#'
+ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nf = 4,
+                     U = list(indep = diag(ncol(X)),
+                              iden = matrix(1,ncol(X),ncol(X))), w) {
 
   # Get the number of rows (n) and columns (m) of the data matrix,
   n <- nrow(X)
   m <- ncol(X)
 
-  # Check and process inputs.
-  if (missing(k))
-    k <- length(U)
+  # Randomly initialize the rank-1 prior covariances.
+  if (n1 > 0) {
+    U1 <- vector("list",n1)
+    names(U1) <- paste("rank1",1:n1,sep = "_")
+    for (i in 1:n1) {
+      U1[[i]] <- sim_r1(m)
+      attr(U1[[i]],"covtype") <- "rank1"
+    }
+  } else
+    U1 <- NULL
+
+  # Randomly initialize the full prior covariances.
+  if (nf > 0) {
+    Uf <- vector("list",nf)
+    names(Uf) <- paste0("full",1:nf)
+    for (i in 1:nf) {
+      # TO DO.
+    }
+  } else
+    Uf <- NULL
+
+  # TO DO: Process input argument U.
+  
+  # Combine the prior covariances into a single list.
+  U <- c(U1,U)
+  k <- length(U)
+
+  # Set the default updates for the prior covariances when the updates
+  # haven't already been chosen.
+  # TO DO.
+  
+  # Check and process input w.
   if (missing(w))
     w <- rep(1/k,k)
-
+  if (is.null(names(w)))
+    names(w) <- names(U)
+  
+  # Add row and column names to the matrices.
+  rownames(V) <- colnames(X)
+  colnames(V) <- colnames(X)
+  for (i in 1:k) {
+    rownames(U[[i]]) <- colnames(X)
+    colnames(U[[i]]) <- colnames(X)
+  }
+  
   # Finalize the output.
   fit <- list(V = V,U = U,w = w)
   class(fit) <- c("ud_fit","list")
   return(fit)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+set_prior_covariance_updates <- function (U) {
+
 }

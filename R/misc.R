@@ -9,12 +9,12 @@ array2list <- function (x) {
 
 # Returns TRUE if and only if the matrix is symmetric positive
 # definite.
-is.posdef <- function (X)
+isposdef <- function (X)
   is.matrix(tryCatch(chol(X),error = function (e) NULL))
 
 # Returns TRUE if and only if the matrix is (symmetric) positive
 # semi-definite.
-is.semidef <- function (X, e = 1e-15) 
+issemidef <- function (X, e = 1e-15) 
   all(eigen(X)$values > -e)
 
 # Compute the softmax of each row of W in a way that guards against
@@ -31,7 +31,7 @@ softmax <- function (W) {
 # achieved by setting any eigenvalues of T less than 1 to 1 + minval,
 # or, equivalently, setting any eigenvalues of U less than 0 to be
 # minval.  The output is a positive definite matrix, U.
-shrink.cov <- function (T, minval) {
+shrink_cov <- function (T, minval) {
   if (length(T) == 1)
 
     # Handle univariate case (m = 1).
@@ -48,7 +48,7 @@ shrink.cov <- function (T, minval) {
 # Returns TRUE if and only if all prior covariances U are positive
 # semi-definite, and all marginal covariances T = S + U are positive
 # definite.
-verify.prior.covariances <- function (U, S, e = 1e-15) {
+verify_prior_covariances <- function (U, S, e = 1e-15) {
   k   <- length(U)
   out <- TRUE  
   for (i in 1:k)
@@ -56,11 +56,17 @@ verify.prior.covariances <- function (U, S, e = 1e-15) {
   return(out)
 }
 
+# Randomly generate an m x m rank-1 matrix.
+#
+#' @importFrom stats rnorm
+sim_r1 <- function (m)
+  tcrossprod(rnorm(m),rnorm(m))
+
 # Randomly generate initial estimates of the prior covariance matrices
 # U by computing the sample covariances of random subsets of the data.
 #
 #' @importFrom stats cov
-generate.random.covariances <- function (X, k) {
+generate_random_covariances <- function (X, k) {
 
   # Get the number of data samples (n) and their dimension (m).
   n <- nrow(X)

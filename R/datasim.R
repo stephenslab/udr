@@ -66,3 +66,4 @@ simulate_ud_data <- function (n, w, U, S) {
   colnames(X) <- rownames(S)
   return(drop(X))
 }
+
