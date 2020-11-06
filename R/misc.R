@@ -56,11 +56,17 @@ verify_prior_covariances <- function (U, S, e = 1e-15) {
   return(out)
 }
 
-# Randomly generate an m x m rank-1 matrix.
+# Randomly generate an m x m symmetric rank-1 matrix.
 #
 #' @importFrom stats rnorm
-sim_r1 <- function (m)
-  tcrossprod(rnorm(m),rnorm(m))
+simr1 <- function (m)
+  tcrossprod(rnorm(m))
+
+# Randomly generate a full-rank symmetric m x m matrix.
+#
+#' @importFrom stats rWishart
+simfull <- function (m)
+  drop(rWishart(1,4,diag(m)))
 
 # Randomly generate initial estimates of the prior covariance matrices
 # U by computing the sample covariances of random subsets of the data.

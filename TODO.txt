@@ -1,6 +1,8 @@
 to do
 =====
 
++ Implement summary.ud_fit S3 method.
+
 + Make outputs more consistent with ebnm and/or mashr.
 
 + Output posterior quantities (see ebnm and mashr).

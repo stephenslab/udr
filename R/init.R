@@ -59,8 +59,9 @@ ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nf = 4,
     U1 <- vector("list",n1)
     names(U1) <- paste("rank1",1:n1,sep = "_")
     for (i in 1:n1) {
-      U1[[i]] <- sim_r1(m)
-      attr(U1[[i]],"covtype") <- "rank1"
+      u <- simr1(m)
+      attr(u,"covtype") <- "rank1"
+      U1[[i]] <- u
     }
   } else
     U1 <- NULL
@@ -70,15 +71,27 @@ ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nf = 4,
     Uf <- vector("list",nf)
     names(Uf) <- paste0("full",1:nf)
     for (i in 1:nf) {
-      # TO DO.
+      u <- simfull(m)
+      attr(u,"covtype") <- "full"
+      Uf[[i]] <- u
     }
   } else
     Uf <- NULL
 
-  # TO DO: Process input argument U.
+  # If the covariance type is not provided for an element of U, set to
+  # be "scaled".
+  nu <- length(U)
+  if (nu > 0) {
+    for (i in 1:nu) {
+      u <- U[[i]]
+      if (is.null(attr(u,"covtype")))
+        attr(u,"covtype") <- "scaled"
+      U[[i]] <- u
+    }
+  }
   
   # Combine the prior covariances into a single list.
-  U <- c(U1,U)
+  U <- c(U,U1,Uf)
   k <- length(U)
 
   # Set the default updates for the prior covariances when the updates
@@ -95,8 +108,10 @@ ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nf = 4,
   rownames(V) <- colnames(X)
   colnames(V) <- colnames(X)
   for (i in 1:k) {
-    rownames(U[[i]]) <- colnames(X)
-    colnames(U[[i]]) <- colnames(X)
+    u <- U[[i]]
+    rownames(u) <- colnames(X)
+    colnames(u) <- colnames(X)
+    U[[i]] <- u
   }
   
   # Finalize the output.
