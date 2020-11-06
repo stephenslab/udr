@@ -10,7 +10,7 @@
 #'
 #' @param n1 Describe input argument "n1" here.
 #'
-#' @param nf Describe input argument "nf" here.
+#' @param nfull Describe input argument "nf" here.
 #' 
 #' @param U A list of length k giving initial estimates of the
 #'   covariance matrices in the mixture-of-multivariate-normals prior;
@@ -29,24 +29,27 @@
 #'
 #' library(mvtnorm)
 #' set.seed(1)
-#' V <- diag(2) + 1
-#' X <- rmvt(1000,V,df = 4)
-#' U <- list(fixed  = matrix(1,2,2),
-#'           scaled = diag(2),
-#'           rank1  = tcrossprod(c(1,2)),
-#'           ed     = crossprod(matrix(rnorm(4),2,2)),
-#'           teem   = crossprod(matrix(rnorm(4),2,2)))
-#' attr(U$scaled,"covtype") <- "scaled"
-#' attr(U$scaled,"update")  <- "ed"
-#' attr(U$rank1,"covtype")  <- "rank1"
-#' attr(U$fixed,"covtype")  <- "full"
-#' attr(U$ed,"covtype")     <- "full"
-#' attr(U$teem,"covtype")   <- "full"
-#' fit0 <- ud_init(X,V,U = U)
+#' n <- 1000
+#' V <- diag(0.5,2) + 0.5
+#' X <- rmvt(n,V,df = 4)
+#' rownames(X) <- paste("s",1:n)
+#' colnames(X) <- c("d1","d2")
+#'
+#' # Simplest invocation relying on default settings.
+#' fit0 <- ud_init(X)
+#'
+#' # Override default U.
+#' U1 <- matrix(0,2,2)
+#' U2 <- diag(2)
+#' U3 <- matrix(1,2,2)
+#' attr(U1,"covtype") <- "full"; attr(U1,"covupdate") <- "fixed"
+#' attr(U2,"covtype") <- "full"; attr(U2,"covupdate") <- "scaled"
+#' attr(U3,"covtype") <- "full"; attr(U3,"covupdate") <- "teem"
+#' fit1 <- ud_init(X,U = list(spike = U1,indep = U2,iden = U3))
 #' 
 #' @export
 #'
-ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nf = 4,
+ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nfull = 4,
                      U = list(indep = diag(ncol(X)),
                               iden = matrix(1,ncol(X),ncol(X))), w) {
 
@@ -67,36 +70,45 @@ ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nf = 4,
     U1 <- NULL
 
   # Randomly initialize the full prior covariances.
-  if (nf > 0) {
-    Uf <- vector("list",nf)
-    names(Uf) <- paste0("full",1:nf)
-    for (i in 1:nf) {
+  if (nfull > 0) {
+    Ufull <- vector("list",nfull)
+    names(Ufull) <- paste0("full",1:nfull)
+    for (i in 1:nfull) {
       u <- simfull(m)
       attr(u,"covtype") <- "full"
-      Uf[[i]] <- u
+      Ufull[[i]] <- u
     }
   } else
-    Uf <- NULL
+    Ufull <- NULL
 
   # If the covariance type is not provided for an element of U, set to
-  # be "scaled".
+  # be "full".
   nu <- length(U)
-  if (nu > 0) {
+  if (nu > 0)
     for (i in 1:nu) {
       u <- U[[i]]
       if (is.null(attr(u,"covtype")))
-        attr(u,"covtype") <- "scaled"
+        attr(u,"covtype") <- "full"
       U[[i]] <- u
     }
-  }
   
   # Combine the prior covariances into a single list.
-  U <- c(U,U1,Uf)
+  U <- c(U,U1,Ufull)
   k <- length(U)
 
   # Set the default updates for the prior covariances when the updates
   # haven't already been chosen.
-  # TO DO.
+  for (i in 1:k) {
+    u <- U[[i]]
+    covtype <- attr(u,"covtype")
+    if (is.null(attr(u,"covupdate"))) {
+      if (covtype == "rank1")
+        attr(u,"covupdate") <- "rank1"
+      else if (covtype == "full")
+        attr(u,"covupdate") <- "ed"
+      U[[i]] <- u
+    }
+  }
   
   # Check and process input w.
   if (missing(w))
@@ -118,9 +130,4 @@ ud_init <- function (X, V = diag(ncol(X)), n1 = 4, nf = 4,
   fit <- list(V = V,U = U,w = w)
   class(fit) <- c("ud_fit","list")
   return(fit)
-}
-
-# TO DO: Explain here what this function does, and how to use it.
-set_prior_covariance_updates <- function (U) {
-
 }

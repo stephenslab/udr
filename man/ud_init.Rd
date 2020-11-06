@@ -4,7 +4,14 @@
 \alias{ud_init}
 \title{Function Title Goes Here}
 \usage{
-ud_init(X, V = diag(ncol(X)), U, w, k)
+ud_init(
+  X,
+  V = diag(ncol(X)),
+  n1 = 4,
+  nfull = 4,
+  U = list(indep = diag(ncol(X)), iden = matrix(1, ncol(X), ncol(X))),
+  w
+)
 }
 \arguments{
 \item{X}{The n x m data matrix, in which each row is an
@@ -12,6 +19,10 @@ m-dimensional observation.}
 
 \item{V}{An m x m matrix giving the initial estimate of the
 residual covariance matrix.}
+
+\item{n1}{Describe input argument "n1" here.}
+
+\item{nfull}{Describe input argument "nf" here.}
 
 \item{U}{A list of length k giving initial estimates of the
 covariance matrices in the mixture-of-multivariate-normals prior;
@@ -25,10 +36,6 @@ the prior mixture weights. All entries must be non-negative, but
 need not sum to 1; the mixture weights are automatically normalized
 to sum to 1. If not provided, the mixture weights are set to
 uniform.}
-
-\item{k}{An integer 2 or greater specifying the number of
-components in the mixture-of-normals prior. This only needs to be
-provided if neither \code{U} nor \code{w} are provided.}
 }
 \description{
 Description of function goes here.
@@ -37,18 +44,22 @@ Description of function goes here.
 
 library(mvtnorm)
 set.seed(1)
-V <- diag(2) + 1
-X <- rmvt(1000,V,df = 4)
-U <- list(fixed  = matrix(1,2,2),
-          scaled = diag(2),
-          rank1  = tcrossprod(c(1,2)),
-          ed     = crossprod(matrix(rnorm(4),2,2)),
-          teem   = crossprod(matrix(rnorm(4),2,2)))
-attr(U$fixed,"covtype")  <- "fixed"
-attr(U$scaled,"covtype") <- "scaled"
-attr(U$rank1,"covtype")  <- "rank1"
-attr(U$ed,"covtype")     <- "ed"
-attr(U$teem,"covtype")   <- "teem"
-fit0 <- ud_init(X,V,U = U)
+n <- 1000
+V <- diag(0.5,2) + 0.5
+X <- rmvt(n,V,df = 4)
+rownames(X) <- paste("s",1:n)
+colnames(X) <- c("d1","d2")
+
+# Simplest invocation relying on default settings.
+fit0 <- ud_init(X)
+
+# Override default U.
+U1 <- matrix(0,2,2)
+U2 <- diag(2)
+U3 <- matrix(1,2,2)
+attr(U1,"covtype") <- "full"; attr(U1,"covupdate") <- "fixed"
+attr(U2,"covtype") <- "full"; attr(U2,"covupdate") <- "scaled"
+attr(U3,"covtype") <- "full"; attr(U3,"covupdate") <- "teem"
+fit1 <- ud_init(X,U = list(spike = U1,indep = U2,iden = U3))
 
 }
