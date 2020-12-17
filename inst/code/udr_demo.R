@@ -36,6 +36,16 @@ for (i in 1:k) {
 X           <- simulate_ud_data(n,w,U,S)
 rownames(X) <- paste0("s",1:n)
 
+# INITIALIZE FIT
+# --------------
+# This is the simplest invocation of ud_init.
+fit1 <- ud_init(X)
+
+# This is a more complicated invocation of ud_init.
+# TO DO.
+
+stop()
+
 # FIT MODEL
 # ---------
 set.seed(1)

@@ -46,50 +46,24 @@ shrink_cov <- function (T, minval) {
 }
 
 # Returns TRUE if and only if all prior covariances U are positive
-# semi-definite, and all marginal covariances T = S + U are positive
+# semi-definite, and all marginal covariances T = V + U are positive
 # definite.
-verify_prior_covariances <- function (U, S, e = 1e-15) {
+verify_prior_covariances <- function (U, V, e = 1e-15) {
   k   <- length(U)
   out <- TRUE  
   for (i in 1:k)
-    out <- out & is.semidef(U[[i]]) & is.posdef(S + U[[i]])
+    out <- out & issemidef(U[[i]]) & isposdef(V + U[[i]])
   return(out)
 }
 
 # Randomly generate an m x m symmetric rank-1 matrix.
 #
 #' @importFrom stats rnorm
-simr1 <- function (m)
+sim_rank1 <- function (m)
   tcrossprod(rnorm(m))
 
-# Randomly generate a full-rank symmetric m x m matrix.
+# Randomly generate an m x m (unconstrained) symmetric matrix.
 #
 #' @importFrom stats rWishart
-simfull <- function (m)
+sim_unconstrained <- function (m)
   drop(rWishart(1,4,diag(m)))
-
-# Randomly generate initial estimates of the prior covariance matrices
-# U by computing the sample covariances of random subsets of the data.
-#
-#' @importFrom stats cov
-generate_random_covariances <- function (X, k) {
-
-  # Get the number of data samples (n) and their dimension (m).
-  n <- nrow(X)
-  m <- ncol(X)
-  
-  # Select the size of the random subsets.
-  n0 <- max(20,m + 2)
-  if (n0 >= n)
-    stop("Cannot generate random initial estimates of prior covariance ",
-         "matrices; more data points are needed")
-  
-  # Generate random covariance matrices by randomly selecting small
-  # subsets of the data, and computing the sample covariance from
-  # these subsets.
-  U <- vector("list",k)
-  names(U) <- paste0("k",1:k)
-  for (i in 1:k)
-    U[[i]] <- cov(X[sample(n,n0),,drop = FALSE])
-  return(U)
-}

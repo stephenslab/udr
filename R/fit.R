@@ -206,7 +206,7 @@ ud_fit <- function (X, k, fit0, w, U, V = diag(ncol(X)),
   # Check input argument "S" giving the initial estimate of the
   # residual covariance matrix.
   S <- as.matrix(S)
-  if (!(nrow(S) == m & ncol(S) == m && is.semidef(S)))
+  if (!(nrow(S) == m & ncol(S) == m && issemidef(S)))
     stop("Input argument \"S\" (or fit0$S) should be an m x m positive ",
          "semi-definite matrix, where m is the number of columns in \"X\"")
 

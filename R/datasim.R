@@ -31,12 +31,12 @@ simulate_ud_data <- function (n, w, U, S) {
       
   # Check the residual covariance matrix, S.
   S <- as.matrix(S)
-  if (!is.semidef(S))
+  if (!issemidef(S))
     stop("Input argument \"S\" should be a positive semi-definite matrix")
   
   # Check the prior covariance matrices, U.
   U <- lapply(U,as.matrix)
-  if (!(is.list(U) && verify.prior.covariances(U,S)))
+  if (!(is.list(U) && verify_prior_covariances(U,S)))
     stop("Input argument \"U\" should be list in which each list element ",
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
          "S + U[[i]] is symmetric positive definite")
