@@ -40,10 +40,12 @@ rownames(X) <- paste0("s",1:n)
 # --------------
 # This is the simplest invocation of ud_init.
 fit1 <- ud_init(X)
+print(summary(fit1))
 
 # This is a more complicated invocation of ud_init that overrides some
 # of the defaults.
 fit2 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
+print(summary(fit2))
 
 stop()
 

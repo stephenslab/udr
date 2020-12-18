@@ -2,7 +2,7 @@
 % Please edit documentation in R/init.R
 \name{ud_init}
 \alias{ud_init}
-\title{Initialize Multivariate Normal Means Model}
+\title{Initialize Ultimate Deconvolution Model}
 \usage{
 ud_init(
   X,
@@ -12,7 +12,8 @@ ud_init(
   U_scaled = list(indep = diag(ncol(X)), iden = matrix(1, ncol(X), ncol(X))),
   U_rank1,
   U_unconstrained,
-  w
+  w,
+  version = "Rcpp"
 )
 }
 \arguments{
@@ -56,13 +57,16 @@ matrices in the mixture-of-multivariate-normals prior. All entries
 must be non-negative, but need not sum to 1; the mixture weights
 are automatically normalized to sum to 1. If not provided, the
 mixture weights are set to uniform.}
+
+\item{version}{R and C++ implementations of some numerical
+computations are provided; these are selected with \code{version =
+"R"} and \code{version = "Rcpp"}.}
 }
 \value{
 An object of class "ud_fit". See \code{\link{ud_fit}} for
   details.
 }
 \description{
-Initialize a multivariate normal means model. See
-  \code{\link{ud_fit}} for full background on the multivariate normal
-  means model.
+Initialize an Ultimate Deconvolution model. See
+  \code{\link{ud_fit}} for background.
 }

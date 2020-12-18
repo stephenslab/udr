@@ -1,4 +1,4 @@
-# Compute the log-likelihood for the multivariate normal means model.
+# Compute the log-likelihood for the Ultimate Deconvolution model.
 #
 #' @importFrom mvtnorm dmvnorm
 loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {

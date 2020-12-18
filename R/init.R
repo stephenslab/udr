@@ -1,8 +1,7 @@
-#' @title Initialize Multivariate Normal Means Model
+#' @title Initialize Ultimate Deconvolution Model
 #'
-#' @description Initialize a multivariate normal means model. See
-#'   \code{\link{ud_fit}} for full background on the multivariate normal
-#'   means model.
+#' @description Initialize an Ultimate Deconvolution model. See
+#'   \code{\link{ud_fit}} for background.
 #' 
 #' @param X The n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point.
@@ -45,6 +44,10 @@
 #'   are automatically normalized to sum to 1. If not provided, the
 #'   mixture weights are set to uniform.
 #'
+#' @param version R and C++ implementations of some numerical
+#'   computations are provided; these are selected with \code{version =
+#'   "R"} and \code{version = "Rcpp"}.
+#' 
 #' @return An object of class "ud_fit". See \code{\link{ud_fit}} for
 #'   details.
 #'
@@ -53,7 +56,7 @@
 ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
                      U_scaled = list(indep = diag(ncol(X)),
                                      iden = matrix(1,ncol(X),ncol(X))),
-                     U_rank1, U_unconstrained, w) {
+                     U_rank1, U_unconstrained, w, version = "Rcpp") {
 
   # Get the number of rows (n) and columns (m) of the data matrix.
   n <- nrow(X)
@@ -125,7 +128,12 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
 
   # Verify that all scaled and unconstrained matrices are
   # positive semi-definite.
-  # TO DO.
+  for (i in 1:n_scaled)
+    if (!issemidef(U_scaled[[i]]))
+      stop("All U_scaled matrices should be positive semi-definite")
+  for (i in 1:n_unconstrained)
+    if (!issemidef(U_unconstrained[[i]]))
+      stop("All U_unconstrained matrices should be positive semi-definite")
   
   # Combine the prior covariances matrices into a single list.
   U <- c(U_scaled,U_rank1,U_unconstrained)
@@ -160,13 +168,13 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   }
 
   # Compute the log-likelihood.
-  # TO DO.
+  loglik <- loglik_ud(X,w,array(simplify2array(U),c(m,m,k)),V,version)
 
   # Initialize the "progress" data frame.
   # TO DO.
   
   # Finalize the output.
-  fit <- list(V = V,U = U,w = w)
+  fit <- list(V = V,U = U,w = w,loglik = loglik)
   class(fit) <- c("ud_fit","list")
   return(fit)
 }

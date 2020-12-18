@@ -1,7 +1,7 @@
-#' @title Simulate Data from Multivariate Normal Means Model
+#' @title Simulate Data from Ultimate Deconvolution Model
 #'
-#' @description Simulate data points from the multivariate normal
-#'   means model. The univariate case (m = 1) is also handled. See
+#' @description Simulate data points from the Ultimate Deconvolution
+#'   model. The univariate case (m = 1) is also handled. See
 #'   \code{\link{ud_fit}} for the model definition.
 #'
 #' @param n Number of data points to simulate.
@@ -18,7 +18,7 @@
 #' @param V The m x m residual covariance matrix.
 #'
 #' @return An n x m matrix in which each row is a draw from the
-#'   multivariate normal means model. For the univariate case (m = 1), a
+#'   Ultimate Deconvolution model. For the univariate case (m = 1), a
 #'   vector is returned.
 #' 
 #' @seealso \code{\link{ud_fit}}
