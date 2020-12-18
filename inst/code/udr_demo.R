@@ -7,10 +7,10 @@ set.seed(1)
 # These variables specify how the data are simulated: n is the number
 # of samples drawn from the multivariate normal means model,
 #
-#   w[1]*N(0,S + U[[1]]) + ... + w[4]*N(0,S + U[[4]]).
+#   w[1]*N(0,V + U[[1]]) + ... + w[4]*N(0,V + U[[4]]).
 #
 n <- 4000
-S <- rbind(c(0.8,0.2),
+V <- rbind(c(0.8,0.2),
            c(0.2,1.5))
 U <- list(none   = rbind(c(0,0),
                          c(0,0)),
@@ -23,8 +23,8 @@ U <- list(none   = rbind(c(0,0),
 w <- c(0.8,0.1,0.075,0.025)
 
 # Add row and column names to the variables.
-rownames(S) <- c("d1","d2")
-colnames(S) <- c("d1","d2")
+rownames(V) <- c("d1","d2")
+colnames(V) <- c("d1","d2")
 k           <- length(w)
 names(w)    <- paste0("k",1:k)
 for (i in 1:k) {
@@ -33,7 +33,7 @@ for (i in 1:k) {
 }
   
 # Simulate draws from the multivariate normal means model.
-X           <- simulate_ud_data(n,w,U,S)
+X           <- simulate_ud_data(n,w,U,V)
 rownames(X) <- paste0("s",1:n)
 
 # INITIALIZE FIT
@@ -41,8 +41,9 @@ rownames(X) <- paste0("s",1:n)
 # This is the simplest invocation of ud_init.
 fit1 <- ud_init(X)
 
-# This is a more complicated invocation of ud_init.
-# TO DO.
+# This is a more complicated invocation of ud_init that overrides some
+# of the defaults.
+fit2 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
 
 stop()
 

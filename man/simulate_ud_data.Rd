@@ -4,7 +4,7 @@
 \alias{simulate_ud_data}
 \title{Simulate Data from Multivariate Normal Means Model}
 \usage{
-simulate_ud_data(n, w, U, S)
+simulate_ud_data(n, w, U, V)
 }
 \arguments{
 \item{n}{Number of data points to simulate.}
@@ -18,7 +18,7 @@ the mixture-of-multivariate-normals prior; list element
 \code{U[[i]]} is the m x m covariance matrix for the ith mixture
 component.}
 
-\item{S}{The m x m residual covariance matrix.}
+\item{V}{The m x m residual covariance matrix.}
 }
 \value{
 An n x m matrix in which each row is a draw from the

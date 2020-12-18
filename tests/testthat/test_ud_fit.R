@@ -25,7 +25,7 @@ test_that("A few basic tests of ud_fit",{
   # R and C++ implementations should be the same.
   expect_equal(fit1$w,fit2$w,scale = 1,tolerance = 1e-14)
   expect_equal(fit1$U,fit2$U,scale = 1,tolerance = 1e-14)
-  expect_equal(fit1$S,fit2$S,scale = 1,tolerance = 1e-14)
+  expect_equal(fit1$V,fit2$V,scale = 1,tolerance = 1e-14)
   expect_equal(fit1$loglik,fit2$loglik,scale = 1,tolerance = 1e-12)
   expect_equal(fit1$progress[,-6],fit2$progress[,-6],
                scale = 1,tolerance = 1e-12)
@@ -33,8 +33,8 @@ test_that("A few basic tests of ud_fit",{
   # Check that the row and column names are assigned correctly.
   expect_equal(attributes(fit1$w),attributes(dat$w))
   expect_equal(attributes(fit2$w),attributes(dat$w))
-  expect_equal(attributes(fit1$S),attributes(dat$S))
-  expect_equal(attributes(fit2$S),attributes(dat$S))
+  expect_equal(attributes(fit1$V),attributes(dat$V))
+  expect_equal(attributes(fit2$V),attributes(dat$V))
   expect_equal(attributes(simplify2array(fit1$U)),
                attributes(simplify2array(dat$U)))
   expect_equal(attributes(simplify2array(fit2$U)),
@@ -59,7 +59,7 @@ test_that("A few basic tests of ud_fit",{
   # R and C++ implementations should be the same.
   expect_equal(fit3$w,fit4$w,scale = 1,tolerance = 1e-14)
   expect_equal(fit3$U,fit4$U,scale = 1,tolerance = 1e-14)
-  expect_equal(fit3$S,fit4$S,scale = 1,tolerance = 1e-14)
+  expect_equal(fit3$V,fit4$V,scale = 1,tolerance = 1e-14)
   expect_equal(fit3$loglik,fit4$loglik,scale = 1,tolerance = 1e-12)
   expect_equal(fit3$progress[,-6],fit4$progress[,-6],
                scale = 1,tolerance = 1e-12)
@@ -67,8 +67,8 @@ test_that("A few basic tests of ud_fit",{
   # Check that the row and column names are assigned correctly.
   expect_equal(attributes(fit3$w),attributes(dat$w))
   expect_equal(attributes(fit4$w),attributes(dat$w))
-  expect_equal(attributes(fit3$S),attributes(dat$S))
-  expect_equal(attributes(fit4$S),attributes(dat$S))
+  expect_equal(attributes(fit3$V),attributes(dat$V))
+  expect_equal(attributes(fit4$V),attributes(dat$V))
   expect_equal(attributes(simplify2array(fit3$U)),
                attributes(simplify2array(dat$U)))
   expect_equal(attributes(simplify2array(fit4$U)),
@@ -100,7 +100,7 @@ test_that("A few basic tests of ud_fit for univariate (m = 1) data",{
   # R and C++ implementations should be the same.
   expect_equal(fit1$w,fit2$w,scale = 1,tolerance = 1e-14)
   expect_equal(fit1$U,fit2$U,scale = 1,tolerance = 1e-14)
-  expect_equal(fit1$S,fit2$S,scale = 1,tolerance = 1e-14)
+  expect_equal(fit1$V,fit2$V,scale = 1,tolerance = 1e-14)
   expect_equal(fit1$loglik,fit2$loglik,scale = 1,tolerance = 1e-12)
   expect_equal(fit1$progress[,-6],fit2$progress[,-6],
                scale = 1,tolerance = 1e-12)
@@ -111,8 +111,8 @@ test_that("A few basic tests of ud_fit for univariate (m = 1) data",{
   expect_equal(attributes(fit2$w),attributes(dat$w))
   expect_equal(attributes(unlist(fit1$U)),attributes(unlist(dat$U)))
   expect_equal(attributes(unlist(fit2$U)),attributes(unlist(dat$U)))
-  expect_false(is.matrix(fit1$S))
-  expect_false(is.matrix(fit2$S))
+  expect_false(is.matrix(fit1$V))
+  expect_false(is.matrix(fit2$V))
   expect_false(any(sapply(fit1$U,is.matrix)))
   expect_false(any(sapply(fit2$U,is.matrix)))
 
@@ -135,7 +135,7 @@ test_that("A few basic tests of ud_fit for univariate (m = 1) data",{
   # R and C++ implementations should be the same.
   expect_equal(fit3$w,fit4$w,scale = 1,tolerance = 1e-14)
   expect_equal(fit3$U,fit4$U,scale = 1,tolerance = 1e-14)
-  expect_equal(fit3$S,fit4$S,scale = 1,tolerance = 1e-14)
+  expect_equal(fit3$V,fit4$V,scale = 1,tolerance = 1e-14)
   expect_equal(fit3$loglik,fit4$loglik,scale = 1,tolerance = 1e-12)
   expect_equal(fit3$progress[,-6],fit4$progress[,-6],
                scale = 1,tolerance = 1e-12)
@@ -146,8 +146,8 @@ test_that("A few basic tests of ud_fit for univariate (m = 1) data",{
   expect_equal(attributes(fit4$w),attributes(dat$w))
   expect_equal(attributes(unlist(fit3$U)),attributes(unlist(dat$U)))
   expect_equal(attributes(unlist(fit4$U)),attributes(unlist(dat$U)))
-  expect_false(is.matrix(fit3$S))
-  expect_false(is.matrix(fit4$S))
+  expect_false(is.matrix(fit3$V))
+  expect_false(is.matrix(fit4$V))
   expect_false(any(sapply(fit3$U,is.matrix)))
   expect_false(any(sapply(fit4$U,is.matrix)))
 })

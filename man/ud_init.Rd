@@ -20,7 +20,8 @@ ud_init(
 an m-dimensional data point.}
 
 \item{V}{An m x m matrix giving the initial estimate of the
-residual covariance matrix.}
+residual covariance matrix, or a list of "standard error" matrices,
+one for each data point.}
 
 \item{n_rank1}{A non-negative integer specifying the number of
 rank-1 covariance matrices included in the

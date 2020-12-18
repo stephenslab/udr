@@ -8,7 +8,8 @@
 #'   an m-dimensional data point.
 #'
 #' @param V An m x m matrix giving the initial estimate of the
-#'   residual covariance matrix.
+#'   residual covariance matrix, or a list of "standard error" matrices,
+#'   one for each data point.
 #'
 #' @param n_rank1 A non-negative integer specifying the number of
 #'   rank-1 covariance matrices included in the
@@ -119,15 +120,20 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       attr(U_unconstrained[[i]],"covtype") <- "unconstrained"
   }
 
-  # TO DO:
-  #   - Make sure rank-1 matrices are indeed rank 1.
-  #   - Make sure all matrices are positive definite.
-  #   - Process input argument V.
+  # Verify that all the rank-1 covariance matrices are indeed rank 1.
+  # TO DO.
+
+  # Verify that all scaled and unconstrained matrices are
+  # positive semi-definite.
+  # TO DO.
   
   # Combine the prior covariances matrices into a single list.
   U <- c(U_scaled,U_rank1,U_unconstrained)
   k <- length(U)
 
+  # Check input argument V.
+  # TO DO.
+  
   # Check and process input w.
   if (missing(w))
     w <- rep(1,k)
@@ -139,14 +145,25 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   w <- w/sum(w)
   
   # Add row and column names to the matrices.
-  rownames(V) <- colnames(X)
-  colnames(V) <- colnames(X)
-  for (i in 1:k) {
-    u <- U[[i]]
-    rownames(u) <- colnames(X)
-    colnames(u) <- colnames(X)
-    U[[i]] <- u
+  if (is.matrix(V)) {
+    rownames(V) <- colnames(X)
+    colnames(V) <- colnames(X)
+  } else {
+    for (i in 1:n) {
+      rownames(V[[i]]) <- colnames(X)
+      colnames(V[[i]]) <- colnames(X)
+    }
   }
+  for (i in 1:k) {
+    rownames(U[[i]]) <- colnames(X)
+    colnames(U[[i]]) <- colnames(X)
+  }
+
+  # Compute the log-likelihood.
+  # TO DO.
+
+  # Initialize the "progress" data frame.
+  # TO DO.
   
   # Finalize the output.
   fit <- list(V = V,U = U,w = w)

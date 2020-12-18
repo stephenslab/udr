@@ -7,72 +7,72 @@
 using namespace Rcpp;
 
 // compute_posterior_probs_rcpp
-arma::mat compute_posterior_probs_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
-RcppExport SEXP _udr_compute_posterior_probs_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
+arma::mat compute_posterior_probs_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
+RcppExport SEXP _udr_compute_posterior_probs_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_posterior_probs_rcpp(X, w, U, S));
+    Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_posterior_probs_rcpp(X, w, U, V));
     return rcpp_result_gen;
 END_RCPP
 }
 // update_prior_covariances_ed_rcpp
-arma::cube update_prior_covariances_ed_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& S, const arma::mat& P);
-RcppExport SEXP _udr_update_prior_covariances_ed_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
+arma::cube update_prior_covariances_ed_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& V, const arma::mat& P);
+RcppExport SEXP _udr_update_prior_covariances_ed_rcpp(SEXP XSEXP, SEXP USEXP, SEXP VSEXP, SEXP PSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type P(PSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_ed_rcpp(X, U, S, P));
+    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_ed_rcpp(X, U, V, P));
     return rcpp_result_gen;
 END_RCPP
 }
 // update_prior_covariances_teem_rcpp
-arma::cube update_prior_covariances_teem_rcpp(const arma::mat& X, const arma::mat& S, const arma::mat& P, double minval);
-RcppExport SEXP _udr_update_prior_covariances_teem_rcpp(SEXP XSEXP, SEXP SSEXP, SEXP PSEXP, SEXP minvalSEXP) {
+arma::cube update_prior_covariances_teem_rcpp(const arma::mat& X, const arma::mat& V, const arma::mat& P, double minval);
+RcppExport SEXP _udr_update_prior_covariances_teem_rcpp(SEXP XSEXP, SEXP VSEXP, SEXP PSEXP, SEXP minvalSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type P(PSEXP);
     Rcpp::traits::input_parameter< double >::type minval(minvalSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_teem_rcpp(X, S, P, minval));
+    rcpp_result_gen = Rcpp::wrap(update_prior_covariances_teem_rcpp(X, V, P, minval));
     return rcpp_result_gen;
 END_RCPP
 }
 // update_resid_covariance_rcpp
-arma::mat update_resid_covariance_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& S, const arma::mat& P);
-RcppExport SEXP _udr_update_resid_covariance_rcpp(SEXP XSEXP, SEXP USEXP, SEXP SSEXP, SEXP PSEXP) {
+arma::mat update_resid_covariance_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& V, const arma::mat& P);
+RcppExport SEXP _udr_update_resid_covariance_rcpp(SEXP XSEXP, SEXP USEXP, SEXP VSEXP, SEXP PSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type P(PSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_resid_covariance_rcpp(X, U, S, P));
+    rcpp_result_gen = Rcpp::wrap(update_resid_covariance_rcpp(X, U, V, P));
     return rcpp_result_gen;
 END_RCPP
 }
 // loglik_ud_rcpp
-double loglik_ud_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& S);
-RcppExport SEXP _udr_loglik_ud_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP SSEXP) {
+double loglik_ud_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
+RcppExport SEXP _udr_loglik_ud_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(loglik_ud_rcpp(X, w, U, S));
+    Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
+    rcpp_result_gen = Rcpp::wrap(loglik_ud_rcpp(X, w, U, V));
     return rcpp_result_gen;
 END_RCPP
 }

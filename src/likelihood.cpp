@@ -4,7 +4,7 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& S);
+double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& V);
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -15,13 +15,13 @@ double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& S);
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 double loglik_ud_rcpp (const arma::mat& X, const arma::vec& w, 
-		       const arma::cube& U, const arma::mat& S) {
-  return loglik_ud(X,w,U,S);
+		       const arma::cube& U, const arma::mat& V) {
+  return loglik_ud(X,w,U,V);
 }
 
 // Compute the log-likelihood for the Ultimate Deconvolution
 // model. See R "u_fit" for description of the inputs.
-double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& S) {
+double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& V) {
   
   // Get the number of rows (n) and columns (m) of X, and the number
   // of mixture components (k).
@@ -36,7 +36,7 @@ double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& S) {
   
   // Compute the log-likelihood for each sample (row of X).
   for (unsigned int j = 0; j < k; j++) {
-    T = S + U.slice(j);
+    T = V + U.slice(j);
     L = chol(T,"lower");      
     for (unsigned int i = 0; i < n; i++) {
       x     = trans(X.row(i));

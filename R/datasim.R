@@ -15,7 +15,7 @@
 #'   \code{U[[i]]} is the m x m covariance matrix for the ith mixture
 #'   component.
 #' 
-#' @param S The m x m residual covariance matrix.
+#' @param V The m x m residual covariance matrix.
 #'
 #' @return An n x m matrix in which each row is a draw from the
 #'   multivariate normal means model. For the univariate case (m = 1), a
@@ -27,23 +27,23 @@
 #' 
 #' @export
 #' 
-simulate_ud_data <- function (n, w, U, S) {
+simulate_ud_data <- function (n, w, U, V) {
       
-  # Check the residual covariance matrix, S.
-  S <- as.matrix(S)
-  if (!issemidef(S))
-    stop("Input argument \"S\" should be a positive semi-definite matrix")
+  # Check the residual covariance matrix, V.
+  V <- as.matrix(V)
+  if (!issemidef(V))
+    stop("Input argument \"V\" should be a positive semi-definite matrix")
   
   # Check the prior covariance matrices, U.
   U <- lapply(U,as.matrix)
-  if (!(is.list(U) && verify_prior_covariances(U,S)))
+  if (!(is.list(U) && verify_prior_covariances(U,V)))
     stop("Input argument \"U\" should be list in which each list element ",
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
-         "S + U[[i]] is symmetric positive definite")
+         "V + U[[i]] is symmetric positive definite")
 
   # Get the dimension of the data points (m) and the number of
   # mixture components (k).
-  m <- nrow(S)
+  m <- nrow(V)
   k <- length(U)
 
   # Check the mixture weights, w.
@@ -61,9 +61,10 @@ simulate_ud_data <- function (n, w, U, S) {
   # Draw the data points.
   for (j in 1:k) {
     i     <- which(z == j)
-    X[i,] <- rmvnorm(length(i),sigma = S + U[[j]])
+    T     <- V + U[[j]]
+    X[i,] <- rmvnorm(length(i),sigma = T)
   }
-  colnames(X) <- rownames(S)
+  colnames(X) <- rownames(V)
   return(drop(X))
 }
 
