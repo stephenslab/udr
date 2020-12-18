@@ -1,8 +1,8 @@
 #' @title Simulate Data from Ultimate Deconvolution Model
 #'
 #' @description Simulate data points from the Ultimate Deconvolution
-#'   model. The univariate case (m = 1) is also handled. See
-#'   \code{\link{ud_fit}} for the model definition.
+#'   model. Note that the univariate case (m = 1) is not handled.
+#'   See \code{\link{ud_fit}} for the model definition.
 #'
 #' @param n Number of data points to simulate.
 #' 
@@ -30,12 +30,10 @@
 simulate_ud_data <- function (n, w, U, V) {
       
   # Check the residual covariance matrix, V.
-  V <- as.matrix(V)
   if (!issemidef(V))
     stop("Input argument \"V\" should be a positive semi-definite matrix")
   
   # Check the prior covariance matrices, U.
-  U <- lapply(U,as.matrix)
   if (!(is.list(U) && verify_prior_covariances(U,V)))
     stop("Input argument \"U\" should be list in which each list element ",
          "U[[i]] is a (symmetric) positive semi-definite matrix, and",
@@ -45,7 +43,9 @@ simulate_ud_data <- function (n, w, U, V) {
   # mixture components (k).
   m <- nrow(V)
   k <- length(U)
-
+  if (m < 2)
+    stop("The univariate case (m = 1) is not implemented")
+  
   # Check the mixture weights, w.
   if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
     stop("Input argument \"w\" should be a vector of length \"k\" ",
@@ -65,6 +65,6 @@ simulate_ud_data <- function (n, w, U, V) {
     X[i,] <- rmvnorm(length(i),sigma = T)
   }
   colnames(X) <- rownames(V)
-  return(drop(X))
+  return(X)
 }
 

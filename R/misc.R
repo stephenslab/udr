@@ -17,7 +17,7 @@ isposdef <- function (X)
 issemidef <- function (X, e = 1e-15) 
   all(eigen(X)$values > -e)
 
-# For symmetric semi-definite matrix X, get the nearest rank-1 matrix.
+# For symmetric semi-definite matrix X, get the nearest rank-1 matrix. 
 getrank1 <- function (X) {
   out <- eigen(X)
   out$values[-1] <- 0
@@ -30,7 +30,7 @@ getrank1 <- function (X) {
 softmax <- function (W) {
   a <- apply(W,1,max)
   W <- exp(W - a)
-  return(W / rowSums(W))
+  return(W/rowSums(W))
 }
 
 # "Shrink" matrix T = U + I; that is, find the "best" matrix T
@@ -39,17 +39,10 @@ softmax <- function (W) {
 # or, equivalently, setting any eigenvalues of U less than 0 to be
 # minval.  The output is a positive definite matrix, U.
 shrink_cov <- function (T, minval) {
-  if (length(T) == 1)
-
-    # Handle univariate case (m = 1).
-    U <- pmax(T - 1,minval)  
-  else {
-    out <- eigen(T)
-    d   <- out$values
-    d   <- pmax(d - 1,minval)
-    U   <- tcrossprod(out$vectors %*% diag(sqrt(d)))
-  }
-  return(U)
+  out <- eigen(T)
+  d   <- out$values
+  d   <- pmax(d - 1,minval)
+  return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }
 
 # Returns TRUE if and only if all prior covariances U are positive

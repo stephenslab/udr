@@ -4,7 +4,7 @@
 #'   \code{\link{ud_fit}} for background and model definition.
 #' 
 #' @param X The n x m data matrix, in which each row of the matrix is
-#'   an m-dimensional data point.
+#'   an m-dimensional data point. m should be 2 or greater.
 #'
 #' @param V An m x m matrix giving the initial estimate of the
 #'   residual covariance matrix, or a list of "standard error" matrices,
@@ -58,6 +58,12 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
                                      iden = matrix(1,ncol(X),ncol(X))),
                      U_rank1, U_unconstrained, w, version = "Rcpp") {
 
+  # Check the input data matrix, X.
+  if (!(is.matrix(X) & is.numeric(X)))
+    stop("Input argument \"X\" should be a numeric matrix")
+  if (ncol(X) < 2)
+    stop("Input argument \"X\" should have at least 2 columns")
+  
   # Get the number of rows (n) and columns (m) of the data matrix.
   n <- nrow(X)
   m <- ncol(X)
@@ -84,7 +90,6 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
         U_rank1[[i]] <- sim_rank1(m)
     }
   }
-
   if (missing(U_unconstrained)) {
     if (missing(n_unconstrained))
       n_unconstrained <- 4
@@ -99,11 +104,16 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     }
   }
 
-  # Fill out the attributes of the covariance matrices and, if
-  # necessary, label the matrices.
+  # Force all the rank-1 covariance matrices to be rank 1.
   n_scaled        <- length(U_scaled)
   n_rank1         <- length(U_rank1)
   n_unconstrained <- length(U_unconstrained)
+  if (n_rank1 > 0)
+    for (i in 1:n_rank1)
+      U_rank1[[i]] <- getrank1(U_rank1[[i]])
+
+  # Fill out the attributes of the covariance matrices and, if
+  # necessary, label the individual matrices.
   if (n_scaled > 0) {
     if (is.null(names(U_scaled)))
       names(U_scaled) <- paste("scaled",1:n_scaled,sep = "_")
@@ -123,19 +133,17 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       attr(U_unconstrained[[i]],"covtype") <- "unconstrained"
   }
 
-  # Force all the rank-1 covariance matrices to be rank 1.
-  for (i in 1:n_rank1)
-    U_rank1[[i]] <- getrank1(U_rank1[[i]])
-      
   # Verify that all scaled and unconstrained matrices are
   # positive semi-definite.
-  for (i in 1:n_scaled)
-    if (!issemidef(U_scaled[[i]]))
-      stop("All U_scaled matrices should be positive semi-definite")
-  for (i in 1:n_unconstrained)
-    if (!issemidef(U_unconstrained[[i]]))
-      stop("All U_unconstrained matrices should be positive semi-definite")
-  
+  if (n_scaled > 0)
+    for (i in 1:n_scaled)
+      if (!issemidef(U_scaled[[i]]))
+        stop("All U_scaled matrices should be positive semi-definite")
+  if (n_unconstrained > 0)
+    for (i in 1:n_unconstrained)
+      if (!issemidef(U_unconstrained[[i]]))
+        stop("All U_unconstrained matrices should be positive semi-definite")
+
   # Combine the prior covariances matrices into a single list.
   U <- c(U_scaled,U_rank1,U_unconstrained)
   k <- length(U)
@@ -150,9 +158,12 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   if (length(w) != k)
     stop("Input argument \"w\" should be a numeric vector with one element ",
          "per prior covariance matrix")
-  if (is.null(names(w)))
-    names(w) <- names(U)
+   # Check the mixture weights, w.
+  if (!(is.numeric(w) & all(w >= 0)))
+    stop("Input argument \"w\" should be a vector containing non-negative ",
+         "weights")
   w <- w/sum(w)
+  names(w) <- names(U)
   
   # Add row and column names to the matrices.
   if (is.matrix(V)) {

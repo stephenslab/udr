@@ -18,7 +18,7 @@ ud_init(
 }
 \arguments{
 \item{X}{The n x m data matrix, in which each row of the matrix is
-an m-dimensional data point.}
+an m-dimensional data point. m should be 2 or greater.}
 
 \item{V}{An m x m matrix giving the initial estimate of the
 residual covariance matrix, or a list of "standard error" matrices,
@@ -68,5 +68,5 @@ An object of class "ud_fit". See \code{\link{ud_fit}} for
 }
 \description{
 Initialize an Ultimate Deconvolution model. See
-  \code{\link{ud_fit}} for background.
+  \code{\link{ud_fit}} for background and model definition.
 }
