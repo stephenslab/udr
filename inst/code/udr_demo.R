@@ -39,6 +39,7 @@ rownames(X) <- paste0("s",1:n)
 # INITIALIZE FIT
 # --------------
 # This is the simplest invocation of ud_init.
+set.seed(1)
 fit1 <- ud_init(X)
 print(summary(fit1))
 

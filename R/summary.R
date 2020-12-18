@@ -21,7 +21,8 @@ summary.ud_fit <- function (object, ...) {
               n_scaled        = sum(covtypes == "scaled"),
               n_rank1         = sum(covtypes == "rank1"),
               n_unconstrained = sum(covtypes == "unconstrained"),
-              loglik          = object$loglik)
+              loglik          = object$loglik,
+              numiter         = nrow(object$progress))
   class(out) <- c("summary.ud_fit","list")
   return(out)
 }
@@ -42,7 +43,7 @@ print.summary.ud_fit <- function (x, ...) {
   cat(sprintf("  Number of rank-1 prior covariances: %d\n",x$n_rank1))
   cat(sprintf("  Number of unconstrained prior covariances: %d\n",
               x$n_unconstrained))
-  cat("Evaluation of fit:\n")
+  cat(sprintf("Evaluation of fit (%d updates performed):\n",x$numiter))
   cat(sprintf("  Log-likelihood: %+0.12e\n",x$loglik))
   return(invisible(x))
 }

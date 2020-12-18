@@ -1,7 +1,7 @@
 #' @title Initialize Ultimate Deconvolution Model
 #'
 #' @description Initialize an Ultimate Deconvolution model. See
-#'   \code{\link{ud_fit}} for background.
+#'   \code{\link{ud_fit}} for background and model definition.
 #' 
 #' @param X The n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point.
@@ -140,7 +140,8 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   k <- length(U)
 
   # Check input argument V.
-  # TO DO.
+  if (!issemidef(V))
+    stop("V should be a positive semi-definite matrix")
   
   # Check and process input w.
   if (missing(w))
@@ -170,11 +171,13 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # Compute the log-likelihood.
   loglik <- loglik_ud(X,w,array(simplify2array(U),c(m,m,k)),V,version)
 
-  # Initialize the "progress" data frame.
-  # TO DO.
+  # Initialize the data frame for keeping track of the algorithm's
+  # progress over time.
+  progress        <- as.data.frame(matrix(0,0,6))
+  names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   
   # Finalize the output.
-  fit <- list(V = V,U = U,w = w,loglik = loglik)
+  fit <- list(V = V,U = U,w = w,loglik = loglik,progress = progress)
   class(fit) <- c("ud_fit","list")
   return(fit)
 }
