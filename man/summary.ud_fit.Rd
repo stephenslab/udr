@@ -10,7 +10,8 @@
 \method{print}{summary.ud_fit}(x, ...)
 }
 \arguments{
-\item{object}{Describe input argument "object" here.}
+\item{object}{An object of class \dQuote{ud_fit}, usually the
+result of calling function \code{link{ud_fit}}.}
 
 \item{\dots}{Additional arguments passed to the generic \code{summary}
 or \code{print.summary} method.}
@@ -18,6 +19,10 @@ or \code{print.summary} method.}
 \item{x}{An object of class \dQuote{summary.ud_fit}, usually the
 result of a call to \code{summary.ud_fit}.}
 }
+\value{
+\code{summary.ud_fit} returns list of statistics
+  summarizing the model fit.
+}
 \description{
-Description goes here.
+\code{summary} method for the \dQuote{ud_fit} class.
 }
