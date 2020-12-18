@@ -6,9 +6,9 @@
 #' @param X The n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point. m should be 2 or greater.
 #'
-#' @param V An m x m matrix giving the initial estimate of the
-#'   residual covariance matrix, or a list of "standard error" matrices,
-#'   one for each data point.
+#' @param V Either an m x m matrix giving the initial estimate of the
+#'   residual covariance matrix, or a list of m x m "standard error"
+#'   matrices, one for each data point.
 #'
 #' @param n_rank1 A non-negative integer specifying the number of
 #'   rank-1 covariance matrices included in the
@@ -149,6 +149,9 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   k <- length(U)
 
   # Check input argument V.
+  #
+  # TO DO: Handle case when each data point has a separate V.
+  #
   if (!issemidef(V))
     stop("V should be a positive semi-definite matrix")
   

@@ -18,6 +18,7 @@
 summary.ud_fit <- function (object, ...) {
   covtypes <- sapply(object$U,function (x) attr(x,"covtype"))
   out <- list(m               = nrow(object$V),
+              iid             = is.matrix(object$V),
               n_scaled        = sum(covtypes == "scaled"),
               n_rank1         = sum(covtypes == "rank1"),
               n_unconstrained = sum(covtypes == "unconstrained"),
@@ -39,6 +40,10 @@ summary.ud_fit <- function (object, ...) {
 print.summary.ud_fit <- function (x, ...) {
   cat("Model overview:\n")
   cat(sprintf("  Dimension of data points: %d\n",x$m))
+  if (x$iid)
+    cat("Data points are i.i.d. (same V)\n")
+  else
+    cat("Data points are not i.i.d. (different Vs)\n")
   cat(sprintf("  Number of scaled prior covariances: %d\n",x$n_scaled))
   cat(sprintf("  Number of rank-1 prior covariances: %d\n",x$n_rank1))
   cat(sprintf("  Number of unconstrained prior covariances: %d\n",

@@ -20,9 +20,9 @@ ud_init(
 \item{X}{The n x m data matrix, in which each row of the matrix is
 an m-dimensional data point. m should be 2 or greater.}
 
-\item{V}{An m x m matrix giving the initial estimate of the
-residual covariance matrix, or a list of "standard error" matrices,
-one for each data point.}
+\item{V}{Either an m x m matrix giving the initial estimate of the
+residual covariance matrix, or a list of m x m "standard error"
+matrices, one for each data point.}
 
 \item{n_rank1}{A non-negative integer specifying the number of
 rank-1 covariance matrices included in the
