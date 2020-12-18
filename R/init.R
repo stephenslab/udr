@@ -123,9 +123,10 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       attr(U_unconstrained[[i]],"covtype") <- "unconstrained"
   }
 
-  # Verify that all the rank-1 covariance matrices are indeed rank 1.
-  # TO DO.
-
+  # Force all the rank-1 covariance matrices to be rank 1.
+  for (i in 1:n_rank1)
+    U_rank1[[i]] <- getrank1(U_rank1[[i]])
+      
   # Verify that all scaled and unconstrained matrices are
   # positive semi-definite.
   for (i in 1:n_scaled)
@@ -173,7 +174,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
 
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.
-  progress        <- as.data.frame(matrix(0,0,6))
+  progress <- as.data.frame(matrix(0,0,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   
   # Finalize the output.

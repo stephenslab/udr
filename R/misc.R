@@ -17,6 +17,13 @@ isposdef <- function (X)
 issemidef <- function (X, e = 1e-15) 
   all(eigen(X)$values > -e)
 
+# For symmetric semi-definite matrix X, get the nearest rank-1 matrix.
+getrank1 <- function (X) {
+  out <- eigen(X)
+  out$values[-1] <- 0
+  return(with(out,vectors %*% diag(values) %*% t(vectors)))
+}
+ 
 # Compute the softmax of each row of W in a way that guards against
 # numerical underflow or overflow. The return value is a matrix of the
 # same dimension in which the entries in each row sum to 1.

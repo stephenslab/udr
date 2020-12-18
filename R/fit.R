@@ -242,7 +242,7 @@ ud_fit <- function (X, k, fit0, w, U, V = diag(ncol(X)),
     cat("with these settings:\n")
     cat(sprintf("number of components in mixture prior: %d",k))
     cat(sprintf("max %d updates, conv tol %0.1e ",control$maxiter,control$tol))
-    cat(sprintf("(udr 0.3-2, \"%s\").\n",control$version))
+    cat(sprintf("(udr 0.3-3, \"%s\").\n",control$version))
     cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     cat(sprintf("U (prior cov) = %s; ",control$update.U))
     cat(sprintf("S (resid cov) = %s\n",control$update.S))
