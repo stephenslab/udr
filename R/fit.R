@@ -1,6 +1,6 @@
 #' @rdname ud_fit
 #' 
-#' @title Fit Empirical Bayes Multivariate Normal Means Model
+#' @title Fit Ultimate Deconvolution Model
 #'
 #' @description This function implements "Ultimate Deconvolution", an
 #' empirical Bayes method for fitting a multivariate normal means
@@ -154,7 +154,6 @@ ud_fit <- function (X, k, fit0, w, U, V = diag(ncol(X)),
   # CHECK & PROCESS INPUTS
   # ----------------------
   # Check the input data matrix, X.
-  X <- as.matrix(X)  
   if (!is.numeric(X))
     stop("Input argument \"X\" should be a numeric matrix")
 

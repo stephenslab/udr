@@ -1,10 +1,12 @@
 ---
-title: "Introduction to Ultimate Deconvolution for multivariate normal means"
+title: "Introduction to Ultimate Deconvolution"
 author: Peter Carbonetto
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output:
+  html_document:
+    theme: readable
 vignette: >
-  %\VignetteIndexEntry{udr intro}
+  %\VignetteIndexEntry{Introduction to Ultimate Deconvolution}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

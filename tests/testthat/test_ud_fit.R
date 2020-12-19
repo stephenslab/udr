@@ -1,5 +1,11 @@
 context("ud_fit")
 
+test_that("Error is thrown for univariate (m = 1) case",{
+  set.seed(1)
+  X <- matrix(rnorm(20))
+  expect_error(ud_init(X))
+})
+
 test_that("A few basic tests of ud_fit",{
  
   # Simulate data.
@@ -73,10 +79,4 @@ test_that("A few basic tests of ud_fit",{
                attributes(simplify2array(dat$U)))
   expect_equal(attributes(simplify2array(fit4$U)),
                attributes(simplify2array(dat$U)))
-})
-
-test_that("Error is thrown for univariate (m = 1) case",{
-  set.seed(1)
-  X <- matrix(rnorm(20))
-  expect_error(ud_init(X))
 })

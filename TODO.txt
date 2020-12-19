@@ -1,7 +1,9 @@
 to do
 =====
 
-+ Add examples to roxygen2 docs for ud_init.
++ Update pkgdown site.
+
++ Add continuous integration (TravisCI, Appveyor and/or CircleCI).
 
 + Make outputs more consistent with ebnm and/or mashr.
 
