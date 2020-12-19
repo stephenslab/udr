@@ -149,11 +149,19 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   k <- length(U)
 
   # Check input argument V.
-  #
-  # TO DO: Handle case when each data point has a separate V.
-  #
-  if (!issemidef(V))
-    stop("V should be a positive semi-definite matrix")
+  msg <- paste("Input argument \"V\" should either be a positive",
+               "semi-definite matrix, or a list of positive semi-definite",
+               "matrices, with one matrix per row of \"X\"")
+  if (is.matrix(V)) {
+    if (!issemidef(V))
+      stop(msg)
+  } else {
+    if (length(V) != n)
+      stop(msg)
+    for (i in 1:n)
+      if (!issemidef(V[[i]]))
+        stop(msg)
+  }
   
   # Check and process input w.
   if (missing(w))
@@ -173,6 +181,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     rownames(V) <- colnames(X)
     colnames(V) <- colnames(X)
   } else {
+    names(V) <- rownames(X)
     for (i in 1:n) {
       rownames(V[[i]]) <- colnames(X)
       colnames(V[[i]]) <- colnames(X)
@@ -192,7 +201,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   
   # Finalize the output.
-  fit <- list(V = V,U = U,w = w,loglik = loglik,progress = progress)
+  fit <- list(X = X,V = V,U = U,w = w,loglik = loglik,progress = progress)
   class(fit) <- c("ud_fit","list")
   return(fit)
 }

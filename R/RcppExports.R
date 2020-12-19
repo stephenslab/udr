@@ -21,3 +21,7 @@ loglik_ud_rcpp <- function(X, w, U, V) {
     .Call('_udr_loglik_ud_rcpp', PACKAGE = 'udr', X, w, U, V)
 }
 
+loglik_ud2_rcpp <- function(X, w, U, V) {
+    .Call('_udr_loglik_ud2_rcpp', PACKAGE = 'udr', X, w, U, V)
+}
+

@@ -17,7 +17,8 @@
 #'
 summary.ud_fit <- function (object, ...) {
   covtypes <- sapply(object$U,function (x) attr(x,"covtype"))
-  out <- list(m               = nrow(object$V),
+  out <- list(n               = nrow(object$X),
+              m               = ncol(object$X),
               iid             = is.matrix(object$V),
               n_scaled        = sum(covtypes == "scaled"),
               n_rank1         = sum(covtypes == "rank1"),
@@ -39,6 +40,7 @@ summary.ud_fit <- function (object, ...) {
 #' 
 print.summary.ud_fit <- function (x, ...) {
   cat("Model overview:\n")
+  cat(sprintf("  Number of data points: %d\n",x$n))
   cat(sprintf("  Dimension of data points: %d\n",x$m))
   if (x$iid)
     cat("Data points are i.i.d. (same V)\n")
