@@ -4,8 +4,11 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-double loglik_ud  (const mat& X, const vec& w, const cube& U, const mat& V);
-double loglik_ud2 (const mat& X, const vec& w, const cube& U, const cube& V);
+double loglik_ud_iid (const mat& X, const vec& w, const cube& U, 
+		      const mat& V);
+
+double loglik_ud_general (const mat& X, const vec& w, const cube& U, 
+                          const cube& V);
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -15,9 +18,9 @@ double loglik_ud2 (const mat& X, const vec& w, const cube& U, const cube& V);
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-double loglik_ud_rcpp (const arma::mat& X, const arma::vec& w, 
-		       const arma::cube& U, const arma::mat& V) {
-  return loglik_ud(X,w,U,V);
+double loglik_ud_iid_rcpp (const arma::mat& X, const arma::vec& w, 
+			   const arma::cube& U, const arma::mat& V) {
+  return loglik_ud_iid(X,w,U,V);
 }
 
 // Compute the log-likelihood for the Ultimate Deconvolution model
@@ -25,14 +28,15 @@ double loglik_ud_rcpp (const arma::mat& X, const arma::vec& w,
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-double loglik_ud2_rcpp (const arma::mat& X, const arma::vec& w, 
-			const arma::cube& U, const arma::cube& V) {
-  return loglik_ud2(X,w,U,V);
+double loglik_ud_general_rcpp (const arma::mat& X, const arma::vec& w, 
+			       const arma::cube& U, const arma::cube& V) {
+  return loglik_ud_general(X,w,U,V);
 }
 
 // Compute the log-likelihood for the Ultimate Deconvolution model
 // when the residual covariance is the same for all samples.
-double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& V) {
+double loglik_ud_iid (const mat& X, const vec& w, const cube& U, 
+		      const mat& V) {
   
   // Get the number of rows (n) and columns (m) of X, and the number
   // of mixture components (k).
@@ -60,7 +64,8 @@ double loglik_ud (const mat& X, const vec& w, const cube& U, const mat& V) {
 
 // Compute the log-likelihood for the Ultimate Deconvolution model
 // when the residual covariance is *not* the same for all samples.
-double loglik_ud2 (const mat& X, const vec& w, const cube& U, const cube& V) {
+double loglik_ud_general (const mat& X, const vec& w, const cube& U, 
+			  const cube& V) {
   
   // Get the number of rows (n) and columns (m) of X, and the number
   // of mixture components (k).

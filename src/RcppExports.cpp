@@ -6,9 +6,9 @@
 
 using namespace Rcpp;
 
-// compute_posterior_probs_rcpp
-arma::mat compute_posterior_probs_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
-RcppExport SEXP _udr_compute_posterior_probs_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
+// compute_posterior_probs_iid_rcpp
+arma::mat compute_posterior_probs_iid_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
+RcppExport SEXP _udr_compute_posterior_probs_iid_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,7 +16,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_posterior_probs_rcpp(X, w, U, V));
+    rcpp_result_gen = Rcpp::wrap(compute_posterior_probs_iid_rcpp(X, w, U, V));
+    return rcpp_result_gen;
+END_RCPP
+}
+// compute_posterior_probs_general_rcpp
+arma::mat compute_posterior_probs_general_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::cube& V);
+RcppExport SEXP _udr_compute_posterior_probs_general_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type V(VSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_posterior_probs_general_rcpp(X, w, U, V));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -62,9 +76,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// loglik_ud_rcpp
-double loglik_ud_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
-RcppExport SEXP _udr_loglik_ud_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
+// loglik_ud_iid_rcpp
+double loglik_ud_iid_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
+RcppExport SEXP _udr_loglik_ud_iid_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -72,13 +86,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
-    rcpp_result_gen = Rcpp::wrap(loglik_ud_rcpp(X, w, U, V));
+    rcpp_result_gen = Rcpp::wrap(loglik_ud_iid_rcpp(X, w, U, V));
     return rcpp_result_gen;
 END_RCPP
 }
-// loglik_ud2_rcpp
-double loglik_ud2_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::cube& V);
-RcppExport SEXP _udr_loglik_ud2_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
+// loglik_ud_general_rcpp
+double loglik_ud_general_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::cube& V);
+RcppExport SEXP _udr_loglik_ud_general_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -86,18 +100,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type V(VSEXP);
-    rcpp_result_gen = Rcpp::wrap(loglik_ud2_rcpp(X, w, U, V));
+    rcpp_result_gen = Rcpp::wrap(loglik_ud_general_rcpp(X, w, U, V));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_udr_compute_posterior_probs_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_rcpp, 4},
+    {"_udr_compute_posterior_probs_iid_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_iid_rcpp, 4},
+    {"_udr_compute_posterior_probs_general_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_general_rcpp, 4},
     {"_udr_update_prior_covariances_ed_rcpp", (DL_FUNC) &_udr_update_prior_covariances_ed_rcpp, 4},
     {"_udr_update_prior_covariances_teem_rcpp", (DL_FUNC) &_udr_update_prior_covariances_teem_rcpp, 4},
     {"_udr_update_resid_covariance_rcpp", (DL_FUNC) &_udr_update_resid_covariance_rcpp, 4},
-    {"_udr_loglik_ud_rcpp", (DL_FUNC) &_udr_loglik_ud_rcpp, 4},
-    {"_udr_loglik_ud2_rcpp", (DL_FUNC) &_udr_loglik_ud2_rcpp, 4},
+    {"_udr_loglik_ud_iid_rcpp", (DL_FUNC) &_udr_loglik_ud_iid_rcpp, 4},
+    {"_udr_loglik_ud_general_rcpp", (DL_FUNC) &_udr_loglik_ud_general_rcpp, 4},
     {NULL, NULL, 0}
 };
 

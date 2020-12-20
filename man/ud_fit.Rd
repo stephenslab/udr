@@ -3,13 +3,15 @@
 \name{ud_fit}
 \alias{ud_fit}
 \alias{ud_fit_control_default}
-\title{Fit Empirical Bayes Multivariate Normal Means Model}
+\title{Fit Ultimate Deconvolution Model}
 \usage{
-ud_fit(X, k, fit0, w, U, V = diag(ncol(X)), control = list(), verbose = TRUE)
+ud_fit(X, fit0, control = list(), verbose = TRUE)
 
 ud_fit_control_default()
 }
 \arguments{
+\item{X}{Describe input argument "X" here.}
+
 \item{fit0}{A previous Ultimate Deconvolution fit. This is useful
 for "re-fitting" the model. When a value for this argument is
 given, the other inputs \code{k}, \code{w}, \code{U} and \code{S}

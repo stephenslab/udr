@@ -10,8 +10,12 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
-			      const mat& V, mat& P);
+void compute_posterior_probs_iid (const mat& X, const vec& w, const cube& U,
+				  const mat& V, mat& P);
+
+void compute_posterior_probs_general (const mat& X, const vec& w, 
+				      const cube& U, const cube& V, 
+				      mat& P);
 
 void update_prior_covariances_ed (const mat& X, cube& U, const mat& V, 
 				  const mat& P);
@@ -54,18 +58,38 @@ inline double max (double a, double b) {
 // FUNCTION DEFINITIONS
 // --------------------
 // Compute the n x k matrix of posterior mixture assignment
-// probabilities given current estimates of the model parameters.
+// probabilities given current estimates of the model parameters for
+// the special case when all the samples share the same residual
+// covariance.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-arma::mat compute_posterior_probs_rcpp (const arma::mat& X,
-					const arma::vec& w,
-					const arma::cube& U,
-					const arma::mat& V) {
+arma::mat compute_posterior_probs_iid_rcpp (const arma::mat& X,
+					    const arma::vec& w,
+					    const arma::cube& U,
+					    const arma::mat& V) {
   unsigned int n = X.n_rows;
   unsigned int k = w.n_elem;
   mat          P(n,k);
-  compute_posterior_probs(X,w,U,V,P);
+  compute_posterior_probs_iid(X,w,U,V,P);
+  return P;
+}
+
+// Compute the n x k matrix of posterior mixture assignment
+// probabilities given current estimates of the model parameters for
+// the more general case when the samples do not necessarily share the
+// same residual covariance matrix.
+//
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
+arma::mat compute_posterior_probs_general_rcpp (const arma::mat& X,
+						const arma::vec& w,
+						const arma::cube& U,
+						const arma::cube& V) {
+  unsigned int n = X.n_rows;
+  unsigned int k = w.n_elem;
+  mat          P(n,k);
+  compute_posterior_probs_general(X,w,U,V,P);
   return P;
 }
 
@@ -114,9 +138,11 @@ arma::mat update_resid_covariance_rcpp (const arma::mat& X,
 }
 
 // Compute the n x k matrix of posterior mixture assignment
-// probabilities given current estimates of the model parameters.
-void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
-			      const mat& V, mat& P) {
+// probabilities given current estimates of the model parameters for
+// the special case when the residual variance is the same for all
+// samples.
+void compute_posterior_probs_iid (const mat& X, const vec& w, const cube& U,
+				  const mat& V, mat& P) {
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = w.n_elem;
@@ -131,6 +157,36 @@ void compute_posterior_probs (const mat& X, const vec& w, const cube& U,
     L = chol(T,"lower");
     for (unsigned int i = 0; i < n; i++) {
       x      = trans(X.row(i));
+      P(i,j) = log(w(j)) + ldmvnorm(x,L);
+    }
+  }
+
+  // Normalize the probabilities so that each row of P sums to 1.
+  for (unsigned int i = 0; i < n; i++)
+    P.row(i) = softmax(P.row(i));
+}
+
+// Compute the n x k matrix of posterior mixture assignment
+// probabilities given current estimates of the model parameters for
+// the more general case when the residual variance is not necessarily
+// the same for all samples.
+void compute_posterior_probs_general (const mat& X, const vec& w, 
+				      const cube& U, const cube& V, 
+				      mat& P) {
+  unsigned int n = X.n_rows;
+  unsigned int m = X.n_cols;
+  unsigned int k = w.n_elem;
+  mat T(m,m);
+  mat L(m,m);
+  vec x(m);
+  vec p(k);
+
+  // Compute the log-probabilities, stored in an n x k matrix.
+  for (unsigned int j = 0; j < k; j++) {
+    for (unsigned int i = 0; i < n; i++) {
+      x      = trans(X.row(i));
+      T      = V.slice(i) + U.slice(j);
+      L      = chol(T,"lower");
       P(i,j) = log(w(j)) + ldmvnorm(x,L);
     }
   }

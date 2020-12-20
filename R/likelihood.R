@@ -2,29 +2,34 @@
 #
 #' @importFrom mvtnorm dmvnorm
 loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
-  m <- ncol(X)
   version <- match.arg(version)
   if (is.list(U))
     U <- simplify2array(U)
   if (is.matrix(V)) {
+
+    # Perform the computations for the case when the residual variance
+    # is the same for all samples.
     if (version == "Rcpp")
-      y <- loglik_ud_rcpp(X,w,U,V)
+      y <- loglik_ud_iid_rcpp(X,w,U,V)
     else if (version == "R")
-      y <- loglik_ud_helper(X,w,U,V)
+      y <- loglik_ud_iid_helper(X,w,U,V)
   } else {
+
+    # Perform the computations for the case when the residual variance
+    # is *not* the same for all samples.
     if (is.list(V))
       V <- simplify2array(V)
     if (version == "Rcpp")
-      y <- loglik_ud2_rcpp(X,w,U,V)
+      y <- loglik_ud_general_rcpp(X,w,U,V)
     else if (version == "R")
-      y <- loglik_ud2_helper(X,w,U,V)
+      y <- loglik_ud_general_helper(X,w,U,V)
   }
   return(y)
 }
 
 # This is the R implementation of the likelihood computation when the
 # residual covariance V is the same for all samples.
-loglik_ud_helper <- function (X, w, U, V) {
+loglik_ud_iid_helper <- function (X, w, U, V) {
   n <- nrow(X)
   k <- length(w)
   y <- rep(0,n)
@@ -35,7 +40,7 @@ loglik_ud_helper <- function (X, w, U, V) {
 
 # This is the R implementation of the likelihood computation when the
 # residual covariance V is *not* the same for all samples.
-loglik_ud2_helper <- function (X, w, U, V) {
+loglik_ud_general_helper <- function (X, w, U, V) {
   n <- nrow(X)
   k <- length(w)
   y <- rep(0,n)

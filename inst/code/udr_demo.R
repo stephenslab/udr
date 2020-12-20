@@ -36,26 +36,21 @@ for (i in 1:k) {
 X           <- simulate_ud_data(n,w,U,V)
 rownames(X) <- paste0("s",1:n)
 
-# INITIALIZE FIT
-# --------------
-# This is the simplest invocation of ud_init.
+# FIT MODEL
+# ---------
+# This is the simplest invocation of ud_init and ud_fit.
 set.seed(1)
-fit1 <- ud_init(X)
+fit0 <- ud_init(X)
+fit1 <- ud_fit(X,fit0,control = list(version = "R"))
 print(summary(fit1))
+
+stop()
 
 # This is a more complicated invocation of ud_init that overrides some
 # of the defaults.
 fit2 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
 print(summary(fit2))
 
-# FIT MODEL
-# ---------
-set.seed(1)
-numiter <- 100
-t1 <- system.time(
-  fit1 <- ud_fit(X,k = k,S = S,
-                 control = list(version = "R",update.U = "ed",
-                                tol = 0,maxiter = numiter)))
 set.seed(1)
 t2 <- system.time(
   fit2 <- ud_fit(X,k = k,S = S,
