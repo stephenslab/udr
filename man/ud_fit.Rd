@@ -5,17 +5,16 @@
 \alias{ud_fit_control_default}
 \title{Fit Ultimate Deconvolution Model}
 \usage{
-ud_fit(X, fit0, control = list(), verbose = TRUE)
+ud_fit(fit0, X, control = list(), verbose = TRUE)
 
 ud_fit_control_default()
 }
 \arguments{
-\item{X}{Describe input argument "X" here.}
+\item{fit0}{A previous Ultimate Deconvolution fit. Typically, this
+will be an output from \code{\link{ud_init}} or from a previous
+call to \code{ud_fit}.}
 
-\item{fit0}{A previous Ultimate Deconvolution fit. This is useful
-for "re-fitting" the model. When a value for this argument is
-given, the other inputs \code{k}, \code{w}, \code{U} and \code{S}
-are not needed.}
+\item{X}{Describe input argument "X" here.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model fitting algorithm. See \sQuote{Details}.}
@@ -61,38 +60,30 @@ it can also be viewed as a method for multivariate density
 deconvolution.
 }
 \details{
-In the multivariate normal means model, each m-dimensional
-observation \eqn{x} is drawn from a mixture of multivariate
-normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0, T_k)}, where
-\eqn{k} is the number of mixture components, the \eqn{w_j}'s are
-the mixture weights, and each \eqn{T_j = S + U_j} is a covariance
-matrix. This is the marginal density derived from a model in which
-each \eqn{x} is multivariate normal with mean \eqn{y} and
-covariance \eqn{S}, and the underlying, or "latent", signal \eqn{y}
+In the Ultimate Deconvolution (UD) model, the
+m-dimensional observation \eqn{x} is drawn from a mixture of
+multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0,
+T_k)}, where \eqn{k} is the number of mixture components, the
+\eqn{w_j}'s are the mixture weights, and each \eqn{T_j = V + U_j}
+is a covariance matrix. This is the marginal density derived from a
+model in which \eqn{x} is multivariate normal with mean \eqn{y} and
+covariance \eqn{V}, and the underlying, or "latent", signal \eqn{y}
 is in turn modeled by a mixture prior in which each mixture
 component \eqn{j} is multivariate normal with zero mean and
-covariance matrix \eqn{S_j}. The "Extreme Deconvolution" (ED) model
-(Bovy \emph{et al}, 2011) is a slight generalization of this
-multivariate normal means model; the ED model allows for the
-mixture components to have nonzero means, sample-specific residual
-covariances, and it allows one to specify a linear projection of
-the underlying signal onto the observed signal. Therefore, this
-method also implements a useful special case of Extreme
-Deconvolution.
+covariance matrix \eqn{U_j}.
 
-The multivariate normal means model is fit by
-expectation-maximization (EM). The \code{control} argument is a
-list in which any of the following named components will override
-the default optimization algorithm settings (as they are defined by
-\code{ud_fit_control_default}):
+This model is a useful special case of the "Extreme Deconvolution"
+(ED) model (Bovy \emph{et al}, 2011).
+
+The UD model is fit by expectation-maximization (EM). The
+\code{control} argument is a list in which any of the following
+named components will override the default optimization algorithm
+settings (as they are defined by \code{ud_fit_control_default}):
 
 \describe{
 
-\item{\code{update.w}}{When \code{update.w = "em"},
-maximum-likelihood estimates of the mixture weights are computed
-via an EM algorithm; when \code{update.w = "mixsqp"}, the mix-SQP
-solver is used to update the mixture weights by maximizing the
-likelihood with the other parameters fixed; when \code{update.w =
+\item{\code{weights.update}}{When \code{weights.update = "em"}, the
+mixture weights are updated via EM; when \code{weights.update =
 "none"}, the mixture weights are not updated.}
 
 \item{\code{update.U}}{This setting determines the algorithm used
@@ -121,7 +112,7 @@ to perform.}
 
 \item{\code{tol}}{Convergence tolerance for the EM algorithm; the
 updates are halted when the largest change in the model parameters
-between two successive iterations of EM is less than \code{tol}.}
+between two successive updates is less than \code{tol}.}
 
 \item{\code{minval}}{A small, non-negative number specifying the
 lower bound on the eigenvalues of the prior covariance matrices

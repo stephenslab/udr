@@ -41,9 +41,9 @@ rownames(X) <- paste0("s",1:n)
 # This is the simplest invocation of ud_init and ud_fit.
 set.seed(1)
 fit0 <- ud_init(X)
-fit1 <- ud_fit(X,fit0,control = list(version = "R"))
+fit1 <- ud_fit(fit0,control = list(maxiter = 10))
 print(summary(fit1))
-plot(1:100,max(fit1$progress$loglik) - fit1$progress$loglik + 0.01,
+plot(1:10,max(fit1$progress$loglik) - fit1$progress$loglik + 0.01,
      type = "l",col = "dodgerblue",lwd = 2,log = "y",xlab = "iteration",
      ylab = "dist to best loglik")
 

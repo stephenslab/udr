@@ -9,39 +9,45 @@
 #' it can also be viewed as a method for multivariate density
 #' deconvolution.
 #'
-#' @details In the multivariate normal means model, each m-dimensional
-#' observation \eqn{x} is drawn from a mixture of multivariate
-#' normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0, T_k)}, where
-#' \eqn{k} is the number of mixture components, the \eqn{w_j}'s are
-#' the mixture weights, and each \eqn{T_j = S + U_j} is a covariance
-#' matrix. This is the marginal density derived from a model in which
-#' each \eqn{x} is multivariate normal with mean \eqn{y} and
-#' covariance \eqn{S}, and the underlying, or "latent", signal \eqn{y}
+#' @details In the Ultimate Deconvolution (UD) model, the
+#' m-dimensional observation \eqn{x} is drawn from a mixture of
+#' multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0,
+#' T_k)}, where \eqn{k} is the number of mixture components, the
+#' \eqn{w_j}'s are the mixture weights, and each \eqn{T_j = V + U_j}
+#' is a covariance matrix. This is the marginal density derived from a
+#' model in which \eqn{x} is multivariate normal with mean \eqn{y} and
+#' covariance \eqn{V}, and the underlying, or "latent", signal \eqn{y}
 #' is in turn modeled by a mixture prior in which each mixture
 #' component \eqn{j} is multivariate normal with zero mean and
-#' covariance matrix \eqn{S_j}. The "Extreme Deconvolution" (ED) model
-#' (Bovy \emph{et al}, 2011) is a slight generalization of this
-#' multivariate normal means model; the ED model allows for the
-#' mixture components to have nonzero means, sample-specific residual
-#' covariances, and it allows one to specify a linear projection of
-#' the underlying signal onto the observed signal. Therefore, this
-#' method also implements a useful special case of Extreme
-#' Deconvolution.
+#' covariance matrix \eqn{U_j}. This model is a useful special case of
+#' the "Extreme Deconvolution" (ED) model (Bovy \emph{et al}, 2011).
 #'
-#' The multivariate normal means model is fit by
-#' expectation-maximization (EM). The \code{control} argument is a
-#' list in which any of the following named components will override
-#' the default optimization algorithm settings (as they are defined by
-#' \code{ud_fit_control_default}):
+#' Two variants of the UD model are implemented: one in which the
+#' residual covariance \code{V} is the same for all data points, and
+#' another in which V is different for each data point. In the first
+#' case, this covariance matrix may be estimated.
+#' 
+#' The UD model is fit by expectation-maximization (EM). The
+#' \code{control} argument is a list in which any of the following
+#' named components will override the default optimization algorithm
+#' settings (as they are defined by \code{ud_fit_control_default}):
 #' 
 #' \describe{
 #'
-#' \item{\code{update.weights}}{When \code{update.w = "em"},
-#' maximum-likelihood estimates of the mixture weights are computed
-#' via an EM algorithm; when \code{update.w = "mixsqp"}, the mix-SQP
-#' solver is used to update the mixture weights by maximizing the
-#' likelihood with the other parameters fixed; when \code{update.w =
+#' \item{\code{weights.update}}{When \code{weights.update = "em"}, the
+#' mixture weights are updated via EM; when \code{weights.update =
 #' "none"}, the mixture weights are not updated.}
+#'
+#' \item{\code{version}}{R and C++ implementations of the model
+#' fitting algorithm are provided; these are selected with
+#' \code{version = "R"} and \code{version = "Rcpp"}.}
+#' 
+#' \item{\code{maxiter}}{The upper limit on the number of EM updates
+#' to perform.}
+#'
+#' \item{\code{tol}}{Convergence tolerance for the EM algorithm; the
+#' updates are halted when the largest change in the model parameters
+#' between two successive updates is less than \code{tol}.}
 #'
 #' \item{\code{update.U}}{This setting determines the algorithm used
 #' to estimate the prior covariance matrices. Two EM variants are
@@ -60,17 +66,6 @@
 #' computed via EM; when \code{update.S = "none", the residual
 #' covariance parameter is not updated.}}
 #' 
-#' \item{\code{version}}{R and C++ implementations of the model
-#' fitting algorithm are provided; these are selected with
-#' \code{version = "R"} and \code{version = "Rcpp"}.}
-#' 
-#' \item{\code{maxiter}}{The upper limit on the number of EM updates
-#' to perform.}
-#'
-#' \item{\code{tol}}{Convergence tolerance for the EM algorithm; the
-#' updates are halted when the largest change in the model parameters
-#' between two successive iterations of EM is less than \code{tol}.}
-#'
 #' \item{\code{minval}}{A small, non-negative number specifying the
 #' lower bound on the eigenvalues of the prior covariance matrices
 #' \code{U}.}}
@@ -79,13 +74,12 @@
 #' argument checking is performed. See the documentation and examples
 #' for guidance.
 #'
+#' @param fit0 A previous Ultimate Deconvolution model fit. Typically,
+#'   this will be an output from \code{\link{ud_init}} or from a
+#'   previous call to \code{ud_fit}.
+#'
 #' @param X Describe input argument "X" here.
 #' 
-#' @param fit0 A previous Ultimate Deconvolution fit. This is useful
-#'   for "re-fitting" the model. When a value for this argument is
-#'   given, the other inputs \code{k}, \code{w}, \code{U} and \code{S}
-#'   are not needed.
-#'
 #' @param control A list of parameters controlling the behaviour of
 #'   the model fitting algorithm. See \sQuote{Details}.
 #'
@@ -150,13 +144,19 @@
 #' 
 #' @export
 #' 
-ud_fit <- function (X, fit0, control = list(), verbose = TRUE) {
+ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     
   # CHECK & PROCESS INPUTS
   # ----------------------
+  # Check input argument "fit0".
+  if (!(is.list(fit0) & inherits(fit0,"ud_fit")))
+    stop("Input argument \"fit0\" should be an object of class \"ud_fit\",",
+         "such as an output of ud_init")
+  fit <- fit0
+  
   # Check the input data matrix, X.
   if (missing(X))
-    X <- fit0$X
+    X <- fit$X
   if (!(is.matrix(X) & is.numeric(X)))
     stop("Input argument \"X\" should be a numeric matrix")
 
@@ -164,25 +164,23 @@ ud_fit <- function (X, fit0, control = list(), verbose = TRUE) {
   n <- nrow(X)
   m <- ncol(X)
 
-  # Check input argument "fit0".
-  if (!(is.list(fit0) & inherits(fit0,"ud_fit")))
-    stop("Input argument \"fit0\" should be an object of class \"ud_fit\",",
-         "such as an output of ud_init")
-  fit <- fit0
-  
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
   
   # Give an overview of the model fitting.
   if (verbose) {
-    cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix.",n,m))
-    cat("\n")
-    # cat("with these settings:\n")
-    # cat(sprintf("number of components in mixture prior: %d",length(fit0$w)))
-    # cat(sprintf("max %d updates, conv tol %0.1e ",
-    #     control$maxiter,control$tol))
-    # cat(sprintf("(udr 0.3-8, \"%s\").\n",control$version))
-    # cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
+    covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
+    cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
+    cat(sprintf("(udr 0.3-8, \"%s\"):\n",control$version))
+    if (is.matrix(fit$V))
+      cat("data points are i.i.d. (same V)\n")
+    else
+      cat("data points are not i.i.d. (different Vs)\n")
+    cat(sprintf("prior covariances: %d scaled, %d rank-1, %d unconstrained\n",
+                sum(covtypes == "scaled"),sum(covtypes == "rank1"),
+                sum(covtypes == "unconstrained")))
+    cat(sprintf("max %d updates, conv tol %0.1e\n",
+                control$maxiter,control$tol))
     # cat(sprintf("U (prior cov) = %s; ",control$update.U))
     # cat(sprintf("S (resid cov) = %s\n",control$update.S))
   }
