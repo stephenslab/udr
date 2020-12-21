@@ -1,4 +1,9 @@
 # Compute the log-likelihood for the Ultimate Deconvolution model.
+# Input argument U should be an m x m x k array, where m is the
+# dimension of the data points, and k is the number of mixture
+# components in the mixture-of-multivariate-normals prior. Input
+# argument should either be an m x m matrix, or an m x m x n array,
+# where n is the number of data points.
 #
 #' @importFrom mvtnorm dmvnorm
 loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {

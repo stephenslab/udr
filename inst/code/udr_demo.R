@@ -43,6 +43,9 @@ set.seed(1)
 fit0 <- ud_init(X)
 fit1 <- ud_fit(X,fit0,control = list(version = "R"))
 print(summary(fit1))
+plot(1:100,max(fit1$progress$loglik) - fit1$progress$loglik + 0.01,
+     type = "l",col = "dodgerblue",lwd = 2,log = "y",xlab = "iteration",
+     ylab = "dist to best loglik")
 
 stop()
 

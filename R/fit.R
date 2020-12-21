@@ -36,7 +36,7 @@
 #' 
 #' \describe{
 #'
-#' \item{\code{update.w}}{When \code{update.w = "em"},
+#' \item{\code{update.weights}}{When \code{update.w = "em"},
 #' maximum-likelihood estimates of the mixture weights are computed
 #' via an EM algorithm; when \code{update.w = "mixsqp"}, the mix-SQP
 #' solver is used to update the mixture weights by maximizing the
@@ -172,9 +172,8 @@ ud_fit <- function (X, fit0, control = list(), verbose = TRUE) {
   
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
-  # TO DO.
   
-  # Give an overview of the optimization settings.
+  # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix.",n,m))
     cat("\n")
@@ -182,7 +181,7 @@ ud_fit <- function (X, fit0, control = list(), verbose = TRUE) {
     # cat(sprintf("number of components in mixture prior: %d",length(fit0$w)))
     # cat(sprintf("max %d updates, conv tol %0.1e ",
     #     control$maxiter,control$tol))
-    # cat(sprintf("(udr 0.3-7, \"%s\").\n",control$version))
+    # cat(sprintf("(udr 0.3-8, \"%s\").\n",control$version))
     # cat(sprintf("updates: w (mix weights) = %s; ",control$update.w))
     # cat(sprintf("U (prior cov) = %s; ",control$update.U))
     # cat(sprintf("S (resid cov) = %s\n",control$update.S))
@@ -195,28 +194,31 @@ ud_fit <- function (X, fit0, control = list(), verbose = TRUE) {
   if (is.list(fit$V))
     fit$V <- simplify2array(fit$V)
   fit$U <- simplify2array(fit$U)
-  fit <- ud_fit_main_loop(X,fit,control,verbose)
-
+  fit <- ud_fit_main_loop(X,fit$w,fit$U,fit$V,control,verbose)
+  
   # Output the parameters of the updated model (w, U, V), the
   # log-likelihood of the updated model (loglik), and a record of the
   # algorithm's progress over time (progress).
-  fit$loglik <- loglik_ud(X,fit$w,fit$U,fit$S,control$version)
-  fit$X      <- X
-  fit$U      <- array2list(fit$U)
-  for (i in 1:k) {
-    rownames(fit$U[[i]]) <- colnames(X)
-    colnames(fit$U[[i]]) <- colnames(X)
-  }
-  names(fit$w)    <- mixture.labels
-  names(fit$U)    <- mixture.labels
-  rownames(fit$S) <- colnames(X)
-  colnames(fit$S) <- colnames(X)
-  class(fit)      <- c("ud_fit","list")
+  fit$progress <- rbind(fit0$progress,fit$progress)
+  fit$loglik   <- loglik_ud(X,fit$w,fit$U,fit$V,control$version)
+  fit$X        <- X
+  fit$U        <- array2list(fit$U)
+  if (!is.matrix(V))
+    fit$V <- array2list(fit$V)
+  # for (i in 1:k) {
+  #   rownames(fit$U[[i]]) <- colnames(X)
+  #   colnames(fit$U[[i]]) <- colnames(X)
+  # }
+  # names(fit$w)    <- mixture.labels
+  # names(fit$U)    <- mixture.labels
+  # rownames(fit$S) <- colnames(X)
+  # colnames(fit$S) <- colnames(X)
+  class(fit) <- c("ud_fit","list")
   return(fit)
 }
 
 # This implements the core part of ud_fit.
-ud_fit_main_loop <- function (X, fit, control, verbose) {
+ud_fit_main_loop <- function (X, w, U, V, control, verbose) {
 
   # Get the number of components in the mixture prior.
   k <- length(w)
@@ -226,84 +228,80 @@ ud_fit_main_loop <- function (X, fit, control, verbose) {
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
 
   # Iterate the EM updates.
-  for (i in 1:control$maxiter) {
-    fit0 <- fit
-    t1   <- proc.time()
+  for (iter in 1:control$maxiter) {
+    t1 <- proc.time()
 
     # E-step
     # ------
     # Compute the n x k matrix of posterior mixture assignment
     # probabilities given current estimates of the model parameters.
-    P <- compute_posterior_probs(X,fit,control$version)
+    P <- compute_posterior_probs(X,w,U,V,control$version)
 
     # M-step
     # ------
     # Compute the M-step update for the residual covariance (V), if
     # relevant.
-    if (control$update.S == "em")
-      Snew <- update_resid_covariance(X,U,S,P,control$version)
-    else if (control$update.S == "none")
-      Snew <- S
+    # if (control$update.S == "em")
+    #   Snew <- update_resid_covariance(X,U,S,P,control$version)
+    # else if (control$update.S == "none")
+    #   Snew <- S
+    Vnew <- V
     
     # Update the prior covariance matrices (U), if requested.
-    if (control$update.U == "ed")
-      Unew <- update_prior_covariance_ed(X,U,S,P,control$version)
-    else if (control$update.U == "teem")
-      Unew <- update_prior_covariance_teem(X,S,P,control$minval,
-                                           control$version)
-    else if (control$update.U == "none")
-      Unew <- U
+    # if (control$update.U == "ed")
+    #   Unew <- update_prior_covariance_ed(X,U,S,P,control$version)
+    # else if (control$update.U == "teem")
+    #   Unew <- update_prior_covariance_teem(X,S,P,control$minval,
+    #                                        control$version)
+    # else if (control$update.U == "none")
+    #   Unew <- U
+    Unew <- U
     
     # Update the mixture weights (w), if requested. Since the "mixsqp"
     # update does not use the posterior probabilities computed in the
     # E-step, it can make use of the new estimates of the other model
     # parameters.
-    if (control$update.w == "em")
+    if (control$weights.update == "em")
       wnew <- update_mixture_weights_em(P)
-    else if (control$update.w == "mixsqp")
-      wnew <- update_mixture_weights_mixsqp(X,Snew,Unew)
-    else if (control$update.w == "none")
+    else if (control$weights.update == "none")
       wnew <- w
     
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
-    loglik <- loglik_ud(X,wnew,Unew,Snew,control$version)
-    dw     <- max(abs(wnew - w))
-    dS     <- max(abs(Snew - S))
-    dU     <- max(abs(Unew - U))
-    t2     <- proc.time()
+    loglik <- loglik_ud(X,wnew,Unew,Vnew,control$version)
+    dw <- max(abs(wnew - w))
+    dU <- max(abs(Unew - U))
+    dV <- max(abs(Vnew - V))
+    t2 <- proc.time()
     progress[iter,"loglik"]  <- loglik
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.u"] <- dU 
-    progress[iter,"delta.s"] <- dS 
+    progress[iter,"delta.v"] <- dV 
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
-      cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dS))
+      cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dV))
 
     # Apply the parameter updates, and check convergencce.
     w <- wnew
     U <- Unew
-    S <- Snew
-    if (max(dw,dU,dS) < control$tol)
+    V <- Vnew
+    if (max(dw,dU,dV) < control$tol)
       break
   }
 
-  # Output the parameters of the updated model (w, U, S) and a record
-  # of the algorithm's progress over time ("progress").
-  return(list(w = w,U = U,S = S,progress = progress[1:iter,]))
+  # Output the parameters of the updated model, and a record of the
+  # algorithm's progress over time.
+  return(list(w = w,U = U,V = V,progress = progress[1:iter,]))
 }
 
 # Compute the n x k matrix of posterior mixture assignment
 # probabilities given current estimates of the model parameters. This
 # implements the E step in the EM algorithm for fitting the Ultimate
 # Deconvolution model.
-compute_posterior_probs <- function (X, fit, version = c("Rcpp","R")) {
+compute_posterior_probs <- function (X, w, U, V, version = c("Rcpp","R")) {
   version <- match.arg(version)
-  w <- fit$w
-  U <- fit$U
-  V <- fit$V
-  if (is.matrix(fit$V)) {
+  if (is.matrix(V)) {
 
     # Perform the computations for the special case when the same
     # residual variance is used for all samples.
@@ -367,33 +365,9 @@ compute_posterior_probs_general_helper <- function (X, w, U, V) {
 }
 
 # Perform an M-step update for the mixture weights in the
-# mixture-of-multivariate-normals prior. Odd things can happen if the
-# mixture weights are too small, so we avoid this by adding a small
-# positive scalar to all the weights.
-update_mixture_weights_em <- function (P) {
-  n <- nrow(P)
-  w <- colSums(P)/n
-  w <- pmax(w,1e-4)  
-  return(w/sum(w))
-}
-
-# Update the mixture weights using the "mix-SQP" algorithm. Odd things
-# can happen if the mixture weights are too small, so we avoid this by
-# adding a small positive scalar to all the weights.
-#'
-#' @importFrom mvtnorm dmvnorm
-#' @importFrom mixsqp mixsqp
-#' 
-update_mixture_weights_mixsqp <- function (X, S, U) {
-  n <- nrow(X)
-  k <- dim(U)[3]
-  L <- matrix(0,n,k)
-  for (i in 1:k)
-    L[,i] <- dmvnorm(X,sigma = S + U[,,i],log = TRUE)
-  out <- mixsqp(L,log = TRUE,control = list(verbose = FALSE))
-  w   <- pmax(out$x,1e-4)
-  return(w/sum(w))
-}
+# mixture-of-multivariate-normals prior.
+update_mixture_weights_em <- function (P)
+  colSums(P)/nrow(P)
 
 # Perform an M-step update for the prior covariance matrices using the
 # update forumla derived in Bovy et al (2011). The calculations are
@@ -522,9 +496,9 @@ compute_posterior_mvtnorm <- function (x, V, S) {
 #' @export
 #' 
 ud_fit_control_default <- function()
-  list(update.w = "em",    # One or "em", "mixsqp" or "none".
+  list(weights.update = "em", # "em" or "none".
        update.U = "teem",  # One of "ed", "teem" or "none".
-       update.S = "none",  # One of "em" or "none".
+       update.V = "none",  # One of "em" or "none".
        version  = "Rcpp",  # One of "R" or "Rcpp".
        maxiter  = 100,
        minval   = 1e-8,
