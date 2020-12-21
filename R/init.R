@@ -199,7 +199,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   }
 
   # Compute the log-likelihood.
-  loglik <- loglik_ud(X,w,array(simplify2array(U),c(m,m,k)),V,version)
+  loglik <- loglik_ud(X,w,array(simplify2array(U),c(m,m,k)),V,control$version)
 
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.

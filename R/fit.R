@@ -157,9 +157,12 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (!(is.matrix(X) & is.numeric(X)))
     stop("Input argument \"X\" should be a numeric matrix")
 
-  # Get the number of rows (n) and columns (m) of the data matrix,
+  # Get the number of rows (n) and columns (m) of the data matrix, and
+  # the number of components in the mixture-of-multivariate-normals
+  # prior (k).
   n <- nrow(X)
   m <- ncol(X)
+  k <- length(fit$U)
 
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
@@ -168,7 +171,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-11, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-12, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -196,21 +199,24 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   
   # Output the parameters of the updated model (w, U, V), the
   # log-likelihood of the updated model (loglik), and a record of the
-  # algorithm's progress over time (progress).
+  # algorithm's progress over time (progress). Some attributes such as
+  # row and column names may be missing and need to be added back.
   fit$progress <- rbind(fit0$progress,fit$progress)
   fit$loglik   <- loglik_ud(X,fit$w,fit$U,fit$V,control$version)
   fit$X        <- X
   fit$U        <- array2list(fit$U)
-  if (!is.matrix(V))
+  if (is.matrix(V)) {
+    rownames(fit$V) <- colnames(X)
+    colnames(fit$V) <- colnames(X)
+  } else
     fit$V <- array2list(fit$V)
-  # for (i in 1:k) {
-  #   rownames(fit$U[[i]]) <- colnames(X)
-  #   colnames(fit$U[[i]]) <- colnames(X)
-  # }
-  # names(fit$w)    <- mixture.labels
-  # names(fit$U)    <- mixture.labels
-  # rownames(fit$S) <- colnames(X)
-  # colnames(fit$S) <- colnames(X)
+  for (i in 1:k) {
+    rownames(fit$U[[i]]) <- colnames(X)
+    colnames(fit$U[[i]]) <- colnames(X)
+    attr(fit$U[[i]],"covtype") <- attr(fit0$U[[i]],"covtype")
+  }
+  names(fit$w) <- names(fit0$U)
+  names(fit$U) <- names(fit0$U)
   class(fit) <- c("ud_fit","list")
   return(fit)
 }
@@ -224,7 +230,8 @@ ud_fit_main_loop <- function (X, w, U, V, control, verbose) {
   # Set up data structures used in the loop below.
   progress <- as.data.frame(matrix(0,control$maxiter,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
-
+  progress$iter <- 1:control$maxiter
+  
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
