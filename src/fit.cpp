@@ -36,9 +36,9 @@ void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const mat& V,
 				    const cube& S, vec& mu1, mat& S1, vec& y);
 
 void compute_posterior_covariance_mvtnorm (const mat& U, const mat& V,
-					   const mat& I, mat& S);
+					   const mat& I, mat& S1);
 
-void compute_posterior_mean_mvtnorm (const vec& x, const mat& S, 
+void compute_posterior_mean_mvtnorm (const vec& x, const mat& S1, 
 				     const mat& V, vec& mu1);
 
 void shrink_cov (const mat& T, mat& U, mat& Y, vec& d, double minval);
@@ -286,22 +286,22 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
   // Compute the posterior covariances for each mixture component. The
   // posterior covariances do not depend on x, so we compute them
   // upfront.
-  cube S1(m,m,k);
+  cube S(m,m,k);
   mat  I(m,m,fill::eye);
   for (unsigned int j = 0; j < k; j++)
-    compute_posterior_covariance_mvtnorm(U.slice(j),V,I,S1.slice(j));
+    compute_posterior_covariance_mvtnorm(U.slice(j),V,I,S.slice(j));
 
   // Compute the M-step update for the residual covariance.
-  vec x(m);
-  vec mu1(m);
-  vec y(m);
   vec p(k);
-  mat S(m,m);
+  vec x(m);
+  vec y(m);
+  vec mu1(m);
+  mat S1(m,m);
   Vnew.fill(0);
   for (unsigned int i = 0; i < n; i++) {
      x = trans(X.row(i));
      p = trans(P.row(i));
-     compute_posterior_mvtnorm_mix(x,p,V,S1,mu1,S,y);
+     compute_posterior_mvtnorm_mix(x,p,V,S,mu1,S1,y);
      mu1  -= x;
      Vnew += S1;
      Vnew += mu1 * trans(mu1);
@@ -318,8 +318,9 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 // posterior covariance matrix for mixture component i. Input y is
 // used to store intermediate calculations; it is a vector of the same
 // size as x.
-void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const mat& V,
-				    const cube& S, vec& mu1, mat& S1, vec& y) {
+void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, 
+				    const mat& V, const cube& S, 
+				    vec& mu1, mat& S1, vec& y) {
   unsigned int k = w1.n_elem;
   mu1.fill(0);
   S1.fill(0);
@@ -333,31 +334,24 @@ void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const mat& V,
 
 // Suppose x is drawn from a multivariate normal distribution with
 // mean z and covariance V, and z is drawn from a multivariate normal
-// distribution with mean zero and covariance U. Return in S the
+// distribution with mean zero and covariance U. Return in S1 the
 // posterior covariance of z. (Note that the posterior covariance does
-// not depend on x, so it is not one of the inputs.) These calculations
-// will only work if V is positive definite (invertible).
-//
-// Input I should be the identity matrix of the same dimension as U
-// and V.
-//
+// not depend on x, so it is not one of the inputs.) These calculations 
+// will only work if V is positive definite (invertible). Input I
+// should be the identity matrix of the same dimension as U and V.
 void compute_posterior_covariance_mvtnorm (const mat& U, const mat& V,
-					   const mat& I, mat& S) {
-  S = inv(U*inv(V) + I)*U;
+					   const mat& I, mat& S1) {
+  S1 = inv(U*inv(V) + I)*U;
 }
 
 // Suppose x is drawn from a multivariate normal distribution with
 // mean z and covariance V, and z is drawn from a multivariate normal
-// distribution with mean zero and covariance U. Given S, the previously
-// calculated posterior covariance of z, return the posterior mean
-// (mu1) of z.
-//
-// Input I should be the identity matrix of the same dimension as U
-// and V.
-//
-void compute_posterior_mean_mvtnorm (const vec& x, const mat& S, 
+// distribution with mean zero and covariance U. Given S1, the
+// previously calculated posterior covariance of z, return the
+// posterior mean (mu1) of z.
+void compute_posterior_mean_mvtnorm (const vec& x, const mat& S1,
 				     const mat& V, vec& mu1) {
-  mu1 = S * solve(V,x);
+  mu1 = S1 * solve(V,x);
 }
 
 // "Shrink" matrix T = U + I; that is, find the "best" matrix T

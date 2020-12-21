@@ -115,10 +115,7 @@
 #'   seconds (recorded using \code{\link{proc.time}}).}
 #'
 #' @examples
-#' library(mvtnorm)
-#' set.seed(1)
-#' X   <- rmvt(1000,diag(2),df = 4)
-#' fit <- ud_fit(X,k = 10,S = diag(2))
+#' # TO DO.
 #' 
 #' @references
 #'
@@ -128,13 +125,13 @@
 #' \bold{5}, 1657–1677. doi:10.1214/10-AOAS439
 #'
 #' A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
-#' (2018). Bayesian semiparametric multivariate density
-#' deconvolution. \emph{Journal of the American Statistical
-#' Association} \bold{113}, 401–416. doi:10.1080/01621459.2016.1260467
+#' (2018). Bayesian semiparametric multivariate density deconvolution.
+#' \emph{Journal of the American Statistical Association} \bold{113},
+#' 401–416. doi:10.1080/01621459.2016.1260467
 #'
-#' J. Won, J. Lim, S. Kim and B. Rajaratnam
-#' (2013). Condition-number-regularized covariance estimation.
-#' \emph{Journal of the Royal Statistical Society, Series B} \bold{75},
+#' J. Won, J. Lim, S. Kim and B. Rajaratnam (2013).
+#' Condition-number-regularized covariance estimation. \emph{Journal
+#' of the Royal Statistical Society, Series B} \bold{75},
 #' 427–450. doi:10.1111/j.1467-9868.2012.01049.x
 #' 
 #' @useDynLib udr
@@ -171,7 +168,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-8, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-9, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -179,10 +176,12 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     cat(sprintf("prior covariances: %d scaled, %d rank-1, %d unconstrained\n",
                 sum(covtypes == "scaled"),sum(covtypes == "rank1"),
                 sum(covtypes == "unconstrained")))
+    cat(sprintf("mixture weights update: %s\n",control$weights.update))
+    if (is.matrix(fit$V))
+      cat(sprintf("residual covariance update: %s\n",control$resid.update))
     cat(sprintf("max %d updates, conv tol %0.1e\n",
                 control$maxiter,control$tol))
     # cat(sprintf("U (prior cov) = %s; ",control$update.U))
-    # cat(sprintf("S (resid cov) = %s\n",control$update.S))
   }
   
   # RUN UPDATES
@@ -237,13 +236,13 @@ ud_fit_main_loop <- function (X, w, U, V, control, verbose) {
 
     # M-step
     # ------
-    # Compute the M-step update for the residual covariance (V), if
-    # relevant.
-    # if (control$update.S == "em")
-    #   Snew <- update_resid_covariance(X,U,S,P,control$version)
-    # else if (control$update.S == "none")
-    #   Snew <- S
-    Vnew <- V
+    # Update the residual covariance matrix.
+    if (is.matrix(V)) {
+      if (control$resid.update == "em")
+        Vnew <- update_resid_covariance(X,U,V,P,control$version)
+      else if (control$resid.update == "none")
+        Vnew <- V
+    }
     
     # Update the prior covariance matrices (U), if requested.
     # if (control$update.U == "ed")
@@ -400,26 +399,26 @@ update_prior_covariance_teem <- function (X, S, P, minval,
   return(U)
 }
 
-# Perform an M-step update for the residual covariance matrix, S.
-update_resid_covariance <- function (X, U, S, P, version = c("Rcpp","R")) {
+# Perform an M-step update for the residual covariance matrix.
+update_resid_covariance <- function (X, U, V, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
   if (version == "R")
-    S <- update_resid_covariance_helper(X,U,S,P)
+    V <- update_resid_covariance_helper(X,U,V,P)
   else if (version == "Rcpp")
-    S <- update_resid_covariance_rcpp(X,U,S,P)
-  return(S)
+    V <- update_resid_covariance_rcpp(X,U,V,P)
+  return(V)
 }
 
-# Perform an M-step update for the residual covariance matrix, S.
-update_resid_covariance_helper <- function (X, U, S, P) {
+# Perform an M-step update for the residual covariance matrix.
+update_resid_covariance_helper <- function (X, U, V, P) {
   n    <- nrow(X)
   m    <- ncol(X)
-  Snew <- matrix(0,m,m)
+  Vnew <- matrix(0,m,m)
   for (i in 1:n) {
-    out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,S)
-    Snew <- Snew + out$S1 + tcrossprod(X[i,] - out$mu1)
+    out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,V)
+    Vnew <- Vnew + out$S1 + tcrossprod(X[i,] - out$mu1)
   }
-  return(Snew/n)
+  return(Vnew/n)
 }
 
 # Perform an M-step update for one of the prior covariance matrices
@@ -458,34 +457,34 @@ update_prior_covariance_teem_helper <- function (X, S, p, minval) {
 }
 
 # Suppose x is drawn from a multivariate normal distribution with mean
-# z and covariance S, and z is drawn from a mixture of multivariate
-# normals, each with zero mean, covariance V[,,i] and weight w[i].
+# z and covariance V, and z is drawn from a mixture of multivariate
+# normals, each with zero mean, covariance U[,,i] and weight w[i].
 # Return the posterior mean (mu1) and covariance (S1) of z. Note that
 # input w1 must be the vector of *posterior* mixture weights (see
 # compute_posterior_probs).
-compute_posterior_mvtnorm_mix <- function (x, w1, V, S) {
+compute_posterior_mvtnorm_mix <- function (x, w1, U, V) {
   m   <- length(x)
   k   <- length(w1)
   mu1 <- rep(0,m)
   S1  <- matrix(0,m,m)
   for (i in 1:k) {
-    out <- compute_posterior_mvtnorm(x,V[,,i],S)
-    mu1 <- mu1 + w1[i] * out$mu
-    S1  <- S1  + w1[i] * (out$S + tcrossprod(out$mu))
+    out <- compute_posterior_mvtnorm(x,U[,,i],V)
+    mu1 <- mu1 + w1[i] * out$mu1
+    S1  <- S1 + w1[i] * (out$S1 + tcrossprod(out$mu1))
   }
   S1 <- S1 - tcrossprod(mu1)
   return(list(mu1 = mu1,S1 = S1))
 }
 
 # Suppose x is drawn from a multivariate normal distribution with mean
-# z and covariance S, and z is drawn from a multivariate normal
-# distribution with mean zero and covariance V. Return the posterior
-# mean (mu1) and covariance (S1) of z. These calculations will only
-# work if S is positive definite.
-compute_posterior_mvtnorm <- function (x, V, S) {
+# z and covariance V, and z is drawn from a multivariate normal
+# distribution with mean zero and covariance U. Return the posterior
+# mean (mu) and covariance (S1) of z. These calculations will only
+# work if V is positive definite (invertible).
+compute_posterior_mvtnorm <- function (x, U, V) {
   m   <- length(x)
-  S1  <- solve(V %*% solve(S) + diag(m)) %*% V
-  mu1 <- drop(S1 %*% solve(S,x))
+  S1  <- solve(U %*% solve(V) + diag(m)) %*% U
+  mu1 <- drop(S1 %*% solve(V,x))
   return(list(mu1 = mu1,S1 = S1))
 }
 
@@ -494,10 +493,10 @@ compute_posterior_mvtnorm <- function (x, V, S) {
 #' @export
 #' 
 ud_fit_control_default <- function()
-  list(weights.update = "em", # "em" or "none".
-       update.U = "teem",  # One of "ed", "teem" or "none".
-       update.V = "none",  # One of "em" or "none".
-       version  = "Rcpp",  # One of "R" or "Rcpp".
-       maxiter  = 100,
-       minval   = 1e-8,
-       tol      = 1e-6)
+  list(weights.update = "em",   # "em" or "none"
+       update.U       = "teem", # "ed", "teem" or "none"
+       resid.update   = "em",   # "em" or "none"
+       version        = "Rcpp", # "R" or "Rcpp"
+       maxiter        = 100,
+       minval         = 1e-8,
+       tol            = 1e-6)

@@ -10,9 +10,9 @@ ud_fit(fit0, X, control = list(), verbose = TRUE)
 ud_fit_control_default()
 }
 \arguments{
-\item{fit0}{A previous Ultimate Deconvolution fit. Typically, this
-will be an output from \code{\link{ud_init}} or from a previous
-call to \code{ud_fit}.}
+\item{fit0}{A previous Ultimate Deconvolution model fit. Typically,
+this will be an output from \code{\link{ud_init}} or from a
+previous call to \code{ud_fit}.}
 
 \item{X}{Describe input argument "X" here.}
 
@@ -70,10 +70,13 @@ model in which \eqn{x} is multivariate normal with mean \eqn{y} and
 covariance \eqn{V}, and the underlying, or "latent", signal \eqn{y}
 is in turn modeled by a mixture prior in which each mixture
 component \eqn{j} is multivariate normal with zero mean and
-covariance matrix \eqn{U_j}.
+covariance matrix \eqn{U_j}. This model is a useful special case of
+the "Extreme Deconvolution" (ED) model (Bovy \emph{et al}, 2011).
 
-This model is a useful special case of the "Extreme Deconvolution"
-(ED) model (Bovy \emph{et al}, 2011).
+Two variants of the UD model are implemented: one in which the
+residual covariance \code{V} is the same for all data points, and
+another in which V is different for each data point. In the first
+case, this covariance matrix may be estimated.
 
 The UD model is fit by expectation-maximization (EM). The
 \code{control} argument is a list in which any of the following
@@ -85,6 +88,17 @@ settings (as they are defined by \code{ud_fit_control_default}):
 \item{\code{weights.update}}{When \code{weights.update = "em"}, the
 mixture weights are updated via EM; when \code{weights.update =
 "none"}, the mixture weights are not updated.}
+
+\item{\code{version}}{R and C++ implementations of the model
+fitting algorithm are provided; these are selected with
+\code{version = "R"} and \code{version = "Rcpp"}.}
+
+\item{\code{maxiter}}{The upper limit on the number of EM updates
+to perform.}
+
+\item{\code{tol}}{Convergence tolerance for the EM algorithm; the
+updates are halted when the largest change in the model parameters
+between two successive updates is less than \code{tol}.}
 
 \item{\code{update.U}}{This setting determines the algorithm used
 to estimate the prior covariance matrices. Two EM variants are
@@ -103,17 +117,6 @@ maximum-likelihood estimate of the residual covariance matrix is
 computed via EM; when \code{update.S = "none", the residual
 covariance parameter is not updated.}}
 
-\item{\code{version}}{R and C++ implementations of the model
-fitting algorithm are provided; these are selected with
-\code{version = "R"} and \code{version = "Rcpp"}.}
-
-\item{\code{maxiter}}{The upper limit on the number of EM updates
-to perform.}
-
-\item{\code{tol}}{Convergence tolerance for the EM algorithm; the
-updates are halted when the largest change in the model parameters
-between two successive updates is less than \code{tol}.}
-
 \item{\code{minval}}{A small, non-negative number specifying the
 lower bound on the eigenvalues of the prior covariance matrices
 \code{U}.}}
@@ -123,10 +126,7 @@ argument checking is performed. See the documentation and examples
 for guidance.
 }
 \examples{
-library(mvtnorm)
-set.seed(1)
-X   <- rmvt(1000,diag(2),df = 4)
-fit <- ud_fit(X,k = 10,S = diag(2))
+# TO DO.
 
 }
 \references{
@@ -136,12 +136,12 @@ and incomplete observations. \emph{Annals of Applied Statistics},
 \bold{5}, 1657–1677. doi:10.1214/10-AOAS439
 
 A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
-(2018). Bayesian semiparametric multivariate density
-deconvolution. \emph{Journal of the American Statistical
-Association} \bold{113}, 401–416. doi:10.1080/01621459.2016.1260467
+(2018). Bayesian semiparametric multivariate density deconvolution.
+\emph{Journal of the American Statistical Association} \bold{113},
+401–416. doi:10.1080/01621459.2016.1260467
 
-J. Won, J. Lim, S. Kim and B. Rajaratnam
-(2013). Condition-number-regularized covariance estimation.
-\emph{Journal of the Royal Statistical Society, Series B} \bold{75},
+J. Won, J. Lim, S. Kim and B. Rajaratnam (2013).
+Condition-number-regularized covariance estimation. \emph{Journal
+of the Royal Statistical Society, Series B} \bold{75},
 427–450. doi:10.1111/j.1467-9868.2012.01049.x
 }
