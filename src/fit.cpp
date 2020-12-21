@@ -33,7 +33,7 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 			      const mat& P, mat& Vnew);
 
 void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, const mat& V,
-				    const cube& S, vec& mu1, mat& S1, vec& y);
+				    const cube& B1, vec& mu1, mat& S1, vec& y);
 
 void compute_posterior_covariance_mvtnorm (const mat& U, const mat& V,
 					   const mat& I, mat& S1);
@@ -286,10 +286,10 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
   // Compute the posterior covariances for each mixture component. The
   // posterior covariances do not depend on x, so we compute them
   // upfront.
-  cube S(m,m,k);
+  cube B1(m,m,k);
   mat  I(m,m,fill::eye);
   for (unsigned int j = 0; j < k; j++)
-    compute_posterior_covariance_mvtnorm(U.slice(j),V,I,S.slice(j));
+    compute_posterior_covariance_mvtnorm(U.slice(j),V,I,B1.slice(j));
 
   // Compute the M-step update for the residual covariance.
   vec p(k);
@@ -301,7 +301,7 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
   for (unsigned int i = 0; i < n; i++) {
      x = trans(X.row(i));
      p = trans(P.row(i));
-     compute_posterior_mvtnorm_mix(x,p,V,S,mu1,S1,y);
+     compute_posterior_mvtnorm_mix(x,p,V,B1,mu1,S1,y);
      mu1  -= x;
      Vnew += S1;
      Vnew += mu1 * trans(mu1);
@@ -314,20 +314,20 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 // multivariate normals, each with zero mean, covariance U[,,i] and
 // weight w[i]. Return the posterior mean (mu1) and covariance (S1) of
 // z. Note that input w1 must be the vector of *posterior* mixture
-// weights (see compute_posterior_probs), and S[,,i] should be the
+// weights (see compute_posterior_probs), and B[,,i] should be the
 // posterior covariance matrix for mixture component i. Input y is
 // used to store intermediate calculations; it is a vector of the same
 // size as x.
 void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, 
-				    const mat& V, const cube& S, 
+				    const mat& V, const cube& B1,
 				    vec& mu1, mat& S1, vec& y) {
   unsigned int k = w1.n_elem;
   mu1.fill(0);
   S1.fill(0);
   for (unsigned int i = 0; i < k; i++) {
-    compute_posterior_mean_mvtnorm(x,S.slice(i),V,y);
+    compute_posterior_mean_mvtnorm(x,B1.slice(i),V,y);
     mu1 += w1(i) * y;
-    S1  += w1(i) * (S.slice(i) + y * trans(y));
+    S1  += w1(i) * (B1.slice(i) + y * trans(y));
   }
   S1 -= mu1 * trans(mu1);
 }
