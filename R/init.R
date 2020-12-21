@@ -44,6 +44,9 @@
 #'   are automatically normalized to sum to 1. If not provided, the
 #'   mixture weights are set to uniform.
 #'
+#' @param control A list of parameters controlling the behaviour of
+#'   the model initialization. See \code{\link{ud_fit}} for details.
+#'
 #' @param version R and C++ implementations of some numerical
 #'   computations are provided; these are selected with \code{version =
 #'   "R"} and \code{version = "Rcpp"}.
@@ -56,7 +59,7 @@
 ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
                      U_scaled = list(indep = diag(ncol(X)),
                                      iden = matrix(1,ncol(X),ncol(X))),
-                     U_rank1, U_unconstrained, w, version = "Rcpp") {
+                     U_rank1, U_unconstrained, w, control = list()) {
 
   # Check the input data matrix, X.
   if (!(is.matrix(X) & is.numeric(X)))
@@ -68,6 +71,9 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   n <- nrow(X)
   m <- ncol(X)
 
+  # Check and process the optimization settings.
+  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
+  
   # Process the "n" and "U" input arguments (that is, n_rank1,
   # n_unconstrained, U_rank1 and U_unconstrained). First, verify that
   # at most one of n_rank1 and U_rank1 is provided, and that at most
@@ -137,11 +143,11 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # positive semi-definite.
   if (n_scaled > 0)
     for (i in 1:n_scaled)
-      if (!issemidef(U_scaled[[i]]))
+      if (!issemidef(U_scaled[[i]],control$minval))
         stop("All U_scaled matrices should be positive semi-definite")
   if (n_unconstrained > 0)
     for (i in 1:n_unconstrained)
-      if (!issemidef(U_unconstrained[[i]]))
+      if (!issemidef(U_unconstrained[[i]],control$minval))
         stop("All U_unconstrained matrices should be positive semi-definite")
 
   # Combine the prior covariances matrices into a single list.
@@ -153,13 +159,13 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
                "semi-definite matrix, or a list of positive semi-definite",
                "matrices, with one matrix per row of \"X\"")
   if (is.matrix(V)) {
-    if (!issemidef(V))
+    if (!issemidef(V,control$minval))
       stop(msg)
   } else {
     if (length(V) != n)
       stop(msg)
     for (i in 1:n)
-      if (!issemidef(V[[i]]))
+      if (!issemidef(V[[i]],control$minval))
         stop(msg)
   }
   

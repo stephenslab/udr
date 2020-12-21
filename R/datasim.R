@@ -29,16 +29,6 @@
 #' 
 simulate_ud_data <- function (n, w, U, V) {
       
-  # Check the residual covariance matrix, V.
-  if (!issemidef(V))
-    stop("Input argument \"V\" should be a positive semi-definite matrix")
-  
-  # Check the prior covariance matrices, U.
-  if (!(is.list(U) && verify_prior_covariances(U,V)))
-    stop("Input argument \"U\" should be list in which each list element ",
-         "U[[i]] is a (symmetric) positive semi-definite matrix, and",
-         "V + U[[i]] is symmetric positive definite")
-
   # Get the dimension of the data points (m) and the number of
   # mixture components (k).
   m <- nrow(V)
@@ -46,6 +36,15 @@ simulate_ud_data <- function (n, w, U, V) {
   if (m < 2)
     stop("The univariate case (m = 1) is not implemented")
   
+  # Check the residual covariance matrix, V.
+  if (!issemidef(V))
+    stop("Input argument \"V\" should be a positive semi-definite matrix")
+  
+  # Check the prior covariance matrices, U.
+ for (i in 1:k)
+   if (!issemidef(U[[i]]))
+     stop("All \"U\" matrices should be positive semi-definite")
+
   # Check the mixture weights, w.
   if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
     stop("Input argument \"w\" should be a vector of length \"k\" ",

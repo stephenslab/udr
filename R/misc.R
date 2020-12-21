@@ -14,8 +14,8 @@ isposdef <- function (X)
 
 # Returns TRUE if and only if the matrix is (symmetric) positive
 # semi-definite.
-issemidef <- function (X, e = 1e-15) 
-  all(eigen(X)$values > -e)
+issemidef <- function (X, minval = -1e-15) 
+  all(eigen(X)$values > minval)
 
 # For symmetric semi-definite matrix X, get the nearest rank-1 matrix. 
 getrank1 <- function (X) {
@@ -34,26 +34,18 @@ softmax <- function (W) {
 }
 
 # "Shrink" matrix T = U + I; that is, find the "best" matrix T
-# satisfying the constraint that U is positive definite. This is
-# achieved by setting any eigenvalues of T less than 1 to 1 + minval,
-# or, equivalently, setting any eigenvalues of U less than 0 to be
-# minval.  The output is a positive definite matrix, U.
-shrink_cov <- function (T, minval) {
+# satisfying the constraint that U is positive definite (if minval >
+# 0) or positive semi-definite (if minval <= 0). This is achieved by
+# setting any eigenvalues of T less than 1 to 1 + minval, or,
+# equivalently, setting any eigenvalues of U less than 0 to be
+# minval. The output is a positive definite matrix, U, or a positive
+# semi-definite matrix if minval <= 0. 
+shrink_cov <- function (T, minval = 0) {
+  minval <- max(0,minval)
   out <- eigen(T)
-  d   <- out$values
-  d   <- pmax(d - 1,minval)
+  d <- out$values
+  d <- pmax(d - 1,minval)
   return(tcrossprod(out$vectors %*% diag(sqrt(d))))
-}
-
-# Returns TRUE if and only if all prior covariances U are positive
-# semi-definite, and all marginal covariances T = V + U are positive
-# definite.
-verify_prior_covariances <- function (U, V, e = 1e-15) {
-  k   <- length(U)
-  out <- TRUE  
-  for (i in 1:k)
-    out <- out & issemidef(U[[i]]) & isposdef(V + U[[i]])
-  return(out)
 }
 
 # Randomly generate an m x m symmetric rank-1 matrix.

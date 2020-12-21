@@ -17,7 +17,7 @@ previous call to \code{ud_fit}.}
 \item{X}{Describe input argument "X" here.}
 
 \item{control}{A list of parameters controlling the behaviour of
-the model fitting algorithm. See \sQuote{Details}.}
+the model fitting and initialization. See \sQuote{Details}.}
 
 \item{verbose}{When \code{verbose = TRUE}, information about the
 algorithm's progress is printed to the console at each
@@ -117,9 +117,9 @@ maximum-likelihood estimate of the residual covariance matrix is
 computed via EM; when \code{update.S = "none", the residual
 covariance parameter is not updated.}}
 
-\item{\code{minval}}{A small, non-negative number specifying the
-lower bound on the eigenvalues of the prior covariance matrices
-\code{U}.}}
+\item{\code{minval}}{Minimum eigenvalue allowed in the residual
+  covariance(s) \code{V} and the prior covariance matrices
+  \code{U}.}}
 
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples

@@ -66,9 +66,9 @@
 #' computed via EM; when \code{update.S = "none", the residual
 #' covariance parameter is not updated.}}
 #' 
-#' \item{\code{minval}}{A small, non-negative number specifying the
-#' lower bound on the eigenvalues of the prior covariance matrices
-#' \code{U}.}}
+#' \item{\code{minval}}{Minimum eigenvalue allowed in the residual
+#'   covariance(s) \code{V} and the prior covariance matrices
+#'   \code{U}.}}
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
@@ -81,7 +81,7 @@
 #' @param X Describe input argument "X" here.
 #' 
 #' @param control A list of parameters controlling the behaviour of
-#'   the model fitting algorithm. See \sQuote{Details}.
+#'   the model fitting and initialization. See \sQuote{Details}.
 #'
 #' @param verbose When \code{verbose = TRUE}, information about the
 #'   algorithm's progress is printed to the console at each
@@ -168,13 +168,14 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-10, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-11, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
       cat("data points are not i.i.d. (different Vs)\n")
     cat(sprintf("prior covariances: %d scaled, %d rank-1, %d unconstrained\n",
-                sum(covtypes == "scaled"),sum(covtypes == "rank1"),
+                sum(covtypes == "scaled"),
+                sum(covtypes == "rank1"),
                 sum(covtypes == "unconstrained")))
     cat(sprintf("mixture weights update: %s\n",control$weights.update))
     if (is.matrix(fit$V))
@@ -450,7 +451,7 @@ update_prior_covariance_teem_helper <- function (X, S, p, minval) {
   # to the constraint that U is positive definite is obtained by
   # truncating the eigenvalues of T = U + I less than 1 to be 1; see
   # Won et al (2013), p. 434, the sentence just after equation (16).
-  U <- shrink.cov(T,minval)
+  U <- shrink_cov(T,minval)
 
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
@@ -498,5 +499,5 @@ ud_fit_control_default <- function()
        resid.update   = "em",   # "em" or "none"
        version        = "Rcpp", # "R" or "Rcpp"
        maxiter        = 100,
-       minval         = 1e-8,
+       minval         = -1e-8,
        tol            = 1e-6)

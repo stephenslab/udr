@@ -13,7 +13,7 @@ ud_init(
   U_rank1,
   U_unconstrained,
   w,
-  version = "Rcpp"
+  control = list()
 )
 }
 \arguments{
@@ -57,6 +57,9 @@ matrices in the mixture-of-multivariate-normals prior. All entries
 must be non-negative, but need not sum to 1; the mixture weights
 are automatically normalized to sum to 1. If not provided, the
 mixture weights are set to uniform.}
+
+\item{control}{A list of parameters controlling the behaviour of
+the model initialization. See \code{\link{ud_fit}} for details.}
 
 \item{version}{R and C++ implementations of some numerical
 computations are provided; these are selected with \code{version =
