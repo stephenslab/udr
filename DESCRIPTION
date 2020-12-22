@@ -19,8 +19,7 @@ Imports:
     utils,
     stats,
     mvtnorm,
-    Rcpp (>= 1.0.3),
-    mixsqp
+    Rcpp (>= 1.0.3)
 LinkingTo: 
     Rcpp, 
     RcppArmadillo

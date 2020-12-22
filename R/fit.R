@@ -299,10 +299,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
              "\" is not implemented")
     }
     
-    # Update the mixture weights (w), if requested. Since the "mixsqp"
-    # update does not use the posterior probabilities computed in the
-    # E-step, it can make use of the new estimates of the other model
-    # parameters.
+    # Update the mixture weights.
     if (control$weights.update == "em")
       wnew <- update_mixture_weights_em(P)
     else if (control$weights.update == "none")
