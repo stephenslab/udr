@@ -10,7 +10,7 @@
 #' 
 #' @method summary ud_fit
 #'
-#' @return \code{summary.ud_fit} returns list of statistics
+#' @return \code{summary.ud_fit} returns a list of statistics
 #'   summarizing the model fit.
 #' 
 #' @export

@@ -31,31 +31,33 @@ simulate_ud_data <- function (n, w, U, V) {
   # mixture components (k).
   m <- nrow(V)
   k <- length(U)
+  if (n < 2)
+    stop("n should be 2 or greater")
   if (m < 2)
     stop("The univariate case (m = 1) is not implemented")
+  if (k < 2)
+    stop("Input argument \"U\" should be a list of length 2 or more")
   
-  # Check the residual covariance matrix, V.
+  # Check the residual covariance matrix.
   if (!issemidef(V))
     stop("Input argument \"V\" should be a positive semi-definite matrix")
   
-  # Check the prior covariance matrices, U.
- for (i in 1:k)
-   if (!issemidef(U[[i]]))
-     stop("All \"U\" matrices should be positive semi-definite")
+  # Check the prior covariance matrices.
+  for (i in 1:k)
+    if (!issemidef(U[[i]]))
+      stop("All \"U\" matrices should be positive semi-definite")
 
-  # Check the mixture weights, w.
+  # Check the mixture weights.
   if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
     stop("Input argument \"w\" should be a vector of length \"k\" ",
          "containing non-negative weights")
   w <- w/sum(w)
 
-  # Initialize storage for the data points.
-  X <- matrix(0,n,m)
-
   # Draw mixture components according to the mixture weights.
   z <- sample(k,n,replace = TRUE,prob = w)
   
   # Draw the data points.
+  X <- matrix(0,n,m)
   for (j in 1:k) {
     i <- which(z == j)
     if (length(i) > 0) {

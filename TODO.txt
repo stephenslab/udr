@@ -1,6 +1,8 @@
 to do
 =====
 
++ Create basic vignette.
+
 + Add tests, and activate testing in CI configs.
 
 + Update README.

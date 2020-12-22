@@ -1,9 +1,6 @@
 # Compute the log-likelihood for the Ultimate Deconvolution model.
-# Input argument U should be an m x m x k array, where m is the
-# dimension of the data points, and k is the number of mixture
-# components in the mixture-of-multivariate-normals prior. Input
-# argument should either be an m x m matrix, or an m x m x n array,
-# where n is the number of data points.
+# Input argument should either be an m x m matrix, or an m x m x n
+# array, where n is the number of data points.
 #
 #' @importFrom mvtnorm dmvnorm
 loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
@@ -32,8 +29,8 @@ loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
   return(y)
 }
 
-# This is the R implementation of the likelihood computation when the
-# residual covariance V is the same for all samples.
+# Compute the log-likelihood when the residual covariance V is the
+# same for all samples.
 loglik_ud_iid_helper <- function (X, w, U, V) {
   n <- nrow(X)
   k <- length(w)
@@ -43,8 +40,8 @@ loglik_ud_iid_helper <- function (X, w, U, V) {
   return(sum(log(y)))
 }
 
-# This is the R implementation of the likelihood computation when the
-# residual covariance V is *not* the same for all samples.
+# Compute the log-likelihood when the residual covariance V is *not*
+# the same for all samples.
 loglik_ud_general_helper <- function (X, w, U, V) {
   n <- nrow(X)
   k <- length(w)

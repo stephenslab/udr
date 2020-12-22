@@ -5,8 +5,8 @@ update_mixture_weights_em <- function (P)
 
 # Perform an M-step update for the residual covariance matrix.
 update_resid_covariance <- function (X, U, V, P) {
-  n    <- nrow(X)
-  m    <- ncol(X)
+  n<- nrow(X)
+  m <- ncol(X)
   Vnew <- matrix(0,m,m)
   for (i in 1:n) {
     out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,V)
@@ -20,7 +20,6 @@ update_resid_covariance <- function (X, U, V, P) {
 # implemented in both R (version = "R") and C++ (version = "Rcpp").
 update_prior_covariances_ed <- function (X, U, V, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
-  U0 <- U
   if (version == "R") {
     k <- ncol(P)
     for (i in 1:k)
@@ -35,8 +34,8 @@ update_prior_covariances_ed <- function (X, U, V, P, version = c("Rcpp","R")) {
 # vector, with one entry per row of X, giving the posterior assignment
 # probabilities for the mixture component being updated.
 update_prior_covariance_ed <- function (X, U, V, p) {
-  T  <- U + V
-  B  <- solve(T,U)
+  T <- U + V
+  B <- solve(T,U)
   X1 <- crossprod((sqrt(p/sum(p)) * X) %*% B)
   return(U - U %*% B + X1)
 }

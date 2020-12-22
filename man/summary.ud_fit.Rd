@@ -20,7 +20,7 @@ or \code{print.summary} method.}
 result of a call to \code{summary.ud_fit}.}
 }
 \value{
-\code{summary.ud_fit} returns list of statistics
+\code{summary.ud_fit} returns a list of statistics
   summarizing the model fit.
 }
 \description{
