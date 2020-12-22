@@ -22,13 +22,11 @@ component.}
 }
 \value{
 An n x m matrix in which each row is a draw from the
-  Ultimate Deconvolution model. For the univariate case (m = 1), a
-  vector is returned.
+  Ultimate Deconvolution model.
 }
 \description{
 Simulate data points from the Ultimate Deconvolution
-  model. Note that the univariate case (m = 1) is not handled.
-  See \code{\link{ud_fit}} for the model definition.
+  model. See \code{\link{ud_fit}} for the model definition.
 }
 \seealso{
 \code{\link{ud_fit}}

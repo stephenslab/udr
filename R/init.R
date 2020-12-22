@@ -60,13 +60,12 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # Check the input data matrix, X.
   if (!(is.matrix(X) & is.numeric(X)))
     stop("Input argument \"X\" should be a numeric matrix")
-  if (ncol(X) < 2)
-    stop("Input argument \"X\" should have at least 2 columns")
-  
-  # Get the number of rows (n) and columns (m) of the data matrix.
   n <- nrow(X)
   m <- ncol(X)
-
+  if (n < 2 | m < 2)
+    stop("Input argument \"X\" should have at least 2 columns and ",
+         "at least 2 rows")
+  
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
   
@@ -149,7 +148,9 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # Combine the prior covariances matrices into a single list.
   U <- c(U_scaled,U_rank1,U_unconstrained)
   k <- length(U)
-
+  if (k < 2)
+    stop("The total number of prior covariances should be at least 2")
+  
   # Check input argument V.
   msg <- paste("Input argument \"V\" should either be a positive",
                "semi-definite matrix, or a list of positive semi-definite",

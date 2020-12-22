@@ -1,15 +1,11 @@
 to do
 =====
 
-+ Add examples.
-
-+ Add tests.
++ Add tests, and activate testing in CI configs.
 
 + Update README.
 
 + Update pkgdown site.
-
-+ Add continuous integration (TravisCI, Appveyor and/or CircleCI).
 
 + Add codecov.
 

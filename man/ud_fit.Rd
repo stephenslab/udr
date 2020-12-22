@@ -126,7 +126,44 @@ argument checking is performed. See the documentation and examples
 for guidance.
 }
 \examples{
-# TO DO.
+# These variables specify how the data are simulated: n is the number
+# of samples drawn from the multivariate normal means model,
+# w[1]*N(0,V + U[[1]]) + ... + w[4]*N(0,V + U[[4]]).
+set.seed(1)
+n <- 4000
+V <- rbind(c(0.8,0.2),
+           c(0.2,1.5))
+U <- list(none   = rbind(c(0,0),
+                         c(0,0)),
+          shared = rbind(c(1.0,0.9),
+                         c(0.9,1.0)),
+          only1  = rbind(c(1,0),
+                         c(0,0)),
+          only2  = rbind(c(0,0),
+                         c(0,1)))
+w <- c(0.8,0.1,0.075,0.025)
+rownames(V) <- c("d1","d2")
+colnames(V) <- c("d1","d2")
+X <- simulate_ud_data(n,w,U,V)
+
+# This is the simplest invocation of ud_init.
+fit1 <- ud_init(X)
+fit1 <- ud_fit(fit1)
+summary(fit1)
+plot(fit1$progress$iter,
+     max(fit1$progress$loglik) - fit1$progress$loglik + 0.1,
+     type = "l",col = "dodgerblue",lwd = 2,log = "y",xlab = "iteration",
+     ylab = "dist to best loglik")
+
+# This is a more complex invocation of ud_init that overrides some
+# of the defaults.
+fit2 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
+fit2 <- ud_fit(fit2)
+summary(fit2)
+plot(fit2$progress$iter,
+     max(fit2$progress$loglik) - fit2$progress$loglik + 0.1,
+     type = "l",col = "dodgerblue",lwd = 2,log = "y",xlab = "iteration",
+     ylab = "dist to best loglik")
 
 }
 \references{

@@ -1,8 +1,7 @@
 #' @title Simulate Data from Ultimate Deconvolution Model
 #'
 #' @description Simulate data points from the Ultimate Deconvolution
-#'   model. Note that the univariate case (m = 1) is not handled.
-#'   See \code{\link{ud_fit}} for the model definition.
+#'   model. See \code{\link{ud_fit}} for the model definition.
 #'
 #' @param n Number of data points to simulate.
 #' 
@@ -18,8 +17,7 @@
 #' @param V The m x m residual covariance matrix.
 #'
 #' @return An n x m matrix in which each row is a draw from the
-#'   Ultimate Deconvolution model. For the univariate case (m = 1), a
-#'   vector is returned.
+#'   Ultimate Deconvolution model.
 #' 
 #' @seealso \code{\link{ud_fit}}
 #'
@@ -59,10 +57,13 @@ simulate_ud_data <- function (n, w, U, V) {
   
   # Draw the data points.
   for (j in 1:k) {
-    i     <- which(z == j)
-    T     <- V + U[[j]]
-    X[i,] <- rmvnorm(length(i),sigma = T)
+    i <- which(z == j)
+    if (length(i) > 0) {
+      T <- V + U[[j]]
+      X[i,] <- rmvnorm(length(i),sigma = T)
+    }
   }
+  rownames(X) <- paste0("s",1:n)
   colnames(X) <- rownames(V)
   return(X)
 }
