@@ -17,9 +17,7 @@ jobs:
           name: Install package dependencies
           command: |
             mkdir -p ~/R/Library
-            Rscript -e 'install.packages(c("devtools","remotes","quadprog","MCMCpack","irlba","Rtsne","dplyr","Rcpp","RcppArmadillo","RcppParallel","RcppProgress","progress","ggplot2","ggrepel","cowplot","plotly","htmlwidgets","testthat","Ternary"))'
-            Rscript -e 'devtools::install_github("slowkow/ggrepel",upgrade="never",force=TRUE)'
-            Rscript -e 'devtools::install_github("linxihui/NNLM",upgrade="never",force=TRUE)'
+            Rscript -e 'install.packages(c("devtools","covr","testthat","mvtnorm","Rcpp","RcppArmadillo","knitr","rmarkdown"))'
       - run:
           name: Session information and installed package versions
           command: |
@@ -33,7 +31,7 @@ jobs:
           name: Check package
           command: R CMD check --as-cran --no-manual --ignore-vignettes *tar.gz
       - store_artifacts:
-          path: fastTopics.Rcheck/
+          path: udr.Rcheck/
       - save_cache:
           key: r-pkg-cache-{{ arch }}-{{ .Branch }}
           paths:
