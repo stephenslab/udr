@@ -171,7 +171,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-12, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-14, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -180,6 +180,11 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
                 sum(covtypes == "scaled"),
                 sum(covtypes == "rank1"),
                 sum(covtypes == "unconstrained")))
+    cat(sprintf(paste("prior covariance updates: %s (scaled), %s (rank-1),",
+                      "%s (unconstrained)\n"),
+                control$scaled.update,
+                control$rank1.update,
+                control$unconstrained.update))
     cat(sprintf("mixture weights update: %s\n",control$weights.update))
     if (is.matrix(fit$V))
       cat(sprintf("residual covariance update: %s\n",control$resid.update))
@@ -194,8 +199,9 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
   if (is.list(fit$V))
     fit$V <- simplify2array(fit$V)
-  fit$U <- simplify2array(fit$U)
-  fit <- ud_fit_main_loop(X,fit$w,fit$U,fit$V,control,verbose)
+  covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
+  fit$U    <- simplify2array(fit$U)
+  fit      <- ud_fit_main_loop(X,fit$w,fit$U,fit$V,covtypes,control,verbose)
   
   # Output the parameters of the updated model (w, U, V), the
   # log-likelihood of the updated model (loglik), and a record of the
@@ -222,16 +228,22 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
 }
 
 # This implements the core part of ud_fit.
-ud_fit_main_loop <- function (X, w, U, V, control, verbose) {
+ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
   # Get the number of components in the mixture prior.
   k <- length(w)
 
+  # Get the indices of the scaled, rank-1 and unconstrained prior
+  # covariance matrix.
+  scaled        <- which(covtypes == "scaled")
+  rank1         <- which(covtypes == "rank1")
+  unconstrained <- which(covtypes == "unconstrained")
+  
   # Set up data structures used in the loop below.
   progress <- as.data.frame(matrix(0,control$maxiter,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   progress$iter <- 1:control$maxiter
-  
+
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
@@ -250,17 +262,26 @@ ud_fit_main_loop <- function (X, w, U, V, control, verbose) {
         Vnew <- update_resid_covariance(X,U,V,P,control$version)
       else if (control$resid.update == "none")
         Vnew <- V
+      else
+        stop("control$resid.update == \"",control$resid.update,
+             "\" is not implemented")
     }
     
-    # Update the prior covariance matrices (U), if requested.
-    # if (control$update.U == "ed")
-    #   Unew <- update_prior_covariance_ed(X,U,S,P,control$version)
-    # else if (control$update.U == "teem")
-    #   Unew <- update_prior_covariance_teem(X,S,P,control$minval,
-    #                                        control$version)
-    # else if (control$update.U == "none")
-    #   Unew <- U
+    # Update the prior covariance matrices.
     Unew <- U
+    if (length(unconstrained) > 0) {
+      if (control$unconstrained.update == "ed")
+        Unew[,,unconstrained] <-
+          update_prior_covariance_ed(X,U[,,unconstrained],V,P[,unconstrained],
+                                     control$version)
+      else if (control$unconstrained.update == "teem")
+        Unew[,,unconstrained] <-
+          update_prior_covariance_teem(X,V,P[,unconstrained],control$minval,
+                                       control$version)
+      else if (control$unconstrained.update != "none")
+        stop("control$unconstrained.update == \"",control$unconstrained.update,
+             "\" is not implemented")
+    }
     
     # Update the mixture weights (w), if requested. Since the "mixsqp"
     # update does not use the posterior probabilities computed in the
@@ -270,6 +291,9 @@ ud_fit_main_loop <- function (X, w, U, V, control, verbose) {
       wnew <- update_mixture_weights_em(P)
     else if (control$weights.update == "none")
       wnew <- w
+    else
+      stop("control$weights.update == \"",control$weights.update,
+           "\" is not implemented")
     
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
@@ -377,15 +401,15 @@ update_mixture_weights_em <- function (P)
 # Perform an M-step update for the prior covariance matrices using the
 # update forumla derived in Bovy et al (2011). The calculations are
 # implemented in both R (version = "R") and C++ (version = "Rcpp").
-update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
+update_prior_covariance_ed <- function (X, U, V, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
   U0 <- U
   if (version == "R") {
     k <- ncol(P)
     for (i in 1:k)
-      U[,,i] <- update_prior_covariance_ed_helper(X,U[,,i],S,P[,i])
+      U[,,i] <- update_prior_covariance_ed_helper(X,U[,,i],V,P[,i])
   } else if (version == "Rcpp")
-    U <- update_prior_covariances_ed_rcpp(X,U,S,P)
+    U <- update_prior_covariances_ed_rcpp(X,U,V,P)
   return(U)
 }
 
@@ -393,7 +417,7 @@ update_prior_covariance_ed <- function (X, U, S, P, version = c("Rcpp","R")) {
 # eigenvalue-truncation technique described in Won et al (2013). The
 # calculations are implemented in both R (version = "R") and C++
 # (version = "Rcpp").
-update_prior_covariance_teem <- function (X, S, P, minval,
+update_prior_covariance_teem <- function (X, V, P, minval,
                                           version = c("Rcpp","R")) {
   version <- match.arg(version)
   if (version == "R") {
@@ -401,9 +425,9 @@ update_prior_covariance_teem <- function (X, S, P, minval,
     k <- ncol(P)
     U <- array(0,dim = c(m,m,k))
     for (i in 1:k)
-      U[,,i] <- update_prior_covariance_teem_helper(X,S,P[,i],minval)
+      U[,,i] <- update_prior_covariance_teem_helper(X,V,P[,i],minval)
   } else if (version == "Rcpp")
-    U <- update_prior_covariances_teem_rcpp(X,S,P,minval)
+    U <- update_prior_covariances_teem_rcpp(X,V,P,minval)
   return(U)
 }
 
@@ -433,11 +457,11 @@ update_resid_covariance_helper <- function (X, U, V, P) {
 # using the update formula derived in Bovy et al (2011). Here, p is a
 # vector, with one entry per row of X, giving the posterior assignment
 # probabilities for the mixture component being updated.
-update_prior_covariance_ed_helper <- function (X, U, S, p) {
-  T <- S + U
-  B <- solve(T,U)
-  Y <- crossprod((sqrt(p/sum(p)) * X) %*% B)
-  return(U - U %*% B + Y)
+update_prior_covariance_ed_helper <- function (X, U, V, p) {
+  T  <- U + V
+  B  <- solve(T,U)
+  X1 <- crossprod((sqrt(p/sum(p)) * X) %*% B)
+  return(U - U %*% B + X1)
 }
 
 # Perform an M-step update for one of the prior covariance matrices
@@ -445,11 +469,11 @@ update_prior_covariance_ed_helper <- function (X, U, S, p) {
 # (2013). Input p is a vector, with one entry per row of X, giving
 # the posterior assignment probabilities for the mixture components
 # being updated.
-update_prior_covariance_teem_helper <- function (X, S, p, minval) {
+update_prior_covariance_teem_helper <- function (X, V, p, minval) {
 
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
-  R <- chol(S)
+  R <- chol(V)
   T <- crossprod((sqrt(p/sum(p))*X) %*% solve(R))
   
   # Find U maximizing the expected complete log-likelihood subject to
@@ -501,10 +525,12 @@ compute_posterior_mvtnorm <- function (x, U, V) {
 #' @export
 #' 
 ud_fit_control_default <- function()
-  list(weights.update = "em",   # "em" or "none"
-       update.U       = "teem", # "ed", "teem" or "none"
-       resid.update   = "em",   # "em" or "none"
-       version        = "Rcpp", # "R" or "Rcpp"
-       maxiter        = 100,
-       minval         = -1e-8,
-       tol            = 1e-6)
+  list(weights.update       = "em",   # "em" or "none"
+       scaled.update        = "em",   # "em" or "none"
+       rank1.update         = "em",   # "em" or "none"
+       unconstrained.update = "ed",   # "ed", "teem" or "none"
+       resid.update         = "em",   # "em" or "none"
+       version              = "Rcpp", # "R" or "Rcpp"
+       maxiter              = 100,
+       minval               = -1e-8,
+       tol                  = 1e-6)
