@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Simulate Data from Ultimate Deconvolution Model — simulate_ud_data • udr</title>
+<title>Initialize Ultimate Deconvolution Model — ud_init • udr</title>
 
 
 <!-- jquery -->
@@ -39,10 +39,9 @@
 
 
 
-<meta property="og:title" content="Simulate Data from Ultimate Deconvolution Model — simulate_ud_data" />
-<meta property="og:description" content="Simulate data points from the Ultimate Deconvolution
-  model. Note that the univariate case (m = 1) is not handled.
-  See ud_fit for the model definition." />
+<meta property="og:title" content="Initialize Ultimate Deconvolution Model — ud_init" />
+<meta property="og:description" content="Initialize an Ultimate Deconvolution model. See
+  ud_fit for background and model definition." />
 
 
 
@@ -107,53 +106,105 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Simulate Data from Ultimate Deconvolution Model</h1>
-    <small class="dont-index">Source: <a href='https://github.com/stephenslab/udr/blob/master/R/datasim.R'><code>R/datasim.R</code></a></small>
-    <div class="hidden name"><code>simulate_ud_data.Rd</code></div>
+    <h1>Initialize Ultimate Deconvolution Model</h1>
+    <small class="dont-index">Source: <a href='https://github.com/stephenslab/udr/blob/master/R/init.R'><code>R/init.R</code></a></small>
+    <div class="hidden name"><code>ud_init.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Simulate data points from the Ultimate Deconvolution
-  model. Note that the univariate case (m = 1) is not handled.
-  See <code><a href='ud_fit.html'>ud_fit</a></code> for the model definition.</p>
+    <p>Initialize an Ultimate Deconvolution model. See
+  <code><a href='ud_fit.html'>ud_fit</a></code> for background and model definition.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>simulate_ud_data</span>(<span class='no'>n</span>, <span class='no'>w</span>, <span class='no'>U</span>, <span class='no'>V</span>)</pre>
+    <pre class="usage"><span class='fu'>ud_init</span>(
+  <span class='no'>X</span>,
+  <span class='kw'>V</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>)),
+  <span class='no'>n_rank1</span>,
+  <span class='no'>n_unconstrained</span>,
+  <span class='kw'>U_scaled</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>indep</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>)), <span class='kw'>iden</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>), <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>))),
+  <span class='no'>U_rank1</span>,
+  <span class='no'>U_unconstrained</span>,
+  <span class='no'>w</span>,
+  <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>n</th>
-      <td><p>Number of data points to simulate.</p></td>
-    </tr>
-    <tr>
-      <th>w</th>
-      <td><p>A numeric vector of length k specifying the prior mixture
-weights. All entries must be non-negative, but need not sum to 1;
-the mixture weights are automatically normalized to sum to 1.</p></td>
-    </tr>
-    <tr>
-      <th>U</th>
-      <td><p>A list of length k specifying the covariance matrices in
-the mixture-of-multivariate-normals prior; list element
-<code>U[[i]]</code> is the m x m covariance matrix for the ith mixture
-component.</p></td>
+      <th>X</th>
+      <td><p>The n x m data matrix, in which each row of the matrix is
+an m-dimensional data point. m should be 2 or greater.</p></td>
     </tr>
     <tr>
       <th>V</th>
-      <td><p>The m x m residual covariance matrix.</p></td>
+      <td><p>Either an m x m matrix giving the initial estimate of the
+residual covariance matrix, or a list of m x m "standard error"
+matrices, one for each data point.</p></td>
+    </tr>
+    <tr>
+      <th>n_rank1</th>
+      <td><p>A non-negative integer specifying the number of
+rank-1 covariance matrices included in the
+mixture-of-multivariate-normals prior. Initial estimates of the m x
+m rank-1 covariance matrices are generated at random. At most one
+of <code>n_rank1</code> and <code>U_rank1</code> should be provided. If neither
+are specified, 4 rank-1 matrices will be used.</p></td>
+    </tr>
+    <tr>
+      <th>n_unconstrained</th>
+      <td><p>A non-negative integer specifying the number
+of unconstrained covariance matrices included in the
+mixture-of-multivariate-normals prior. Initial estimates of the m x
+m covariance matrices are generated at random. At most one of
+<code>n_unconstrained</code> and <code>U_unconstrained</code> should be
+provided. If neither are specified, 4 unconstrained matrices are
+used.</p></td>
+    </tr>
+    <tr>
+      <th>U_scaled</th>
+      <td><p>A list specifying initial estimates of the scaled
+covariance matrices in the mixture-of-multivariate-normals prior.</p></td>
+    </tr>
+    <tr>
+      <th>U_rank1</th>
+      <td><p>A list specifying initial estimates of the rank-1
+matrices in the mixture-of-multivariate-normals prior. At most one
+of <code>n_rank1</code> and <code>U_rank1</code> should be provided.</p></td>
+    </tr>
+    <tr>
+      <th>U_unconstrained</th>
+      <td><p>A list specifying initial estimates of the
+unconstrained matrices in the mixture-of-multivariate-normals
+prior. At most one of <code>n_unconstrained</code> and
+<code>U_unconstrained</code> should be provided.</p></td>
+    </tr>
+    <tr>
+      <th>w</th>
+      <td><p>A numeric vector of length k giving initial estimates of
+the prior mixture weights, where k is equal to the number of
+matrices in the mixture-of-multivariate-normals prior. All entries
+must be non-negative, but need not sum to 1; the mixture weights
+are automatically normalized to sum to 1. If not provided, the
+mixture weights are set to uniform.</p></td>
+    </tr>
+    <tr>
+      <th>control</th>
+      <td><p>A list of parameters controlling the behaviour of
+the model initialization. See <code><a href='ud_fit.html'>ud_fit</a></code> for details.</p></td>
+    </tr>
+    <tr>
+      <th>version</th>
+      <td><p>R and C++ implementations of some numerical
+computations are provided; these are selected with <code>version =
+"R"</code> and <code>version = "Rcpp"</code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An n x m matrix in which each row is a draw from the
-  Ultimate Deconvolution model. For the univariate case (m = 1), a
-  vector is returned.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p><code><a href='ud_fit.html'>ud_fit</a></code></p></div>
+    <p>An object of class "ud_fit". See <code><a href='ud_fit.html'>ud_fit</a></code> for
+  details.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
