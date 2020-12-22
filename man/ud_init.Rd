@@ -60,10 +60,6 @@ mixture weights are set to uniform.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model initialization. See \code{\link{ud_fit}} for details.}
-
-\item{version}{R and C++ implementations of some numerical
-computations are provided; these are selected with \code{version =
-"R"} and \code{version = "Rcpp"}.}
 }
 \value{
 An object of class "ud_fit". See \code{\link{ud_fit}} for

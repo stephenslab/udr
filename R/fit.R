@@ -171,7 +171,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-18, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-19, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -210,7 +210,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   fit$loglik   <- loglik_ud(X,fit$w,fit$U,fit$V,control$version)
   fit$X        <- X
   fit$U        <- array2list(fit$U)
-  if (is.matrix(V)) {
+  if (is.matrix(fit$V)) {
     rownames(fit$V) <- colnames(X)
     colnames(fit$V) <- colnames(X)
   } else

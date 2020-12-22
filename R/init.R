@@ -47,10 +47,6 @@
 #' @param control A list of parameters controlling the behaviour of
 #'   the model initialization. See \code{\link{ud_fit}} for details.
 #'
-#' @param version R and C++ implementations of some numerical
-#'   computations are provided; these are selected with \code{version =
-#'   "R"} and \code{version = "Rcpp"}.
-#' 
 #' @return An object of class "ud_fit". See \code{\link{ud_fit}} for
 #'   details.
 #'
