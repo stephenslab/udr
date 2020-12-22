@@ -12,7 +12,6 @@ double loglik_ud_general (const mat& X, const vec& w, const cube& U,
 
 // FUNCTION DEFINITIONS
 // --------------------
-
 // Compute the log-likelihood for the Ultimate Deconvolution model
 // when the residual covariance V is the same for all samples.
 //
@@ -44,17 +43,18 @@ double loglik_ud_iid (const mat& X, const vec& w, const cube& U,
   unsigned int m = X.n_cols;
   unsigned int k = w.n_elem;
 
+  // These store intermediate computations.
+  vec x(m);
   mat T(m,m);
   mat L(m,m);
-  vec x(m);
-  vec y(n,fill::zeros);
   
   // Compute the log-likelihood for each sample (row of X).
+  vec y(n,fill::zeros);
   for (unsigned int j = 0; j < k; j++) {
     T = V + U.slice(j);
     L = chol(T,"lower");      
     for (unsigned int i = 0; i < n; i++) {
-      x     = trans(X.row(i));
+      x = trans(X.row(i));
       y(i) += w(j) * exp(ldmvnorm(x,L));
     }
   }
@@ -73,17 +73,18 @@ double loglik_ud_general (const mat& X, const vec& w, const cube& U,
   unsigned int m = X.n_cols;
   unsigned int k = w.n_elem;
 
+  // These store intermediate computations.
+  vec x(m);
   mat T(m,m);
   mat L(m,m);
-  vec x(m);
-  vec y(n,fill::zeros);
   
   // Compute the log-likelihood for each sample (row of X).
-  for (unsigned int j = 0; j < k; j++)
-    for (unsigned int i = 0; i < n; i++) {
-      x     = trans(X.row(i));
-      T     = V.slice(i) + U.slice(j);
-      L     = chol(T,"lower");      
+  vec y(n,fill::zeros);
+  for (unsigned int i = 0; i < n; i++)
+    for (unsigned int j = 0; j < k; j++) {
+      x = trans(X.row(i));
+      T = V.slice(i) + U.slice(j);
+      L = chol(T,"lower");      
       y(i) += w(j) * exp(ldmvnorm(x,L));
     }
   

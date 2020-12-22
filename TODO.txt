@@ -1,6 +1,8 @@
 to do
 =====
 
++ Add examples.
+
 + Add tests.
 
 + Update README.

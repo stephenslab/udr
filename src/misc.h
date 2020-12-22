@@ -1,6 +1,10 @@
 #ifndef INCLUDE_MISC
 #define INCLUDE_MISC
 
+// This is included to suppress the warnings from solve() when the
+// system is singular or close to singular.
+#define ARMA_DONT_PRINT_ERRORS
+
 #include <RcppArmadillo.h>
 
 // FUNCTION DECLARATIONS
