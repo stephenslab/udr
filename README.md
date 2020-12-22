@@ -1,6 +1,6 @@
 # udr: Ultimate Deconvolution in R
 
-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/2nrg0agal5ei7uet?svg=true](https://ci.appveyor.com/project/pcarbo/udr)
+[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/2nrg0agal5ei7uet?svg=true)](https://ci.appveyor.com/project/pcarbo/udr)
 
 R package implementing empirical Bayes methods for multivariate normal
 means, building on the [extreme deconvolution][ed] method.
