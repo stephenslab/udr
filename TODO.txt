@@ -5,8 +5,6 @@ to do
 
 + Add tests, and activate testing in CI configs.
 
-+ Update README.
-
 + Update pkgdown site.
 
 + Add codecov.
