@@ -87,8 +87,7 @@ void update_prior_covariances_ed (const mat& X, cube& U, const mat& V,
 				  const mat& P) {
 
   // Get the number of rows (n) and columns (m) of the data matrix, and
-  // the number of components in the mixture-of-multivariate-normals
-  // prior (k).
+  // the number of components in the mixture prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
@@ -112,8 +111,7 @@ void update_prior_covariances_teem (const mat& X, const mat& V, const mat& P,
 				    cube& U, double minval) {
 
   // Get the number of rows (n) and columns (m) of the data matrix, and
-  // the number of components in the mixture-of-multivariate-normals
-  // prior (k).
+  // the number of components in the mixture prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
@@ -179,8 +177,7 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 			      const mat& P, mat& Vnew) {
 
   // Get the number of rows (n) and columns (m) of the data matrix, and
-  // the number of components in the mixture-of-multivariate-normals
-  // prior (k).
+  // the number of components in the mixture prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;

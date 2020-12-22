@@ -10,9 +10,8 @@
 #'   the mixture weights are automatically normalized to sum to 1.
 #'
 #' @param U A list of length k specifying the covariance matrices in
-#'   the mixture-of-multivariate-normals prior; list element
-#'   \code{U[[i]]} is the m x m covariance matrix for the ith mixture
-#'   component.
+#'   the mixture prior; list element \code{U[[i]]} is the m x m
+#'   covariance matrix for the ith mixture component.
 #' 
 #' @param V The m x m residual covariance matrix.
 #'

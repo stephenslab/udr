@@ -12,7 +12,6 @@ ud_init(
   U_scaled = list(indep = diag(ncol(X)), iden = matrix(1, ncol(X), ncol(X))),
   U_rank1,
   U_unconstrained,
-  w,
   control = list()
 )
 }
@@ -25,38 +24,31 @@ residual covariance matrix, or a list of m x m "standard error"
 matrices, one for each data point.}
 
 \item{n_rank1}{A non-negative integer specifying the number of
-rank-1 covariance matrices included in the
-mixture-of-multivariate-normals prior. Initial estimates of the m x
-m rank-1 covariance matrices are generated at random. At most one
-of \code{n_rank1} and \code{U_rank1} should be provided. If neither
-are specified, 4 rank-1 matrices will be used.}
+rank-1 covariance matrices included in the mixture prior. Initial
+estimates of the m x m rank-1 covariance matrices are generated at
+random. At most one of \code{n_rank1} and \code{U_rank1} should be
+provided. If neither are specified, 4 rank-1 matrices will be used.}
 
 \item{n_unconstrained}{A non-negative integer specifying the number
-of unconstrained covariance matrices included in the
-mixture-of-multivariate-normals prior. Initial estimates of the m x
-m covariance matrices are generated at random. At most one of
-\code{n_unconstrained} and \code{U_unconstrained} should be
-provided. If neither are specified, 4 unconstrained matrices are
-used.}
+of unconstrained covariance matrices included in the mixture
+prior. Initial estimates of the m x m covariance matrices are
+generated at random. At most one of \code{n_unconstrained} and
+\code{U_unconstrained} should be provided. If neither are
+specified, 4 unconstrained matrices are used.}
 
 \item{U_scaled}{A list specifying initial estimates of the scaled
-covariance matrices in the mixture-of-multivariate-normals prior.}
+covariance matrices in the mixture prior.}
 
 \item{U_rank1}{A list specifying initial estimates of the rank-1
-matrices in the mixture-of-multivariate-normals prior. At most one
-of \code{n_rank1} and \code{U_rank1} should be provided.}
+matrices in the mixture prior. At most one of \code{n_rank1} and
+\code{U_rank1} should be provided. If \code{U_rank1} is not given,
+the rank-1 covariates are initialized at random.}
 
 \item{U_unconstrained}{A list specifying initial estimates of the
-unconstrained matrices in the mixture-of-multivariate-normals
-prior. At most one of \code{n_unconstrained} and
-\code{U_unconstrained} should be provided.}
-
-\item{w}{A numeric vector of length k giving initial estimates of
-the prior mixture weights, where k is equal to the number of
-matrices in the mixture-of-multivariate-normals prior. All entries
-must be non-negative, but need not sum to 1; the mixture weights
-are automatically normalized to sum to 1. If not provided, the
-mixture weights are set to uniform.}
+unconstrained matrices in the mixture prior. At most one of
+\code{n_unconstrained} and \code{U_unconstrained} should be
+provided. If \code{U_unconstrained} is not given, the matrices are
+initialized at random.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model initialization. See \code{\link{ud_fit}} for details.}

@@ -14,9 +14,8 @@ weights. All entries must be non-negative, but need not sum to 1;
 the mixture weights are automatically normalized to sum to 1.}
 
 \item{U}{A list of length k specifying the covariance matrices in
-the mixture-of-multivariate-normals prior; list element
-\code{U[[i]]} is the m x m covariance matrix for the ith mixture
-component.}
+the mixture prior; list element \code{U[[i]]} is the m x m
+covariance matrix for the ith mixture component.}
 
 \item{V}{The m x m residual covariance matrix.}
 }

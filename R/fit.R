@@ -195,8 +195,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     stop("Input argument \"X\" should be a numeric matrix")
 
   # Get the number of rows (n) and columns (m) of the data matrix, and
-  # the number of components in the mixture-of-multivariate-normals
-  # prior (k).
+  # the number of components in the mixture prior (k).
   n <- nrow(X)
   m <- ncol(X)
   k <- length(fit$U)
@@ -208,7 +207,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-23, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-24, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else

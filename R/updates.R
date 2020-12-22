@@ -1,5 +1,5 @@
-# Perform an M-step update for the mixture weights in the
-# mixture-of-multivariate-normals prior.
+# Perform an M-step update for the mixture weights in the mixture
+# prior.
 update_mixture_weights_em <- function (P)
   colSums(P)/nrow(P)
 

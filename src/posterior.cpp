@@ -59,8 +59,7 @@ void compute_posterior_probs_iid (const mat& X, const vec& w, const cube& U,
 				  const mat& V, mat& P) {
   
   // Get the number of rows (n) and columns (m) of the data matrix, and
-  // the number of components in the mixture-of-multivariate-normals
-  // prior (k).
+  // the number of components in the mixture prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = w.n_elem;
@@ -94,8 +93,7 @@ void compute_posterior_probs_general (const mat& X, const vec& w,
 				      mat& P) {
   
   // Get the number of rows (n) and columns (m) of the data matrix, and
-  // the number of components in the mixture-of-multivariate-normals
-  // prior (k).
+  // the number of components in the mixture prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = w.n_elem;
