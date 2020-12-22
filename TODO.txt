@@ -1,6 +1,8 @@
 to do
 =====
 
++ Merge to master.
+
 + Update pkgdown site.
 
 + Add continuous integration (TravisCI, Appveyor and/or CircleCI).
