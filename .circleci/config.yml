@@ -1,0 +1,40 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: rocker/verse:latest
+    environment:
+      R_LIBS: ~/R/Library
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      _R_CHECK_FORCE_SUGGESTS_: false
+    steps:
+      - restore_cache:
+          keys:
+            - r-pkg-cache-{{ arch }}-{{ .Branch }}
+            - r-pkg-cache-{{ arch }}-
+      - checkout
+      - run:
+          name: Install package dependencies
+          command: |
+            mkdir -p ~/R/Library
+            Rscript -e 'install.packages(c("devtools","remotes","quadprog","MCMCpack","irlba","Rtsne","dplyr","Rcpp","RcppArmadillo","RcppParallel","RcppProgress","progress","ggplot2","ggrepel","cowplot","plotly","htmlwidgets","testthat","Ternary"))'
+            Rscript -e 'devtools::install_github("slowkow/ggrepel",upgrade="never",force=TRUE)'
+            Rscript -e 'devtools::install_github("linxihui/NNLM",upgrade="never",force=TRUE)'
+      - run:
+          name: Session information and installed package versions
+          command: |
+            Rscript -e 'sessionInfo()'
+            Rscript -e 'installed.packages()[, c("Package", "Version")]'
+            Rscript -e 'rmarkdown::pandoc_version()'
+      - run:
+          name: Build package
+          command: R CMD build --no-build-vignettes .
+      - run:
+          name: Check package
+          command: R CMD check --as-cran --no-manual --ignore-vignettes *tar.gz
+      - store_artifacts:
+          path: fastTopics.Rcheck/
+      - save_cache:
+          key: r-pkg-cache-{{ arch }}-{{ .Branch }}
+          paths:
+            - "~/R/Library"
