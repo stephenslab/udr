@@ -171,7 +171,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-16, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-17, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -288,17 +288,18 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     if (length(unconstrained) > 0) {
       if (control$unconstrained.update == "ed")
         Unew[,,unconstrained] <-
-          update_prior_covariances_ed(X,U[,,unconstrained],V,P[,unconstrained],
+          update_prior_covariances_ed(X,U[,,unconstrained,drop = FALSE],V,
+                                      P[,unconstrained,drop = FALSE],
                                       control$version)
       else if (control$unconstrained.update == "teem")
         Unew[,,unconstrained] <-
-          update_prior_covariances_teem(X,V,P[,unconstrained],control$minval,
-                                        control$version)
+          update_prior_covariances_teem(X,V,P[,unconstrained,drop = FALSE],
+                                        control$minval,control$version)
       else if (control$unconstrained.update != "none")
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
     }
-    
+
     # Update the mixture weights.
     if (control$weights.update == "em")
       wnew <- update_mixture_weights_em(P)

@@ -1,6 +1,8 @@
 to do
 =====
 
++ Add tests.
+
 + Update README.
 
 + Update pkgdown site.
