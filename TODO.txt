@@ -7,6 +7,8 @@ to do
 
 + Add continuous integration (TravisCI, Appveyor and/or CircleCI).
 
++ Add codecov.
+
 + Make outputs more consistent with ebnm and/or mashr.
 
 + Output posterior quantities (see ebnm and mashr).
