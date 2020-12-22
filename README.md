@@ -42,7 +42,7 @@ with contributions from [Matthew Stephens][matthew].
 [ed]: https://github.com/jobovy/extreme-deconvolution
 [cran]: https://cran.r-project.org
 [uchicago]: https://www.uchicago.edu
-[yunqi]: https://github.com/Nicholeyang0215
+[yunqi]: https://github.com/yunqiyang0215
 [peter]: https://pcarbo.github.io
 [matthew]: http://stephenslab.uchicago.edu
 [intro-vignette]: https://stephenslab.github.io/udr/articles/udr_intro.html
