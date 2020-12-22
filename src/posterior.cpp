@@ -28,7 +28,7 @@ arma::mat compute_posterior_probs_iid_rcpp (const arma::mat& X,
 					    const arma::mat& V) {
   unsigned int n = X.n_rows;
   unsigned int k = w.n_elem;
-  mat          P(n,k);
+  mat P(n,k);
   compute_posterior_probs_iid(X,w,U,V,P);
   return P;
 }
@@ -46,7 +46,7 @@ arma::mat compute_posterior_probs_general_rcpp (const arma::mat& X,
 						const arma::cube& V) {
   unsigned int n = X.n_rows;
   unsigned int k = w.n_elem;
-  mat          P(n,k);
+  mat P(n,k);
   compute_posterior_probs_general(X,w,U,V,P);
   return P;
 }

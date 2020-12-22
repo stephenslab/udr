@@ -67,7 +67,7 @@ arma::cube update_prior_covariances_teem_rcpp (const arma::mat& X,
   return U;
 }
 
-// Perform an M-step update for the residual covariance matrix, S.
+// Perform an M-step update for the residual covariance matrix.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -81,34 +81,51 @@ arma::mat update_resid_covariance_rcpp (const arma::mat& X,
   return Vnew;
 }
 
-// Perform an M-step update for the prior covariance matrices using the
-// update formla derived in Bovy et al (2011).
+// Perform an M-step update for the (unconstrained) prior covariance
+// matrices using the update formula derived in Bovy et al (2011).
 void update_prior_covariances_ed (const mat& X, cube& U, const mat& V, 
 				  const mat& P) {
+
+  // Get the number of rows (n) and columns (m) of the data matrix, and
+  // the number of components in the mixture-of-multivariate-normals
+  // prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
+
+  // These matricecs are used to store intermediate calculations.
   mat X1(n,m);
   mat T(m,m);
   mat B(m,m);
+
+  // Repeat for each prior covariance matrix to update.
   for (unsigned int i = 0; i < k; i++) {
     X1 = X;
     update_prior_covariance_ed(X1,U.slice(i),V,P.col(i),T,B);
   }
 }
 
-// Perform an M-step update for the prior covariance matrices, using
-// the eigenvalue-truncation technique described in Won et al (2013).
+// Perform an M-step update for the (unconstrained) prior covariance
+// matrices, using the eigenvalue-truncation technique described in
+// Won et al (2013).
 void update_prior_covariances_teem (const mat& X, const mat& V, const mat& P, 
 				    cube& U, double minval) {
+
+  // Get the number of rows (n) and columns (m) of the data matrix, and
+  // the number of components in the mixture-of-multivariate-normals
+  // prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
+
+  // These are used to store intermediate calculations.
   mat R = chol(V,"upper");
   mat X1(n,m);
   mat T(m,m);
   mat Y(m,m);
   vec d(m);
+
+  // Repeat for each prior covariance matrix to update.
   for (unsigned int i = 0; i < k; i++) {
     X1 = X;
     update_prior_covariance_teem(X1,R,P.col(i),U.slice(i),T,Y,d,minval);
@@ -116,29 +133,25 @@ void update_prior_covariances_teem (const mat& X, const mat& V, const mat& P,
 }
 
 // Perform an M-step update for one of the prior covariance matrices
-// using the update formula derived in Bovy et al (2011). 
-// 
-// Note that data matrix X is modified to perform the update, so
-// should not be reused.
-void update_prior_covariance_ed (mat& X, mat& U, const mat& V, 
-				 const vec& p, mat& T, mat& B) {
+// using the update formula derived in Bovy et al (2011). Note that
+// data matrix X is modified to perform the update, so should not be
+// reused.
+void update_prior_covariance_ed (mat& X, mat& U, const mat& V, const vec& p,
+				 mat& T, mat& B) {
   scale_rows(X,sqrt(p/sum(p)));
-  T  = V + U;
-  B  = solve(T,U);
+  T = V + U;
+  B = solve(T,U);
   X *= B;
   U += crossprod(X) - U*B;
 }
 
 // Perform an M-step update for one of the prior covariance matrices
 // using the eigenvalue-truncation technique described in Won et al
-// (2013). 
-//
-// Input R should be R = chol(V,"upper"). Inputs T and Y are matrices
-// of the same dimension as U and V storing intermediate calculations,
-// and d is a vector of length m also storing an intermediate result.
-//
-// Note that data matrix X is modified to perform the update, so
-// should not be reused.
+// (2013). Input R should be R = chol(V,"upper"). Inputs T and Y are
+// matrices of the same dimension as U and V storing intermediate
+// calculations, and d is a vector of length m also storing an
+// intermediate result. Also note that data matrix X is modified to
+// perform the update, so should not be reused.
 void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, 
 				   mat& U, mat& T, mat& Y, vec& d, 
 				   double minval) {
@@ -161,33 +174,39 @@ void update_prior_covariance_teem (mat& X, const mat& R, const vec& p,
   U = trans(R) * U * R;
 }
 
-// Perform an M-step update for the residual covariance matrix, V.
+// Perform an M-step update for the residual covariance matrix.
 void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 			      const mat& P, mat& Vnew) {
+
+  // Get the number of rows (n) and columns (m) of the data matrix, and
+  // the number of components in the mixture-of-multivariate-normals
+  // prior (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
   unsigned int k = P.n_cols;
 
+  // These are used to store intermediate calculations.
+  cube B1(m,m,k);
+  mat I(m,m,fill::eye);
+  mat S1(m,m);
+  vec mu1(m);
+  vec x(m);
+  vec y(m);
+  vec p(k);
+  
   // Compute the posterior covariances for each mixture component. The
   // posterior covariances do not depend on x, so we compute them
   // upfront.
-  cube B1(m,m,k);
-  mat  I(m,m,fill::eye);
   for (unsigned int j = 0; j < k; j++)
     compute_posterior_covariance_mvtnorm(U.slice(j),V,I,B1.slice(j));
 
   // Compute the M-step update for the residual covariance.
-  vec p(k);
-  vec x(m);
-  vec y(m);
-  vec mu1(m);
-  mat S1(m,m);
   Vnew.fill(0);
   for (unsigned int i = 0; i < n; i++) {
      x = trans(X.row(i));
      p = trans(P.row(i));
      compute_posterior_mvtnorm_mix(x,p,V,B1,mu1,S1,y);
-     mu1  -= x;
+     mu1 -= x;
      Vnew += S1;
      Vnew += mu1 * trans(mu1);
   }
@@ -198,29 +217,22 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 // satisfying the constraint that U is positive definite. This is
 // achieved by setting any eigenvalues of T less than 1 to 1 + minval,
 // or, equivalently, setting any eigenvalues of U less than 0 to be
-// minval.
-//
-// Inputs d and Y are used to store the eigenvalue decomposition of T;
-// these will store the eigenvalues and eigenvectors, respectively.
+// minval. Inputs d and Y are used to store the eigenvalue
+// decomposition of T; these will store the eigenvalues and
+// eigenvectors, respectively.
 void shrink_cov (const mat& T, mat& U, mat& Y, vec& d, double minval) {
   unsigned int m = T.n_rows;
-  if (m == 1)
-    
-    // Handle univariate case (m = 1).
-    U(0) = max(T(0) - 1,minval);
-  else {
-    eig_sym(d,Y,T);
-    for (unsigned int i = 0; i < m; i++)
-      d(i) = max(d(i) - 1,minval);
+  eig_sym(d,Y,T);
+  for (unsigned int i = 0; i < m; i++)
+    d(i) = max(d(i) - 1,minval);
 
-    // These next few lines are equivalent to
-    //
-    //   U = Y * diagmat(d) * trans(Y)
-    //
-    // but implemented in a slightly more efficient way because they
-    // avoid an extra matrix-matrix multiplication.
-    inplace_trans(Y);
-    scale_rows(Y,sqrt(d));
-    U = crossprod(Y);
-  }
+  // These next few lines are equivalent to
+  //
+  //   U = Y * diagmat(d) * trans(Y)
+  //
+  // but implemented in a slightly more efficient way because they
+  // avoid an extra matrix-matrix multiplication.
+  inplace_trans(Y);
+  scale_rows(Y,sqrt(d));
+  U = crossprod(Y);
 }
