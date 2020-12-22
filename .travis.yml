@@ -2,7 +2,7 @@ language: r
 cache: packages
 latex: false
 r_build_args: --no-build-vignettes
-r_check_args: --as-cran --ignore-vignettes
+r_check_args: --as-cran --no-tests --ignore-vignettes 
 
 # This is the minimal set of R packages needed to run "R CMD check" on
 # the package.
