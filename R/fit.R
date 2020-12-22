@@ -171,7 +171,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-14, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-15, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -190,7 +190,6 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
       cat(sprintf("residual covariance update: %s\n",control$resid.update))
     cat(sprintf("max %d updates, conv tol %0.1e\n",
                 control$maxiter,control$tol))
-    # cat(sprintf("U (prior cov) = %s; ",control$update.U))
   }
   
   # RUN UPDATES
@@ -258,26 +257,43 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     # ------
     # Update the residual covariance matrix.
     if (is.matrix(V)) {
-      if (control$resid.update == "em")
-        Vnew <- update_resid_covariance(X,U,V,P,control$version)
-      else if (control$resid.update == "none")
+      if (control$resid.update == "em") {
+        if (control$version == "R")
+           Vnew <- update_resid_covariance(X,U,V,P)
+         else if (control$version == "Rcpp")
+           Vnew <- update_resid_covariance_rcpp(X,U,V,P)
+      } else if (control$resid.update == "none")
         Vnew <- V
       else
         stop("control$resid.update == \"",control$resid.update,
              "\" is not implemented")
     }
-    
-    # Update the prior covariance matrices.
+
+    # Update the scaled prior covariance matrices.
     Unew <- U
+    if (length(scaled) > 0) {
+      if (control$scaled.update != "none")
+        stop("control$scaled.update == \"",control$scaled.update,
+             "\" is not implemented")
+    }
+    
+    # Update the rank-1 prior covariance matrices.
+    if (length(rank1) > 0) {
+      if (control$rank1.update != "none")
+        stop("control$rank1.update == \"",control$rank1.update,
+             "\" is not implemented")
+    }
+    
+    # Update the unconstrained prior covariance matrices.
     if (length(unconstrained) > 0) {
       if (control$unconstrained.update == "ed")
         Unew[,,unconstrained] <-
-          update_prior_covariance_ed(X,U[,,unconstrained],V,P[,unconstrained],
-                                     control$version)
+          update_prior_covariances_ed(X,U[,,unconstrained],V,P[,unconstrained],
+                                      control$version)
       else if (control$unconstrained.update == "teem")
         Unew[,,unconstrained] <-
-          update_prior_covariance_teem(X,V,P[,unconstrained],control$minval,
-                                       control$version)
+          update_prior_covariances_teem(X,V,P[,unconstrained],control$minval,
+                                        control$version)
       else if (control$unconstrained.update != "none")
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
@@ -324,210 +340,14 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
   return(list(w = w,U = U,V = V,progress = progress[1:iter,]))
 }
 
-# Compute the n x k matrix of posterior mixture assignment
-# probabilities given current estimates of the model parameters. This
-# implements the E step in the EM algorithm for fitting the Ultimate
-# Deconvolution model.
-compute_posterior_probs <- function (X, w, U, V, version = c("Rcpp","R")) {
-  version <- match.arg(version)
-  if (is.matrix(V)) {
-
-    # Perform the computations for the special case when the same
-    # residual variance is used for all samples.
-    if (version == "R")
-      P <- compute_posterior_probs_iid_helper(X,w,U,V)
-    else if (version == "Rcpp")
-      P <- compute_posterior_probs_iid_rcpp(X,w,U,V)
-  } else {
-
-    # Perform the computations for the more general case when the
-    # residual variance is not necessarily the same for all samples.
-    if (version == "R")
-      P <- compute_posterior_probs_general_helper(X,w,U,V)
-    else if (version == "Rcpp")
-      P <- compute_posterior_probs_general_rcpp(X,w,U,V)
-  }
-  return(P)
-}
-
-# This implements the calculations for compute_posterior_probs for the
-# special case when the same residual covariance matrix is used for
-# all samples.
-#
-#' @importFrom mvtnorm dmvnorm
-compute_posterior_probs_iid_helper <- function (X, w, U, V) {
-      
-  # Get the number of samples (n) and the number of components in the
-  # mixture prior (k).
-  n <- nrow(X)
-  k <- length(w)
-
-  # Compute the log-probabilities, stored in an n x k matrix.
-  P <- matrix(0,n,k)
-  for (j in 1:k)
-    P[,j] = log(w[j]) + dmvnorm(X,sigma = V + U[,,j],log = TRUE)
-
-  # Normalize the probabilities so that each row of P sums to 1.
-  return(softmax(P))
-}
-
-# This implements the calculations for compute_posterior_probs for the
-# more general case when the residual covariances are not necessaily
-# the same for all samples.
-#
-#' @importFrom mvtnorm dmvnorm
-compute_posterior_probs_general_helper <- function (X, w, U, V) {
-      
-  # Get the number of samples (n) and the number of components in the
-  # mixture prior (k).
-  n <- nrow(X)
-  k <- length(w)
-
-  # Compute the log-probabilities, stored in an n x k matrix.
-  P <- matrix(0,n,k)
-  for (i in 1:n)
-    for (j in 1:k)
-      P[i,j] = log(w[j]) + dmvnorm(X[i,],sigma = V[,,i] + U[,,j],log = TRUE)
-
-  # Normalize the probabilities so that each row of P sums to 1.
-  return(softmax(P))
-}
-
-# Perform an M-step update for the mixture weights in the
-# mixture-of-multivariate-normals prior.
-update_mixture_weights_em <- function (P)
-  colSums(P)/nrow(P)
-
-# Perform an M-step update for the prior covariance matrices using the
-# update forumla derived in Bovy et al (2011). The calculations are
-# implemented in both R (version = "R") and C++ (version = "Rcpp").
-update_prior_covariance_ed <- function (X, U, V, P, version = c("Rcpp","R")) {
-  version <- match.arg(version)
-  U0 <- U
-  if (version == "R") {
-    k <- ncol(P)
-    for (i in 1:k)
-      U[,,i] <- update_prior_covariance_ed_helper(X,U[,,i],V,P[,i])
-  } else if (version == "Rcpp")
-    U <- update_prior_covariances_ed_rcpp(X,U,V,P)
-  return(U)
-}
-
-# Perform an M-step update for the prior covariance matrices using the
-# eigenvalue-truncation technique described in Won et al (2013). The
-# calculations are implemented in both R (version = "R") and C++
-# (version = "Rcpp").
-update_prior_covariance_teem <- function (X, V, P, minval,
-                                          version = c("Rcpp","R")) {
-  version <- match.arg(version)
-  if (version == "R") {
-    m <- ncol(X)
-    k <- ncol(P)
-    U <- array(0,dim = c(m,m,k))
-    for (i in 1:k)
-      U[,,i] <- update_prior_covariance_teem_helper(X,V,P[,i],minval)
-  } else if (version == "Rcpp")
-    U <- update_prior_covariances_teem_rcpp(X,V,P,minval)
-  return(U)
-}
-
-# Perform an M-step update for the residual covariance matrix.
-update_resid_covariance <- function (X, U, V, P, version = c("Rcpp","R")) {
-  version <- match.arg(version)
-  if (version == "R")
-    V <- update_resid_covariance_helper(X,U,V,P)
-  else if (version == "Rcpp")
-    V <- update_resid_covariance_rcpp(X,U,V,P)
-  return(V)
-}
-
-# Perform an M-step update for the residual covariance matrix.
-update_resid_covariance_helper <- function (X, U, V, P) {
-  n    <- nrow(X)
-  m    <- ncol(X)
-  Vnew <- matrix(0,m,m)
-  for (i in 1:n) {
-    out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,V)
-    Vnew <- Vnew + out$S1 + tcrossprod(X[i,] - out$mu1)
-  }
-  return(Vnew/n)
-}
-
-# Perform an M-step update for one of the prior covariance matrices
-# using the update formula derived in Bovy et al (2011). Here, p is a
-# vector, with one entry per row of X, giving the posterior assignment
-# probabilities for the mixture component being updated.
-update_prior_covariance_ed_helper <- function (X, U, V, p) {
-  T  <- U + V
-  B  <- solve(T,U)
-  X1 <- crossprod((sqrt(p/sum(p)) * X) %*% B)
-  return(U - U %*% B + X1)
-}
-
-# Perform an M-step update for one of the prior covariance matrices
-# using the eigenvalue-truncation technique described in Won et al
-# (2013). Input p is a vector, with one entry per row of X, giving
-# the posterior assignment probabilities for the mixture components
-# being updated.
-update_prior_covariance_teem_helper <- function (X, V, p, minval) {
-
-  # Transform the data so that the residual covariance is I, then
-  # compute the maximum-likelhood estimate (MLE) for T = U + I.
-  R <- chol(V)
-  T <- crossprod((sqrt(p/sum(p))*X) %*% solve(R))
-  
-  # Find U maximizing the expected complete log-likelihood subject to
-  # U being positive definite. This update for U is based on the fact
-  # that the covariance matrix that minimizes the likelihood subject
-  # to the constraint that U is positive definite is obtained by
-  # truncating the eigenvalues of T = U + I less than 1 to be 1; see
-  # Won et al (2013), p. 434, the sentence just after equation (16).
-  U <- shrink_cov(T,minval)
-
-  # Recover the solution for the original (untransformed) data.
-  return(t(R) %*% U %*% R)
-}
-
-# Suppose x is drawn from a multivariate normal distribution with mean
-# z and covariance V, and z is drawn from a mixture of multivariate
-# normals, each with zero mean, covariance U[,,i] and weight w[i].
-# Return the posterior mean (mu1) and covariance (S1) of z. Note that
-# input w1 must be the vector of *posterior* mixture weights (see
-# compute_posterior_probs).
-compute_posterior_mvtnorm_mix <- function (x, w1, U, V) {
-  m   <- length(x)
-  k   <- length(w1)
-  mu1 <- rep(0,m)
-  S1  <- matrix(0,m,m)
-  for (i in 1:k) {
-    out <- compute_posterior_mvtnorm(x,U[,,i],V)
-    mu1 <- mu1 + w1[i] * out$mu1
-    S1  <- S1 + w1[i] * (out$S1 + tcrossprod(out$mu1))
-  }
-  S1 <- S1 - tcrossprod(mu1)
-  return(list(mu1 = mu1,S1 = S1))
-}
-
-# Suppose x is drawn from a multivariate normal distribution with mean
-# z and covariance V, and z is drawn from a multivariate normal
-# distribution with mean zero and covariance U. Return the posterior
-# mean (mu) and covariance (S1) of z. These calculations will only
-# work if V is positive definite (invertible).
-compute_posterior_mvtnorm <- function (x, U, V) {
-  m   <- length(x)
-  S1  <- solve(U %*% solve(V) + diag(m)) %*% U
-  mu1 <- drop(S1 %*% solve(V,x))
-  return(list(mu1 = mu1,S1 = S1))
-}
-
 #' @rdname ud_fit
 #'
 #' @export
 #' 
 ud_fit_control_default <- function()
   list(weights.update       = "em",   # "em" or "none"
-       scaled.update        = "em",   # "em" or "none"
-       rank1.update         = "em",   # "em" or "none"
+       scaled.update        = "none", # "em" or "none"
+       rank1.update         = "none", # "em" or "none"
        unconstrained.update = "ed",   # "ed", "teem" or "none"
        resid.update         = "em",   # "em" or "none"
        version              = "Rcpp", # "R" or "Rcpp"
