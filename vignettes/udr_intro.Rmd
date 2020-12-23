@@ -49,12 +49,12 @@ X <- simulate_ud_data(n,w,U,V)
 This is the most basic usage:
 
 ```{r ud-fit-1}
-fit1 <- ud_init(X)
-fit1 <- ud_fit(fit1)
+fit0 <- ud_init(X)
+fit1 <- ud_fit(fit0)
 ```
 
 The default model is a mixture with a total of $K = 10$ mixture
-components with 2 scaled$, 4 rank-1, and 4 unconstrained prior
+components with 2 scaled, 4 rank-1, and 4 unconstrained prior
 covariance matrices $U_k$:
 
 ```{r ud-fit-2}
@@ -65,193 +65,57 @@ The function `ud_init` is a flexible interface for design a variety of
 UD models. For example,
 
 ```{r ud-fit-3}
-fit2 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
-fit3 <- ud_fit(fit2)
+fit0 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
+fit2 <- ud_fit(fit0)
 ```
 
-The `ud_fit` interface allows for flexibly re-fitting a model multiple
-times.
+The `ud_fit` interface also allows for flexibly re-fitting a model;
+that is, a `ud_fit` output can be used in another call to `ud_fit`.
 
 Notice that the data do not need to be passed to `ud_fit` because they
 are already embedded in the `ud_fit` output. However, one can pass a
 new data set `X` to `ud_fit`.
 
-The `control` argument to `ud_fit` controls the model fitting. For
-example, the unconstrained prior covariance matrices are by default
-optimized using the Extreme Deconvolution (ED) updates. We can instead
-use the "truncated eigenvalue" EM (TEEM) updates:
+The `control` argument to `ud_fit` controls the optimization of the
+model parameters. For example, the unconstrained prior covariance
+matrices are by default optimized using the Extreme Deconvolution (ED)
+updates, and we can replace these with the new "truncated eigenvalue"
+EM (TEEM) updates:
 
 ```{r ud-fit-4}
-fit4 <- ud_fit(fit2,control = list(unconstrained.update = "teem"))
+fit3 <- ud_fit(fit0,control = list(unconstrained.update = "teem"))
 ```
 
 Notice that the likelihood is slightly higher with the TEEM updates,
 reflecting the fact that the TEEM updates have greater freedom to
-optimize t he covariance matrices.
+optimize the covariance matrices.
+
+These are the current model fitting defaults:
 
 ```{r ud-fit-control-default}
 unlist(ud_fit_control_default())
 ```
 
+The most intensive computations are implemented in R (`version = R`)
+and C++ (`version = Rcpp`); both versions should return the same, or
+nearly the same output, but the C++ version can be much faster.
 
-"Truncated-eigenvalue" EM
--------------------------
+The default updates for the scaled and rank-1 prior covariance
+matrices are `"none"`; they have not yet been implemented.
 
- This provides greater freedom in fitting the model; here we
-demonstrate this by comparing the new update, `update.U = "teem"`,
-against the "Extreme Deconvolution" update, `update.U = "ed"`.
+In some cases each sample might have different measurement error, and
+udr can handle such cases by specifying `V` as a list instead of a matrix:
 
-First, fit the multivariate normal means model using the original
-"Extreme Deconvolution" update:
-
-```{r fit-ud-ed, results="hide", eval=FALSE}
-set.seed(1)
-fit.ed <- ud_fit(X,k = k,S = S,control = list(update.U = "ed"))
+```{r ud-fit-5}
+fit0 <- ud_init(X,V = rep(list(V),n))
 ```
 
-Next, fit the model using the "truncated eigenvalue" update:
+However, the ED update has not yet been implemented for this case.
+(The TEEM update is not applicable to this case).
 
-```{r fit-ud-teem, results="hide", eval=FALSE}
-set.seed(1)
-fit.teem <- ud_fit(X,k = k,S = S,control = list(update.U = "teem"))
+```{r ud-fit-6}
+fit5 <- ud_fit(fit0,control = list(unconstrained.update = "none"))
 ```
-
-The "truncated eigenvalue" update provides a better fit, as measured
-by the likelihood:
-
-```{r compare-loglik-1, eval=FALSE}
-print(fit.ed$loglik,digits = 12)
-print(fit.teem$loglik,digits = 12)
-```
-
-This is because the new update allows for much greater flexibility in
-the covariance estimates:
-
-```{r compare-prior-covs, eval=FALSE}
-print(round(sapply(fit.ed$U,function (x) eigen(x)$values),digits = 6))
-print(round(sapply(fit.teem$U,function (x) eigen(x)$values),digits = 6))
-```
-
-The output above shows the eigenvalues of each of the four 2 x 2
-covariance matrices. The TEEM updates have shrunk some of the
-eigenvalues to zero, leading to prior covariances with an effective
-rank of 0, 1 or 2 --- this is the number of non-zero eigenvalues in
-each column of the output above. By contrast, the prior covariances
-estimated by the ED algorithm are all full rank --- all the
-eigenvalues are greater than zero.
-
-Estimate the residual covariance
---------------------------------
-
-In cases where the residual variance-covariance matrix, $S$, is not
-known, UD can estimate it from the data:
-
-```{r fit-ud-estimate-resid-cov, results="hide", eval=FALSE}
-set.seed(1)
-fit.teem2 <- ud_fit(X,k = k,control = list(update.S = "em",update.U = "teem"))
-```
-
-The resulting likelihood is slightly higher than the fixing the
-residual covariance to the ground-truth:
-
-```{r compare-loglik-2, eval=FALSE}
-print(fit.teem$loglik,digits = 12)
-print(fit.teem2$loglik,digits = 12)
-```
-
-Efficient C++ implementation
-----------------------------
-
-We provide two implementations of UD: an R version with code that is
-easier to understand, and simpler to maintain; and a C++ (Rcpp)
-version that can be much faster. Both implementations should give the
-same, or nearly the same, output. Here's an example:
-
-```{r r-vs-rcpp, results="hide", eval=FALSE}
-set.seed(1)
-t1 <- system.time(
-  fit1 <- ud_fit(X,k = k,control = list(update.S = "em",version = "R")))
-set.seed(1)
-t2 <- system.time(
-  fit2 <- ud_fit(X,k = k,control = list(update.S = "em",version = "Rcpp")))
-```
-
-Indeed, both runs achieve the same likelihood (you can check for
-yourself that the parameter estimates are also the same),
-
-```{r compare-loglik-3, eval=FALSE}
-print(fit1$loglik,digits = 12)
-print(fit2$loglik,digits = 12)
-```
-
-but the C++ implementation achieves the result much more quickly:
-
-```{r compare-runtime, eval=FALSE}
-print(t1)
-print(t2)
-```
-
-Update mixture weights using mix-SQP
-------------------------------------
-
-There is also the potential to use the mix-SQP algorithm to fit the
-mixture weights, with estimates of the other parameters fixed. This
-could be useful as a "re-fitting" step to improve the model after
-first running the EM updates:
-
-```{r fit-ud-mixsqp, results="hide", eval=FALSE}
-set.seed(1)
-fit.mixsqp <- ud_fit(X,k = k,S = S,
-                     control = list(maxiter = 80))
-fit.mixsqp <- ud_fit(X,fit0 = fit.mixsqp,
-                     control = list(update.w = "mixsqp",maxiter = 20))
-```
-
-The mix-SQP updates only achieve a slightly higher likelihood,
-
-```{r compare-loglik-4, eval=FALSE}
-print(fit.teem$loglik,digits = 12)
-print(fit.mixsqp$loglik,digits = 12)
-```
-
-but, perhaps more compellingly, in this example mix-SQP assigns
-(nearly) zero weight to a redundant mixture component, whereas the EM
-algorithm does not:
-
-```{r compare-mixture-weights, eval=FALSE}
-print(round(fit.teem$w,digits = 3))
-print(round(fit.mixsqp$w,digits = 3))
-```
-
-The benefits of the mix-SQP updates need to be explored further.
-
-Plot improvement in solutions over time
----------------------------------------
-
-Each EM update should improve the log-likelihood. Here we show the
-improvement in the solution over time for the four variants
-illustrated above: "Extreme Deconvolution" updates (dark blue);
-"truncated-eigenvalue" updates with the mix-SQP re-fitting step
-(dashed, yellow line), and without (solid, orange line); and
-"truncated-eigenvalue" updates combined with estimating the residual
-covariance (green line). 
-
-```{r plot-progress, fig.height=5, fig.width=4, eval=FALSE}
-par(mar = c(4,4,2,2))
-y <- cbind(fit.ed$progress$loglik,
-           fit.teem$progress$loglik,
-           fit.teem2$progress$loglik,
-           fit.mixsqp$progress$loglik)
-y <- max(y) - y + 0.01
-plot(1:100,y[,1],col = "darkblue",type = "l",log = "y",lwd = 2,
-     xlab = "iteration",ylab = "dist. from best loglik",ylim = c(0.01,500))
-lines(1:100,y[,2],col = "darkorange",lwd = 2)
-lines(1:100,y[,3] + 0.01,col = "seagreen",lwd = 2)
-lines(1:100,y[,4] + 0.01,col = "gold",lwd = 2,lty = "dashed")
-```
-
-The combination of the "truncated-eigenvalue" updates and estimation
-of the residual covariance provides the best fit in this case.
 
 Session info
 ------------
