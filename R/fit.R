@@ -214,7 +214,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-27, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-28, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -297,15 +297,14 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     # M-step
     # ------
     # Update the residual covariance matrix.
+    Vnew <- V
     if (is.matrix(V)) {
       if (control$resid.update == "em") {
         if (control$version == "R")
            Vnew <- update_resid_covariance(X,U,V,P)
          else if (control$version == "Rcpp")
            Vnew <- update_resid_covariance_rcpp(X,U,V,P)
-      } else if (control$resid.update == "none")
-        Vnew <- V
-      else
+      } else if (control$resid.update != "none")
         stop("control$resid.update == \"",control$resid.update,
              "\" is not implemented")
     }
@@ -327,15 +326,23 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     
     # Update the unconstrained prior covariance matrices.
     if (length(ku) > 0) {
-      if (control$unconstrained.update == "ed")
+      if (control$unconstrained.update == "ed") {
+        if (!is.matrix(V))
+          stop("control$unconstrained.update == \"ed\" is currently not ",
+               "implemented for case when each data point has a different ",
+               "residual covariance, V")
         Unew[,,ku] <- update_prior_covariances_ed(X,U[,,ku,drop = FALSE],V,
                                                   P[,ku,drop = FALSE],
                                                   control$version)
-      else if (control$unconstrained.update == "teem")
+      } else if (control$unconstrained.update == "teem") {
+        if (!is.matrix(V))
+          stop("control$unconstrained.update == \"teem\" can only be used ",
+               "when the residual covariance (V) is the same for all data ",
+               "points")
         Unew[,,ku] <- update_prior_covariances_teem(X,V,P[,ku,drop = FALSE],
                                                     control$minval,
                                                     control$version)
-      else if (control$unconstrained.update != "none")
+      } else if (control$unconstrained.update != "none")
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
     }
@@ -355,7 +362,10 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     loglik <- loglik_ud(X,wnew,Unew,Vnew,control$version)
     dw <- max(abs(wnew - w))
     dU <- max(abs(Unew - U))
-    dV <- max(abs(Vnew - V))
+    if (is.matrix(V))
+      dV <- max(abs(Vnew - V))
+    else
+      dV <- 0
     t2 <- proc.time()
     progress[iter,"loglik"]  <- loglik
     progress[iter,"delta.w"] <- dw 

@@ -6,7 +6,34 @@ test_that("Error is thrown for univariate case",{
   expect_error(ud_init(X))
 })
 
-test_that("R and C++ implementations of ud_fit give the same result",{
+test_that("ud_fit produces same result when V is a matrix or list",{
+
+  # Simulate data.
+  set.seed(1)
+  n   <- 100
+  dat <- simulate_ud_data_2d(n)
+  X   <- dat$X
+
+  # Run ud_fit when V is a matrix and a list.
+  set.seed(1); fit1 <- ud_init(X,V = dat$V)
+  set.seed(1); fit2 <- ud_init(X,V = rep(list(dat$V),n))
+  capture.output({
+    fit3 <- ud_fit(fit1,control = list(maxiter = 20,resid.update = "none",
+                                       unconstrained.update = "none"))
+    fit4 <- ud_fit(fit2,control = list(unconstrained.update = "none",
+                                       maxiter = 20))
+  })
+  
+  # The likelihoods should be the same.
+  expect_equal(fit3$progress$loglik,fit4$progress$loglik)
+  
+  # The parameter estimates should also be the same.
+  expect_equal(fit3$w,fit4$w,scale = 1,tolerance = 1e-14)
+  expect_equal(fit3$U,fit4$U,scale = 1,tolerance = 1e-14)
+  expect_equal(fit3$progress[,-6],fit4$progress[,-6],scale = 1,tolerance=1e-12)
+})
+
+test_that("R and C++ implementations of ud_fit produce same result",{
  
   # Simulate data.
   set.seed(1)
@@ -16,32 +43,36 @@ test_that("R and C++ implementations of ud_fit give the same result",{
    
   # Compare the R and C++ implementations with different invocations
   # of ud_init and ud_fit.
-  fit0 <- ud_init(X)
   capture.output({
+    fit0 <- ud_init(X)
     fit1 <- ud_fit(fit0,control = list(maxiter = 20,version = "R"))
     fit2 <- ud_fit(fit0,control = list(maxiter = 20,version = "Rcpp"))
     fit3 <- ud_fit(fit0,control = list(unconstrained.update = "teem",
                                        maxiter = 20,version = "R"))
     fit4 <- ud_fit(fit0,control = list(unconstrained.update = "teem",
                                        maxiter = 20,version = "Rcpp"))
+    fit0 <- ud_init(X,V = rep(list(dat$V),n))
+    fit5 <- ud_fit(fit0,control = list(maxiter = 20,version = "R",
+                                       unconstrained.update = "none"))
+    fit6 <- ud_fit(fit0,control = list(maxiter = 20,version = "Rcpp",
+                                       unconstrained.update = "none"))
   })
-  # fit0 <- ud_init(X,V = rep(list(dat$V),n))
-  # capture.output({
-  #   fit5 <- ud_fit(fit0,control = list(maxiter = 20,version = "R"))
-  #   fit6 <- ud_fit(fit0,control = list(maxiter = 20,version = "Rcpp"))
-  #  })
   
   # The likelihoods should be the same.
   expect_equal(fit1$progress$loglik,fit2$progress$loglik)
   expect_equal(fit3$progress$loglik,fit4$progress$loglik)
+  expect_equal(fit5$progress$loglik,fit6$progress$loglik)
   
   # The parameter estimates should also be the same.
   expect_equal(fit1$w,fit2$w,scale = 1,tolerance = 1e-14)
   expect_equal(fit3$w,fit4$w,scale = 1,tolerance = 1e-14)
+  expect_equal(fit5$w,fit6$w,scale = 1,tolerance = 1e-14)
   expect_equal(fit1$U,fit2$U,scale = 1,tolerance = 1e-14)
   expect_equal(fit3$U,fit4$U,scale = 1,tolerance = 1e-14)
+  expect_equal(fit5$U,fit6$U,scale = 1,tolerance = 1e-14)
   expect_equal(fit1$V,fit2$V,scale = 1,tolerance = 1e-14)
   expect_equal(fit3$V,fit4$V,scale = 1,tolerance = 1e-14)
   expect_equal(fit1$progress[,-6],fit2$progress[,-6],scale = 1,tolerance=1e-12)
   expect_equal(fit3$progress[,-6],fit4$progress[,-6],scale = 1,tolerance=1e-12)
+  expect_equal(fit5$progress[,-6],fit6$progress[,-6],scale = 1,tolerance=1e-12)
 })
