@@ -5,8 +5,6 @@ to do
 
 + Update pkgdown site.
 
-+ Add codecov.
-
 + Make outputs more consistent with ebnm and/or mashr.
 
 + Output posterior quantities (see ebnm and mashr).
