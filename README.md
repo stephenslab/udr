@@ -3,6 +3,7 @@
 [![Travis Build Status](https://travis-ci.com/stephenslab/udr.svg?branch=master)](https://travis-ci.com/stephenslab/udr)
 [![Appveyor Build status](https://ci.appveyor.com/api/projects/status/2nrg0agal5ei7uet?svg=true)](https://ci.appveyor.com/project/pcarbo/udr)
 [![CircleCI build status](https://circleci.com/gh/stephenslab/udr.svg?style=svg)](https://circleci.com/gh/stephenslab/udr)
+[![codecov](https://codecov.io/gh/stephenslab/udr/branch/master/graph/badge.svg)](https://codecov.io/gh/stephenslab/udr)
 
 R package implementing fast statistical algorithms for solving the
 multivariate normal means problem via empirical Bayes, building on
