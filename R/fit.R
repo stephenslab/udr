@@ -23,9 +23,9 @@
 #' the "Extreme Deconvolution" (ED) model (Bovy \emph{et al}, 2011).
 #'
 #' Two variants of the UD model are implemented: one in which the
-#' residual covariance \code{V} is the same for all data points, and
-#' another in which V is different for each data point. In the first
-#' case, this covariance matrix may be estimated.
+#' residual covariance V is the same for all data points, and another
+#' in which V is different for each data point. In the first case,
+#' this covariance matrix may be estimated.
 #' 
 #' The UD model is fit by expectation-maximization (EM). The
 #' \code{control} argument is a list in which any of the following
@@ -38,34 +38,41 @@
 #' mixture weights are updated via EM; when \code{weights.update =
 #' "none"}, the mixture weights are not updated.}
 #'
+#' \item{\code{resid.update}}{When \code{resid.update = "em"}, the
+#' residual covariance matrix is updated via EM; when
+#' \code{resid.update = "none", the residual covariance matrix is not
+#' updated.}}
+#'
+#' \item{\code{scaled.update}}{This setting specifies the updates for
+#' the scaled prior covariance matrices. Currently, only
+#' \code{scaled.update = "none"} is allowed.}
+#' 
+#' \item{\code{rank1.update}}{This setting specifies the updates for
+#' the rank-1 prior covariance matrices. Currently, only
+#' \code{rank1.update = "none"} is allowed.}
+#' 
+#' \item{\code{unconstrained.update}}{This setting determines the
+#' updates used to estimate the unconstrained prior covariance
+#' matrices. Two variants of EM are implemented: \code{update.U = "ed"},
+#' the EM updates described by Bovy \emph{et al} (2011); and
+#' \code{update.U = "teem"}, "truncated eigenvalue
+#' expectation-maximization", in which the M-step update for each
+#' covariance matrix \code{U[[j]]} is solved by truncating the
+#' eigenvalues in a spectral decomposition of the unconstrained
+#' maximimum likelihood estimate (MLE) of \code{U[j]]}. The latter
+#' method provides greater freedom in the updates.}
+#'
 #' \item{\code{version}}{R and C++ implementations of the model
 #' fitting algorithm are provided; these are selected with
 #' \code{version = "R"} and \code{version = "Rcpp"}.}
 #' 
-#' \item{\code{maxiter}}{The upper limit on the number of EM updates
+#' \item{\code{maxiter}}{The upper limit on the number of updates
 #' to perform.}
 #'
 #' \item{\code{tol}}{Convergence tolerance for the EM algorithm; the
 #' updates are halted when the largest change in the model parameters
 #' between two successive updates is less than \code{tol}.}
 #'
-#' \item{\code{update.U}}{This setting determines the algorithm used
-#' to estimate the prior covariance matrices. Two EM variants are
-#' implemented: \code{update.U = "ed"}, the EM algorithm described by
-#' Bovy \emph{et al} (2011); and \code{update.U = "teem"} (truncated
-#' eigenvalue expectation-maximization), in which the M-step update
-#' for each covariance matrix \code{U[[j]]} is solved by truncating
-#' the eigenvalues in a spectral decomposition of the unconstrained
-#' maximimum likelihood estimate (MLE) of \code{U[j]]}. The latter
-#' method provides greater freedom in the updates for U, and is
-#' expected to yield better fits, and converge more quickly to a good
-#' fit.}
-#'
-#' \item{\code{update.S}}{When \code{update.S = "em"},
-#' maximum-likelihood estimate of the residual covariance matrix is
-#' computed via EM; when \code{update.S = "none", the residual
-#' covariance parameter is not updated.}}
-#' 
 #' \item{\code{minval}}{Minimum eigenvalue allowed in the residual
 #'   covariance(s) \code{V} and the prior covariance matrices
 #'   \code{U}.}}
@@ -75,10 +82,12 @@
 #' for guidance.
 #'
 #' @param fit0 A previous Ultimate Deconvolution model fit. Typically,
-#'   this will be an output from \code{\link{ud_init}} or from a
-#'   previous call to \code{ud_fit}.
+#'   this will be an output from \code{\link{ud_init}}, or an output
+#'   from a previous call to \code{ud_fit}.
 #'
-#' @param X Describe input argument "X" here.
+#' @param X The n x m data matrix, in which each row of the matrix is
+#'   an m-dimensional data point. The number of rows and columns should
+#'   be 2 or more.
 #' 
 #' @param control A list of parameters controlling the behaviour of
 #'   the model fitting and initialization. See \sQuote{Details}.
@@ -207,7 +216,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-24, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-25, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else

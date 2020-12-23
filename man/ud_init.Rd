@@ -17,7 +17,8 @@ ud_init(
 }
 \arguments{
 \item{X}{The n x m data matrix, in which each row of the matrix is
-an m-dimensional data point. m should be 2 or greater.}
+an m-dimensional data point. The number of rows and columns should
+be 2 or more.}
 
 \item{V}{Either an m x m matrix giving the initial estimate of the
 residual covariance matrix, or a list of m x m "standard error"
