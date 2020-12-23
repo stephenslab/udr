@@ -73,7 +73,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-29</span>
       </span>
     </div>
 
@@ -124,7 +124,6 @@
   <span class='kw'>U_scaled</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>indep</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>)), <span class='kw'>iden</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>), <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>))),
   <span class='no'>U_rank1</span>,
   <span class='no'>U_unconstrained</span>,
-  <span class='no'>w</span>,
   <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
 )</pre>
 
@@ -134,7 +133,8 @@
     <tr>
       <th>X</th>
       <td><p>The n x m data matrix, in which each row of the matrix is
-an m-dimensional data point. m should be 2 or greater.</p></td>
+an m-dimensional data point. The number of rows and columns should
+be 2 or more.</p></td>
     </tr>
     <tr>
       <th>V</th>
@@ -145,59 +145,44 @@ matrices, one for each data point.</p></td>
     <tr>
       <th>n_rank1</th>
       <td><p>A non-negative integer specifying the number of
-rank-1 covariance matrices included in the
-mixture-of-multivariate-normals prior. Initial estimates of the m x
-m rank-1 covariance matrices are generated at random. At most one
-of <code>n_rank1</code> and <code>U_rank1</code> should be provided. If neither
-are specified, 4 rank-1 matrices will be used.</p></td>
+rank-1 covariance matrices included in the mixture prior. Initial
+estimates of the m x m rank-1 covariance matrices are generated at
+random. At most one of <code>n_rank1</code> and <code>U_rank1</code> should be
+provided. If neither are specified, 4 rank-1 matrices will be used.</p></td>
     </tr>
     <tr>
       <th>n_unconstrained</th>
       <td><p>A non-negative integer specifying the number
-of unconstrained covariance matrices included in the
-mixture-of-multivariate-normals prior. Initial estimates of the m x
-m covariance matrices are generated at random. At most one of
-<code>n_unconstrained</code> and <code>U_unconstrained</code> should be
-provided. If neither are specified, 4 unconstrained matrices are
-used.</p></td>
+of unconstrained covariance matrices included in the mixture
+prior. Initial estimates of the m x m covariance matrices are
+generated at random. At most one of <code>n_unconstrained</code> and
+<code>U_unconstrained</code> should be provided. If neither are
+specified, 4 unconstrained matrices are used.</p></td>
     </tr>
     <tr>
       <th>U_scaled</th>
       <td><p>A list specifying initial estimates of the scaled
-covariance matrices in the mixture-of-multivariate-normals prior.</p></td>
+covariance matrices in the mixture prior.</p></td>
     </tr>
     <tr>
       <th>U_rank1</th>
       <td><p>A list specifying initial estimates of the rank-1
-matrices in the mixture-of-multivariate-normals prior. At most one
-of <code>n_rank1</code> and <code>U_rank1</code> should be provided.</p></td>
+matrices in the mixture prior. At most one of <code>n_rank1</code> and
+<code>U_rank1</code> should be provided. If <code>U_rank1</code> is not given,
+the rank-1 covariates are initialized at random.</p></td>
     </tr>
     <tr>
       <th>U_unconstrained</th>
       <td><p>A list specifying initial estimates of the
-unconstrained matrices in the mixture-of-multivariate-normals
-prior. At most one of <code>n_unconstrained</code> and
-<code>U_unconstrained</code> should be provided.</p></td>
-    </tr>
-    <tr>
-      <th>w</th>
-      <td><p>A numeric vector of length k giving initial estimates of
-the prior mixture weights, where k is equal to the number of
-matrices in the mixture-of-multivariate-normals prior. All entries
-must be non-negative, but need not sum to 1; the mixture weights
-are automatically normalized to sum to 1. If not provided, the
-mixture weights are set to uniform.</p></td>
+unconstrained matrices in the mixture prior. At most one of
+<code>n_unconstrained</code> and <code>U_unconstrained</code> should be
+provided. If <code>U_unconstrained</code> is not given, the matrices are
+initialized at random.</p></td>
     </tr>
     <tr>
       <th>control</th>
       <td><p>A list of parameters controlling the behaviour of
 the model initialization. See <code><a href='ud_fit.html'>ud_fit</a></code> for details.</p></td>
-    </tr>
-    <tr>
-      <th>version</th>
-      <td><p>R and C++ implementations of some numerical
-computations are provided; these are selected with <code>version =
-"R"</code> and <code>version = "Rcpp"</code>.</p></td>
     </tr>
     </table>
 

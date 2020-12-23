@@ -77,7 +77,7 @@ deconvolution." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-29</span>
       </span>
     </div>
 
@@ -134,12 +134,14 @@ deconvolution.</p>
     <tr>
       <th>fit0</th>
       <td><p>A previous Ultimate Deconvolution model fit. Typically,
-this will be an output from <code><a href='ud_init.html'>ud_init</a></code> or from a
-previous call to <code>ud_fit</code>.</p></td>
+this will be an output from <code><a href='ud_init.html'>ud_init</a></code>, or an output
+from a previous call to <code>ud_fit</code>.</p></td>
     </tr>
     <tr>
       <th>X</th>
-      <td><p>Describe input argument "X" here.</p></td>
+      <td><p>The n x m data matrix, in which each row of the matrix is
+an m-dimensional data point. The number of rows and columns should
+be 2 or more.</p></td>
     </tr>
     <tr>
       <th>control</th>
@@ -197,9 +199,9 @@ component \(j\) is multivariate normal with zero mean and
 covariance matrix \(U_j\). This model is a useful special case of
 the "Extreme Deconvolution" (ED) model (Bovy <em>et al</em>, 2011).</p>
 <p>Two variants of the UD model are implemented: one in which the
-residual covariance <code>V</code> is the same for all data points, and
-another in which V is different for each data point. In the first
-case, this covariance matrix may be estimated.</p>
+residual covariance V is the same for all data points, and another
+in which V is different for each data point. In the first case,
+this covariance matrix may be estimated.</p>
 <p>The UD model is fit by expectation-maximization (EM). The
 <code>control</code> argument is a list in which any of the following
 named components will override the default optimization algorithm
@@ -210,33 +212,40 @@ settings (as they are defined by <code>ud_fit_control_default</code>):</p>
 mixture weights are updated via EM; when <code>weights.update =
 "none"</code>, the mixture weights are not updated.</p></dd>
 
+<dt><code>resid.update</code></dt><dd><p>When <code>resid.update = "em"</code>, the
+residual covariance matrix is updated via EM; when
+<code>resid.update = "none", the residual covariance matrix is not
+updated.</code></p></dd>
+
+<dt><code>scaled.update</code></dt><dd><p>This setting specifies the updates for
+the scaled prior covariance matrices. Currently, only
+<code>scaled.update = "none"</code> is allowed.</p></dd>
+
+<dt><code>rank1.update</code></dt><dd><p>This setting specifies the updates for
+the rank-1 prior covariance matrices. Currently, only
+<code>rank1.update = "none"</code> is allowed.</p></dd>
+
+<dt><code>unconstrained.update</code></dt><dd><p>This setting determines the
+updates used to estimate the unconstrained prior covariance
+matrices. Two variants of EM are implemented: <code>update.U = "ed"</code>,
+the EM updates described by Bovy <em>et al</em> (2011); and
+<code>update.U = "teem"</code>, "truncated eigenvalue
+expectation-maximization", in which the M-step update for each
+covariance matrix <code>U[[j]]</code> is solved by truncating the
+eigenvalues in a spectral decomposition of the unconstrained
+maximimum likelihood estimate (MLE) of <code>U[j]]</code>. The latter
+method provides greater freedom in the updates.</p></dd>
+
 <dt><code>version</code></dt><dd><p>R and C++ implementations of the model
 fitting algorithm are provided; these are selected with
 <code>version = "R"</code> and <code>version = "Rcpp"</code>.</p></dd>
 
-<dt><code>maxiter</code></dt><dd><p>The upper limit on the number of EM updates
+<dt><code>maxiter</code></dt><dd><p>The upper limit on the number of updates
 to perform.</p></dd>
 
-<dt><code>tol</code></dt><dd><p>Convergence tolerance for the EM algorithm; the
+<dt><code>tol</code></dt><dd><p>Convergence tolerance for the optimization; the
 updates are halted when the largest change in the model parameters
 between two successive updates is less than <code>tol</code>.</p></dd>
-
-<dt><code>update.U</code></dt><dd><p>This setting determines the algorithm used
-to estimate the prior covariance matrices. Two EM variants are
-implemented: <code>update.U = "ed"</code>, the EM algorithm described by
-Bovy <em>et al</em> (2011); and <code>update.U = "teem"</code> (truncated
-eigenvalue expectation-maximization), in which the M-step update
-for each covariance matrix <code>U[[j]]</code> is solved by truncating
-the eigenvalues in a spectral decomposition of the unconstrained
-maximimum likelihood estimate (MLE) of <code>U[j]]</code>. The latter
-method provides greater freedom in the updates for U, and is
-expected to yield better fits, and converge more quickly to a good
-fit.</p></dd>
-
-<dt><code>update.S</code></dt><dd><p>When <code>update.S = "em"</code>,
-maximum-likelihood estimate of the residual covariance matrix is
-computed via EM; when <code>update.S = "none", the residual
-covariance parameter is not updated.</code></p></dd>
 
 <dt><code>minval</code></dt><dd><p>Minimum eigenvalue allowed in the residual
   covariance(s) <code>V</code> and the prior covariance matrices
@@ -262,8 +271,107 @@ of the Royal Statistical Society, Series B</em> <b>75</b>,
 427–450. doi:10.1111/j.1467-9868.2012.01049.x</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'># TO DO.
+    <pre class="examples"><div class='input'><span class='co'># Simulate data from a UD model.</span>
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
+<span class='no'>n</span> <span class='kw'>&lt;-</span> <span class='fl'>4000</span>
+<span class='no'>V</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>rbind</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.8</span>,<span class='fl'>0.2</span>),
+           <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.2</span>,<span class='fl'>1.5</span>))
+<span class='no'>U</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>none</span>   <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>rbind</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>0</span>),
+                         <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>0</span>)),
+          <span class='kw'>shared</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>rbind</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1.0</span>,<span class='fl'>0.9</span>),
+                         <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.9</span>,<span class='fl'>1.0</span>)),
+          <span class='kw'>only1</span>  <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>rbind</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>,<span class='fl'>0</span>),
+                         <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>0</span>)),
+          <span class='kw'>only2</span>  <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/cbind.html'>rbind</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>0</span>),
+                         <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>1</span>)))
+<span class='no'>w</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>0.8</span>,<span class='fl'>0.1</span>,<span class='fl'>0.075</span>,<span class='fl'>0.025</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>rownames</a></span>(<span class='no'>V</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"d1"</span>,<span class='st'>"d2"</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/colnames.html'>colnames</a></span>(<span class='no'>V</span>) <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"d1"</span>,<span class='st'>"d2"</span>)
+<span class='no'>X</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='simulate_ud_data.html'>simulate_ud_data</a></span>(<span class='no'>n</span>,<span class='no'>w</span>,<span class='no'>U</span>,<span class='no'>V</span>)
 
+<span class='co'># This is the simplest invocation of ud_init.</span>
+<span class='no'>fit1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='ud_init.html'>ud_init</a></span>(<span class='no'>X</span>)
+<span class='no'>fit1</span> <span class='kw'>&lt;-</span> <span class='fu'>ud_fit</span>(<span class='no'>fit1</span>)</div><div class='output co'>#&gt; Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):
+#&gt; data points are i.i.d. (same V)
+#&gt; prior covariances: 2 scaled, 4 rank-1, 4 unconstrained
+#&gt; prior covariance updates: none (scaled), none (rank-1), ed (unconstrained)
+#&gt; mixture weights update: em
+#&gt; residual covariance update: em
+#&gt; max 20 updates, conv tol 1.0e-06
+#&gt; iter          log-likelihood |w - w'| |U - U'| |V - V'|
+#&gt;    1 -1.2427686311528083e+04 4.09e-02 3.30e+00 2.63e-01
+#&gt;    2 -1.2304140122123885e+04 1.56e-02 6.93e-01 1.23e-01
+#&gt;    3 -1.2258787778612572e+04 1.12e-02 3.24e-01 6.34e-02
+#&gt;    4 -1.2238592114352827e+04 8.25e-03 1.96e-01 3.61e-02
+#&gt;    5 -1.2228634107038721e+04 5.99e-03 1.36e-01 2.18e-02
+#&gt;    6 -1.2223365009974717e+04 4.28e-03 1.03e-01 1.37e-02
+#&gt;    7 -1.2220373469123095e+04 2.99e-03 8.10e-02 8.66e-03
+#&gt;    8 -1.2218531401439679e+04 2.04e-03 6.59e-02 7.05e-03
+#&gt;    9 -1.2217291566752165e+04 1.66e-03 5.48e-02 6.21e-03
+#&gt;   10 -1.2216382082357368e+04 1.46e-03 4.64e-02 5.52e-03
+#&gt;   11 -1.2215664664949669e+04 1.31e-03 3.99e-02 4.94e-03
+#&gt;   12 -1.2215066880822524e+04 1.20e-03 3.47e-02 4.47e-03
+#&gt;   13 -1.2214549269280509e+04 1.12e-03 3.06e-02 4.08e-03
+#&gt;   14 -1.2214089216000202e+04 1.06e-03 2.73e-02 3.75e-03
+#&gt;   15 -1.2213672954458118e+04 1.01e-03 2.45e-02 3.47e-03
+#&gt;   16 -1.2213291541480336e+04 9.76e-04 2.22e-02 3.23e-03
+#&gt;   17 -1.2212938791490886e+04 9.47e-04 2.02e-02 3.03e-03
+#&gt;   18 -1.2212610186332380e+04 9.22e-04 1.85e-02 2.85e-03
+#&gt;   19 -1.2212302278259031e+04 9.00e-04 1.71e-02 2.69e-03
+#&gt;   20 -1.2212012347524636e+04 8.81e-04 1.58e-02 2.55e-03</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit1</span>)</div><div class='output co'>#&gt; Model overview:
+#&gt;   Number of data points: 4000
+#&gt;   Dimension of data points: 2
+#&gt; Data points are i.i.d. (same V)
+#&gt;   Number of scaled prior covariances: 2
+#&gt;   Number of rank-1 prior covariances: 4
+#&gt;   Number of unconstrained prior covariances: 4
+#&gt; Evaluation of fit (20 updates performed):
+#&gt;   Log-likelihood: -1.221201234752e+04</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit1</span>$<span class='no'>progress</span>$<span class='no'>iter</span>,
+     <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='no'>fit1</span>$<span class='no'>progress</span>$<span class='no'>loglik</span>) - <span class='no'>fit1</span>$<span class='no'>progress</span>$<span class='no'>loglik</span> + <span class='fl'>0.1</span>,
+     <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"l"</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"dodgerblue"</span>,<span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>,<span class='kw'>log</span> <span class='kw'>=</span> <span class='st'>"y"</span>,<span class='kw'>xlab</span> <span class='kw'>=</span> <span class='st'>"iteration"</span>,
+     <span class='kw'>ylab</span> <span class='kw'>=</span> <span class='st'>"dist to best loglik"</span>)</div><div class='img'><img src='ud_fit-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'># This is a more complex invocation of ud_init that overrides some</span>
+<span class='co'># of the defaults.</span>
+<span class='no'>fit2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='ud_init.html'>ud_init</a></span>(<span class='no'>X</span>,<span class='kw'>U_scaled</span> <span class='kw'>=</span> <span class='no'>U</span>,<span class='kw'>n_rank1</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>n_unconstrained</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>V</span> <span class='kw'>=</span> <span class='no'>V</span>)
+<span class='no'>fit2</span> <span class='kw'>&lt;-</span> <span class='fu'>ud_fit</span>(<span class='no'>fit2</span>)</div><div class='output co'>#&gt; Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):
+#&gt; data points are i.i.d. (same V)
+#&gt; prior covariances: 4 scaled, 1 rank-1, 1 unconstrained
+#&gt; prior covariance updates: none (scaled), none (rank-1), ed (unconstrained)
+#&gt; mixture weights update: em
+#&gt; residual covariance update: em
+#&gt; max 20 updates, conv tol 1.0e-06
+#&gt; iter          log-likelihood |w - w'| |U - U'| |V - V'|
+#&gt;    1 -1.2363711051186072e+04 7.30e-02 5.73e+00 2.57e-01
+#&gt;    2 -1.2292274931142549e+04 2.05e-02 7.56e-01 1.03e-01
+#&gt;    3 -1.2267494111926884e+04 1.64e-02 3.05e-01 4.38e-02
+#&gt;    4 -1.2256023670976268e+04 1.30e-02 1.72e-01 1.77e-02
+#&gt;    5 -1.2249093233304877e+04 1.06e-02 1.14e-01 6.70e-03
+#&gt;    6 -1.2243997672931913e+04 8.94e-03 8.32e-02 3.43e-03
+#&gt;    7 -1.2239833645896120e+04 7.75e-03 6.47e-02 3.78e-03
+#&gt;    8 -1.2236269664286576e+04 6.84e-03 5.26e-02 5.02e-03
+#&gt;    9 -1.2233162270327024e+04 6.11e-03 4.41e-02 5.42e-03
+#&gt;   10 -1.2230432724775706e+04 5.49e-03 3.78e-02 5.40e-03
+#&gt;   11 -1.2228026901640827e+04 4.94e-03 3.29e-02 5.17e-03
+#&gt;   12 -1.2225902045468960e+04 4.46e-03 2.91e-02 4.85e-03
+#&gt;   13 -1.2224022190861437e+04 4.03e-03 2.59e-02 4.50e-03
+#&gt;   14 -1.2222356363655990e+04 3.65e-03 2.32e-02 4.16e-03
+#&gt;   15 -1.2220877682381668e+04 3.30e-03 2.10e-02 3.84e-03
+#&gt;   16 -1.2219562768089942e+04 2.99e-03 1.91e-02 3.54e-03
+#&gt;   17 -1.2218391279794114e+04 2.71e-03 1.77e-02 3.26e-03
+#&gt;   18 -1.2217345519259270e+04 2.45e-03 1.65e-02 3.01e-03
+#&gt;   19 -1.2216410086581143e+04 2.23e-03 1.55e-02 2.78e-03
+#&gt;   20 -1.2215571578679148e+04 2.02e-03 1.46e-02 2.58e-03</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit2</span>)</div><div class='output co'>#&gt; Model overview:
+#&gt;   Number of data points: 4000
+#&gt;   Dimension of data points: 2
+#&gt; Data points are i.i.d. (same V)
+#&gt;   Number of scaled prior covariances: 4
+#&gt;   Number of rank-1 prior covariances: 1
+#&gt;   Number of unconstrained prior covariances: 1
+#&gt; Evaluation of fit (20 updates performed):
+#&gt;   Log-likelihood: -1.221557157868e+04</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit2</span>$<span class='no'>progress</span>$<span class='no'>iter</span>,
+     <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='no'>fit2</span>$<span class='no'>progress</span>$<span class='no'>loglik</span>) - <span class='no'>fit2</span>$<span class='no'>progress</span>$<span class='no'>loglik</span> + <span class='fl'>0.1</span>,
+     <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"l"</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"dodgerblue"</span>,<span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>,<span class='kw'>log</span> <span class='kw'>=</span> <span class='st'>"y"</span>,<span class='kw'>xlab</span> <span class='kw'>=</span> <span class='st'>"iteration"</span>,
+     <span class='kw'>ylab</span> <span class='kw'>=</span> <span class='st'>"dist to best loglik"</span>)</div><div class='img'><img src='ud_fit-2.png' alt='' width='700' height='433' /></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

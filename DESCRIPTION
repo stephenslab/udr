@@ -8,6 +8,8 @@ Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
                     email="peter.carbonetto@gmail.com"),
              person("Yunqi","Yang",role="aut"),
              person("Matthew","Stephens",role="aut"),
+             person("Yuxin","Zhou",role="ctb"),
+             person("David","Gerard",role="ctb"),
              person("Gao","Wang",role="ctb"))
 URL: https://github.com/stephenslab/udr
 BugReports: https://github.com/stephenslab/udr/issues

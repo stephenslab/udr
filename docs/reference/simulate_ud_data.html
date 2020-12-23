@@ -41,8 +41,7 @@
 
 <meta property="og:title" content="Simulate Data from Ultimate Deconvolution Model — simulate_ud_data" />
 <meta property="og:description" content="Simulate data points from the Ultimate Deconvolution
-  model. Note that the univariate case (m = 1) is not handled.
-  See ud_fit for the model definition." />
+  model. See ud_fit for the model definition." />
 
 
 
@@ -74,7 +73,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-29</span>
       </span>
     </div>
 
@@ -114,8 +113,7 @@
 
     <div class="ref-description">
     <p>Simulate data points from the Ultimate Deconvolution
-  model. Note that the univariate case (m = 1) is not handled.
-  See <code><a href='ud_fit.html'>ud_fit</a></code> for the model definition.</p>
+  model. See <code><a href='ud_fit.html'>ud_fit</a></code> for the model definition.</p>
     </div>
 
     <pre class="usage"><span class='fu'>simulate_ud_data</span>(<span class='no'>n</span>, <span class='no'>w</span>, <span class='no'>U</span>, <span class='no'>V</span>)</pre>
@@ -136,9 +134,8 @@ the mixture weights are automatically normalized to sum to 1.</p></td>
     <tr>
       <th>U</th>
       <td><p>A list of length k specifying the covariance matrices in
-the mixture-of-multivariate-normals prior; list element
-<code>U[[i]]</code> is the m x m covariance matrix for the ith mixture
-component.</p></td>
+the mixture prior; list element <code>U[[i]]</code> is the m x m
+covariance matrix for the ith mixture component.</p></td>
     </tr>
     <tr>
       <th>V</th>
@@ -149,8 +146,7 @@ component.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>An n x m matrix in which each row is a draw from the
-  Ultimate Deconvolution model. For the univariate case (m = 1), a
-  vector is returned.</p>
+  Ultimate Deconvolution model.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='ud_fit.html'>ud_fit</a></code></p></div>

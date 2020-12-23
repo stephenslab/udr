@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-16</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-29</span>
       </span>
     </div>
 
@@ -67,7 +67,7 @@
       <h1 data-toc-skip>Introduction to Ultimate Deconvolution</h1>
                         <h4 class="author">Peter Carbonetto</h4>
             
-            <h4 class="date">2020-12-22</h4>
+            <h4 class="date">2020-12-23</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/stephenslab/udr/blob/master/vignettes/udr_intro.Rmd"><code>vignettes/udr_intro.Rmd</code></a></small>
       <div class="hidden name"><code>udr_intro.Rmd</code></div>
@@ -76,18 +76,14 @@
 
     
     
-<div id="simulate-data" class="section level2">
-<h2 class="hasAnchor">
-<a href="#simulate-data" class="anchor"></a>Simulate data</h2>
-<p>Here we illustrate the Ultimate Deconvolution (UD) method in a simulated data set, in which the data are simulated from the multivariate normal means model with 4 mixture components.</p>
+<p>Here we illustrate the features of the Ultimate Deconvolution (UD) package.</p>
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">udr</span>)</pre></body></html></div>
-<p>We simulate 4,000 data points from a mixture of multivariate normals, <span class="math display">\[
-w_1 N(0,S + U_1) + \cdots + w_4 N(0,S + U_4).
+<p>We simulate 4,000 data points from a UD model with 4 mixture components: <span class="math display">\[
+x_i \sim w_1 N(0,V + U_1) + \cdots + w_4 N(0,V + U_4).
 \]</span></p>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
 <span class="no">n</span> <span class="kw">&lt;-</span> <span class="fl">4000</span>
-<span class="no">k</span> <span class="kw">&lt;-</span> <span class="fl">4</span>
-<span class="no">S</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.8</span>,<span class="fl">0.2</span>),
+<span class="no">V</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.8</span>,<span class="fl">0.2</span>),
            <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.2</span>,<span class="fl">1.5</span>))
 <span class="no">U</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">none</span>   <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">0</span>),
                          <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">0</span>)),
@@ -98,86 +94,184 @@ w_1 N(0,S + U_1) + \cdots + w_4 N(0,S + U_4).
           <span class="kw">only2</span>  <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">0</span>),
                          <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">1</span>)))
 <span class="no">w</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.8</span>,<span class="fl">0.1</span>,<span class="fl">0.075</span>,<span class="fl">0.025</span>)
-<span class="no">X</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/simulate_ud_data.html">simulate_ud_data</a></span>(<span class="no">n</span>,<span class="no">w</span>,<span class="no">U</span>,<span class="no">S</span>)</pre></body></html></div>
-</div>
-<div id="truncated-eigenvalue-em" class="section level2">
+<span class="no">X</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/simulate_ud_data.html">simulate_ud_data</a></span>(<span class="no">n</span>,<span class="no">w</span>,<span class="no">U</span>,<span class="no">V</span>)</pre></body></html></div>
+<p>This is the most basic usage:</p>
+<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">fit0</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span>(<span class="no">X</span>)
+<span class="no">fit1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>)
+<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):</span>
+<span class="co"># data points are i.i.d. (same V)</span>
+<span class="co"># prior covariances: 2 scaled, 4 rank-1, 4 unconstrained</span>
+<span class="co"># prior covariance updates: none (scaled), none (rank-1), ed (unconstrained)</span>
+<span class="co"># mixture weights update: em</span>
+<span class="co"># residual covariance update: em</span>
+<span class="co"># max 20 updates, conv tol 1.0e-06</span>
+<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
+<span class="co">#    1 -1.2427686311528083e+04 4.09e-02 3.30e+00 2.63e-01</span>
+<span class="co">#    2 -1.2304140122123885e+04 1.56e-02 6.93e-01 1.23e-01</span>
+<span class="co">#    3 -1.2258787778612572e+04 1.12e-02 3.24e-01 6.34e-02</span>
+<span class="co">#    4 -1.2238592114352827e+04 8.25e-03 1.96e-01 3.61e-02</span>
+<span class="co">#    5 -1.2228634107038721e+04 5.99e-03 1.36e-01 2.18e-02</span>
+<span class="co">#    6 -1.2223365009974717e+04 4.28e-03 1.03e-01 1.37e-02</span>
+<span class="co">#    7 -1.2220373469123095e+04 2.99e-03 8.10e-02 8.66e-03</span>
+<span class="co">#    8 -1.2218531401439679e+04 2.04e-03 6.59e-02 7.05e-03</span>
+<span class="co">#    9 -1.2217291566752165e+04 1.66e-03 5.48e-02 6.21e-03</span>
+<span class="co">#   10 -1.2216382082357368e+04 1.46e-03 4.64e-02 5.52e-03</span>
+<span class="co">#   11 -1.2215664664949669e+04 1.31e-03 3.99e-02 4.94e-03</span>
+<span class="co">#   12 -1.2215066880822524e+04 1.20e-03 3.47e-02 4.47e-03</span>
+<span class="co">#   13 -1.2214549269280509e+04 1.12e-03 3.06e-02 4.08e-03</span>
+<span class="co">#   14 -1.2214089216000202e+04 1.06e-03 2.73e-02 3.75e-03</span>
+<span class="co">#   15 -1.2213672954458118e+04 1.01e-03 2.45e-02 3.47e-03</span>
+<span class="co">#   16 -1.2213291541480336e+04 9.76e-04 2.22e-02 3.23e-03</span>
+<span class="co">#   17 -1.2212938791490886e+04 9.47e-04 2.02e-02 3.03e-03</span>
+<span class="co">#   18 -1.2212610186332380e+04 9.22e-04 1.85e-02 2.85e-03</span>
+<span class="co">#   19 -1.2212302278259031e+04 9.00e-04 1.71e-02 2.69e-03</span>
+<span class="co">#   20 -1.2212012347524636e+04 8.81e-04 1.58e-02 2.55e-03</span></pre></body></html></div>
+<p>The default model is a mixture with a total of <span class="math inline">\(K = 10\)</span> mixture components with 2 scaled, 4 rank-1, and 4 unconstrained prior covariance matrices <span class="math inline">\(U_k\)</span>:</p>
+<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">fit1</span>)
+<span class="co"># Model overview:</span>
+<span class="co">#   Number of data points: 4000</span>
+<span class="co">#   Dimension of data points: 2</span>
+<span class="co"># Data points are i.i.d. (same V)</span>
+<span class="co">#   Number of scaled prior covariances: 2</span>
+<span class="co">#   Number of rank-1 prior covariances: 4</span>
+<span class="co">#   Number of unconstrained prior covariances: 4</span>
+<span class="co"># Evaluation of fit (20 updates performed):</span>
+<span class="co">#   Log-likelihood: -1.221201234752e+04</span></pre></body></html></div>
+<p>The function <code>ud_init</code> is a flexible interface for design a variety of UD models. For example,</p>
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">fit0</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span>(<span class="no">X</span>,<span class="kw">U_scaled</span> <span class="kw">=</span> <span class="no">U</span>,<span class="kw">n_rank1</span> <span class="kw">=</span> <span class="fl">1</span>,<span class="kw">n_unconstrained</span> <span class="kw">=</span> <span class="fl">1</span>,<span class="kw">V</span> <span class="kw">=</span> <span class="no">V</span>)
+<span class="no">fit2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>)
+<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):</span>
+<span class="co"># data points are i.i.d. (same V)</span>
+<span class="co"># prior covariances: 4 scaled, 1 rank-1, 1 unconstrained</span>
+<span class="co"># prior covariance updates: none (scaled), none (rank-1), ed (unconstrained)</span>
+<span class="co"># mixture weights update: em</span>
+<span class="co"># residual covariance update: em</span>
+<span class="co"># max 20 updates, conv tol 1.0e-06</span>
+<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
+<span class="co">#    1 -1.2363711051186072e+04 7.30e-02 5.73e+00 2.57e-01</span>
+<span class="co">#    2 -1.2292274931142549e+04 2.05e-02 7.56e-01 1.03e-01</span>
+<span class="co">#    3 -1.2267494111926884e+04 1.64e-02 3.05e-01 4.38e-02</span>
+<span class="co">#    4 -1.2256023670976268e+04 1.30e-02 1.72e-01 1.77e-02</span>
+<span class="co">#    5 -1.2249093233304877e+04 1.06e-02 1.14e-01 6.70e-03</span>
+<span class="co">#    6 -1.2243997672931913e+04 8.94e-03 8.32e-02 3.43e-03</span>
+<span class="co">#    7 -1.2239833645896120e+04 7.75e-03 6.47e-02 3.78e-03</span>
+<span class="co">#    8 -1.2236269664286576e+04 6.84e-03 5.26e-02 5.02e-03</span>
+<span class="co">#    9 -1.2233162270327024e+04 6.11e-03 4.41e-02 5.42e-03</span>
+<span class="co">#   10 -1.2230432724775706e+04 5.49e-03 3.78e-02 5.40e-03</span>
+<span class="co">#   11 -1.2228026901640827e+04 4.94e-03 3.29e-02 5.17e-03</span>
+<span class="co">#   12 -1.2225902045468960e+04 4.46e-03 2.91e-02 4.85e-03</span>
+<span class="co">#   13 -1.2224022190861437e+04 4.03e-03 2.59e-02 4.50e-03</span>
+<span class="co">#   14 -1.2222356363655990e+04 3.65e-03 2.32e-02 4.16e-03</span>
+<span class="co">#   15 -1.2220877682381668e+04 3.30e-03 2.10e-02 3.84e-03</span>
+<span class="co">#   16 -1.2219562768089942e+04 2.99e-03 1.91e-02 3.54e-03</span>
+<span class="co">#   17 -1.2218391279794114e+04 2.71e-03 1.77e-02 3.26e-03</span>
+<span class="co">#   18 -1.2217345519259270e+04 2.45e-03 1.65e-02 3.01e-03</span>
+<span class="co">#   19 -1.2216410086581143e+04 2.23e-03 1.55e-02 2.78e-03</span>
+<span class="co">#   20 -1.2215571578679148e+04 2.02e-03 1.46e-02 2.58e-03</span></pre></body></html></div>
+<p>The <code>ud_fit</code> interface also allows for flexibly re-fitting a model; that is, a <code>ud_fit</code> output can be used in another call to <code>ud_fit</code>.</p>
+<p>Notice that the data do not need to be passed to <code>ud_fit</code> because they are already embedded in the <code>ud_fit</code> output. However, one can pass a new data set <code>X</code> to <code>ud_fit</code>.</p>
+<p>The <code>control</code> argument to <code>ud_fit</code> controls the optimization of the model parameters. For example, the unconstrained prior covariance matrices are by default optimized using the Extreme Deconvolution (ED) updates, and we can replace these with the new “truncated eigenvalue” EM (TEEM) updates:</p>
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">fit3</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">unconstrained.update</span> <span class="kw">=</span> <span class="st">"teem"</span>))
+<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):</span>
+<span class="co"># data points are i.i.d. (same V)</span>
+<span class="co"># prior covariances: 4 scaled, 1 rank-1, 1 unconstrained</span>
+<span class="co"># prior covariance updates: none (scaled), none (rank-1), teem (unconstrained)</span>
+<span class="co"># mixture weights update: em</span>
+<span class="co"># residual covariance update: em</span>
+<span class="co"># max 20 updates, conv tol 1.0e-06</span>
+<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
+<span class="co">#    1 -1.2319222292060802e+04 7.30e-02 6.88e+00 2.57e-01</span>
+<span class="co">#    2 -1.2271191737197005e+04 2.11e-02 4.74e-01 8.64e-02</span>
+<span class="co">#    3 -1.2255432620034080e+04 1.61e-02 1.83e-01 3.16e-02</span>
+<span class="co">#    4 -1.2247612809991640e+04 1.27e-02 9.11e-02 1.10e-02</span>
+<span class="co">#    5 -1.2242257433012641e+04 1.06e-02 5.28e-02 4.74e-03</span>
+<span class="co">#    6 -1.2237960148178690e+04 9.06e-03 3.44e-02 3.38e-03</span>
+<span class="co">#    7 -1.2234307726375413e+04 7.93e-03 2.47e-02 3.46e-03</span>
+<span class="co">#    8 -1.2231142506906435e+04 7.03e-03 1.92e-02 3.46e-03</span>
+<span class="co">#    9 -1.2228379012090587e+04 6.26e-03 1.59e-02 3.47e-03</span>
+<span class="co">#   10 -1.2225957013026069e+04 5.60e-03 1.36e-02 3.34e-03</span>
+<span class="co">#   11 -1.2223828605844137e+04 5.02e-03 1.20e-02 3.16e-03</span>
+<span class="co">#   12 -1.2221953932565955e+04 4.50e-03 1.07e-02 2.98e-03</span>
+<span class="co">#   13 -1.2220299250030850e+04 4.05e-03 9.62e-03 2.79e-03</span>
+<span class="co">#   14 -1.2218835757058101e+04 3.64e-03 8.71e-03 2.62e-03</span>
+<span class="co">#   15 -1.2217538749593115e+04 3.28e-03 7.91e-03 2.45e-03</span>
+<span class="co">#   16 -1.2216386964678833e+04 2.96e-03 7.20e-03 2.30e-03</span>
+<span class="co">#   17 -1.2215362053284140e+04 2.67e-03 6.57e-03 2.16e-03</span>
+<span class="co">#   18 -1.2214448148286296e+04 2.41e-03 5.99e-03 2.02e-03</span>
+<span class="co">#   19 -1.2213631505568623e+04 2.18e-03 5.48e-03 1.90e-03</span>
+<span class="co">#   20 -1.2212900202791410e+04 1.98e-03 5.01e-03 1.78e-03</span></pre></body></html></div>
+<p>Notice that the likelihood is slightly higher with the TEEM updates, reflecting the fact that the TEEM updates have greater freedom to optimize the covariance matrices.</p>
+<p>These are the current model fitting defaults:</p>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span>(<span class="fu"><a href="../reference/ud_fit.html">ud_fit_control_default</a></span>())
+<span class="co">#       weights.update        scaled.update         rank1.update </span>
+<span class="co">#                 "em"               "none"               "none" </span>
+<span class="co"># unconstrained.update         resid.update              version </span>
+<span class="co">#                 "ed"                 "em"               "Rcpp" </span>
+<span class="co">#              maxiter               minval                  tol </span>
+<span class="co">#                 "20"             "-1e-08"              "1e-06"</span></pre></body></html></div>
+<p>The most intensive computations are implemented in R (<code>version = R</code>) and C++ (<code>version = Rcpp</code>); both versions should return the same, or nearly the same output, but the C++ version can be much faster.</p>
+<p>The default updates for the scaled and rank-1 prior covariance matrices are <code>"none"</code>; they have not yet been implemented.</p>
+<p>In some cases each sample might have different measurement error, and udr can handle such cases by specifying <code>V</code> as a list instead of a matrix:</p>
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">fit0</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span>(<span class="no">X</span>,<span class="kw">V</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="no">V</span>),<span class="no">n</span>))</pre></body></html></div>
+<p>However, the ED update has not yet been implemented for this case. (The TEEM update is not applicable to this case).</p>
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="no">fit5</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">unconstrained.update</span> <span class="kw">=</span> <span class="st">"none"</span>))
+<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):</span>
+<span class="co"># data points are not i.i.d. (different Vs)</span>
+<span class="co"># prior covariances: 2 scaled, 4 rank-1, 4 unconstrained</span>
+<span class="co"># prior covariance updates: none (scaled), none (rank-1), none (unconstrained)</span>
+<span class="co"># mixture weights update: em</span>
+<span class="co"># max 20 updates, conv tol 1.0e-06</span>
+<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
+<span class="co">#    1 -1.2662335972334322e+04 3.24e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    2 -1.2573986634544281e+04 2.49e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    3 -1.2505616818129827e+04 2.46e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    4 -1.2452941724963250e+04 2.39e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    5 -1.2412225731454400e+04 2.29e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    6 -1.2380485603464937e+04 2.20e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    7 -1.2355451032689052e+04 2.10e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    8 -1.2335437842587164e+04 2.01e-02 0.00e+00 0.00e+00</span>
+<span class="co">#    9 -1.2319211144932151e+04 1.92e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   10 -1.2305868086869421e+04 1.84e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   11 -1.2294746778947443e+04 1.77e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   12 -1.2285358934733120e+04 1.70e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   13 -1.2277341269045748e+04 1.63e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   14 -1.2270420827420285e+04 1.57e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   15 -1.2264390336982351e+04 1.51e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   16 -1.2259090655353386e+04 1.46e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   17 -1.2254398216612393e+04 1.40e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   18 -1.2250215993974274e+04 1.35e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   19 -1.2246466945254691e+04 1.30e-02 0.00e+00 0.00e+00</span>
+<span class="co">#   20 -1.2243089220579937e+04 1.26e-02 0.00e+00 0.00e+00</span></pre></body></html></div>
+<div id="session-info" class="section level2">
 <h2 class="hasAnchor">
-<a href="#truncated-eigenvalue-em" class="anchor"></a>“Truncated-eigenvalue” EM</h2>
-<p>One innovation in UD is that the M-step update for the prior covariances is solved exactly by truncating the eigenvalues in a spectral decomposition of the unconstrained maximum-likelihood estimate. This provides greater freedom in fitting the model; here we demonstrate this by comparing the new update, <code>update.U = "teem"</code>, against the “Extreme Deconvolution” update, <code>update.U = "ed"</code>.</p>
-<p>First, fit the multivariate normal means model using the original “Extreme Deconvolution” update:</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
-<span class="no">fit.ed</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">X</span>,<span class="kw">k</span> <span class="kw">=</span> <span class="no">k</span>,<span class="kw">S</span> <span class="kw">=</span> <span class="no">S</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">update.U</span> <span class="kw">=</span> <span class="st">"ed"</span>))</pre></body></html></div>
-<p>Next, fit the model using the “truncated eigenvalue” update:</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
-<span class="no">fit.teem</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">X</span>,<span class="kw">k</span> <span class="kw">=</span> <span class="no">k</span>,<span class="kw">S</span> <span class="kw">=</span> <span class="no">S</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">update.U</span> <span class="kw">=</span> <span class="st">"teem"</span>))</pre></body></html></div>
-<p>The “truncated eigenvalue” update provides a better fit, as measured by the likelihood:</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit.ed</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit.teem</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)</pre></body></html></div>
-<p>This is because the new update allows for much greater flexibility in the covariance estimates:</p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="no">fit.ed</span>$<span class="no">U</span>,<span class="kw">function</span> (<span class="no">x</span>) <span class="fu"><a href="https://rdrr.io/r/base/eigen.html">eigen</a></span>(<span class="no">x</span>)$<span class="no">values</span>),<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">6</span>))
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="no">fit.teem</span>$<span class="no">U</span>,<span class="kw">function</span> (<span class="no">x</span>) <span class="fu"><a href="https://rdrr.io/r/base/eigen.html">eigen</a></span>(<span class="no">x</span>)$<span class="no">values</span>),<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">6</span>))</pre></body></html></div>
-<p>The output above shows the eigenvalues of each of the four 2 x 2 covariance matrices. The TEEM updates have shrunk some of the eigenvalues to zero, leading to prior covariances with an effective rank of 0, 1 or 2 — this is the number of non-zero eigenvalues in each column of the output above. By contrast, the prior covariances estimated by the ED algorithm are all full rank — all the eigenvalues are greater than zero.</p>
-</div>
-<div id="estimate-the-residual-covariance" class="section level2">
-<h2 class="hasAnchor">
-<a href="#estimate-the-residual-covariance" class="anchor"></a>Estimate the residual covariance</h2>
-<p>In cases where the residual variance-covariance matrix, <span class="math inline">\(S\)</span>, is not known, UD can estimate it from the data:</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
-<span class="no">fit.teem2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">X</span>,<span class="kw">k</span> <span class="kw">=</span> <span class="no">k</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">update.S</span> <span class="kw">=</span> <span class="st">"em"</span>,<span class="kw">update.U</span> <span class="kw">=</span> <span class="st">"teem"</span>))</pre></body></html></div>
-<p>The resulting likelihood is slightly higher than the fixing the residual covariance to the ground-truth:</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit.teem</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit.teem2</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)</pre></body></html></div>
-</div>
-<div id="efficient-c-implementation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#efficient-c-implementation" class="anchor"></a>Efficient C++ implementation</h2>
-<p>We provide two implementations of UD: an R version with code that is easier to understand, and simpler to maintain; and a C++ (Rcpp) version that can be much faster. Both implementations should give the same, or nearly the same, output. Here’s an example:</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
-<span class="no">t1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(
-  <span class="no">fit1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">X</span>,<span class="kw">k</span> <span class="kw">=</span> <span class="no">k</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">update.S</span> <span class="kw">=</span> <span class="st">"em"</span>,<span class="kw">version</span> <span class="kw">=</span> <span class="st">"R"</span>)))
-<span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
-<span class="no">t2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>(
-  <span class="no">fit2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">X</span>,<span class="kw">k</span> <span class="kw">=</span> <span class="no">k</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">update.S</span> <span class="kw">=</span> <span class="st">"em"</span>,<span class="kw">version</span> <span class="kw">=</span> <span class="st">"Rcpp"</span>)))</pre></body></html></div>
-<p>Indeed, both runs achieve the same likelihood (you can check for yourself that the parameter estimates are also the same),</p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit1</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit2</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)</pre></body></html></div>
-<p>but the C++ implementation achieves the result much more quickly:</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">t1</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">t2</span>)</pre></body></html></div>
-</div>
-<div id="update-mixture-weights-using-mix-sqp" class="section level2">
-<h2 class="hasAnchor">
-<a href="#update-mixture-weights-using-mix-sqp" class="anchor"></a>Update mixture weights using mix-SQP</h2>
-<p>There is also the potential to use the mix-SQP algorithm to fit the mixture weights, with estimates of the other parameters fixed. This could be useful as a “re-fitting” step to improve the model after first running the EM updates:</p>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
-<span class="no">fit.mixsqp</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">X</span>,<span class="kw">k</span> <span class="kw">=</span> <span class="no">k</span>,<span class="kw">S</span> <span class="kw">=</span> <span class="no">S</span>,
-                     <span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">maxiter</span> <span class="kw">=</span> <span class="fl">80</span>))
-<span class="no">fit.mixsqp</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">X</span>,<span class="kw">fit0</span> <span class="kw">=</span> <span class="no">fit.mixsqp</span>,
-                     <span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">update.w</span> <span class="kw">=</span> <span class="st">"mixsqp"</span>,<span class="kw">maxiter</span> <span class="kw">=</span> <span class="fl">20</span>))</pre></body></html></div>
-<p>The mix-SQP updates only achieve a slightly higher likelihood,</p>
-<div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit.teem</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">fit.mixsqp</span>$<span class="no">loglik</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">12</span>)</pre></body></html></div>
-<p>but, perhaps more compellingly, in this example mix-SQP assigns (nearly) zero weight to a redundant mixture component, whereas the EM algorithm does not:</p>
-<div class="sourceCode" id="cb14"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="no">fit.teem</span>$<span class="no">w</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">3</span>))
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span>(<span class="no">fit.mixsqp</span>$<span class="no">w</span>,<span class="kw">digits</span> <span class="kw">=</span> <span class="fl">3</span>))</pre></body></html></div>
-<p>The benefits of the mix-SQP updates need to be explored further.</p>
-</div>
-<div id="plot-improvement-in-solutions-over-time" class="section level2">
-<h2 class="hasAnchor">
-<a href="#plot-improvement-in-solutions-over-time" class="anchor"></a>Plot improvement in solutions over time</h2>
-<p>Each EM update should improve the log-likelihood. Here we show the improvement in the solution over time for the four variants illustrated above: “Extreme Deconvolution” updates (dark blue); “truncated-eigenvalue” updates with the mix-SQP re-fitting step (dashed, yellow line), and without (solid, orange line); and “truncated-eigenvalue” updates combined with estimating the residual covariance (green line).</p>
-<div class="sourceCode" id="cb15"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span>(<span class="kw">mar</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">4</span>,<span class="fl">4</span>,<span class="fl">2</span>,<span class="fl">2</span>))
-<span class="no">y</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span>(<span class="no">fit.ed</span>$<span class="no">progress</span>$<span class="no">loglik</span>,
-           <span class="no">fit.teem</span>$<span class="no">progress</span>$<span class="no">loglik</span>,
-           <span class="no">fit.teem2</span>$<span class="no">progress</span>$<span class="no">loglik</span>,
-           <span class="no">fit.mixsqp</span>$<span class="no">progress</span>$<span class="no">loglik</span>)
-<span class="no">y</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span>(<span class="no">y</span>) - <span class="no">y</span> + <span class="fl">0.01</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="fl">1</span>:<span class="fl">100</span>,<span class="no">y</span>[,<span class="fl">1</span>],<span class="kw">col</span> <span class="kw">=</span> <span class="st">"darkblue"</span>,<span class="kw">type</span> <span class="kw">=</span> <span class="st">"l"</span>,<span class="kw">log</span> <span class="kw">=</span> <span class="st">"y"</span>,<span class="kw">lwd</span> <span class="kw">=</span> <span class="fl">2</span>,
-     <span class="kw">xlab</span> <span class="kw">=</span> <span class="st">"iteration"</span>,<span class="kw">ylab</span> <span class="kw">=</span> <span class="st">"dist. from best loglik"</span>,<span class="kw">ylim</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.01</span>,<span class="fl">500</span>))
-<span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="fl">1</span>:<span class="fl">100</span>,<span class="no">y</span>[,<span class="fl">2</span>],<span class="kw">col</span> <span class="kw">=</span> <span class="st">"darkorange"</span>,<span class="kw">lwd</span> <span class="kw">=</span> <span class="fl">2</span>)
-<span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="fl">1</span>:<span class="fl">100</span>,<span class="no">y</span>[,<span class="fl">3</span>] + <span class="fl">0.01</span>,<span class="kw">col</span> <span class="kw">=</span> <span class="st">"seagreen"</span>,<span class="kw">lwd</span> <span class="kw">=</span> <span class="fl">2</span>)
-<span class="fu"><a href="https://rdrr.io/r/graphics/lines.html">lines</a></span>(<span class="fl">1</span>:<span class="fl">100</span>,<span class="no">y</span>[,<span class="fl">4</span>] + <span class="fl">0.01</span>,<span class="kw">col</span> <span class="kw">=</span> <span class="st">"gold"</span>,<span class="kw">lwd</span> <span class="kw">=</span> <span class="fl">2</span>,<span class="kw">lty</span> <span class="kw">=</span> <span class="st">"dashed"</span>)</pre></body></html></div>
-<p>The combination of the “truncated-eigenvalue” updates and estimation of the residual covariance provides the best fit in this case.</p>
+<a href="#session-info" class="anchor"></a>Session info</h2>
+<p>This is the version of R and the packages that were used to generate these results.</p>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()
+<span class="co"># R version 3.6.2 (2019-12-12)</span>
+<span class="co"># Platform: x86_64-apple-darwin15.6.0 (64-bit)</span>
+<span class="co"># Running under: macOS Catalina 10.15.7</span>
+<span class="co"># </span>
+<span class="co"># Matrix products: default</span>
+<span class="co"># BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib</span>
+<span class="co"># LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib</span>
+<span class="co"># </span>
+<span class="co"># locale:</span>
+<span class="co"># [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8</span>
+<span class="co"># </span>
+<span class="co"># attached base packages:</span>
+<span class="co"># [1] stats     graphics  grDevices utils     datasets  methods   base     </span>
+<span class="co"># </span>
+<span class="co"># other attached packages:</span>
+<span class="co"># [1] udr_0.3-29</span>
+<span class="co"># </span>
+<span class="co"># loaded via a namespace (and not attached):</span>
+<span class="co">#  [1] Rcpp_1.0.5       mvtnorm_1.0-11   rprojroot_1.3-2  crayon_1.3.4    </span>
+<span class="co">#  [5] digest_0.6.23    assertthat_0.2.1 MASS_7.3-51.4    R6_2.4.1        </span>
+<span class="co">#  [9] backports_1.1.5  magrittr_1.5     evaluate_0.14    stringi_1.4.3   </span>
+<span class="co"># [13] rlang_0.4.5      fs_1.3.1         rmarkdown_2.3    pkgdown_1.5.1   </span>
+<span class="co"># [17] desc_1.2.0       tools_3.6.2      stringr_1.4.0    yaml_2.2.0      </span>
+<span class="co"># [21] xfun_0.11        compiler_3.6.2   memoise_1.1.0    htmltools_0.4.0 </span>
+<span class="co"># [25] knitr_1.26</span></pre></body></html></div>
 </div>
   </div>
 
