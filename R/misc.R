@@ -33,21 +33,6 @@ softmax <- function (W) {
   return(W/rowSums(W))
 }
 
-# "Shrink" matrix T = U + I; that is, find the "best" matrix T
-# satisfying the constraint that U is positive definite (if minval >
-# 0) or positive semi-definite (if minval <= 0). This is achieved by
-# setting any eigenvalues of T less than 1 to 1 + minval, or,
-# equivalently, setting any eigenvalues of U less than 0 to be
-# minval. The output is a positive definite matrix, U, or a positive
-# semi-definite matrix if minval <= 0. 
-shrink_cov <- function (T, minval = 0) {
-  minval <- max(0,minval)
-  out <- eigen(T)
-  d <- out$values
-  d <- pmax(d - 1,minval)
-  return(tcrossprod(out$vectors %*% diag(sqrt(d))))
-}
-
 # Randomly generate an m x m symmetric rank-1 matrix.
 #
 #' @importFrom stats rnorm

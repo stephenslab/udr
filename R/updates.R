@@ -5,7 +5,7 @@ update_mixture_weights_em <- function (P)
 
 # Perform an M-step update for the residual covariance matrix.
 update_resid_covariance <- function (X, U, V, P) {
-  n<- nrow(X)
+  n <- nrow(X)
   m <- ncol(X)
   Vnew <- matrix(0,m,m)
   for (i in 1:n) {
@@ -80,4 +80,19 @@ update_prior_covariance_teem <- function (X, V, p, minval) {
 
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
+}
+
+# "Shrink" matrix T = U + I; that is, find the "best" matrix T
+# satisfying the constraint that U is positive definite (if minval >
+# 0) or positive semi-definite (if minval <= 0). This is achieved by
+# setting any eigenvalues of T less than 1 to 1 + minval, or,
+# equivalently, setting any eigenvalues of U less than 0 to be
+# minval. The output is a positive definite matrix, U, or a positive
+# semi-definite matrix if minval <= 0. 
+shrink_cov <- function (T, minval = 0) {
+  minval <- max(0,minval)
+  out <- eigen(T)
+  d <- out$values
+  d <- pmax(d - 1,minval)
+  return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }

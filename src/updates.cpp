@@ -220,6 +220,7 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 void shrink_cov (const mat& T, mat& U, mat& Y, vec& d, double minval) {
   unsigned int m = T.n_rows;
   eig_sym(d,Y,T);
+  minval = max(0,minval);
   for (unsigned int i = 0; i < m; i++)
     d(i) = max(d(i) - 1,minval);
 
