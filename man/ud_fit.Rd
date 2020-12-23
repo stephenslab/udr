@@ -122,7 +122,7 @@ fitting algorithm are provided; these are selected with
 \item{\code{maxiter}}{The upper limit on the number of updates
 to perform.}
 
-\item{\code{tol}}{Convergence tolerance for the EM algorithm; the
+\item{\code{tol}}{Convergence tolerance for the optimization; the
 updates are halted when the largest change in the model parameters
 between two successive updates is less than \code{tol}.}
 
@@ -135,9 +135,7 @@ argument checking is performed. See the documentation and examples
 for guidance.
 }
 \examples{
-# These variables specify how the data are simulated: n is the number
-# of samples drawn from the multivariate normal means model,
-# w[1]*N(0,V + U[[1]]) + ... + w[4]*N(0,V + U[[4]]).
+# Simulate data from a UD model.
 set.seed(1)
 n <- 4000
 V <- rbind(c(0.8,0.2),

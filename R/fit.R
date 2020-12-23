@@ -69,7 +69,7 @@
 #' \item{\code{maxiter}}{The upper limit on the number of updates
 #' to perform.}
 #'
-#' \item{\code{tol}}{Convergence tolerance for the EM algorithm; the
+#' \item{\code{tol}}{Convergence tolerance for the optimization; the
 #' updates are halted when the largest change in the model parameters
 #' between two successive updates is less than \code{tol}.}
 #'
@@ -124,9 +124,7 @@
 #'   seconds (recorded using \code{\link{proc.time}}).}
 #'
 #' @examples
-#' # These variables specify how the data are simulated: n is the number
-#' # of samples drawn from the multivariate normal means model,
-#' # w[1]*N(0,V + U[[1]]) + ... + w[4]*N(0,V + U[[4]]).
+#' # Simulate data from a UD model.
 #' set.seed(1)
 #' n <- 4000
 #' V <- rbind(c(0.8,0.2),
@@ -197,7 +195,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
          "such as an output of ud_init")
   fit <- fit0
   
-  # Check the input data matrix, X.
+  # Check the input data matrix, "X".
   if (missing(X))
     X <- fit$X
   if (!(is.matrix(X) & is.numeric(X)))
@@ -216,7 +214,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-25, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-26, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -244,17 +242,15 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (is.list(fit$V))
     fit$V <- simplify2array(fit$V)
   covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
-  fit$U    <- simplify2array(fit$U)
-  fit      <- ud_fit_main_loop(X,fit$w,fit$U,fit$V,covtypes,control,verbose)
+  fit$U <- simplify2array(fit$U)
+  fit <- ud_fit_main_loop(X,fit$w,fit$U,fit$V,covtypes,control,verbose)
   
-  # Output the parameters of the updated model (w, U, V), the
-  # log-likelihood of the updated model (loglik), and a record of the
-  # algorithm's progress over time (progress). Some attributes such as
-  # row and column names may be missing and need to be added back.
+  # Output the updated model. Some attributes such as row and column
+  # names may be missing and need to be added back.
   fit$progress <- rbind(fit0$progress,fit$progress)
-  fit$loglik   <- loglik_ud(X,fit$w,fit$U,fit$V,control$version)
-  fit$X        <- X
-  fit$U        <- array2list(fit$U)
+  fit$loglik <- loglik_ud(X,fit$w,fit$U,fit$V,control$version)
+  fit$X <- X
+  fit$U <- array2list(fit$U)
   if (is.matrix(fit$V)) {
     rownames(fit$V) <- colnames(X)
     colnames(fit$V) <- colnames(X)
@@ -279,9 +275,9 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
   # Get the indices of the scaled, rank-1 and unconstrained prior
   # covariance matrix.
-  scaled        <- which(covtypes == "scaled")
-  rank1         <- which(covtypes == "rank1")
-  unconstrained <- which(covtypes == "unconstrained")
+  ks <- which(covtypes == "scaled")
+  k1 <- which(covtypes == "rank1")
+  ku <- which(covtypes == "unconstrained")
   
   # Set up data structures used in the loop below.
   progress <- as.data.frame(matrix(0,control$maxiter,6))
@@ -316,30 +312,29 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
     # Update the scaled prior covariance matrices.
     Unew <- U
-    if (length(scaled) > 0) {
+    if (length(ks) > 0) {
       if (control$scaled.update != "none")
         stop("control$scaled.update == \"",control$scaled.update,
              "\" is not implemented")
     }
     
     # Update the rank-1 prior covariance matrices.
-    if (length(rank1) > 0) {
+    if (length(k1) > 0) {
       if (control$rank1.update != "none")
         stop("control$rank1.update == \"",control$rank1.update,
              "\" is not implemented")
     }
     
     # Update the unconstrained prior covariance matrices.
-    if (length(unconstrained) > 0) {
+    if (length(ku) > 0) {
       if (control$unconstrained.update == "ed")
-        Unew[,,unconstrained] <-
-          update_prior_covariances_ed(X,U[,,unconstrained,drop = FALSE],V,
-                                      P[,unconstrained,drop = FALSE],
-                                      control$version)
+        Unew[,,ku] <- update_prior_covariances_ed(X,U[,,ku,drop = FALSE],V,
+                                                  P[,ku,drop = FALSE],
+                                                  control$version)
       else if (control$unconstrained.update == "teem")
-        Unew[,,unconstrained] <-
-          update_prior_covariances_teem(X,V,P[,unconstrained,drop = FALSE],
-                                        control$minval,control$version)
+        Unew[,,ku] <- update_prior_covariances_teem(X,V,P[,ku,drop = FALSE],
+                                                    control$minval,
+                                                    control$version)
       else if (control$unconstrained.update != "none")
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
