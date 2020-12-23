@@ -3,8 +3,6 @@ to do
 
 + Create basic vignette.
 
-+ Add tests, and activate testing in CI configs.
-
 + Update pkgdown site.
 
 + Add codecov.
@@ -12,8 +10,3 @@ to do
 + Make outputs more consistent with ebnm and/or mashr.
 
 + Output posterior quantities (see ebnm and mashr).
-
-+ Implement Travis CI, Appveyor & CircleCI testing.
-
-
-

@@ -29,7 +29,7 @@ jobs:
           command: R CMD build --no-build-vignettes .
       - run:
           name: Check package
-          command: R CMD check --as-cran --no-manual --no-tests --ignore-vignettes *tar.gz
+          command: R CMD check --as-cran --no-manual --ignore-vignettes *tar.gz
       - store_artifacts:
           path: udr.Rcheck/
       - save_cache:
