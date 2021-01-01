@@ -19,6 +19,17 @@ rowvec softmax (const rowvec& x) {
   return y;
 }
 
+// Replace x with x/sum(x), but take care of the special case when all
+// the entries are zero, in which case return the vector of all 1/n,
+// where n is the length of x.
+void safenormalize (vec& x) {
+  unsigned int n = x.n_elem;
+  if (sum(x) <= 0)
+    x.fill(1/n);
+  else
+    x = x/sum(x);
+}
+
 // Return the cross-product of matrix X, i.e., X'*X.
 mat crossprod (const mat& X) {
   return trans(X) * X;

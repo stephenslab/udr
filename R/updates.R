@@ -20,13 +20,14 @@ update_resid_covariance <- function (X, U, V, P) {
 # implemented in both R (version = "R") and C++ (version = "Rcpp").
 update_prior_covariances_ed <- function (X, U, V, P, version = c("Rcpp","R")) {
   version <- match.arg(version)
+  Unew <- U
   if (version == "R") {
     k <- ncol(P)
     for (i in 1:k)
-      U[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
+      Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
   } else if (version == "Rcpp")
-    U <- update_prior_covariances_ed_rcpp(X,U,V,P)
-  return(U)
+    Unew <- update_prior_covariances_ed_rcpp(X,U,V,P)
+  return(Unew)
 }
 
 # Perform an M-step update for one of the prior covariance matrices
@@ -34,9 +35,10 @@ update_prior_covariances_ed <- function (X, U, V, P, version = c("Rcpp","R")) {
 # vector, with one entry per row of X, giving the posterior assignment
 # probabilities for the mixture component being updated.
 update_prior_covariance_ed <- function (X, U, V, p) {
+  p <- safenormalize(p)
   T <- U + V
   B <- solve(T,U)
-  X1 <- crossprod((sqrt(p/sum(p)) * X) %*% B)
+  X1 <- crossprod((sqrt(p) * X) %*% B)
   return(U - U %*% B + X1)
 }
 
@@ -67,8 +69,9 @@ update_prior_covariance_teem <- function (X, V, p, minval) {
 
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
+  p <- safenormalize(p)
   R <- chol(V)
-  T <- crossprod((sqrt(p/sum(p))*X) %*% solve(R))
+  T <- crossprod((sqrt(p)*X) %*% solve(R))
   
   # Find U maximizing the expected complete log-likelihood subject to
   # U being positive definite. This update for U is based on the fact

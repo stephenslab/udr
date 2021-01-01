@@ -214,7 +214,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-29, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-30, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -346,7 +346,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
     }
-
+    
     # Update the mixture weights.
     if (control$weights.update == "em")
       wnew <- update_mixture_weights_em(P)

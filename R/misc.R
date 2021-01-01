@@ -23,7 +23,19 @@ getrank1 <- function (X) {
   out$values[-1] <- 0
   return(with(out,vectors %*% diag(values) %*% t(vectors)))
 }
- 
+
+# Output y = x/sum(x), but take care of the special case when all the
+# entries are zero, in which case return the vector of all 1/n, where
+# n = length(x).
+safenormalize <- function (x) {
+  n <- length(x)
+  if (sum(x) <= 0)
+    y <- rep(1/n,n)
+  else
+    y <- x/sum(x)
+  return(y)
+}
+
 # Compute the softmax of each row of W in a way that guards against
 # numerical underflow or overflow. The return value is a matrix of the
 # same dimension in which the entries in each row sum to 1.

@@ -136,7 +136,9 @@ void update_prior_covariances_teem (const mat& X, const mat& V, const mat& P,
 // reused.
 void update_prior_covariance_ed (mat& X, mat& U, const mat& V, const vec& p,
 				 mat& T, mat& B) {
-  scale_rows(X,sqrt(p/sum(p)));
+  vec p1 = p;
+  safenormalize(p1);
+  scale_rows(X,sqrt(p1));
   T = V + U;
   B = solve(T,U);
   X *= B;
@@ -156,7 +158,9 @@ void update_prior_covariance_teem (mat& X, const mat& R, const vec& p,
 
   // Transform the data so that the residual covariance is I, then
   // compute the maximum-likelhood estimate (MLE) for T = U + I.
-  scale_rows(X,sqrt(p/sum(p)));
+  vec p1 = p;
+  safenormalize(p1);
+  scale_rows(X,sqrt(p1));
   X *= inv(R);
   T  = crossprod(X);
 
