@@ -47,14 +47,14 @@ update_prior_covariance_ed <- function (X, U, V, p) {
 # calculations are implemented in both R (version = "R") and C++
 # (version = "Rcpp").
 update_prior_covariances_teem <- function (X, V, P, minval,
-                                           version = c("Rcpp","R")) {
+                                           version = c("Rcpp","R"), covtype) {
   version <- match.arg(version)
   if (version == "R") {
     m <- ncol(X)
     k <- ncol(P)
     U <- array(0,dim = c(m,m,k))
     for (i in 1:k)
-      U[,,i] <- update_prior_covariance_teem(X,V,P[,i],minval)
+      U[,,i] <- update_prior_covariance_teem(X,V,P[,i],minval, covtype)
   } else if (version == "Rcpp")
     U <- update_prior_covariances_teem_rcpp(X,V,P,minval)
   return(U)
@@ -65,7 +65,7 @@ update_prior_covariances_teem <- function (X, V, P, minval,
 # (2013). Input p is a vector, with one entry per row of X, giving
 # the posterior assignment probabilities for the mixture components
 # being updated.
-update_prior_covariance_teem <- function (X, V, p, minval, control) {
+update_prior_covariance_teem <- function (X, V, p, minval, covtype = c('unconstrained', 'rank1')) {
 
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
@@ -79,12 +79,13 @@ update_prior_covariance_teem <- function (X, V, p, minval, control) {
   # to the constraint that U is positive definite is obtained by
   # truncating the eigenvalues of T = U + I less than 1 to be 1; see
   # Won et al (2013), p. 434, the sentence just after equation (16).
-  if (control == 'unconstrained'){
+  if (covtype == 'unconstrained'){
         U <- shrink_cov(T, minval)
   }
-  if (control == 'rank1'){
+  if (covtype == 'rank1'){
       U <- shrink_cov_deficient(T, r = 1, minval)
   }
+  
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
 }
@@ -117,43 +118,13 @@ shrink_cov_deficient <- function (T, r = 1, minval = 0) {
 }
 
 
-update_prior_scalers <- function (X, U, P, minval,
-                                           version = c("Rcpp","R")) {
-  version <- match.arg(version)
-  if (version == "R") {
-    m <- ncol(X)
-    k <- ncol(P)
-    scaler <- rep(1, k)
-    
-    for (i in 1:k)
-    scaler[i]<- update_prior_scaler(X, U[,,i],P[,i],minval)
-  }
-  #else if (version == "Rcpp")
-  # U <- update_prior_covariances_teem_rcpp(X,V,P,minval)
-  return(U)
-}
-
-
-
-update_prior_scaler <- function (X, U, p, minval) {
-    
-  # check: minval is used to control acc???
-  evd = eigen(U)
-  lambdas = ifelse(evd$values < minval, 0,  evd$values)
-  
-  # transform data
-  Y = t(evd$vectors) %*% t(X)  # Y: p by n
-  scaler <- uniroot(function(s) optimize_s(s, p, Y, lambdas), c(0, 20))$root
-  return(scaler)
-}
-
-
 # function for 1-d search of s value based on eq.(20) in the write-up
+# return a function of a scaler s_k.
 # p: weights for component k
 # s: scaling factor for k to search for
 # Y: transformed data
 # lambdas: eigenvalues of U_k
-optimize_s = function(s, p, Y, lambdas){
+optimize_a_scaler = function(s, p, Y, lambdas){
   unweighted_sum = apply(Y, 2, function(y) sum(lambdas*y^2/((s*lambdas+1)^2))-sum(lambdas/(s*lambdas+1)))
   val = sum(p*unweighted_sum)
   return(val)

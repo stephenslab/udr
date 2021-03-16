@@ -283,6 +283,27 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
   progress <- as.data.frame(matrix(0,control$maxiter,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   progress$iter <- 1:control$maxiter
+  
+  
+  # Store eigenvals and eigenvectors of Uhat (transformed U.scaled)
+  # Uhat = R^{-T}UR^{-1}
+  # Xhat = XR^{-1}
+  
+  Uhat.eigenval = c()
+  Uhat.eigenvec = c()
+  Uhat = c()
+
+  R = chol(V)
+  Xhat = X %*% solve(R)
+  
+  for (j in ks){
+      Uhat[[j]] = t(solve(R))%*% U[,,j] %*% solve(R)
+      evd = eigen(Uhat[[j]])
+      lambdas = ifelse(evd$values < control$minval, 0,  evd$values)
+      Uhat.eigenval[[j]] = lambdas
+      Uhat.eigenvec[[j]] = evd$vectors
+  }
+
 
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
@@ -309,20 +330,50 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
              "\" is not implemented")
     }
 
-    # Update the scaled prior covariance matrices.
+    # Update the scaled prior covariance matrices. Need to change. Doesn't fit into teem framework...
     Unew <- U
     if (length(ks) > 0) {
-      if (control$scaled.update != "none")
-        stop("control$scaled.update == \"",control$scaled.update,
-             "\" is not implemented")
+        if (control$scaled.update == "em"){
+            if (!is.matrix(V))
+                stop("control$scaled.update == \"em\" can only be used ",
+                 "when the residual covariance (V) is the same for all data ",
+                 "points")
+                 
+            scalers = rep(1, length(ks)) ## only need to initialize for the first time....
+            
+            for (j in ks){
+                Y = t(Uhat.eigenvec[[j]]) %*% t(Xhat)  # Y: p by n
+                lambdas = Uhat.eigenval[[j]]
+                scaler = uniroot(function(s) optimize_a_scaler(s, P[,j], Y, lambdas), c(0, 20))$root
+                Unew[,,j] = Unew[,,j]*scaler
+            }
+                                                        
+        } else if(control$scaled.update != "none"){
+            stop("control$scaled.update == \"",control$scaled.update,
+            "\" is not implemented")
+        }
     }
     
     # Update the rank-1 prior covariance matrices.
     if (length(k1) > 0) {
-      if (control$rank1.update != "none")
-        stop("control$rank1.update == \"",control$rank1.update,
-             "\" is not implemented")
+        if (control$rank1.update == "teem"){
+            if (!is.matrix(V))
+                stop("control$rank1.update == \"teem\" is currently not ",
+                "implemented for case when each data point has a different ",
+                "residual covariance, V")
+        
+        Unew[,,k1] <- update_prior_covariances_teem(X,V,P[,k1,drop = FALSE],
+                                                    control$minval,
+                                                    control$version, 'rank1')
+                                                    
+        } else if (control$rank1.update != "none"){
+            stop("control$rank1.update == \"",control$rank1.update,
+            "\" is not implemented")
+
+        }
     }
+    
+    
     
     # Update the unconstrained prior covariance matrices.
     if (length(ku) > 0) {
@@ -341,7 +392,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
                "points")
         Unew[,,ku] <- update_prior_covariances_teem(X,V,P[,ku,drop = FALSE],
                                                     control$minval,
-                                                    control$version)
+                                                    control$version, 'unconstrained')
       } else if (control$unconstrained.update != "none")
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
@@ -394,7 +445,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 #' 
 ud_fit_control_default <- function()
   list(weights.update       = "em",   # "em" or "none"
-       scaled.update        = "none", # "em" or "none"
+       scaled.update        = "em", # "em" or "none"
        rank1.update         = "none", # "em" or "none"
        unconstrained.update = "ed",   # "ed", "teem" or "none"
        resid.update         = "em",   # "em" or "none"
