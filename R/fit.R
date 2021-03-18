@@ -272,6 +272,9 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
   # Get the number of components in the mixture prior.
   k <- length(w)
+  
+  # Store initial U for scaling update
+  U0 <- U
 
   # Get the indices of the scaled, rank-1 and unconstrained prior
   # covariance matrix.
@@ -285,26 +288,6 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
   progress$iter <- 1:control$maxiter
   
   
-  # Store eigenvals and eigenvectors of Uhat (transformed U.scaled)
-  # Uhat = R^{-T}UR^{-1}
-  # Xhat = XR^{-1}
-  
-  Uhat.eigenval = c()
-  Uhat.eigenvec = c()
-  Uhat = c()
-
-  R = chol(V)
-  Xhat = X %*% solve(R)
-  
-  for (j in ks){
-      Uhat[[j]] = t(solve(R))%*% U[,,j] %*% solve(R)
-      evd = eigen(Uhat[[j]])
-      lambdas = ifelse(evd$values < control$minval, 0,  evd$values)
-      Uhat.eigenval[[j]] = lambdas
-      Uhat.eigenvec[[j]] = evd$vectors
-  }
-
-
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
@@ -332,6 +315,27 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
     # Update the scaled prior covariance matrices.
     Unew <- U
+    
+    
+    # Store eigenvals and eigenvectors of Uhat (transformed U.scaled)
+    # Uhat = R^{-T}UR^{-1}
+    # Xhat = XR^{-1}
+    Uhat.eigenval = c()
+    Uhat.eigenvec = c()
+    Uhat = c()
+
+    R = chol(V)
+    Xhat = X %*% solve(R)
+    
+    for (j in ks){
+        Uhat[[j]] = t(solve(R))%*% U0[,,j] %*% solve(R)
+        evd = eigen(Uhat[[j]])
+        lambdas = ifelse(evd$values < control$minval, 0,  evd$values)
+        Uhat.eigenval[[j]] = lambdas
+        Uhat.eigenvec[[j]] = evd$vectors
+    }
+
+    
     if (length(ks) > 0) {
         if (control$scaled.update == "em"){
             if (!is.matrix(V))
@@ -342,7 +346,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
             for (j in ks){
                 Y = t(Uhat.eigenvec[[j]]) %*% t(Xhat)  # Y: p by n
                 lambdas = Uhat.eigenval[[j]]
-                scaler = uniroot(function(s) optimize_a_scaler(s, P[,j], Y, lambdas), c(0, 20), extendInt = "yes")$root
+                scaler = uniroot(function(s) optimize_a_scaler(s, P[,j], Y, lambdas), c(0, 1), extendInt = "yes")$root
                 Unew[,,j] = Unew[,,j]*scaler
             }
                                                         
