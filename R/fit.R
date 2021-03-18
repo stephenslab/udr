@@ -342,7 +342,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
             for (j in ks){
                 Y = t(Uhat.eigenvec[[j]]) %*% t(Xhat)  # Y: p by n
                 lambdas = Uhat.eigenval[[j]]
-                scaler = uniroot(function(s) optimize_a_scaler(s, P[,j], Y, lambdas), c(0, 20))$root
+                scaler = uniroot(function(s) optimize_a_scaler(s, P[,j], Y, lambdas), c(0, 20), extendInt = "yes")$root
                 Unew[,,j] = Unew[,,j]*scaler
             }
                                                         
@@ -443,8 +443,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 #' 
 ud_fit_control_default <- function()
   list(weights.update       = "em",   # "em" or "none"
-       scaled.update        = "em", # "em" or "none"
-       rank1.update         = "none", # "em" or "none"
+       scaled.update        = "none", # "em" or "none"
+       rank1.update         = "none", # "teem" or "none"
        unconstrained.update = "ed",   # "ed", "teem" or "none"
        resid.update         = "em",   # "em" or "none"
        version              = "Rcpp", # "R" or "Rcpp"
