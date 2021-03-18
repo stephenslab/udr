@@ -316,26 +316,6 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     # Update the scaled prior covariance matrices.
     Unew <- U
     
-    
-    # Store eigenvals and eigenvectors of Uhat (transformed U.scaled)
-    # Uhat = R^{-T}UR^{-1}
-    # Xhat = XR^{-1}
-    Uhat.eigenval = c()
-    Uhat.eigenvec = c()
-    Uhat = c()
-
-    R = chol(V)
-    Xhat = X %*% solve(R)
-    
-    for (j in ks){
-        Uhat[[j]] = t(solve(R))%*% U0[,,j] %*% solve(R)
-        evd = eigen(Uhat[[j]])
-        lambdas = ifelse(evd$values < control$minval, 0,  evd$values)
-        Uhat.eigenval[[j]] = lambdas
-        Uhat.eigenvec[[j]] = evd$vectors
-    }
-
-    
     if (length(ks) > 0) {
         if (control$scaled.update == "em"){
             if (!is.matrix(V))
@@ -344,10 +324,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
                  "points")
             
             for (j in ks){
-                Y = t(Uhat.eigenvec[[j]]) %*% t(Xhat)  # Y: p by n
-                lambdas = Uhat.eigenval[[j]]
-                scaler = uniroot(function(s) optimize_a_scaler(s, P[,j], Y, lambdas), c(0, 1), extendInt = "yes")$root
-                Unew[,,j] = Unew[,,j]*scaler
+                scaler = update_prior_scaler(X, U0[,,j], V, P[,j], control$minval)
+                Unew[,,j] = U0[,,j]*scaler
             }
                                                         
         } else if(control$scaled.update != "none"){

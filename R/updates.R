@@ -108,7 +108,6 @@ shrink_cov <- function (T, minval = 0) {
 
 # Perform shrinkage update on matrix T with the constraint U is rank 1.
 #' @param r The rank of matrix U.
-
 shrink_cov_deficient <- function (T, r = 1, minval = 0) {
     
   minval <- max(0,minval)
@@ -119,6 +118,29 @@ shrink_cov_deficient <- function (T, r = 1, minval = 0) {
   return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }
 
+
+
+
+# Update the scaling factor for prior canonical covariance matrix.
+#' @param U0 Canonical covariance matrix
+#' @return An integer scaler
+update_prior_scaler <- function (X, U0, V, p, minval){
+
+    # Transform data using the trick
+    # Uhat = R^{-T}UR^{-1}
+    # Xhat = XR^{-1}
+    R = chol(V)
+    Uhat = t(solve(R))%*% U0 %*% solve(R)
+    Xhat = X %*% solve(R)
+    
+    # Eigenvalue decomposition based on transformed U.
+    evd = eigen(Uhat)
+    lambdas = ifelse(evd$values < minval, 0,  evd$values)
+
+    Y = t(evd$vectors) %*% t(Xhat)  # Y: p by n
+    scaler = uniroot(function(s) optimize_a_scaler(s, p, Y, lambdas), c(0, 1), extendInt = "yes")$root
+    return(scaler)
+}
 
 # Function for 1-d search of s value based on eq.(20) in the write-up
 #' @param p Weights for one component
