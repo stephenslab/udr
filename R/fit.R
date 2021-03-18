@@ -330,7 +330,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
              "\" is not implemented")
     }
 
-    # Update the scaled prior covariance matrices. Need to change. Doesn't fit into teem framework...
+    # Update the scaled prior covariance matrices.
     Unew <- U
     if (length(ks) > 0) {
         if (control$scaled.update == "em"){
@@ -338,8 +338,6 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
                 stop("control$scaled.update == \"em\" can only be used ",
                  "when the residual covariance (V) is the same for all data ",
                  "points")
-                 
-            scalers = rep(1, length(ks)) ## only need to initialize for the first time....
             
             for (j in ks){
                 Y = t(Uhat.eigenvec[[j]]) %*% t(Xhat)  # Y: p by n
