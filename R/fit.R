@@ -272,6 +272,9 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
   # Get the number of components in the mixture prior.
   k <- length(w)
+  
+  # Store initial U for scaling update
+  U0 <- U
 
   # Get the indices of the scaled, rank-1 and unconstrained prior
   # covariance matrix.
@@ -283,7 +286,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
   progress <- as.data.frame(matrix(0,control$maxiter,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   progress$iter <- 1:control$maxiter
-
+  
+  
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
@@ -311,18 +315,45 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
     # Update the scaled prior covariance matrices.
     Unew <- U
+    
     if (length(ks) > 0) {
-      if (control$scaled.update != "none")
-        stop("control$scaled.update == \"",control$scaled.update,
-             "\" is not implemented")
+        if (control$scaled.update == "em"){
+            if (!is.matrix(V))
+                stop("control$scaled.update == \"em\" can only be used ",
+                 "when the residual covariance (V) is the same for all data ",
+                 "points")
+            
+            for (j in ks){
+                scalar = update_prior_scalar(X, U0[,,j], V, P[,j], control$minval)
+                Unew[,,j] = U0[,,j]*scalar
+            }
+                                                        
+        } else if(control$scaled.update != "none"){
+            stop("control$scaled.update == \"",control$scaled.update,
+            "\" is not implemented")
+        }
     }
     
     # Update the rank-1 prior covariance matrices.
     if (length(k1) > 0) {
-      if (control$rank1.update != "none")
-        stop("control$rank1.update == \"",control$rank1.update,
-             "\" is not implemented")
+        if (control$rank1.update == "teem"){
+            if (!is.matrix(V))
+                stop("control$rank1.update == \"teem\" is currently not ",
+                "implemented for case when each data point has a different ",
+                "residual covariance, V")
+        
+        Unew[,,k1] <- update_prior_covariances_teem(X,V,P[,k1,drop = FALSE],
+                                                    control$minval,
+                                                    control$version, 'rank1')
+                                                    
+        } else if (control$rank1.update != "none"){
+            stop("control$rank1.update == \"",control$rank1.update,
+            "\" is not implemented")
+
+        }
     }
+    
+    
     
     # Update the unconstrained prior covariance matrices.
     if (length(ku) > 0) {
@@ -341,7 +372,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
                "points")
         Unew[,,ku] <- update_prior_covariances_teem(X,V,P[,ku,drop = FALSE],
                                                     control$minval,
-                                                    control$version)
+                                                    control$version, 'unconstrained')
       } else if (control$unconstrained.update != "none")
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
@@ -394,8 +425,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 #' 
 ud_fit_control_default <- function()
   list(weights.update       = "em",   # "em" or "none"
-       scaled.update        = "none", # "em" or "none"
-       rank1.update         = "none", # "em" or "none"
+       scaled.update        = "em", # "em" or "none"
+       rank1.update         = "teem", # "teem" or "none"
        unconstrained.update = "ed",   # "ed", "teem" or "none"
        resid.update         = "em",   # "em" or "none"
        version              = "Rcpp", # "R" or "Rcpp"
