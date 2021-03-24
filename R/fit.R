@@ -214,7 +214,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-31, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-32, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -425,8 +425,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 #' 
 ud_fit_control_default <- function()
   list(weights.update       = "em",   # "em" or "none"
-       scaled.update        = "em", # "em" or "none"
-       rank1.update         = "teem", # "teem" or "none"
+       scaled.update        = "none", # "em" or "none"
+       rank1.update         = "none", # "teem" or "none"
        unconstrained.update = "ed",   # "ed", "teem" or "none"
        resid.update         = "em",   # "em" or "none"
        version              = "Rcpp", # "R" or "Rcpp"

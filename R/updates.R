@@ -105,11 +105,9 @@ shrink_cov <- function (T, minval = 0) {
   return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }
 
-
 # Perform shrinkage update on matrix T with the constraint U is rank 1.
-#' @param r The rank of matrix U.
+# @param r The rank of matrix U.
 shrink_cov_deficient <- function (T, r = 1, minval = 0) {
-    
   minval <- max(0,minval)
   out <- eigen(T)
   d <- out$values
@@ -118,12 +116,9 @@ shrink_cov_deficient <- function (T, r = 1, minval = 0) {
   return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }
 
-
-
-
 # Update the scaling factor for prior canonical covariance matrix.
-#' @param U0 Canonical covariance matrix
-#' @return An integer scalar
+# @param U0 Canonical covariance matrix
+# @return An integer scalar
 update_prior_scalar <- function (X, U0, V, p, minval){
 
     # Transform data using the trick
@@ -143,13 +138,11 @@ update_prior_scalar <- function (X, U0, V, p, minval){
 }
 
 # Function for 1-d search of s value based on eq.(20) in the write-up
-#' @param p Weights for one component
-#' @param s The scaling factor for one component we aim to search for
-#' @param Y The transformed data
-#' @param lambdas Eigenvalues of U.
-
-#' @importFrom rootSolve
-#' @return A function of the scalar s.
+# @param p Weights for one component
+# @param s The scaling factor for one component we aim to search for
+# @param Y The transformed data
+# @param lambdas Eigenvalues of U.
+# @return A function of the scalar s.
 optimize_a_scalar = function(s, p, Y, lambdas){
   unweighted_sum = apply(Y, 2, function(y) sum(lambdas*y^2/((s*lambdas+1)^2))-sum(lambdas/(s*lambdas+1)))
   val = sum(p*unweighted_sum)
