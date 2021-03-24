@@ -324,8 +324,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
                  "points")
             
             for (j in ks){
-                scaler = update_prior_scaler(X, U0[,,j], V, P[,j], control$minval)
-                Unew[,,j] = U0[,,j]*scaler
+                scalar = update_prior_scalar(X, U0[,,j], V, P[,j], control$minval)
+                Unew[,,j] = U0[,,j]*scalar
             }
                                                         
         } else if(control$scaled.update != "none"){
@@ -425,8 +425,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 #' 
 ud_fit_control_default <- function()
   list(weights.update       = "em",   # "em" or "none"
-       scaled.update        = "none", # "em" or "none"
-       rank1.update         = "none", # "teem" or "none"
+       scaled.update        = "em", # "em" or "none"
+       rank1.update         = "teem", # "teem" or "none"
        unconstrained.update = "ed",   # "ed", "teem" or "none"
        resid.update         = "em",   # "em" or "none"
        version              = "Rcpp", # "R" or "Rcpp"

@@ -123,8 +123,8 @@ shrink_cov_deficient <- function (T, r = 1, minval = 0) {
 
 # Update the scaling factor for prior canonical covariance matrix.
 #' @param U0 Canonical covariance matrix
-#' @return An integer scaler
-update_prior_scaler <- function (X, U0, V, p, minval){
+#' @return An integer scalar
+update_prior_scalar <- function (X, U0, V, p, minval){
 
     # Transform data using the trick
     # Uhat = R^{-T}UR^{-1}
@@ -138,8 +138,8 @@ update_prior_scaler <- function (X, U0, V, p, minval){
     lambdas = ifelse(evd$values < minval, 0,  evd$values)
 
     Y = t(evd$vectors) %*% t(Xhat)  # Y: p by n
-    scaler = uniroot(function(s) optimize_a_scaler(s, p, Y, lambdas), c(0, 1), extendInt = "yes")$root
-    return(scaler)
+    scalar = uniroot(function(s) optimize_a_scalar(s, p, Y, lambdas), c(0, 1), extendInt = "yes")$root
+    return(scalar)
 }
 
 # Function for 1-d search of s value based on eq.(20) in the write-up
@@ -149,8 +149,8 @@ update_prior_scaler <- function (X, U0, V, p, minval){
 #' @param lambdas Eigenvalues of U.
 
 #' @importFrom rootSolve
-#' @return A function of the scaler s.
-optimize_a_scaler = function(s, p, Y, lambdas){
+#' @return A function of the scalar s.
+optimize_a_scalar = function(s, p, Y, lambdas){
   unweighted_sum = apply(Y, 2, function(y) sum(lambdas*y^2/((s*lambdas+1)^2))-sum(lambdas/(s*lambdas+1)))
   val = sum(p*unweighted_sum)
   return(val)
