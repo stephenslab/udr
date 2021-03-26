@@ -181,16 +181,17 @@ update_prior_scalar <- function (X, U0, V, p, minval){
     # Transform data using the trick
     # Uhat = R^{-T}UR^{-1}
     # Xhat = XR^{-1}
-    R = chol(V)
-    Uhat = t(solve(R))%*% U0 %*% solve(R)
-    Xhat = X %*% solve(R)
+    R    <- chol(V)
+    Uhat <- t(solve(R))%*% U0 %*% solve(R)
+    Xhat <- X %*% solve(R)
     
     # Eigenvalue decomposition based on transformed U.
-    evd = eigen(Uhat)
-    lambdas = ifelse(evd$values < minval, 0,  evd$values)
+    evd <- eigen(Uhat)
+    lambdas <- ifelse(evd$values < minval,0,evd$values)
 
-    Y = t(evd$vectors) %*% t(Xhat)  # Y: p by n
-    scalar = uniroot(function(s) optimize_a_scalar(s, p, Y, lambdas), c(0, 1), extendInt = "yes")$root
+    Y <- t(evd$vectors) %*% t(Xhat)  # Y: p by n
+    return(uniroot(function(s) optimize_a_scalar(s,p,Y,lambdas),c(0,1),
+                   extendInt = "yes")$root)
     return(scalar)
 }
 
@@ -200,8 +201,9 @@ update_prior_scalar <- function (X, U0, V, p, minval){
 # @param Y The transformed data
 # @param lambdas Eigenvalues of U.
 # @return A function of the scalar s.
-optimize_a_scalar = function(s, p, Y, lambdas){
-  unweighted_sum = apply(Y, 2, function(y) sum(lambdas*y^2/((s*lambdas+1)^2))-sum(lambdas/(s*lambdas+1)))
-  val = sum(p*unweighted_sum)
-  return(val)
+optimize_a_scalar <- function(s, p, Y, lambdas) {
+  unweighted_sum <-
+    apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
+                          sum(lambdas/(s*lambdas + 1)))
+  return(sum(p*unweighted_sum))
 }
