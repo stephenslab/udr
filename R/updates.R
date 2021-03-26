@@ -42,7 +42,7 @@ update_resid_covariance_helper <- function (X, U, V, P) {
 update_prior_covariances <- function (X, U, V, P, covtypes, control) {
   if (control$version == "Rcpp") {
     control$version <- "R"
-    warning("update_prior_covariances with version = \"Rcpp\" is not yet ",
+    message("update_prior_covariances with version = \"Rcpp\" is not yet ",
             "implemented; switching to version = \"R\"")
   }
   if (control$version == "R")
