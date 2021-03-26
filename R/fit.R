@@ -214,7 +214,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (verbose) {
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-32, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-33, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -273,9 +273,6 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
   # Get the number of components in the mixture prior.
   k <- length(w)
   
-  # Store initial U for scaling update
-  U0 <- U
-
   # Get the indices of the scaled, rank-1 and unconstrained prior
   # covariance matrix.
   ks <- which(covtypes == "scaled")
@@ -304,10 +301,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     Vnew <- V
     if (is.matrix(V)) {
       if (control$resid.update == "em") {
-        if (control$version == "R")
-           Vnew <- update_resid_covariance(X,U,V,P)
-         else if (control$version == "Rcpp")
-           Vnew <- update_resid_covariance_rcpp(X,U,V,P)
+        Vnew <- update_resid_covariance(X,U,V,P,control$version)
       } else if (control$resid.update != "none")
         stop("control$resid.update == \"",control$resid.update,
              "\" is not implemented")
@@ -324,8 +318,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
                  "points")
             
             for (j in ks){
-                scalar = update_prior_scalar(X, U0[,,j], V, P[,j], control$minval)
-                Unew[,,j] = U0[,,j]*scalar
+                scalar = update_prior_scalar(X, U[,,j], V, P[,j], control$minval)
+                Unew[,,j] = U[,,j]*scalar
             }
                                                         
         } else if(control$scaled.update != "none"){
@@ -352,8 +346,6 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 
         }
     }
-    
-    
     
     # Update the unconstrained prior covariance matrices.
     if (length(ku) > 0) {

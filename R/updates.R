@@ -4,7 +4,16 @@ update_mixture_weights_em <- function (P)
   colSums(P)/nrow(P)
 
 # Perform an M-step update for the residual covariance matrix.
-update_resid_covariance <- function (X, U, V, P) {
+update_resid_covariance <- function (X, U, V, P, version = c("Rcpp","R")) {
+  if (version == "R")
+    Vnew <- update_resid_covariance_helper(X,U,V,P)
+  else if (version == "Rcpp")
+    Vnew <- update_resid_covariance_rcpp(X,U,V,P)
+  return(Vnew)
+}
+
+# Implements update_resid_covariance with version = "R".
+update_resid_covariance_helper <- function (X, U, V, P) {
   n <- nrow(X)
   m <- ncol(X)
   Vnew <- matrix(0,m,m)
