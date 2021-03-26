@@ -201,7 +201,7 @@ update_prior_scalar <- function (X, U0, V, p, minval){
 # @param Y The transformed data
 # @param lambdas Eigenvalues of U.
 # @return A function of the scalar s.
-optimize_a_scalar <- function(s, p, Y, lambdas) {
+optimize_a_scalar <- function (s, p, Y, lambdas) {
   unweighted_sum <-
     apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
                           sum(lambdas/(s*lambdas + 1)))
