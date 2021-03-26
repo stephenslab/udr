@@ -222,7 +222,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-35, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-36, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -298,11 +298,10 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
     # M-step
     # ------
     # Update the residual covariance matrix.
+    Vnew <- V
     if (is.matrix(V))
       Vnew <- update_resid_covariance(X,U,V,P,control$resid.update,
-                                        control$version)
-    else
-      Vnew <- V
+                                      control$version)
     
     # Update the scaled prior covariance matrices.
     Unew <- update_prior_covariances(X,U,V,P,covtypes,control)
