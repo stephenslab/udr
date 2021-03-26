@@ -1,14 +1,28 @@
 # Perform an M-step update for the mixture weights in the mixture
-# prior.
-update_mixture_weights_em <- function (P)
-  colSums(P)/nrow(P)
+# prior (or no update if update = "none")
+update_mixture_weights_em <- function (P, update) {
+  if (update == "em")
+    wnew <- colSums(P)/nrow(P)
+  else if (update == "none")
+    wnew <- w
+  else
+    stop("control$weights.update == \"",update,"\" is not implemented")
+  return(wnew)
+}
 
-# Perform an M-step update for the residual covariance matrix.
-update_resid_covariance <- function (X, U, V, P, version = c("Rcpp","R")) {
-  if (version == "R")
-    Vnew <- update_resid_covariance_helper(X,U,V,P)
-  else if (version == "Rcpp")
-    Vnew <- update_resid_covariance_rcpp(X,U,V,P)
+# Perform an M-step update for the residual covariance matrix (or no
+# update if update = "none").
+update_resid_covariance <- function (X, U, V, P, update,
+                                     version = c("Rcpp","R")) {
+  if (update == "em") {
+    if (version == "R")
+      Vnew <- update_resid_covariance_helper(X,U,V,P)
+    else if (version == "Rcpp")
+      Vnew <- update_resid_covariance_rcpp(X,U,V,P)
+  } else if (update == "none")
+    Vnew <- V
+  else
+    stop("control$resid.update == \"",update,"\" is not implemented")
   return(Vnew)
 }
 
@@ -18,24 +32,77 @@ update_resid_covariance_helper <- function (X, U, V, P) {
   m <- ncol(X)
   Vnew <- matrix(0,m,m)
   for (i in 1:n) {
-    out  <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,V)
+    out <- compute_posterior_mvtnorm_mix(X[i,],P[i,],U,V)
     Vnew <- Vnew + out$S1 + tcrossprod(X[i,] - out$mu1)
   }
   return(Vnew/n)
 }
 
-# Perform an M-step update for the prior covariance matrices using the
-# update forumla derived in Bovy et al (2011). The calculations are
-# implemented in both R (version = "R") and C++ (version = "Rcpp").
-update_prior_covariances_ed <- function (X, U, V, P, version = c("Rcpp","R")) {
-  version <- match.arg(version)
+# Perform an M-step update for the prior covariance matrices.
+update_prior_covariances <- function (X, U, V, P, covtypes, control) {
+  if (control$version == "Rcpp") {
+    control$version <- "R"
+    warning("update_prior_covariances with version = \"Rcpp\" is not yet ",
+            "implemented; switching to version = \"R\"")
+  }
+  if (control$version == "R")
+    Unew <- update_prior_covariances_helper(X,U,V,P,covtypes,control)
+  return(Unew)
+}
+
+# Implements update_prior_covariances with version = "R".
+update_prior_covariances_helper <- function (X, U, V, P, covtypes,
+                                             control) {
   Unew <- U
-  if (version == "R") {
-    k <- ncol(P)
-    for (i in 1:k)
-      Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
-  } else if (version == "Rcpp")
-    Unew <- update_prior_covariances_ed_rcpp(X,U,V,P)
+  k <- ncol(P)
+  for (i in 1:k) {
+    if (covtypes[i] == "scaled") {
+
+      # Update the scaling factor.
+      if (control$scaled.update == "em") {
+        if (!is.matrix(V))
+          stop("control$scaled.update == \"em\" can only be used when ",
+               "the residual covariance (V) is the same for all data points")
+          Unew[,,i] <- U[,,i] *
+            update_prior_scalar(X,U[,,i],V,P[,i],control$minval)
+      } else if(control$scaled.update != "none")
+        stop("control$scaled.update == \"",control$scaled.update,
+             "\" is not implemented")
+    } else if (covtypes[i] == "rank1") {
+
+      # Update a rank-1 covariance matrix.
+      if (control$rank1.update == "teem") {
+        if (!is.matrix(V))
+          stop("control$rank1.update == \"teem\" is currently not ",
+               "implemented for case when each data point has a different ",
+               "residual covariance, V")
+        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,
+                                                  "rank1")
+      } else if (control$rank1.update != "none")
+        stop("control$rank1.update == \"",control$rank1.update,
+             "\" is not implemented")
+    } else if (covtypes[i] == "unconstrained") {
+
+      # Update a full (unconstrained) matrix.
+      if (control$unconstrained.update == "ed") {
+        if (!is.matrix(V))
+          stop("control$unconstrained.update == \"ed\" is currently not ",
+               "implemented for case when each data point has a different ",
+               "residual covariance, V")
+        Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
+      } else if (control$unconstrained.update == "teem") {
+        if (!is.matrix(V))
+          stop("control$unconstrained.update == \"teem\" can only be used ",
+               "when the residual covariance (V) is the same for all data ",
+               "points")
+        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,
+                                                  "unconstrained")
+      } else if (control$unconstrained.update != "none")
+        stop("control$unconstrained.update == \"",control$unconstrained.update,
+             "\" is not implemented")
+    } else
+      stop("Invalid prior covariance type")
+  }
   return(Unew)
 }
 
@@ -51,30 +118,13 @@ update_prior_covariance_ed <- function (X, U, V, p) {
   return(U - U %*% B + X1)
 }
 
-# Perform an M-step update for the prior covariance matrices using the
-# eigenvalue-truncation technique described in Won et al (2013). The
-# calculations are implemented in both R (version = "R") and C++
-# (version = "Rcpp").
-update_prior_covariances_teem <- function (X, V, P, minval,
-                                           version = c("Rcpp","R"), covtype) {
-  version <- match.arg(version)
-  if (version == "R") {
-    m <- ncol(X)
-    k <- ncol(P)
-    U <- array(0,dim = c(m,m,k))
-    for (i in 1:k)
-      U[,,i] <- update_prior_covariance_teem(X,V,P[,i],minval, covtype)
-  } else if (version == "Rcpp")
-    U <- update_prior_covariances_teem_rcpp(X,V,P,minval)
-  return(U)
-}
-
 # Perform an M-step update for one of the prior covariance matrices
 # using the eigenvalue-truncation technique described in Won et al
 # (2013). Input p is a vector, with one entry per row of X, giving
 # the posterior assignment probabilities for the mixture components
 # being updated.
-update_prior_covariance_teem <- function (X, V, p, minval, covtype = c('unconstrained', 'rank1')) {
+update_prior_covariance_teem <-
+  function (X, V, p, minval, covtype = c("unconstrained","rank1")) {
 
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
@@ -88,12 +138,10 @@ update_prior_covariance_teem <- function (X, V, p, minval, covtype = c('unconstr
   # to the constraint that U is positive definite is obtained by
   # truncating the eigenvalues of T = U + I less than 1 to be 1; see
   # Won et al (2013), p. 434, the sentence just after equation (16).
-  if (covtype == 'unconstrained'){
-        U <- shrink_cov(T, minval)
-  }
-  if (covtype == 'rank1'){
-      U <- shrink_cov_deficient(T, r = 1, minval)
-  }
+  if (covtype == "unconstrained")
+    U <- shrink_cov(T,minval)
+  else if (covtype == "rank1")
+    U <- shrink_cov_deficient(T,r = 1,minval)
   
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
