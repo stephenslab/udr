@@ -133,45 +133,44 @@ update_prior_covariance_teem <-
   T <- crossprod((sqrt(p)*X) %*% solve(R))
   
   # Find U maximizing the expected complete log-likelihood subject to
-  # U being positive definite. This update for U is based on the fact
-  # that the covariance matrix that minimizes the likelihood subject
-  # to the constraint that U is positive definite is obtained by
+  # U being positive definite, or U being a rank-1 matrix. The unconstrained
+  # update is based on the fact that the covariance matrix that minimizes the
+  # likelihood subject to the constraint that U is positive definite is obtained by
   # truncating the eigenvalues of T = U + I less than 1 to be 1; see
   # Won et al (2013), p. 434, the sentence just after equation (16).
-  if (covtype == "unconstrained")
-    U <- shrink_cov(T,minval)
-  else if (covtype == "rank1")
-    U <- shrink_cov_deficient(T,r = 1,minval)
-  
+  # For rank1 update, only the first rth largest eigenvalues of U are kept.
+  # The others are set to 0.
+
+  U <- shrink_cov(T, minval, covtype)
+    
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
 }
 
-# "Shrink" matrix T = U + I; that is, find the "best" matrix T
+# "Shrink" matrix T = U + I for (1) unconstrained update and (2) rank1 update.
+# For unconstrained update, find the "best" matrix T
 # satisfying the constraint that U is positive definite (if minval >
 # 0) or positive semi-definite (if minval <= 0). This is achieved by
 # setting any eigenvalues of T less than 1 to 1 + minval, or,
 # equivalently, setting any eigenvalues of U less than 0 to be
 # minval. The output is a positive definite matrix, U, or a positive
-# semi-definite matrix if minval <= 0. 
-shrink_cov <- function (T, minval = 0) {
+# semi-definite matrix if minval <= 0.
+# For rank1 update, we keep only first rth eigenvalues where r is the rank of matrix U.
+shrink_cov <- function (T, minval = 0, covtype) {
   minval <- max(0,minval)
   out <- eigen(T)
   d <- out$values
+  
+  if (covtype == 'rank1'){
+      r <- 1
+      d[(r+1):length(d)] <- 1
+  }
   d <- pmax(d - 1,minval)
   return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }
 
-# Perform shrinkage update on matrix T with the constraint U is rank 1.
-# @param r The rank of matrix U.
-shrink_cov_deficient <- function (T, r = 1, minval = 0) {
-  minval <- max(0,minval)
-  out <- eigen(T)
-  d <- out$values
-  d[(r+1):length(d)] <- 1   # keep only first r eigenvalues
-  d <- pmax(d - 1,minval)
-  return(tcrossprod(out$vectors %*% diag(sqrt(d))))
-}
+   
+
 
 # Update the scaling factor for prior canonical covariance matrix.
 # @param U0 Canonical covariance matrix
@@ -190,7 +189,7 @@ update_prior_scalar <- function (X, U0, V, p, minval){
     lambdas <- ifelse(evd$values < minval,0,evd$values)
 
     Y <- t(evd$vectors) %*% t(Xhat)  # Y: p by n
-    return(uniroot(function(s) optimize_a_scalar(s,p,Y,lambdas),c(0,1),
+    return(uniroot(function(s) grad_loglik_scale_factor(s,p,Y,lambdas),c(0,1),
                    extendInt = "yes")$root)
     return(scalar)
 }
@@ -201,7 +200,7 @@ update_prior_scalar <- function (X, U0, V, p, minval){
 # @param Y The transformed data
 # @param lambdas Eigenvalues of U.
 # @return A function of the scalar s.
-optimize_a_scalar <- function (s, p, Y, lambdas) {
+grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
   unweighted_sum <-
     apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
                           sum(lambdas/(s*lambdas + 1)))
