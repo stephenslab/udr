@@ -76,8 +76,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
           stop("control$rank1.update == \"teem\" is currently not ",
                "implemented for case when each data point has a different ",
                "residual covariance, V")
-        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,
-                                                  "rank1")
+        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = 1)
       } else if (control$rank1.update != "none")
         stop("control$rank1.update == \"",control$rank1.update,
              "\" is not implemented")
@@ -95,8 +94,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
           stop("control$unconstrained.update == \"teem\" can only be used ",
                "when the residual covariance (V) is the same for all data ",
                "points")
-        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,
-                                                  "unconstrained")
+        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = nrow(V))
       } else if (control$unconstrained.update != "none")
         stop("control$unconstrained.update == \"",control$unconstrained.update,
              "\" is not implemented")
@@ -124,7 +122,7 @@ update_prior_covariance_ed <- function (X, U, V, p) {
 # the posterior assignment probabilities for the mixture components
 # being updated.
 update_prior_covariance_teem <-
-  function (X, V, p, minval, covtype = c("unconstrained","rank1")) {
+  function (X, V, p, minval, r) {
 
   # Transform the data so that the residual covariance is I, then
   # compute the maximum-likelhood estimate (MLE) for T = U + I.
@@ -141,7 +139,7 @@ update_prior_covariance_teem <-
   # For rank1 update, only the first rth largest eigenvalues of U are kept.
   # The others are set to 0.
 
-  U <- shrink_cov(T, minval, covtype)
+  U <- shrink_cov(T, minval, r)
     
   # Recover the solution for the original (untransformed) data.
   return(t(R) %*% U %*% R)
@@ -156,13 +154,13 @@ update_prior_covariance_teem <-
 # minval. The output is a positive definite matrix, U, or a positive
 # semi-definite matrix if minval <= 0.
 # For rank1 update, we keep only first rth eigenvalues where r is the rank of matrix U.
-shrink_cov <- function (T, minval = 0, covtype) {
+shrink_cov <- function (T, minval = 0, r) {
+    
   minval <- max(0,minval)
   out <- eigen(T)
   d <- out$values
   
-  if (covtype == 'rank1'){
-      r <- 1
+  if (nrow(T)!= r){
       d[(r+1):length(d)] <- 1
   }
   d <- pmax(d - 1,minval)
