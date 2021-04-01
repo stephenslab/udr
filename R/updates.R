@@ -85,9 +85,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
       # Update a full (unconstrained) matrix.
       if (control$unconstrained.update == "ed") {
         if (!is.matrix(V))
-          stop("control$unconstrained.update == \"ed\" is currently not ",
-               "implemented for case when each data point has a different ",
-               "residual covariance, V")
+            Unew[,,i] <- update_covariance_ed_general(X, U[,,i], V, P[,i])
         Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
       } else if (control$unconstrained.update == "teem") {
         if (!is.matrix(V))
@@ -203,4 +201,39 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
     apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
                           sum(lambdas/(s*lambdas + 1)))
   return(sum(p*unweighted_sum))
+}
+
+
+# Function
+# @param p Weights for one component
+# @param s The scaling factor for one component we aim to search for
+# @param Y The transformed data
+# @param lambdas Eigenvalues of U.
+# @return A function of the scalar s.
+
+
+# Perform an M-step update for one of the prior covariance matrices
+# using the update formula derived in Bovy et al (2011) with varied V_j.
+# @param p is a vector of the weight matrix for one component.
+# @param U is a matrix
+# @param V is a 3-d array object, containing V_j for each observation
+
+update_covariance_ed_general = function(X, U, V, p){
+
+    
+  B.weighted = c()
+  b.weighted = c()
+  n <- nrow(X)
+  
+  for (i in 1:n){
+    b.weighted[[i]] = sqrt(p[i])* U %*% solve(U+V[,,i]) %*% X[i, ]
+    B.weighted[[i]] = p[i]*(U - U %*% solve(U+V[,,i])%*% U)
+  }
+  
+  bb.weighted = lapply(b.weighted, function(x) as.matrix(x %*% t(x)))
+  bb.weighted = simplify2array(bb.weighted)
+  B.weighted = simplify2array(B.weighted)
+  
+  Unew = (apply(bb.weighted, c(1,2), sum) + apply(B.weighted, c(1,2), sum))/sum(p)
+  return(Unew)
 }
