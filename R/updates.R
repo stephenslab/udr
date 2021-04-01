@@ -204,20 +204,11 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
 }
 
 
-# Function
-# @param p Weights for one component
-# @param s The scaling factor for one component we aim to search for
-# @param Y The transformed data
-# @param lambdas Eigenvalues of U.
-# @return A function of the scalar s.
-
-
 # Perform an M-step update for one of the prior covariance matrices
 # using the update formula derived in Bovy et al (2011) with varied V_j.
 # @param p is a vector of the weight matrix for one component.
 # @param U is a matrix
 # @param V is a 3-d array object, containing V_j for each observation
-
 update_covariance_ed_general = function(X, U, V, p){
 
     
