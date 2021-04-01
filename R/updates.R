@@ -84,9 +84,14 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
 
       # Update a full (unconstrained) matrix.
       if (control$unconstrained.update == "ed") {
-        if (!is.matrix(V))
-            Unew[,,i] <- update_covariance_ed_general(X, U[,,i], V, P[,i])
-        Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
+          if (!is.matrix(V)){
+              Unew[,,i] <- update_covariance_ed_general(X, U[,,i], V, P[,i])
+          }
+          else{
+              Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
+          }
+            
+            
       } else if (control$unconstrained.update == "teem") {
         if (!is.matrix(V))
           stop("control$unconstrained.update == \"teem\" can only be used ",
