@@ -90,14 +90,10 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
 
       # Update a full (unconstrained) matrix.
       if (control$unconstrained.update == "ed") {
-          if (!is.matrix(V)){
-              Unew[,,i] <- update_prior_covariance_ed_general(X, U[,,i], V, P[,i])
-          }
-          else{
-              Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
-          }
-            
-            
+        if (!is.matrix(V))
+          Unew[,,i] <- update_prior_covariance_ed_general(X,U[,,i],V,P[,i])
+        else
+          Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
       } else if (control$unconstrained.update == "teem") {
         if (!is.matrix(V))
           stop("control$unconstrained.update == \"teem\" can only be used ",
@@ -175,9 +171,6 @@ shrink_cov <- function (T, minval = 0, r) {
   d <- pmax(d - 1,minval)
   return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }
-
-   
-
 
 # Update the scaling factor for prior canonical covariance matrix.
 # @param U0 Canonical covariance matrix
