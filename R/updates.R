@@ -71,16 +71,22 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
     } else if (covtypes[i] == "rank1") {
 
       # Update a rank-1 covariance matrix.
-      if (control$rank1.update == "teem") {
-          if (!is.matrix(V)){
-              Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
-          }else{
-              Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = 1)
-          }
-        }else if (control$rank1.update != "none")
+    if (control$rank1.update == "teem") {
+      if (!is.matrix(V))
+        stop("control$rank1.update == \"teem\" is currently not ",
+             "implemented for case when each data point has a different ",
+             "residual covariance, V")
+      Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = 1)
+    } else if (control$rank1.update == "ed"){
+        if (!is.matrix(V)){
+            Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
+        }
+    }else if (control$rank1.update != "none"){
         stop("control$rank1.update == \"",control$rank1.update,
-             "\" is not implemented")
-    } else if (covtypes[i] == "unconstrained") {
+        "\" is not implemented")
+    }
+           
+    }else if (covtypes[i] == "unconstrained") {
 
       # Update a full (unconstrained) matrix.
       if (control$unconstrained.update == "ed") {
