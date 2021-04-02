@@ -73,7 +73,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
       # Update a rank-1 covariance matrix.
       if (control$rank1.update == "teem") {
           if (!is.matrix(V)){
-              Unew[,,i] <- update_prior_rank1_general(X,U,V,P[,i])
+              Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
           }else{
               Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = 1)
           }
