@@ -72,12 +72,12 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
 
       # Update a rank-1 covariance matrix.
       if (control$rank1.update == "teem") {
-        if (!is.matrix(V))
-          stop("control$rank1.update == \"teem\" is currently not ",
-               "implemented for case when each data point has a different ",
-               "residual covariance, V")
-        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = 1)
-      } else if (control$rank1.update != "none")
+          if (!is.matrix(V)){
+              Unew[,,i] <- update_prior_rank1_general(X,U,V,P[,i])
+          }else{
+              Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = 1)
+          }
+        }else if (control$rank1.update != "none")
         stop("control$rank1.update == \"",control$rank1.update,
              "\" is not implemented")
     } else if (covtypes[i] == "unconstrained") {
@@ -85,7 +85,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
       # Update a full (unconstrained) matrix.
       if (control$unconstrained.update == "ed") {
           if (!is.matrix(V)){
-              Unew[,,i] <- update_covariance_ed_general(X, U[,,i], V, P[,i])
+              Unew[,,i] <- update_prior_covariance_ed_general(X, U[,,i], V, P[,i])
           }
           else{
               Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
@@ -214,7 +214,7 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
 # @param p is a vector of the weight matrix for one component.
 # @param U is a matrix
 # @param V is a 3-d array object, containing V_j for each observation
-update_covariance_ed_general = function(X, U, V, p){
+update_prior_covariance_ed_general = function(X, U, V, p){
 
     
   B.weighted = c()
@@ -232,4 +232,48 @@ update_covariance_ed_general = function(X, U, V, p){
   
   Unew = (apply(bb.weighted, c(1,2), sum) + apply(B.weighted, c(1,2), sum))/sum(p)
   return(Unew)
+}
+
+
+# Perform an M-step update for one of the prior rank1 matrix when V varies
+# The algorithm is based on Bovy et al (2011) and derived by David Gerard.
+# @param p is a vector of the weight matrix for one component.
+# @param U is a matrix
+# @param V is a 3-d array object, containing V_j for each observation
+update_prior_rank1_general = function(X, U, V, p){
+  
+  n = nrow(X)
+  vec = get_vec(U)
+  
+  sigma2 = rep(NA, n)
+  mu = rep(NA, n)
+  V.inverse = c()
+
+  for (i in 1:n){
+    V.inverse[[i]] = solve(V[,,i])
+    sigma2[i] = 1/ (t(vec) %*%  V.inverse[[i]] %*% vec + 1)
+    mu[i] = sigma2[i] * t(vec)%*% V.inverse[[i]] %*% X[i,]
+  }
+  
+  theta = p*mu
+  eta = p*(mu^2 + sigma2)
+  
+  vec.weighted = lapply(1:n, function(i) theta[i]*V.inverse[[i]]%*% X[i, ])
+  V.inverse.weighted  = lapply(1:n, function(i) eta[i]*V.inverse[[i]])
+  
+  sum1 = apply(simplify2array(vec.weighted), c(1,2), sum)
+  sum2 = apply(simplify2array(V.inverse.weighted), c(1,2), sum)
+  
+  vnew = solve(sum2) %*% sum1
+  Unew = tcrossprod(vnew)
+  
+  return(Unew)
+}
+
+
+# function to get the vector from rank1 matrix.
+get_vec = function(U){
+  evd = eigen(U)
+  vec =  sqrt(evd$values[1])*evd$vectors[, 1]
+  return(vec)
 }
