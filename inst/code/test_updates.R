@@ -25,12 +25,9 @@ X <- simulate_ud_data(n,w,U,V)
 ## Compare unconstrained updates for common V vs. general V
 
 Here, I specify a common V and extend it to a list of Vs. fit1 and
-fit3 both use `unconstrained.update = "ed"`. In this case, they are
+fit2 both use `unconstrained.update = "ed"`. In this case, they are
 doing the same update with the same Vs. So results are expected to be
 exactly the same.
-
-However, they are slightly different. The differences occur in the
-initial log-likelihood. Not sure what caused the error.
  
 ```{r ed-update-1}
 set.seed(1)
@@ -56,10 +53,6 @@ lines(fit2$progress$loglik,col = "darkorange",lwd = 2,lty = "dashed")
 range(simplify2array(fit1$U) - simplify2array(fit2$U))
 ```
 
-```{r}
-identical(fit0$loglik, fit2$loglik)
-```
-
 ## Compare rank1 updates for common V and general V
 
 If `rank1.update = "ed"`, we are using David's ultimate deconvolution
@@ -76,12 +69,12 @@ fit1 <- ud_fit(fit0,control = list(unconstrained.update = "none", scaled.update 
 
 ```{r}
 set.seed(1)
-fit2 <- ud_init(X)
+fit2 <- ud_init(X, V = V)
 fit3 <- ud_fit(fit2, control = list(unconstrained.update = "none", scaled.update = 'none', rank1.update = 'teem', resid.update = 'none', minval = 0, maxiter = 5000 ))
 
 ```
 
 ```{r  }
 plot(fit1$progress$loglik)
-points(fit3$progress$loglik)
+points(fit3$progress$loglik, col = 'blue')
 ```
