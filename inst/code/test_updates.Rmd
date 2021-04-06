@@ -53,28 +53,35 @@ lines(fit2$progress$loglik,col = "darkorange",lwd = 2,lty = "dashed")
 range(simplify2array(fit1$U) - simplify2array(fit2$U))
 ```
 
-## Compare rank1 updates for common V and general V
+## Compare rank-1 updates for common V vs. general V
 
-If `rank1.update = "ed"`, we are using David's ultimate deconvolution
-algorithm.  If `rank1.update = 'teem'`, we are using TEEM rank1
-update.
+If `rank1.update = "ed"`, we are using David's algorithm.  If
+`rank1.update = 'teem'`, we are using the TEEM rank-1 update.
 
 Those results are not expected to be the same.
 
-```{r}
+```{r r1-update-1}
 set.seed(1)
-fit0 <- ud_init(X,V = rep(list(V),n))
-fit1 <- ud_fit(fit0,control = list(unconstrained.update = "none", scaled.update = 'none', rank1.update = 'teem', minval = 0, maxiter = 5000 ))
+fit1 <- ud_init(X,V = rep(list(V),n))
+fit1 <- ud_fit(fit1,control = list(unconstrained.update = "none",
+                                   resid.update = "none",
+                                   scaled.update = "none",
+								   rank1.update = "ed",
+								   minval = 0,maxiter = 40))
 ```
 
-```{r}
+```{r r1-update-2}
 set.seed(1)
-fit2 <- ud_init(X, V = V)
-fit3 <- ud_fit(fit2, control = list(unconstrained.update = "none", scaled.update = 'none', rank1.update = 'teem', resid.update = 'none', minval = 0, maxiter = 5000 ))
-
+fit2 <- ud_init(X,V = V)
+fit2 <- ud_fit(fit2,control = list(unconstrained.update = "none",
+                                   resid.update = "none",
+                                   scaled.update = "none",
+								   rank1.update = "teem",
+								   minval = 0,maxiter = 40))
 ```
 
-```{r  }
-plot(fit1$progress$loglik)
-points(fit3$progress$loglik, col = 'blue')
+```{r check-r1-updates}
+plot(fit1$progress$loglik,type = "l",col = "darkblue",lwd = 2)
+lines(fit2$progress$loglik,col = "darkorange",lwd = 2,lty = "dashed")
+range(simplify2array(fit1$U) - simplify2array(fit2$U))
 ```
