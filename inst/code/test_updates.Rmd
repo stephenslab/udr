@@ -80,8 +80,29 @@ fit2 <- ud_fit(fit2,control = list(unconstrained.update = "none",
 								   minval = 0,maxiter = 40))
 ```
 
+```{r r1-update-3}
+set.seed(1)
+fit3 <- ud_init(X,V = rep(list(V),n))
+attr(fit3$U$rank1_1,"covtype") <- "unconstrained"
+attr(fit3$U$rank1_2,"covtype") <- "unconstrained"
+attr(fit3$U$rank1_3,"covtype") <- "unconstrained"
+attr(fit3$U$rank1_4,"covtype") <- "unconstrained"
+attr(fit3$U$unconstrained1,"covtype") <- "scaled"
+attr(fit3$U$unconstrained2,"covtype") <- "scaled"
+attr(fit3$U$unconstrained3,"covtype") <- "scaled"
+attr(fit3$U$unconstrained4,"covtype") <- "scaled"
+fit3 <- ud_fit(fit3,control = list(unconstrained.update = "ed",
+                                   resid.update = "none",
+                                   scaled.update = "none",
+								   rank1.update = "none",
+								   minval = 0,maxiter = 100))
+```
+
 ```{r check-r1-updates}
 plot(fit1$progress$loglik,type = "l",col = "darkblue",lwd = 2)
 lines(fit2$progress$loglik,col = "darkorange",lwd = 2,lty = "dashed")
-range(simplify2array(fit1$U) - simplify2array(fit2$U))
+lines(fit3$progress[1:40,"loglik"],col = "limegreen",lwd = 1,lty = "dashed")
+print(fit1$loglik,digits = 8)
+print(fit2$loglik,digits = 8)
+print(fit3$loglik,digits = 8)
 ```
