@@ -191,7 +191,6 @@ update_prior_scalar <- function (X, U0, V, p, minval){
     Y <- t(evd$vectors) %*% t(Xhat)  # Y: p by n
     return(uniroot(function(s) grad_loglik_scale_factor(s,p,Y,lambdas),c(0,1),
                    extendInt = "yes")$root)
-    return(scalar)
 }
 
 # Function for 1-d search of s value based on eq.(20) in the write-up
