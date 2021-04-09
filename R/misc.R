@@ -17,11 +17,11 @@ isposdef <- function (X)
 issemidef <- function (X, minval = -1e-15) 
   all(eigen(X)$values > minval)
 
-# For symmetric semi-definite matrix X, get the nearest rank-1 matrix. 
+# For symmetric semi-definite matrix X, return u such that
+# tcrossprod(u) is the nearest rank-1 matrix.
 getrank1 <- function (X) {
   out <- eigen(X)
-  out$values[-1] <- 0
-  return(with(out,vectors %*% diag(values) %*% t(vectors)))
+  return(sqrt(out$values[1]) * out$vectors[,1])
 }
 
 # Output y = x/sum(x), but take care of the special case when all the
