@@ -55,4 +55,4 @@ sim_rank1 <- function (m)
 #
 #' @importFrom stats rWishart
 sim_unconstrained <- function (m)
-  drop(rWishart(1,4,diag(m)))
+  drop(rWishart(1,max(4,m),diag(m)))
