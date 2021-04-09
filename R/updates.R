@@ -38,6 +38,19 @@ update_resid_covariance_helper <- function (X, U, V, P) {
   return(Vnew/n)
 }
 
+# TO DO: Explain here what this function does, and how to use it.
+assign_prior_covariance_updates <- function (V, covtypes, control) {
+  k <- length(covtypes)
+  for (i in 1:k) {
+    if (covtypes[i] == "scaled") {
+    } else if (covtypes[i] == "rank1") {
+        
+    } else if (covtypes[i] == "unconstrained") {
+        
+    } else
+      stop("Invalid prior covariance type")
+}
+
 # Perform an M-step update for the prior covariance matrices.
 update_prior_covariances <- function (X, U, V, P, covtypes, control) {
   if (control$version == "Rcpp") {
@@ -50,6 +63,9 @@ update_prior_covariances <- function (X, U, V, P, covtypes, control) {
   return(Unew)
 }
 
+# TO DO: Explain here what this funtion does, and how to use it.
+update_prior_covariance_none <- function (X, U, V, p)
+  
 # Implements update_prior_covariances with version = "R".
 update_prior_covariances_helper <- function (X, U, V, P, covtypes,
                                              control) {
@@ -113,7 +129,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
 # using the update formula derived in Bovy et al (2011). Here, p is a
 # vector, with one entry per row of X, giving the posterior assignment
 # probabilities for the mixture component being updated.
-update_prior_covariance_ed <- function (X, U, V, p) {
+update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
   p <- safenormalize(p)
   T <- U + V
   B <- solve(T,U)
@@ -126,7 +142,7 @@ update_prior_covariance_ed <- function (X, U, V, p) {
 # (2013). Input p is a vector, with one entry per row of X, giving
 # the posterior assignment probabilities for the mixture components
 # being updated.
-update_prior_covariance_teem <-
+update_prior_covariance_unconstrained_teem <-
   function (X, V, p, minval, r) {
 
   # Transform the data so that the residual covariance is I, then

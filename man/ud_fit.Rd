@@ -31,15 +31,15 @@ A list object with the following elements:
 
 \item{w}{A vector containing the estimated prior mixture
   weights. When \code{control$update.w = "none"}, this will be the
-  same as the \code{w} provided at input.}
+  same as the \code{w} provided as input.}
 
 \item{U}{A list containing the estimated prior covariance matrices. When
   \code{control$update.U = "none"}, this will be the same as the \code{U}
-  provided at input.}
+  provided as input.}
 
 \item{V}{The estimated residual covariance matrix. When
   \code{control$update.S = "none"}, this will be the same as the \code{S}
-  provided at input.}
+  provided as input.}
 
 \item{loglik}{The log-likelihood at the current settings of the
   model parameters, \code{w}, \code{U} and \code{S}.}
@@ -93,8 +93,11 @@ mixture weights are updated via EM; when \code{weights.update =
 
 \item{\code{resid.update}}{When \code{resid.update = "em"}, the
 residual covariance matrix is updated via EM; when
-\code{resid.update = "none", the residual covariance matrix is not
-updated.}}
+\code{resid.update = "none"}, the residual covariance matrix is not
+updated. When \code{resid.update = NA}, the update is determined by
+V; if V is a matrix (that is, the case when the residual covariance
+is the same for all data points), EM is used to update V; otherwise,
+no updating is performed.}
 
 \item{\code{scaled.update}}{This setting specifies the updates for
 the scaled prior covariance matrices. Currently, only

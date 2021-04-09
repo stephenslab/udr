@@ -40,8 +40,11 @@
 #'
 #' \item{\code{resid.update}}{When \code{resid.update = "em"}, the
 #' residual covariance matrix is updated via EM; when
-#' \code{resid.update = "none", the residual covariance matrix is not
-#' updated.}}
+#' \code{resid.update = "none"}, the residual covariance matrix is not
+#' updated. When \code{resid.update = NA}, the update is determined by
+#' V; if V is a matrix (that is, the case when the residual covariance
+#' is the same for all data points), EM is used to update V; otherwise,
+#' no updating is performed.}
 #'
 #' \item{\code{scaled.update}}{This setting specifies the updates for
 #' the scaled prior covariance matrices. Currently, only
@@ -101,15 +104,15 @@
 #'
 #' \item{w}{A vector containing the estimated prior mixture
 #'   weights. When \code{control$update.w = "none"}, this will be the
-#'   same as the \code{w} provided at input.}
+#'   same as the \code{w} provided as input.}
 #'
 #' \item{U}{A list containing the estimated prior covariance matrices. When
 #'   \code{control$update.U = "none"}, this will be the same as the \code{U}
-#'   provided at input.}
+#'   provided as input.}
 #' 
 #' \item{V}{The estimated residual covariance matrix. When
 #'   \code{control$update.S = "none"}, this will be the same as the \code{S}
-#'   provided at input.}
+#'   provided as input.}
 #'
 #' \item{loglik}{The log-likelihood at the current settings of the
 #'   model parameters, \code{w}, \code{U} and \code{S}.}
@@ -212,17 +215,17 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
-  if (!is.matrix(fit$V) & control$resid.update != "none") {
-    warning("Residual covariance V can only be updated when it is the ",
-            "same for all data points; switching to control$resid.update = ",
-            "\"none\"")
-    control$resid.update <- "none"
-  }
-  
+  if (is.na(control$resid.update))
+    control$resid.update <- ifelse(is.matrix(fit$V),"em","none")
+  if (!is.matrix(fit$V) & control$resid.update != "none")
+    stop("Residual covariance V can only be updated when it is the ",
+         "same for all data points; switching to control$resid.update = ",
+         "\"none\"")
+    
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-40, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-41, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -249,7 +252,6 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
   if (is.list(fit$V))
     fit$V <- simplify2array(fit$V)
-  fit$U <- simplify2array(fit$U)
   fit <- ud_fit_main_loop(X,fit$w,fit$U,fit$V,covtypes,control,verbose)
   
   # Output the updated model. Some attributes such as row and column
@@ -347,10 +349,10 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 #' 
 ud_fit_control_default <- function()
   list(weights.update       = "em",   # "em" or "none"
+       resid.update         = NA,     # "em", "none" or NA
        scaled.update        = "em",   # "em" or "none"
        rank1.update         = "teem", # "teem" or "none"
        unconstrained.update = "ed",   # "ed", "teem" or "none"
-       resid.update         = "em",   # "em" or "none"
        version              = "R",    # "R" or "Rcpp"
        maxiter              = 20,
        minval               = -1e-8,
