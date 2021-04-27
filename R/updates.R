@@ -11,9 +11,16 @@ update_mixture_weights_em <- function (P, update) {
 }
 
 # Perform an M-step update for the residual covariance matrix (or no
-# update if update = "none").
+# update if update = "none"). Input argument P should be the n x k
+# matrix of posterior mixture assignment probabilities returned by
+# compute_posterior_probs. Input argument V should be an m x m
+# matrix. Input argument U may either be a list of length k in which
+# U[[i]]$mat is an m x m matrix, or an m x m x k array.
 update_resid_covariance <- function (X, U, V, P, update,
                                      version = c("Rcpp","R")) {
+  version <- match.arg(version)
+  if (is.list(U))
+    U <- ulist2array(U)
   if (update == "em") {
     if (version == "R")
       Vnew <- update_resid_covariance_helper(X,U,V,P)
@@ -154,14 +161,14 @@ update_prior_covariance_unconstrained_teem <-
   T <- crossprod((sqrt(p)*X) %*% solve(R))
   
   # Find U maximizing the expected complete log-likelihood subject to
-  # U being positive definite, or U being a rank-1 matrix. The unconstrained
-  # update is based on the fact that the covariance matrix that minimizes the
-  # likelihood subject to the constraint that U is positive definite is obtained by
-  # truncating the eigenvalues of T = U + I less than 1 to be 1; see
-  # Won et al (2013), p. 434, the sentence just after equation (16).
-  # For rank1 update, only the first rth largest eigenvalues of U are kept.
-  # The others are set to 0.
-
+  # U being positive definite, or U being a rank-1 matrix. The
+  # unconstrained update is based on the fact that the covariance
+  # matrix that minimizes the likelihood subject to the constraint
+  # that U is positive definite is obtained by truncating the
+  # eigenvalues of T = U + I less than 1 to be 1; see Won et al
+  # (2013), p. 434, the sentence just after equation (16). For rank1
+  # update, only the first rth largest eigenvalues of U are kept. The
+  # others are set to 0.
   U <- shrink_cov(T, minval, r)
     
   # Recover the solution for the original (untransformed) data.

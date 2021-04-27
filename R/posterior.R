@@ -76,9 +76,19 @@ compute_posterior_probs_general <- function (X, w, U, V) {
 # Compute the n x k matrix of posterior mixture assignment
 # probabilities given current estimates of the model parameters. This
 # implements the E step in the EM algorithm for fitting the Ultimate
-# Deconvolution model.
+# Deconvolution model. Input argument V may either be an m x m matrix,
+# a list of m x m matrices of length n, or a m x m x n array. Input
+# argument U may either be a list of length k in which U[[i]]$mat is
+# an m x m matrix, or an m x m x k array.
 compute_posterior_probs <- function (X, w, U, V, version = c("Rcpp","R")) {
   version <- match.arg(version)
+
+  # Process input arguments U and V as needed.
+  if (is.list(U))
+    U <- ulist2array(U)
+  if (is.list(V))
+    V <- list2array(V)
+  
   if (is.matrix(V)) {
 
     # Perform the computations for the special case when the same
@@ -88,7 +98,7 @@ compute_posterior_probs <- function (X, w, U, V, version = c("Rcpp","R")) {
     else if (version == "Rcpp")
       P <- compute_posterior_probs_iid_rcpp(X,w,U,V)
   } else {
-
+      
     # Perform the computations for the more general case when the
     # residual variance is not necessarily the same for all samples.
     if (version == "R")

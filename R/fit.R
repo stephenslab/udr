@@ -235,7 +235,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-46, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-47, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -328,7 +328,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, covupdates, control,
                                       control$version)
     
     # Update the scaled prior covariance matrices.
-    Unew <- update_prior_covariances(X,U,V,P,covtypes,control)
+    # Unew <- update_prior_covariances(X,U,V,P,covtypes,control)
+    Unew <- U
     
     # Update the mixture weights.
     wnew <- update_mixture_weights_em(P,control$weights.update)
@@ -337,8 +338,8 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, covupdates, control,
     # other quantities, and report the algorithm's progress to the
     # console if requested.
     loglik <- loglik_ud(X,wnew,Unew,Vnew,control$version)
-    dw <- max(abs(wnew - w))
-    dU <- max(abs(Unew - U))
+    dw     <- max(abs(wnew - w))
+    dU     <- max(abs(ulist2array(Unew) - ulist2array(U)))
     if (is.matrix(V))
       dV <- max(abs(Vnew - V))
     else
