@@ -38,14 +38,17 @@ update_resid_covariance_helper <- function (X, U, V, P) {
   return(Vnew/n)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Determine the functions for updating the prior covariance matrices
+# based on the (1) the covariance matrix types and (2) the control
+# settings. The return value is a character vector with one entry for
+# each prior covariance matrix.
 assign_prior_covariance_updates <- function (covtypes, control) {
   k <- length(covtypes)
   covupdates <- rep(as.character(NA),k)
   for (i in 1:k)
     covupdates[i] <- paste0("update_prior_covariance_",covtypes[i],"_",
-                          control[[paste(covtypes[i],"update",sep = ".")]],
-                          ifelse(control$version == "Rcpp","_rcpp",""))
+                            control[[paste(covtypes[i],"update",sep = ".")]],
+                            ifelse(control$version == "Rcpp","_rcpp",""))
   names(covupdates) <- names(covtypes)
   return(covupdates)
 }

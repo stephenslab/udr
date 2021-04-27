@@ -231,12 +231,11 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
          "same for all data points; switching to control$resid.update = ",
          "\"none\"")
   covupdates <- assign_prior_covariance_updates(covtypes,control)
-  browser()
   
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-45, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-46, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -245,8 +244,8 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
                 sum(covtypes == "scaled"),
                 sum(covtypes == "rank1"),
                 sum(covtypes == "unconstrained")))
-    cat(sprintf(paste("prior covariance updates: %s (scaled), %s (rank-1),",
-                      "%s (unconstrained)\n"),
+    cat(sprintf(paste("prior covariance updates: scaled (%s), rank-1 (%s),",
+                      "unconstrained (%s)\n"),
                 control$scaled.update,
                 control$rank1.update,
                 control$unconstrained.update))
@@ -261,25 +260,36 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # -----------
   if (verbose)
     cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
-  if (is.list(fit$V))
-    fit$V <- simplify2array(fit$V)
-  fit <- ud_fit_main_loop(X,fit$w,fit$U,fit$V,covtypes,control,verbose)
+  if (is.matrix(fit$V))
+    V <- fit$V
+  else
+    V <- list2array(fit$V)
+  out <- ud_fit_main_loop(X,fit$w,fit$U,V,covtypes,covupdates,control,verbose)
   
   # Output the updated model. Some attributes such as row and column
   # names may be missing and need to be added back.
-  fit$progress <- rbind(fit0$progress,fit$progress)
-  fit$loglik <- loglik_ud(X,fit$w,fit$U,fit$V,control$version)
-  fit$X <- X
-  fit$U <- array2list(fit$U)
+  fit$X        <- X
+  fit$w        <- out$w
+  fit$V        <- out$V
+  fit$U        <- out$U
+  fit$loglik   <- loglik_ud(X,fit$w,fit$U,fit$V,control$version)
+  fit$progress <- rbind(fit0$progress,out$progress)
   if (is.matrix(fit$V)) {
-    rownames(fit$V) <- colnames(X)
-    colnames(fit$V) <- colnames(X)
-  } else
-    fit$V <- array2list(fit$V)
+    rownames(fit$V) <- rownames(fit0$V)
+    colnames(fit$V) <- colnames(fit0$V)
+  }
   for (i in 1:k) {
-    rownames(fit$U[[i]]) <- colnames(X)
-    colnames(fit$U[[i]]) <- colnames(X)
-    attr(fit$U[[i]],"covtype") <- attr(fit0$U[[i]],"covtype")
+    u0 <- fit0$U[[i]]
+    u  <- fit$U[[i]]
+    rownames(u$mat) <- rownames(u0$mat)
+    colnames(u$mat) <- colnames(u0$mat)
+    attr(u,"covtype") <- covtypes[i]
+    if (covtypes[i] == "rank1")
+      names(u$u) <- names(u0$u)
+    else if (covtypes[i] == "scaled")
+      rownames(u$U0) <- rownames(u0$U0)
+      colnames(u$U0) <- colnames(u0$U0)
+    fit$U[[i]] <- u
   }
   names(fit$w) <- names(fit0$U)
   names(fit$U) <- names(fit0$U)
@@ -288,8 +298,9 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
 }
 
 # This implements the core part of ud_fit.
-ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
-
+ud_fit_main_loop <- function (X, w, U, V, covtypes, covupdates, control,
+                              verbose) {
+  
   # Get the number of components in the mixture prior.
   k <- length(w)
   
@@ -301,7 +312,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
   # Iterate the EM updates.
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
-
+    
     # E-step
     # ------
     # Compute the n x k matrix of posterior mixture assignment
