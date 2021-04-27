@@ -1,11 +1,5 @@
 context("ud_fit")
 
-test_that("Error is thrown for univariate case",{
-  set.seed(1)
-  X <- matrix(rnorm(20))
-  expect_error(ud_init(X))
-})
-
 test_that("ud_fit produces same result when V is a matrix or list",{
 
   # Simulate data.
