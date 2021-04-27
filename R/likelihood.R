@@ -1,26 +1,29 @@
 # Compute the log-likelihood for the Ultimate Deconvolution model.
-# Input argument should either be an m x m matrix, or an m x m x n
-# array, where n is the number of data points.
-#
-#' @importFrom mvtnorm dmvnorm
+# Input argument U should either be a list of length k, in which each
+# U[[i]]$mat is an m x m matrix, or an m x m x k array. Input argument
+# V should either be an m x m matrix, a list of matrices of length n,
+# or an m x m x n array, where n is the number of data points.
 loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
   version <- match.arg(version)
+  
+  # Process input arguments U and V as needed.
   if (is.list(U))
-    U <- simplify2array(U)
+    U <- ulist2array(U)
+  if (is.list(V))
+    V <- list2array(V)
+
   if (is.matrix(V)) {
 
-    # Perform the computations for the case when the residual variance
-    # is the same for all samples.
+    # Compute the likelihood in the case when the residual variance is
+    # the same for all samples.
     if (version == "Rcpp")
       y <- loglik_ud_iid_rcpp(X,w,U,V)
     else if (version == "R")
       y <- loglik_ud_iid_helper(X,w,U,V)
   } else {
 
-    # Perform the computations for the case when the residual variance
-    # is *not* the same for all samples.
-    if (is.list(V))
-      V <- simplify2array(V)
+    # Compute the log-likelihood in the case when the residual
+    # variance is not necessarily the same for all samples.
     if (version == "Rcpp")
       y <- loglik_ud_general_rcpp(X,w,U,V)
     else if (version == "R")
@@ -31,6 +34,8 @@ loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
 
 # Compute the log-likelihood when the residual covariance V is the
 # same for all samples.
+#
+#' @importFrom mvtnorm dmvnorm
 loglik_ud_iid_helper <- function (X, w, U, V) {
   n <- nrow(X)
   k <- length(w)
@@ -40,8 +45,10 @@ loglik_ud_iid_helper <- function (X, w, U, V) {
   return(sum(log(y)))
 }
 
-# Compute the log-likelihood when the residual covariance V is *not*
-# the same for all samples.
+# Compute the log-likelihood when the residual covariance V is not
+# necessarily the same for all samples.
+#
+#' @importFrom mvtnorm dmvnorm
 loglik_ud_general_helper <- function (X, w, U, V) {
   n <- nrow(X)
   k <- length(w)

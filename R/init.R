@@ -128,7 +128,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       if (!issemidef(U_unconstrained[[i]],control$minval))
         stop("All U_unconstrained matrices should be positive semi-definite")
 
-  # Set up the data structure for the unconstrained covariancec matrices.
+  # Set up the data structure for the unconstrained covariance matrices.
   if (n_unconstrained > 0) {
     if (is.null(names(U_unconstrained)))
       names(U_unconstrained) <- paste0("unconstrained",1:n_unconstrained)
@@ -176,7 +176,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   k <- length(U)
   if (k < 2)
     stop("The total number of prior covariances should be at least 2")
-  
+
   # Initialize the mixture weights.
   w        <- rep(1,k)/k
   names(w) <- names(U)
@@ -194,7 +194,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   }
 
   # Compute the log-likelihood.
-  loglik <- loglik_ud(X,w,array(simplify2array(U),c(m,m,k)),V,control$version)
+  loglik <- loglik_ud(X,w,U,V,control$version)
 
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.

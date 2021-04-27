@@ -7,6 +7,20 @@ array2list <- function (x) {
   return(y)
 }
 
+# Convert a list of n x m matrices to an n x m x k array.
+list2array <- function (x) {
+  n <- nrow(x[[1]])
+  m <- ncol(x[[2]])
+  k <- length(x)
+  return(array(simplify2array(x),c(n,m,k)))
+}
+
+# Convert a list of m x m prior covariance matrices ("U" matrices) to
+# an m x m x k array, In the input, the m x m matrices are stored in
+# x[[i]]$mat for each list element i.
+ulist2array <- function (x)
+  list2array(lapply(x,function (e) "[["(e,"mat")))
+
 # Returns TRUE if and only if the matrix is symmetric positive
 # definite.
 isposdef <- function (X)

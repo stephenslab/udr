@@ -49,6 +49,7 @@ assign_prior_covariance_updates <- function (V, covtypes, control) {
         
     } else
       stop("Invalid prior covariance type")
+  }
 }
 
 # Perform an M-step update for the prior covariance matrices.
