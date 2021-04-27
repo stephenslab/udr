@@ -1,6 +1,6 @@
-#' @title Initialize Ultimate Deconvolution Model
+#' @title Initialize Ultimate Deconvolution Model Fit
 #'
-#' @description Initialize an Ultimate Deconvolution model. See
+#' @description Initialize an Ultimate Deconvolution model fit. See
 #'   \code{\link{ud_fit}} for background and model definition.
 #' 
 #' @param X The n x m data matrix, in which each row of the matrix is
