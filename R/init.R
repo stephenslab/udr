@@ -4,12 +4,12 @@
 #'   \code{\link{ud_fit}} for background and model definition.
 #' 
 #' @param X The n x m data matrix, in which each row of the matrix is
-#'   an m-dimensional data point. The number of rows and columns should
-#'   be 2 or more.
+#'   an m-dimensional data point. \code{X} should have at least 2 rows
+#'   and 2 columns.
 #'
 #' @param V Either an m x m matrix giving the initial estimate of the
-#'   residual covariance matrix, or a list of m x m "standard error"
-#'   matrices, one for each data point.
+#'   residual covariance matrix, or a list of m x m covariance matrices,
+#'   one for each data point.
 #'
 #' @param n_rank1 A non-negative integer specifying the number of
 #'   rank-1 covariance matrices included in the mixture prior. Initial

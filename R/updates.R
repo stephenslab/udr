@@ -39,17 +39,15 @@ update_resid_covariance_helper <- function (X, U, V, P) {
 }
 
 # TO DO: Explain here what this function does, and how to use it.
-assign_prior_covariance_updates <- function (V, covtypes, control) {
+assign_prior_covariance_updates <- function (covtypes, control) {
   k <- length(covtypes)
-  for (i in 1:k) {
-    if (covtypes[i] == "scaled") {
-    } else if (covtypes[i] == "rank1") {
-        
-    } else if (covtypes[i] == "unconstrained") {
-        
-    } else
-      stop("Invalid prior covariance type")
-  }
+  covupdates <- rep(as.character(NA),k)
+  for (i in 1:k)
+    covupdates[i] <- paste0("update_prior_covariance_",covtypes[i],"_",
+                          control[[paste(covtypes[i],"update",sep = ".")]],
+                          ifelse(control$version == "Rcpp","_rcpp",""))
+  names(covupdates) <- names(covtypes)
+  return(covupdates)
 }
 
 # Perform an M-step update for the prior covariance matrices.

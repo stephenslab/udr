@@ -12,13 +12,13 @@
 #' @details In the Ultimate Deconvolution (UD) model, the
 #' m-dimensional observation \eqn{x} is drawn from a mixture of
 #' multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0,
-#' T_k)}, where \eqn{k} is the number of mixture components, the
-#' \eqn{w_j}'s are the mixture weights, and each \eqn{T_j = V + U_j}
-#' is a covariance matrix. This is the marginal density derived from a
-#' model in which \eqn{x} is multivariate normal with mean \eqn{y} and
-#' covariance \eqn{V}, and the underlying, or "latent", signal \eqn{y}
-#' is in turn modeled by a mixture prior in which each mixture
-#' component \eqn{j} is multivariate normal with zero mean and
+#' T_k)}, where \eqn{k \geq 2} is the number of mixture components,
+#' the \eqn{w_j}'s are the mixture weights, and each \eqn{T_j = V +
+#' U_j} is a covariance matrix. This is the marginal density derived
+#' from a model in which \eqn{x} is multivariate normal with mean
+#' \eqn{y} and covariance \eqn{V}, and the underlying, or "latent",
+#' signal \eqn{y} is in turn modeled by a mixture prior in which each
+#' mixture component \eqn{j} is multivariate normal with zero mean and
 #' covariance matrix \eqn{U_j}. This model is a useful special case of
 #' the "Extreme Deconvolution" (ED) model (Bovy \emph{et al}, 2011).
 #'
@@ -203,29 +203,40 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     X <- fit$X
   if (!(is.matrix(X) & is.numeric(X)))
     stop("Input argument \"X\" should be a numeric matrix")
-
-  # Get the number of rows (n) and columns (m) of the data matrix, and
-  # the number of components in the mixture prior (k).
   n <- nrow(X)
   m <- ncol(X)
+  if (n < 2 | m < 2)
+    stop("Input argument \"X\" should have at least 2 columns and ",
+         "at least 2 rows")
+
+  # Get the number of components in the mixture prior (k).
   k <- length(fit$U)
 
-  # Extract the "covtype" attribute from the prior covariance matrices.
+  # Extract the "covtype" attribute from the prior covariance (U)
+  # matrices.
   covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
   
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
   if (is.na(control$resid.update))
     control$resid.update <- ifelse(is.matrix(fit$V),"em","none")
+  if (is.na(control$scaled.update))
+    control$scaled.update <- "none"
+  if (is.na(control$rank1.update))
+    control$rank1.update  <- "none"
+  if (is.na(control$unconstrained.update))
+    control$unconstrained.update <- ifelse(is.matrix(fit$V),"teem","none")
   if (!is.matrix(fit$V) & control$resid.update != "none")
     stop("Residual covariance V can only be updated when it is the ",
          "same for all data points; switching to control$resid.update = ",
          "\"none\"")
-    
+  covupdates <- assign_prior_covariance_updates(covtypes,control)
+  browser()
+  
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-44, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-45, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -348,12 +359,12 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, control, verbose) {
 #' @export
 #' 
 ud_fit_control_default <- function()
-  list(weights.update       = "em",   # "em" or "none"
-       resid.update         = NA,     # "em", "none" or NA
-       scaled.update        = "em",   # "em" or "none"
-       rank1.update         = "teem", # "teem" or "none"
-       unconstrained.update = "ed",   # "ed", "teem" or "none"
-       version              = "R",    # "R" or "Rcpp"
+  list(weights.update       = "em",  # em or none
+       resid.update         = NA,    # em, none or NA
+       scaled.update        = NA,    # em, none or NA
+       rank1.update         = NA,    # teem, none or NA
+       unconstrained.update = NA,    # ed, teem, none or NA
+       version              = "R",   # R or Rcpp
        maxiter              = 20,
        minval               = -1e-8,
        tol                  = 1e-6)
