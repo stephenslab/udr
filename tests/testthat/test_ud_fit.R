@@ -10,7 +10,8 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   X   <- dat$X
 
   # Run the R and C++ implementations of ud_fit when V is a matrix or
-  # a list, and V is not updated.
+  # a list, and V is not updated. The updates of the prior covariance
+  # matrices U are skipped in this test.
   control  <- list(maxiter = 20,resid.update = "none",scaled.update = "none",
                    rank1.update = "none",unconstrained.update = "none")
   control1 <- control
