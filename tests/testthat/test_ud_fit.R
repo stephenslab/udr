@@ -1,7 +1,7 @@
 context("ud_fit")
 
 test_that(paste("R and C++ implementations of ud_fit produce same result",
-                "when V is a matrix or list"),{
+                "when V is a matrix or list (and all Vs are the same)"),{
 
   # Simulate data.
   set.seed(1)
@@ -53,4 +53,9 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   fit1$progress$timing <- 0
   fit2$progress$timing <- 0
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
+})
+
+test_that(paste("R and C++ implementations of ud_fit produce same result",
+                "when Vs are not the same"),{
+  # TO DO: Add tests here.
 })

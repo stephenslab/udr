@@ -107,7 +107,17 @@ update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, p) {
 # TO DO: Explain here what this function does, and how to use it.
 update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
   if (is.matrix(V))
-    U$mat <- update_prior_covariance_unconstrained_ed_iid(X,U$mat,V,p)
+    U$mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
+  else
+    stop("update_prior_covariance_unconstrained_ed is not yet implemented ",
+         "for case when data points are not i.i.d. (different Vs)")
+  return(U)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p) {
+  if (is.matrix(V)) 
+    U$mat <- update_prior_covariance_ed_iid_rcpp(X,U$mat,V,p)
   else
     stop("update_prior_covariance_unconstrained_ed is not yet implemented ",
          "for case when data points are not i.i.d. (different Vs)")
@@ -119,7 +129,7 @@ update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
 # special case when the residual covariances V are the same for all
 # data points. Input p is a vector of weights associated with the rows
 # of X.
-update_prior_covariance_unconstrained_ed_iid <- function (X, U, V, p) {
+update_prior_covariance_ed_iid <- function (X, U, V, p) {
   p <- safenormalize(p)
   T <- U + V
   B <- solve(T,U)
@@ -127,64 +137,33 @@ update_prior_covariance_unconstrained_ed_iid <- function (X, U, V, p) {
   return(U - U %*% B + X1)
 }
 
-# Implements update_prior_covariances with version = "R".
-update_prior_covariances_helper <- function (X, U, V, P, covtypes,
-                                             control) {
-  Unew <- U
-  k <- ncol(P)
-  for (i in 1:k) {
-    if (covtypes[i] == "scaled") {
+# update_prior_covariances_helper = function (X, U, V, P, covtypes, control) {
+#     if (covtypes[i] == "scaled") {
 
-      # Update the scaling factor.
-      if (control$scaled.update == "em") {
-        if (!is.matrix(V))
-          stop("control$scaled.update == \"em\" can only be used when ",
-               "the residual covariance (V) is the same for all data points")
-          Unew[,,i] <- U[,,i] *
-            update_prior_scalar(X,U[,,i],V,P[,i],control$minval)
-      } else if(control$scaled.update != "none")
-        stop("control$scaled.update == \"",control$scaled.update,
-             "\" is not implemented")
-    } else if (covtypes[i] == "rank1") {
+#       # Update the scaling factor.
+#       if (control$scaled.update == "em") {
+#           Unew[,,i] <- U[,,i] *
+#             update_prior_scalar(X,U[,,i],V,P[,i],control$minval)
+#     } else if (covtypes[i] == "rank1") 
 
-      # Update a rank-1 covariance matrix.
-    if (control$rank1.update == "teem") {
-      if (!is.matrix(V))
-        stop("control$rank1.update == \"teem\" is currently not ",
-             "implemented for case when each data point has a different ",
-             "residual covariance, V")
-      Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,r = 1)
-    } else if (control$rank1.update == "ed"){
-        if (!is.matrix(V)){
-            Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
-        }
-    }else if (control$rank1.update != "none"){
-        stop("control$rank1.update == \"",control$rank1.update,
-        "\" is not implemented")
-    }
-           
-    } else if (covtypes[i] == "unconstrained") {
+#       # Update a rank-1 covariance matrix.
+#     if (control$rank1.update == "teem") {
+#       Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,r = 1)
+#     } else if (control$rank1.update == "ed"){
+#         if (!is.matrix(V)){
+#             Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
+#         }
+        
+#     } else if (covtypes[i] == "unconstrained") {
 
-      # Update a full (unconstrained) matrix.
-      if (control$unconstrained.update == "ed") {
-        if (!is.matrix(V))
-          Unew[,,i] <- update_prior_covariance_ed_general(X,U[,,i],V,P[,i])
-        else
-          Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
-      } else if (control$unconstrained.update == "teem") {
-        if (!is.matrix(V))
-          stop("control$unconstrained.update == \"teem\" can only be used ",
-               "when the residual covariance (V) is the same for all data ",
-               "points")
-        Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = nrow(V))
-      } else if (control$unconstrained.update != "none")
-        stop("control$unconstrained.update == \"",control$unconstrained.update,
-             "\" is not implemented")
-    } else
-      stop("Invalid prior covariance type")
-  }
-  return(Unew)
-}
+#       # Update a full (unconstrained) matrix.
+#       if (control$unconstrained.update == "ed") {
+#         if (!is.matrix(V))
+#           Unew[,,i] <- update_prior_covariance_ed_general(X,U[,,i],V,P[,i])
+#         else
+#           Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
+#       } else if (control$unconstrained.update == "teem") {
+#         Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = nrow(V))
 
 # Perform an M-step update for one of the prior covariance matrices
 # using the eigenvalue-truncation technique described in Won et al

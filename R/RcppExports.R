@@ -17,8 +17,8 @@ compute_posterior_probs_general_rcpp <- function(X, w, U, V) {
     .Call('_udr_compute_posterior_probs_general_rcpp', PACKAGE = 'udr', X, w, U, V)
 }
 
-update_prior_covariances_ed_rcpp <- function(X, U, V, P) {
-    .Call('_udr_update_prior_covariances_ed_rcpp', PACKAGE = 'udr', X, U, V, P)
+update_prior_covariance_ed_iid_rcpp <- function(X, U, V, p) {
+    .Call('_udr_update_prior_covariance_ed_iid_rcpp', PACKAGE = 'udr', X, U, V, p)
 }
 
 update_prior_covariances_teem_rcpp <- function(X, V, P, minval) {

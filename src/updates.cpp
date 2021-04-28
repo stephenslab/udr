@@ -6,14 +6,11 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-void update_prior_covariances_ed (const mat& X, cube& U, const mat& V, 
-				  const mat& P);
-
 void update_prior_covariances_teem (const mat& X, const mat& V, const mat& P, 
 				    cube& U, double minval);
 
-void update_prior_covariance_ed (mat& X, mat& U, const mat& V, 
-				 const vec& p, mat& T, mat& B);
+void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V, 
+				     const vec& p);
 
 void update_prior_covariance_teem (mat& X, const mat& R, const vec& p, mat& U, 
 				   mat& T, mat& Y, vec& d, double minval);
@@ -37,17 +34,19 @@ inline double max (double a, double b) {
 
 // FUNCTION DEFINITIONS
 // --------------------
-// Perform an M-step update for the prior covariance matrices using the
-// update formula derived in Bovy et al (2011).
+// Perform an M-step update for a prior covariance matrix U using
+// the update formula derived in Bovy et al (2011), for the special
+// case when the residual covariances V are the same for all data
+// points.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-arma::cube update_prior_covariances_ed_rcpp (const arma::mat& X, 
-					     const arma::cube& U, 
-					     const arma::mat& V, 
-					     const arma::mat& P) {
-  cube Unew = U;
-  update_prior_covariances_ed(X,Unew,V,P);
+arma::mat update_prior_covariance_ed_iid_rcpp (const arma::mat& X, 
+					       const arma::mat& U, 
+					       const arma::mat& V, 
+					       const arma::vec& p) {
+  mat Unew = U;
+  update_prior_covariance_ed_iid(X,Unew,V,p);
   return Unew;
 }
 
@@ -82,29 +81,6 @@ arma::mat update_resid_covariance_rcpp (const arma::mat& X,
 }
 
 // Perform an M-step update for the (unconstrained) prior covariance
-// matrices using the update formula derived in Bovy et al (2011).
-void update_prior_covariances_ed (const mat& X, cube& U, const mat& V, 
-				  const mat& P) {
-
-  // Get the number of rows (n) and columns (m) of the data matrix, and
-  // the number of components in the mixture prior (k).
-  unsigned int n = X.n_rows;
-  unsigned int m = X.n_cols;
-  unsigned int k = P.n_cols;
-
-  // These matricecs are used to store intermediate calculations.
-  mat X1(n,m);
-  mat T(m,m);
-  mat B(m,m);
-
-  // Repeat for each prior covariance matrix to update.
-  for (unsigned int i = 0; i < k; i++) {
-    X1 = X;
-    update_prior_covariance_ed(X1,U.slice(i),V,P.col(i),T,B);
-  }
-}
-
-// Perform an M-step update for the (unconstrained) prior covariance
 // matrices, using the eigenvalue-truncation technique described in
 // Won et al (2013).
 void update_prior_covariances_teem (const mat& X, const mat& V, const mat& P, 
@@ -131,18 +107,22 @@ void update_prior_covariances_teem (const mat& X, const mat& V, const mat& P,
 }
 
 // Perform an M-step update for one of the prior covariance matrices
-// using the update formula derived in Bovy et al (2011). Note that
-// data matrix X is modified to perform the update, so should not be
-// reused.
-void update_prior_covariance_ed (mat& X, mat& U, const mat& V, const vec& p,
-				 mat& T, mat& B) {
+// using the update formula derived in Bovy et al (2011), for the
+// special case when all the residual covariance matrices V are all
+// the same.
+void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V, 
+				     const vec& p) {
+  unsigned int m = X.n_cols;
   vec p1 = p;
+  mat X1 = X;
+  mat T(m,m);
+  mat B(m,m);
   safenormalize(p1);
-  scale_rows(X,sqrt(p1));
+  scale_rows(X1,sqrt(p1));
   T = V + U;
   B = solve(T,U);
-  X *= B;
-  U += crossprod(X) - U*B;
+  X1 *= B;
+  U += crossprod(X1) - U*B;
 }
 
 // Perform an M-step update for one of the prior covariance matrices

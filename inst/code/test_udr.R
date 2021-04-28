@@ -24,9 +24,10 @@ control <- list(maxiter = 100,
                 scaled.update = "none",
                 rank1.update = "none",
                 unconstrained.update = "ed",
-                version = "R")
+                version = "Rcpp")
 fit1 <- ud_fit(fit0,control = control)
 y <- fit1$progress$loglik
 y <- max(y) - y + 0.01
 plot(1:100,y,col = "darkblue",type = "l",lwd = 2,log = "y",
      xlab = "iteration",ylab = "loglik difference")
+
