@@ -23,7 +23,8 @@ control <- list(maxiter = 100,
                 resid.update = "em",
                 scaled.update = "none",
                 rank1.update = "none",
-                unconstrained.update = "none")
+                unconstrained.update = "none",
+                version = "Rcpp")
 fit1 <- ud_fit(fit0,control = control)
 y <- fit1$progress$loglik
 y <- max(y) - y + 0.01

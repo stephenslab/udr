@@ -86,6 +86,24 @@ update_prior_covariance_unconstrained_none <- function (X, U, V, P) {
   return(U)
 }
 
+# This function simply returns the scaled prior covariance matrix
+# without updating it.
+update_prior_covariance_scaled_none_rcpp <- function (X, U, V, P) {
+  return(U)
+}
+
+# This function simply returns the rank-1 prior covariance matrix
+# without updating it.
+update_prior_covariance_rank1_none_rcpp <- function (X, U, V, P) {
+  return(U)
+}
+
+# This function simply returns the unconstrained prior covariance
+# matrix without updating it.
+update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, P) {
+  return(U)
+}
+
 # Implements update_prior_covariances with version = "R".
 update_prior_covariances_helper <- function (X, U, V, P, covtypes,
                                              control) {
