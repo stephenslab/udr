@@ -61,20 +61,31 @@ assign_prior_covariance_updates <- function (covtypes, control) {
 }
 
 # Perform an M-step update for the prior covariance matrices.
-update_prior_covariances <- function (X, U, V, P, covtypes, control) {
-  if (control$version == "Rcpp") {
-    control$version <- "R"
-    message("update_prior_covariances with version = \"Rcpp\" is not yet ",
-            "implemented; switching to version = \"R\"")
-  }
-  if (control$version == "R")
-    Unew <- update_prior_covariances_helper(X,U,V,P,covtypes,control)
-  return(Unew)
+update_prior_covariances <- function (X, U, V, P, covupdates) {
+  k <- length(U)
+  for (i in 1:k)
+    U[[i]] <- do.call(covupdates[i],list(X = X,U = U[[i]],V = V,P = P))
+  return(U)
 }
 
-# TO DO: Explain here what this funtion does, and how to use it.
-update_prior_covariance_none <- function (X, U, V, p)
-  
+# This function simply returns the scaled prior covariance matrix
+# without updating it.
+update_prior_covariance_scaled_none <- function (X, U, V, P) {
+  return(U)
+}
+
+# This function simply returns the rank-1 prior covariance matrix
+# without updating it.
+update_prior_covariance_rank1_none <- function (X, U, V, P) {
+  return(U)
+}
+
+# This function simply returns the unconstrained prior covariance
+# matrix without updating it.
+update_prior_covariance_unconstrained_none <- function (X, U, V, P) {
+  return(U)
+}
+
 # Implements update_prior_covariances with version = "R".
 update_prior_covariances_helper <- function (X, U, V, P, covtypes,
                                              control) {

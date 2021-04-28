@@ -235,7 +235,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-48, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-49, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -264,7 +264,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     V <- fit$V
   else
     V <- list2array(fit$V)
-  out <- ud_fit_main_loop(X,fit$w,fit$U,V,covtypes,covupdates,control,verbose)
+  out <- ud_fit_main_loop(X,fit$w,fit$U,V,covupdates,control,verbose)
   
   # Output the updated model. Some attributes such as row and column
   # names may be missing and need to be added back.
@@ -298,8 +298,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
 }
 
 # This implements the core part of ud_fit.
-ud_fit_main_loop <- function (X, w, U, V, covtypes, covupdates, control,
-                              verbose) {
+ud_fit_main_loop <- function (X, w, U, V, covupdates, control, verbose) {
   
   # Get the number of components in the mixture prior.
   k <- length(w)
@@ -328,8 +327,7 @@ ud_fit_main_loop <- function (X, w, U, V, covtypes, covupdates, control,
                                       control$version)
     
     # Update the scaled prior covariance matrices.
-    # Unew <- update_prior_covariances(X,U,V,P,covtypes,control)
-    Unew <- U
+    Unew <- update_prior_covariances(X,U,V,P,covupdates)
     
     # Update the mixture weights.
     wnew <- update_mixture_weights_em(P,control$weights.update)
