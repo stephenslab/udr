@@ -235,7 +235,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-50, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-51, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -373,7 +373,7 @@ ud_fit_control_default <- function()
        resid.update         = NA,    # em, none or NA
        scaled.update        = NA,    # em, none or NA
        rank1.update         = NA,    # teem, none or NA
-       unconstrained.update = NA,    # ed, teem, none or NA
+       unconstrained.update = NA,    # teem, ed, none or NA
        version              = "R",   # R or Rcpp
        maxiter              = 20,
        minval               = -1e-8,

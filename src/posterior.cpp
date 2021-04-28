@@ -18,7 +18,7 @@ void compute_posterior_probs_general (const mat& X, const vec& w,
 // Compute the n x k matrix of posterior mixture assignment
 // probabilities given current estimates of the model parameters for
 // the special case when all the samples share the same residual
-// covariance.
+// covariance V.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -36,7 +36,7 @@ arma::mat compute_posterior_probs_iid_rcpp (const arma::mat& X,
 // Compute the n x k matrix of posterior mixture assignment
 // probabilities given current estimates of the model parameters for
 // the more general case when the samples do not necessarily share the
-// same residual covariance matrix.
+// same residual covariance matrix V.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -74,7 +74,7 @@ void compute_posterior_probs_iid (const mat& X, const vec& w, const cube& U,
     T = V + U.slice(j);
     L = chol(T,"lower");
     for (unsigned int i = 0; i < n; i++) {
-      x      = trans(X.row(i));
+      x = trans(X.row(i));
       P(i,j) = log(w(j)) + ldmvnorm(x,L);
     }
   }
@@ -106,9 +106,9 @@ void compute_posterior_probs_general (const mat& X, const vec& w,
   // Compute the log-probabilities, stored in an n x k matrix.
   for (unsigned int j = 0; j < k; j++) {
     for (unsigned int i = 0; i < n; i++) {
-      x      = trans(X.row(i));
-      T      = V.slice(i) + U.slice(j);
-      L      = chol(T,"lower");
+      x = trans(X.row(i));
+      T = V.slice(i) + U.slice(j);
+      L = chol(T,"lower");
       P(i,j) = log(w(j)) + ldmvnorm(x,L);
     }
   }

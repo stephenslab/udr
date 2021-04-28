@@ -18,13 +18,13 @@ fit0 <- ud_init(X,
                 U_scaled = U,
                 U_rank1 = list(tcrossprod(c(-1,1)),tcrossprod(c(1,2))),
                 n_unconstrained = 2,
-                V = V)
+                V = V) # V = rep(list(V),n)
 control <- list(maxiter = 100,
                 resid.update = "em",
                 scaled.update = "none",
                 rank1.update = "none",
-                unconstrained.update = "none",
-                version = "Rcpp")
+                unconstrained.update = "ed",
+                version = "R")
 fit1 <- ud_fit(fit0,control = control)
 y <- fit1$progress$loglik
 y <- max(y) - y + 0.01

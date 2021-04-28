@@ -23,7 +23,8 @@ double loglik_ud_iid_rcpp (const arma::mat& X, const arma::vec& w,
 }
 
 // Compute the log-likelihood for the Ultimate Deconvolution model
-// when the residual covariance V is *not* the same for all samples.
+// when the residual covariance V is not necessarily the same for all
+// samples.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
@@ -63,7 +64,8 @@ double loglik_ud_iid (const mat& X, const vec& w, const cube& U,
 }
 
 // Compute the log-likelihood for the Ultimate Deconvolution model
-// when the residual covariance is *not* the same for all samples.
+// when the residual covariance is not necessarily the same for all
+// samples.
 double loglik_ud_general (const mat& X, const vec& w, const cube& U, 
 			  const cube& V) {
   

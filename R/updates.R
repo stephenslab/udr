@@ -60,48 +60,71 @@ assign_prior_covariance_updates <- function (covtypes, control) {
   return(covupdates)
 }
 
-# Perform an M-step update for the prior covariance matrices.
+# Perform M-step updates for all the prior covariance matrices U.
 update_prior_covariances <- function (X, U, V, P, covupdates) {
   k <- length(U)
   for (i in 1:k)
-    U[[i]] <- do.call(covupdates[i],list(X = X,U = U[[i]],V = V,P = P))
+    U[[i]] <- do.call(covupdates[i],list(X = X,U = U[[i]],V = V,p = P[,i]))
   return(U)
 }
 
 # This function simply returns the scaled prior covariance matrix
 # without updating it.
-update_prior_covariance_scaled_none <- function (X, U, V, P) {
+update_prior_covariance_scaled_none <- function (X, U, V, p) {
   return(U)
 }
 
 # This function simply returns the rank-1 prior covariance matrix
 # without updating it.
-update_prior_covariance_rank1_none <- function (X, U, V, P) {
+update_prior_covariance_rank1_none <- function (X, U, V, p) {
   return(U)
 }
 
 # This function simply returns the unconstrained prior covariance
 # matrix without updating it.
-update_prior_covariance_unconstrained_none <- function (X, U, V, P) {
+update_prior_covariance_unconstrained_none <- function (X, U, V, p) {
   return(U)
 }
 
 # This function simply returns the scaled prior covariance matrix
 # without updating it.
-update_prior_covariance_scaled_none_rcpp <- function (X, U, V, P) {
+update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p) {
   return(U)
 }
 
 # This function simply returns the rank-1 prior covariance matrix
 # without updating it.
-update_prior_covariance_rank1_none_rcpp <- function (X, U, V, P) {
+update_prior_covariance_rank1_none_rcpp <- function (X, U, V, p) {
   return(U)
 }
 
 # This function simply returns the unconstrained prior covariance
 # matrix without updating it.
-update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, P) {
+update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, p) {
   return(U)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
+  if (is.matrix(V))
+    U$mat <- update_prior_covariance_unconstrained_ed_iid(X,U$mat,V,p)
+  else
+    stop("update_prior_covariance_unconstrained_ed is not yet implemented ",
+         "for case when data points are not i.i.d. (different Vs)")
+  return(U)
+}
+
+# Perform an M-step update for one of the prior covariance matrices
+# using the update formula derived in Bovy et al (2011), for the
+# special case when the residual covariances V are the same for all
+# data points. Input p is a vector of weights associated with the rows
+# of X.
+update_prior_covariance_unconstrained_ed_iid <- function (X, U, V, p) {
+  p <- safenormalize(p)
+  T <- U + V
+  B <- solve(T,U)
+  X1 <- crossprod((sqrt(p)*X) %*% B)
+  return(U - U %*% B + X1)
 }
 
 # Implements update_prior_covariances with version = "R".
@@ -130,7 +153,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
         stop("control$rank1.update == \"teem\" is currently not ",
              "implemented for case when each data point has a different ",
              "residual covariance, V")
-      Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = 1)
+      Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,r = 1)
     } else if (control$rank1.update == "ed"){
         if (!is.matrix(V)){
             Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
@@ -140,7 +163,7 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
         "\" is not implemented")
     }
            
-    }else if (covtypes[i] == "unconstrained") {
+    } else if (covtypes[i] == "unconstrained") {
 
       # Update a full (unconstrained) matrix.
       if (control$unconstrained.update == "ed") {
@@ -161,18 +184,6 @@ update_prior_covariances_helper <- function (X, U, V, P, covtypes,
       stop("Invalid prior covariance type")
   }
   return(Unew)
-}
-
-# Perform an M-step update for one of the prior covariance matrices
-# using the update formula derived in Bovy et al (2011). Here, p is a
-# vector, with one entry per row of X, giving the posterior assignment
-# probabilities for the mixture component being updated.
-update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
-  p <- safenormalize(p)
-  T <- U + V
-  B <- solve(T,U)
-  X1 <- crossprod((sqrt(p) * X) %*% B)
-  return(U - U %*% B + X1)
 }
 
 # Perform an M-step update for one of the prior covariance matrices
