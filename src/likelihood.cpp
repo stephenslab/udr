@@ -4,11 +4,10 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-double loglik_ud_iid (const mat& X, const vec& w, const cube& U, 
-		      const mat& V);
+double loglik_ud_iid (const mat& X, const vec& w, const cube& U, const mat& V);
 
 double loglik_ud_general (const mat& X, const vec& w, const cube& U, 
-                          const cube& V);
+			  const cube& V);
 
 // FUNCTION DEFINITIONS
 // --------------------

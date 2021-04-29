@@ -129,8 +129,10 @@ void compute_posterior_probs_general (const mat& X, const vec& w,
 // size as x.
 void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1, 
 				    const mat& V, const cube& B1,
-				    vec& mu1, mat& S1, vec& y) {
+				    vec& mu1, mat& S1) {
+  unsigned int n = x.n_elem;
   unsigned int k = w1.n_elem;
+  vec y(n);
   mu1.fill(0);
   S1.fill(0);
   for (unsigned int i = 0; i < k; i++) {
@@ -148,8 +150,10 @@ void compute_posterior_mvtnorm_mix (const vec& x, const vec& w1,
 // not depend on x, so it is not one of the inputs.) These calculations 
 // will only work if V is positive definite (invertible). Input I
 // should be the identity matrix of the same dimension as U and V.
-void compute_posterior_covariance_mvtnorm (const mat& U, const mat& V,
-					   const mat& I, mat& S1) {
+void compute_posterior_covariance_mvtnorm (const mat& U, const mat& V, 
+					   mat& S1) {
+  unsigned int n = U.n_rows;
+  mat I(n,n,fill::eye);
   S1 = inv(U*inv(V) + I)*U;
 }
 

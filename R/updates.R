@@ -185,7 +185,6 @@ update_prior_covariance_unconstrained_teem_rcpp <- function (X, U, V, p,
 
 # update_prior_covariances_helper = function (X, U, V, P, covtypes, control) {
 #     if (covtypes[i] == "scaled") {
-
 #       # Update the scaling factor.
 #       if (control$scaled.update == "em") {
 #           Unew[,,i] <- U[,,i] *
@@ -241,12 +240,10 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
 # @param p is a vector of the weight matrix for one component.
 # @param U is a matrix
 # @param V is a 3-d array object, containing V_j for each observation
-update_prior_covariance_ed_general = function(X, U, V, p){
-
-    
+update_prior_covariance_ed_general <- function (X, U, V, p) {
+  n <- nrow(X)
   B.weighted = c()
   b.weighted = c()
-  n <- nrow(X)
   
   for (i in 1:n){
     b.weighted[[i]] = sqrt(p[i])* U %*% solve(U+V[,,i]) %*% X[i, ]

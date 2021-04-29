@@ -120,25 +120,23 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 
   // These are used to store intermediate calculations.
   cube B1(m,m,k);
-  mat I(m,m,fill::eye);
   mat S1(m,m);
   vec mu1(m);
   vec x(m);
-  vec y(m);
   vec p(k);
   
   // Compute the posterior covariances for each mixture component. The
   // posterior covariances do not depend on x, so we compute them
   // upfront.
   for (unsigned int j = 0; j < k; j++)
-    compute_posterior_covariance_mvtnorm(U.slice(j),V,I,B1.slice(j));
+    compute_posterior_covariance_mvtnorm(U.slice(j),V,B1.slice(j));
 
   // Compute the M-step update for the residual covariance.
   Vnew.fill(0);
   for (unsigned int i = 0; i < n; i++) {
      x = trans(X.row(i));
      p = trans(P.row(i));
-     compute_posterior_mvtnorm_mix(x,p,V,B1,mu1,S1,y);
+     compute_posterior_mvtnorm_mix(x,p,V,B1,mu1,S1);
      mu1 -= x;
      Vnew += S1;
      Vnew += mu1 * trans(mu1);
