@@ -172,6 +172,17 @@ update_prior_covariance_unconstrained_teem <- function (X, U, V, p, minval,
   return(U)
 }
 
+# This is a more efficient C++ implementation of 
+# update_prior_covariance_unconstrained_teem.
+update_prior_covariance_unconstrained_teem_rcpp <- function (X, U, V, p,
+                                                             minval) {
+  if (!is.matrix(V))
+    stop("unconstrained.update = \"teem\" does not work for case when data ",
+         "points are not i.i.d. (different Vs)")
+  U$mat <- update_prior_covariance_teem_iid_rcpp(X,U$mat,V,p,minval)
+  return(U)
+}
+
 # update_prior_covariances_helper = function (X, U, V, P, covtypes, control) {
 #     if (covtypes[i] == "scaled") {
 
@@ -180,18 +191,13 @@ update_prior_covariance_unconstrained_teem <- function (X, U, V, p, minval,
 #           Unew[,,i] <- U[,,i] *
 #             update_prior_scalar(X,U[,,i],V,P[,i],control$minval)
 #     } else if (covtypes[i] == "rank1") 
-
-#       # Update a rank-1 covariance matrix.
 #     if (control$rank1.update == "teem") {
 #       Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval,r = 1)
 #     } else if (control$rank1.update == "ed"){
 #         if (!is.matrix(V)){
 #             Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
 #         }
-        
 #     } else if (covtypes[i] == "unconstrained") {
-
-#       # Update a full (unconstrained) matrix.
 #       if (control$unconstrained.update == "ed") {
 #         if (!is.matrix(V))
 #           Unew[,,i] <- update_prior_covariance_ed_general(X,U[,,i],V,P[,i])

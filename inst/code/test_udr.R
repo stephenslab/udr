@@ -25,7 +25,7 @@ control <- list(maxiter = numiter,
                 scaled.update = "none",
                 rank1.update = "none",
                 unconstrained.update = "ed",
-                version = "R")
+                version = "Rcpp")
 control1 <- control
 control2 <- control
 control2$unconstrained.update <- "teem"

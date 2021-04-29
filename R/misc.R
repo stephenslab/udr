@@ -38,7 +38,7 @@ getrank1 <- function (X) {
   return(sqrt(out$values[1]) * out$vectors[,1])
 }
 
-# Find the matrix n x n U + I that best approximates T satisfying the
+# Find the n x n matrix U + I that best approximates T satisfying the
 # constraint that U is positive definite. This is achieved by setting
 # any eigenvalues of T less than 1 to 1 + minval, or, equivalently,
 # setting any eigenvalues of U less than zero to be minval. The output

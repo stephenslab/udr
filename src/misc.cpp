@@ -2,6 +2,18 @@
 
 using namespace arma;
 
+// INLINE FUNCTION DEFINITIONS
+// ---------------------------
+// Return a or b, which ever is larger.
+inline double max (double a, double b) {
+  double y;
+  if (a > b)
+    y = a;
+  else
+    y = b;
+  return y;
+}
+
 // FUNCTION DEFINITIONS
 // --------------------
 // Scale each row A[i,] by b[i].
@@ -43,3 +55,26 @@ double ldmvnorm (const vec& x, const mat& L) {
   return -d*d/2 - sum(log(sqrt(2*M_PI)*L.diag()));
 }
 
+// Find the n x n matrix U + I that best approximates T satisfying the
+// constraint that U is positive definite. This is achieved by setting
+// any eigenvalues of T less than 1 to 1 + minval, or, equivalently,
+// setting any eigenvalues of U less than zero to be minval. The
+// output is a positive definite matrix, U.
+void shrink_cov (const mat& T, mat& U, double minval) {
+  unsigned int n = T.n_rows;
+  mat Y(n,n);
+  vec d(n);
+  eig_sym(d,Y,T);
+  for (unsigned int i = 0; i < n; i++)
+    d(i) = max(d(i) - 1,minval);
+
+  // These next few lines are equivalent to
+  //
+  //   U = Y * diagmat(d) * trans(Y)
+  //
+  // but implemented in a slightly more efficient way because they
+  // avoid an extra matrix-matrix multiplication.
+  inplace_trans(Y);
+  scale_rows(Y,sqrt(d));
+  U = crossprod(Y);
+}
