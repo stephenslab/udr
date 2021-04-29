@@ -68,13 +68,13 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
                "semi-definite matrix, or a list of positive semi-definite",
                "matrices, with one matrix per row of \"X\"")
   if (is.matrix(V)) {
-    if (!issemidef(V,control$minval))
+    if (!issemidef(V))
       stop(msg)
   } else {
     if (length(V) != n)
       stop(msg)
     for (i in 1:n)
-      if (!issemidef(V[[i]],control$minval))
+      if (!issemidef(V[[i]]))
         stop(msg)
   }
   
@@ -121,11 +121,11 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # positive semi-definite.
   if (n_scaled > 0)
     for (i in 1:n_scaled)
-      if (!issemidef(U_scaled[[i]],control$minval))
+      if (!issemidef(U_scaled[[i]]))
         stop("All U_scaled matrices should be positive semi-definite")
   if (n_unconstrained > 0)
     for (i in 1:n_unconstrained)
-      if (!issemidef(U_unconstrained[[i]],control$minval))
+      if (!issemidef(U_unconstrained[[i]]))
         stop("All U_unconstrained matrices should be positive semi-definite")
 
   # Set up the data structure for the unconstrained covariance matrices.

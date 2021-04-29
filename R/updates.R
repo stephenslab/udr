@@ -61,53 +61,55 @@ assign_prior_covariance_updates <- function (covtypes, control) {
 }
 
 # Perform M-step updates for all the prior covariance matrices U.
-update_prior_covariances <- function (X, U, V, P, covupdates) {
+update_prior_covariances <- function (X, U, V, P, covupdates, minval) {
   k <- length(U)
   for (i in 1:k)
-    U[[i]] <- do.call(covupdates[i],list(X = X,U = U[[i]],V = V,p = P[,i]))
+    U[[i]] <- do.call(covupdates[i],list(X = X,U = U[[i]],V = V,p = P[,i],
+                                         minval = minval))
   return(U)
 }
 
 # This function simply returns the scaled prior covariance matrix
 # without updating it.
-update_prior_covariance_scaled_none <- function (X, U, V, p) {
+update_prior_covariance_scaled_none <- function (X, U, V, p, minval) {
   return(U)
 }
 
 # This function simply returns the rank-1 prior covariance matrix
 # without updating it.
-update_prior_covariance_rank1_none <- function (X, U, V, p) {
+update_prior_covariance_rank1_none <- function (X, U, V, p, minval) {
   return(U)
 }
 
 # This function simply returns the unconstrained prior covariance
 # matrix without updating it.
-update_prior_covariance_unconstrained_none <- function (X, U, V, p) {
+update_prior_covariance_unconstrained_none <- function (X, U, V, p, minval) {
   return(U)
 }
 
 # This function simply returns the scaled prior covariance matrix
 # without updating it.
-update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p) {
+update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
   return(U)
 }
 
 # This function simply returns the rank-1 prior covariance matrix
 # without updating it.
-update_prior_covariance_rank1_none_rcpp <- function (X, U, V, p) {
+update_prior_covariance_rank1_none_rcpp <- function (X, U, V, p, minval) {
   return(U)
 }
 
 # This function simply returns the unconstrained prior covariance
 # matrix without updating it.
-update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, p) {
+update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, p,
+                                                             minval) {
   return(U)
 }
 
 # Perform an M-step update for a prior covariance (U) using the update
 # formula derived in Bovy et al (2011). Input p is a vector of weights
 # associated with the rows of X.
-update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
+update_prior_covariance_unconstrained_ed <- function (X, U, V, p, minval) {
   if (is.matrix(V))
     U$mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
   else
@@ -116,9 +118,10 @@ update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
   return(U)
 }
 
-# This is a more efficient C++ implementation of function
+# This is a more efficient C++ implementation of 
 # update_prior_covariance_unconstrained_ed.
-update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p) {
+update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
+                                                           minval) {
   if (is.matrix(V)) 
     U$mat <- update_prior_covariance_ed_iid_rcpp(X,U$mat,V,p)
   else
@@ -138,6 +141,33 @@ update_prior_covariance_ed_iid <- function (X, U, V, p) {
   B <- solve(T,U)
   X1 <- crossprod((sqrt(p)*X) %*% B)
   return(U - U %*% B + X1)
+}
+
+# Perform an M-step update for a prior covariance matrix using the
+# "eigenvalue truncation" technique described in Won et al (2013).
+# Note that input U is not used, and is included for consistent with
+# the other update_prior_covariance functions. Input p is a vector of
+# weights associated with the rows of X.
+update_prior_covariance_unconstrained_teem <- function (X, U, V, p, minval,
+                                                        r = ncol(X)) {
+  if (!is.matrix(V))
+    stop("unconstrained.update = \"teem\" does not work for case when data ",
+         "points are not i.i.d. (different Vs)")
+    
+  # Transform the data so that the residual covariance is I, then
+  # compute the maximum-likelhood estimate (MLE) for T = U + I.
+  p <- safenormalize(p)
+  R <- chol(V)
+  T <- crossprod((sqrt(p)*X) %*% solve(R))
+  
+  # Find U maximizing the expected complete log-likelihood subject to
+  # U being positive definite, with at most r of its eigenvalues being
+  # positive.
+  U$mat <- shrink_cov(T,minval,r)
+  
+  # Recover the solution for the original (untransformed) data.
+  U$mat <- t(R) %*% U$mat %*% R
+  return(U)
 }
 
 # update_prior_covariances_helper = function (X, U, V, P, covtypes, control) {
@@ -163,61 +193,6 @@ update_prior_covariance_ed_iid <- function (X, U, V, p) {
 #       if (control$unconstrained.update == "ed") {
 #         if (!is.matrix(V))
 #           Unew[,,i] <- update_prior_covariance_ed_general(X,U[,,i],V,P[,i])
-#         else
-#           Unew[,,i] <- update_prior_covariance_ed(X,U[,,i],V,P[,i])
-#       } else if (control$unconstrained.update == "teem") {
-#         Unew[,,i] <- update_prior_covariance_teem(X,V,P[,i],control$minval, r = nrow(V))
-
-# Perform an M-step update for one of the prior covariance matrices
-# using the eigenvalue-truncation technique described in Won et al
-# (2013). Input p is a vector, with one entry per row of X, giving
-# the posterior assignment probabilities for the mixture components
-# being updated.
-update_prior_covariance_unconstrained_teem <-
-  function (X, V, p, minval, r) {
-
-  # Transform the data so that the residual covariance is I, then
-  # compute the maximum-likelhood estimate (MLE) for T = U + I.
-  p <- safenormalize(p)
-  R <- chol(V)
-  T <- crossprod((sqrt(p)*X) %*% solve(R))
-  
-  # Find U maximizing the expected complete log-likelihood subject to
-  # U being positive definite, or U being a rank-1 matrix. The
-  # unconstrained update is based on the fact that the covariance
-  # matrix that minimizes the likelihood subject to the constraint
-  # that U is positive definite is obtained by truncating the
-  # eigenvalues of T = U + I less than 1 to be 1; see Won et al
-  # (2013), p. 434, the sentence just after equation (16). For rank1
-  # update, only the first rth largest eigenvalues of U are kept. The
-  # others are set to 0.
-  U <- shrink_cov(T, minval, r)
-    
-  # Recover the solution for the original (untransformed) data.
-  return(t(R) %*% U %*% R)
-}
-
-# "Shrink" matrix T = U + I for (1) unconstrained update and (2) rank1 update.
-# For unconstrained update, find the "best" matrix T
-# satisfying the constraint that U is positive definite (if minval >
-# 0) or positive semi-definite (if minval <= 0). This is achieved by
-# setting any eigenvalues of T less than 1 to 1 + minval, or,
-# equivalently, setting any eigenvalues of U less than 0 to be
-# minval. The output is a positive definite matrix, U, or a positive
-# semi-definite matrix if minval <= 0.
-# For rank1 update, we keep only first rth eigenvalues where r is the rank of matrix U.
-shrink_cov <- function (T, minval = 0, r) {
-    
-  minval <- max(0,minval)
-  out <- eigen(T)
-  d <- out$values
-  
-  if (nrow(T)!= r){
-      d[(r+1):length(d)] <- 1
-  }
-  d <- pmax(d - 1,minval)
-  return(tcrossprod(out$vectors %*% diag(sqrt(d))))
-}
 
 # Update the scaling factor for prior canonical covariance matrix.
 # @param U0 Canonical covariance matrix
@@ -253,7 +228,6 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
   return(sum(p*unweighted_sum))
 }
 
-
 # Perform an M-step update for one of the prior covariance matrices
 # using the update formula derived in Bovy et al (2011) with varied V_j.
 # @param p is a vector of the weight matrix for one component.
@@ -278,7 +252,6 @@ update_prior_covariance_ed_general = function(X, U, V, p){
   Unew = (apply(bb.weighted, c(1,2), sum) + apply(B.weighted, c(1,2), sum))/sum(p)
   return(Unew)
 }
-
 
 # Perform an M-step update for one of the prior rank1 matrix when V varies
 # The algorithm is based on Bovy et al (2011) and derived by David Gerard.
@@ -314,7 +287,6 @@ update_prior_rank1_general = function(X, U, V, p){
   
   return(Unew)
 }
-
 
 # function to get the vector from rank1 matrix.
 get_vec = function(U){

@@ -235,7 +235,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-54, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-55, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -327,7 +327,7 @@ ud_fit_main_loop <- function (X, w, U, V, covupdates, control, verbose) {
                                       control$version)
     
     # Update the scaled prior covariance matrices.
-    Unew <- update_prior_covariances(X,U,V,P,covupdates)
+    Unew <- update_prior_covariances(X,U,V,P,covupdates,control$minval)
     
     # Update the mixture weights.
     wnew <- update_mixture_weights_em(P,control$weights.update)
@@ -376,5 +376,5 @@ ud_fit_control_default <- function()
        unconstrained.update = NA,    # teem, ed, none or NA
        version              = "R",   # R or Rcpp
        maxiter              = 20,
-       minval               = -1e-8,
+       minval               = 1e-14,
        tol                  = 1e-6)

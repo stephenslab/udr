@@ -38,6 +38,23 @@ getrank1 <- function (X) {
   return(sqrt(out$values[1]) * out$vectors[,1])
 }
 
+# Find the matrix n x n U + I that best approximates T satisfying the
+# constraint that U is positive definite. This is achieved by setting
+# any eigenvalues of T less than 1 to 1 + minval, or, equivalently,
+# setting any eigenvalues of U less than zero to be minval. The output
+# is a positive definite matrix, U. When r < n, U is additionally
+# constrained so that at most r of its eigenvalues are positive.
+shrink_cov <- function (T, minval = 0, r = nrow(T)) {
+  n <- nrow(T)
+  r <- min(r,n)
+  out <- eigen(T)
+  d <- out$values
+  d <- pmax(d-1,minval)
+  if (r < n)
+    d[seq(r+1,n)] <- minval
+  return(tcrossprod(out$vectors %*% diag(sqrt(d))))
+}
+
 # Output y = x/sum(x), but take care of the special case when all the
 # entries are zero, in which case return the vector of all 1/n, where
 # n = length(x).
