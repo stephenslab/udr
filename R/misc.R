@@ -38,6 +38,10 @@ getrank1 <- function (X) {
   return(sqrt(out$values[1]) * out$vectors[,1])
 }
 
+# Return a matrix containing the sums over the "slices".
+sliceSums <- function (x)
+  rowSums(x,dims = 2)
+
 # Find the n x n matrix U + I that best approximates T satisfying the
 # constraint that U is positive definite. This is achieved by setting
 # any eigenvalues of T less than 1 to 1 + minval, or, equivalently,

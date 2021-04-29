@@ -31,14 +31,14 @@ control <- list(maxiter = numiter,
 control1 <- control
 control2 <- control
 fit1 <- ud_fit(fit1,control = control1)
-fit2 <- ud_fit(fit2,control = control2)
+print(system.time(fit2 <- ud_fit(fit2,control = control2)))
 y1 <- fit1$progress$loglik
 y2 <- fit2$progress$loglik
 y0 <- max(c(y1,y2))
 y1 <- y0 - y1 + 0.01
 y2 <- y0 - y2 + 0.01
-plot(1:numiter,y1,col = "darkblue",type = "l",lwd = 2,log = "y",
-     xlab = "iteration",ylab = "loglik difference",
+plot(1:numiter,y1,col = "darkblue",type = "l",lwd = 2,
+     log = "y",xlab = "iteration",ylab = "loglik difference",
      ylim = c(0.01,max(c(y1,y2))))
-lines(1:numiter,y2,col = "tomato",lwd = 2)
+lines(1:numiter,y2,col = "tomato",lty = "dashed",lwd = 2)
 

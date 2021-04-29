@@ -140,17 +140,16 @@ update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
 # @param U is a matrix
 # @param V is a 3-d array, containing V_j for each observation
 update_prior_covariance_ed_general <- function (X, U, V, p) {
-  n <- nrow(X)
-  B.weighted = c()
-  b.weighted = c()
+  n  <- nrow(X)
+  m  <- ncol(X)
+  B  <- array(0,c(m,m,n))
+  bb <- array(0,c(m,m,n))
   for (i in 1:n) {
-    b.weighted[[i]] <- (sqrt(p[i])*U) %*% solve(U + V[,,i]) %*% X[i, ]
-    B.weighted[[i]] <- p[i]*(U - U %*% solve(U + V[,,i]) %*% U)
+    Tinv    <- solve(U + V[,,i])
+    bb[,,i] <- tcrossprod(((sqrt(p[i])*U) %*% Tinv) %*% X[i,])
+    B[,,i]  <- p[i]*(U - (U %*% Tinv) %*% U)
   }
-  bb.weighted <- lapply(b.weighted, function(x) as.matrix(x %*% t(x)))
-  bb.weighted <- simplify2array(bb.weighted)
-  B.weighted <- simplify2array(B.weighted)
-  Unew <- (apply(bb.weighted,c(1,2),sum) + apply(B.weighted,c(1,2),sum))/sum(p)
+  Unew <- (sliceSums(bb) + sliceSums(B))/sum(p)
   return(Unew)
 }
 
