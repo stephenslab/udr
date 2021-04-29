@@ -62,7 +62,30 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
 
 test_that(paste("Check R and C++ implementations of prior covariance",
                 "matrix (U) updates when V is a matrix"),{
-  # TO DO.
+  # Simulate data.
+  set.seed(1)
+  n   <- 100
+  dat <- simulate_ud_data_2d(n)
+  X   <- dat$X
+
+  # Run ud_fit with unconstrained.update = "ed".
+  control  <- list(maxiter = 20,resid.update = "em",scaled.update = "none",
+                   rank1.update = "none",unconstrained.update = "ed")
+  control1 <- control
+  control2 <- control
+  control1$version <- "R"
+  control2$version <- "Rcpp"
+  set.seed(1); fit1 <- ud_init(X,V = dat$V,control = control1)
+  set.seed(1); fit2 <- ud_init(X,V = dat$V,control = control2)
+  capture.output(fit1 <- ud_fit(fit1,control = control1))
+  capture.output(fit2 <- ud_fit(fit2,control = control2))
+
+  # The likelihoods should be non-decreasing, and both ud_fit outputs
+  # should be the same (except for the timings).
+  fit1$progress$timing <- 0
+  fit2$progress$timing <- 0
+  expect_nondecreasing(fit1$progress$loglik)
+  expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
 })
 
 test_that(paste("Check R and C++ implementations of prior covariance",

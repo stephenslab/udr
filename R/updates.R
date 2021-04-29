@@ -104,7 +104,9 @@ update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, p) {
   return(U)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Perform an M-step update for a prior covariance (U) using the update
+# formula derived in Bovy et al (2011). Input p is a vector of weights
+# associated with the rows of X.
 update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
   if (is.matrix(V))
     U$mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
@@ -114,7 +116,8 @@ update_prior_covariance_unconstrained_ed <- function (X, U, V, p) {
   return(U)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# This is a more efficient C++ implementation of function
+# update_prior_covariance_unconstrained_ed.
 update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p) {
   if (is.matrix(V)) 
     U$mat <- update_prior_covariance_ed_iid_rcpp(X,U$mat,V,p)
@@ -124,11 +127,11 @@ update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p) {
   return(U)
 }
 
-# Perform an M-step update for one of the prior covariance matrices
-# using the update formula derived in Bovy et al (2011), for the
-# special case when the residual covariances V are the same for all
-# data points. Input p is a vector of weights associated with the rows
-# of X.
+# Perform an M-step update for a prior covariance matrix (U) using the
+# update formula derived in Bovy et al (2011), for the special case
+# when the residual covariances V are the same for all data
+# points. Input p is a vector of weights associated with the rows of
+# X.
 update_prior_covariance_ed_iid <- function (X, U, V, p) {
   p <- safenormalize(p)
   T <- U + V
