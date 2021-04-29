@@ -61,8 +61,12 @@ assign_prior_covariance_updates <- function (covtypes, control) {
 }
 
 # Perform M-step updates for all the prior covariance matrices U.
+# Input argument V may either be an m x m matrix, a list of m x m
+# matrices of length n, or a m x m x n array.
 update_prior_covariances <- function (X, U, V, P, covupdates, minval) {
   k <- length(U)
+  if (is.list(V))
+    V <- list2array(V)
   for (i in 1:k)
     U[[i]] <- do.call(covupdates[i],list(X = X,U = U[[i]],V = V,p = P[,i],
                                          minval = minval))
@@ -113,8 +117,7 @@ update_prior_covariance_unconstrained_ed <- function (X, U, V, p, minval) {
   if (is.matrix(V))
     U$mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
   else
-    stop("update_prior_covariance_unconstrained_ed is not yet implemented ",
-         "for case when data points are not i.i.d. (different Vs)")
+    U$mat <- update_prior_covariance_ed_general(X,U$mat,V,p)
   return(U)
 }
 
@@ -125,9 +128,30 @@ update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
   if (is.matrix(V)) 
     U$mat <- update_prior_covariance_ed_iid_rcpp(X,U$mat,V,p)
   else
-    stop("update_prior_covariance_unconstrained_ed is not yet implemented ",
-         "for case when data points are not i.i.d. (different Vs)")
+    stop("update_prior_covariance_unconstrained_ed_rcpp is not yet ",
+         "implemented for case when data points are not i.i.d. (different Vs)")
   return(U)
+}
+
+# Perform an M-step update for a prior covariance matrix (U) using the
+# eupdate formula derived in Bovy et al (2011), allowing for residual
+# covariance matrices that differ among the data samples (rows of X).
+# @param p is a vector of the weight matrix for one component
+# @param U is a matrix
+# @param V is a 3-d array, containing V_j for each observation
+update_prior_covariance_ed_general <- function (X, U, V, p) {
+  n <- nrow(X)
+  B.weighted = c()
+  b.weighted = c()
+  for (i in 1:n) {
+    b.weighted[[i]] <- (sqrt(p[i])*U) %*% solve(U + V[,,i]) %*% X[i, ]
+    B.weighted[[i]] <- p[i]*(U - U %*% solve(U + V[,,i]) %*% U)
+  }
+  bb.weighted <- lapply(b.weighted, function(x) as.matrix(x %*% t(x)))
+  bb.weighted <- simplify2array(bb.weighted)
+  B.weighted <- simplify2array(B.weighted)
+  Unew <- (apply(bb.weighted,c(1,2),sum) + apply(B.weighted,c(1,2),sum))/sum(p)
+  return(Unew)
 }
 
 # Perform an M-step update for a prior covariance matrix (U) using the
@@ -233,29 +257,6 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
     apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
                           sum(lambdas/(s*lambdas + 1)))
   return(sum(p*unweighted_sum))
-}
-
-# Perform an M-step update for one of the prior covariance matrices
-# using the update formula derived in Bovy et al (2011) with varied V_j.
-# @param p is a vector of the weight matrix for one component.
-# @param U is a matrix
-# @param V is a 3-d array object, containing V_j for each observation
-update_prior_covariance_ed_general <- function (X, U, V, p) {
-  n <- nrow(X)
-  B.weighted = c()
-  b.weighted = c()
-  
-  for (i in 1:n){
-    b.weighted[[i]] = sqrt(p[i])* U %*% solve(U+V[,,i]) %*% X[i, ]
-    B.weighted[[i]] = p[i]*(U - U %*% solve(U+V[,,i])%*% U)
-  }
-  
-  bb.weighted = lapply(b.weighted, function(x) as.matrix(x %*% t(x)))
-  bb.weighted = simplify2array(bb.weighted)
-  B.weighted = simplify2array(B.weighted)
-  
-  Unew = (apply(bb.weighted, c(1,2), sum) + apply(B.weighted, c(1,2), sum))/sum(p)
-  return(Unew)
 }
 
 # Perform an M-step update for one of the prior rank1 matrix when V varies
