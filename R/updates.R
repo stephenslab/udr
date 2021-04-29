@@ -143,11 +143,13 @@ update_prior_covariance_ed_iid <- function (X, U, V, p) {
   return(U - U %*% B + X1)
 }
 
-# Perform an M-step update for a prior covariance matrix using the
+# Perform an M-step update for a prior covariance matrix U using the
 # "eigenvalue truncation" technique described in Won et al (2013).
-# Note that input U is not used, and is included for consistent with
-# the other update_prior_covariance functions. Input p is a vector of
-# weights associated with the rows of X.
+# Note that input U is not used, and is included only for consistency
+# with the other update_prior_covariance functions. Input p is a
+# vector of weights associated with the rows of X. Input r specifies
+# an optional constraint on U; when r < n, where U is an n x n matrix,
+# at most r of the eigenvalues are positive in the updated matrix.
 update_prior_covariance_unconstrained_teem <- function (X, U, V, p, minval,
                                                         r = ncol(X)) {
   if (!is.matrix(V))
