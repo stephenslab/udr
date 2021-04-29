@@ -27,6 +27,9 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   capture.output(fit3 <- ud_fit(fit3,control = control1))
   capture.output(fit4 <- ud_fit(fit4,control = control2))
   
+  # The likelihoods should be non-decreasing.
+  expect_nondecreasing(fit1$progress$loglik)
+  
   # The outputs of all four variants of ud_fit should be the same
   # (except for V and the timings).
   fit1$progress$timing <- 0
@@ -48,15 +51,21 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   set.seed(1); fit2 <- ud_init(X,V = dat$V,control = control2)
   capture.output(fit1 <- ud_fit(fit1,control = control1))
   capture.output(fit2 <- ud_fit(fit2,control = control2))
+  expect_nondecreasing(fit1$progress$loglik)
 
-  # The outputs of all four variants of ud_fit should be the same
-  # (except for the timings).
+  # The ud_fit outputs should be the same (except for the timings),
+  # and the likelihoods should be non-decreasing.
   fit1$progress$timing <- 0
   fit2$progress$timing <- 0
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
 })
 
-test_that(paste("R and C++ implementations of ud_fit produce same result",
-                "when Vs are not the same"),{
-  # TO DO: Add tests here.
+test_that(paste("Check R and C++ implementations of prior covariance",
+                "matrix (U) updates when V is a matrix"),{
+  # TO DO.
+})
+
+test_that(paste("Check R and C++ implementations of prior covariance",
+                "matrix (U) updates when the Vs are not all the same"),{
+  # TO DO.
 })
