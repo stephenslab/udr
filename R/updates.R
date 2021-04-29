@@ -219,10 +219,6 @@ update_prior_covariance_unconstrained_teem_rcpp <- function (X, U, V, p,
 #         if (!is.matrix(V)){
 #             Unew[,,i] <- update_prior_rank1_general(X,U[,,i],V,P[,i])
 #         }
-#     } else if (covtypes[i] == "unconstrained") {
-#       if (control$unconstrained.update == "ed") {
-#         if (!is.matrix(V))
-#           Unew[,,i] <- update_prior_covariance_ed_general(X,U[,,i],V,P[,i])
 
 # Update the scaling factor for prior canonical covariance matrix.
 # @param U0 Canonical covariance matrix

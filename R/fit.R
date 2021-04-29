@@ -372,7 +372,7 @@ ud_fit_control_default <- function()
   list(weights.update       = "em",  # em or none
        resid.update         = NA,    # em, none or NA
        scaled.update        = NA,    # em, none or NA
-       rank1.update         = NA,    # teem, none or NA
+       rank1.update         = NA,    # teem, ed, none or NA
        unconstrained.update = NA,    # teem, ed, none or NA
        version              = "R",   # R or Rcpp
        maxiter              = 20,
