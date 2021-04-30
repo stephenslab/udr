@@ -189,7 +189,7 @@ update_prior_scalar <- function (X, U0, V, p, minval){
     lambdas <- ifelse(evd$values < minval,0,evd$values)
 
     Y <- t(evd$vectors) %*% t(Xhat)  # Y: p by n
-    return(uniroot(function(s) grad_loglik_scale_factor(s,p,Y,lambdas),c(0,1),
+    return(uniroot(function(s) grad_loglik_scale_factor(s,p,Y,lambdas),c(0,1e6),
                    extendInt = "yes")$root)
 }
 
