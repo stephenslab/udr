@@ -13,14 +13,19 @@ T <- U + V
 X <- rmvnorm(n,sigma = T)
 
 # Perform the EM updates derived using the ED data augmentation.
-numiter <- 20
-fit1 <- ed(X,U,V,numiter = numiter)
+numiter <- 40
+fit1 <- ed(X,U,V,numiter)
 
 # Perform the EM updates derived using the FA data augmentation.
-# TO DO
+fit2 <- fa(X,U,V,numiter)
 
 # Plot the improvement in the solution over time.
+e  <- 1e-10
 y1 <- fit1$loglik
-y1 <- max(y1) - y1 + 1e-10
+y2 <- fit2$loglik
+y  <- c(y1,y2)
+y1 <- max(y) - y1 + e
+y2 <- max(y) - y2 + e
 plot(1:numiter,y1,type = "l",lwd = 2,col = "darkorange",log = "y",
-     xlab = "iteration",ylab = "loglik diff")
+     xlab = "iteration",ylab = "loglik diff",ylim = c(e,max(c(y1,y2))))
+lines(1:numiter,y2,col = "dodgerblue",lwd = 2)
