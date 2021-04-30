@@ -17,25 +17,18 @@ ed <- function (X, U, V, numiter = 100) {
 
     # E STEP
     # ------
-    mu <- matrix(0,n,m)
+    # Compute the posterior means and covariances of the latent v's.
     S  <- solve(solve(U) + solve(V))
-    for (i in 1:n)
-      mu[i,] <- S %*% solve(V,X[i,])
-
+    mu <- t(S %*% solve(V,t(X)))
+    
     # M STEP
     # ------
     # Update the prior covariance matrix, U.
-    U <- n*S
-    for (i in 1:n)
-      U <- U + tcrossprod(mu[i,])
-    U <- U/n
+    U <- S + crossprod(mu)/n
     
     # Update the residual covariance matrix, V.
-    V <- n*S
-    for (i in 1:n)
-      V <- V + tcrossprod(X[i,] - mu[i,])
-    V <- V/n
-
+    V <- S + crossprod(X - mu)/n
+    
     # Record the algorithm's progress.
     T <- U + V
     loglik[iter]  <- sum(dmvnorm(X,sigma = T,log = TRUE))
