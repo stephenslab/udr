@@ -47,7 +47,8 @@ ed <- function (X, U, V, numiter = 100) {
 fa <- function (X, U, V, numiter = 100) {
   n <- nrow(X)
   m <- ncol(X)
-  
+  L <- t(chol(U))
+
   # These two variables are used to keep track of the algorithm's
   # progress.
   loglik  <- rep(0,numiter)
@@ -57,33 +58,38 @@ fa <- function (X, U, V, numiter = 100) {
   for (iter in 1:numiter) {
 
     # Save the current parameter estimates.
-    U0 <- U
+    L0 <- L
     V0 <- V
 
     # E STEP
     # ------
     # Compute the posterior means (mu) and covariances (S) of the
-    # latent variables z. Here, L is the keft Cholesky factor of U so
+    # latent variables z. Here, L is the left Cholesky factor of U so
     # that that tcrossprod(L) = U.
     I  <- diag(m)
-    L  <- t(chol(U))
     S  <- I - t(L) %*% solve(U + V,L)
     mu <- t(solve(U + V,t(X))) %*% L
+
+    # Compute the posterior means (mv) and covariances (Sv) of t he
+    # latent variables v = L*z.
+    mv <- mu %*% t(L)
+    Sv <- L %*% S %*% t(L)
     
     # M STEP
     # ------
-    # Update the residual covariance matrix, V.
-    V <- L %*% S %*% t(L) + crossprod(X - mu %*% t(L))/n
-    
-    # Update the prior covariance matrix, U.
-    # TO DO
+    # Update V.
+    V <- Sv + crossprod(X - mv)/n
+
+    # Update L and U.
+    L <- t(solve(n*S + crossprod(mu),t(crossprod(X,mu))))
+    U <- tcrossprod(L)
     
     # Record the algorithm's progress.
     T <- U + V
     loglik[iter]  <- sum(dmvnorm(X,sigma = T,log = TRUE))
-    maxdiff[iter] <- max(max(abs(U - U0)),max(abs(V - V0)))
+    maxdiff[iter] <- max(max(abs(L - L0)),max(abs(V - V0)))
   }
   
-  return(list(U = U,V = V,loglik = loglik,maxdiff = maxdiff))
+  return(list(U = U,L = L,V = V,loglik = loglik,maxdiff = maxdiff))
 }
 

@@ -13,7 +13,7 @@ T <- U + V
 X <- rmvnorm(n,sigma = T)
 
 # Perform the EM updates derived using the ED data augmentation.
-numiter <- 40
+numiter <- 20
 fit1 <- ed(X,U,V,numiter)
 
 # Perform the EM updates derived using the FA data augmentation.
