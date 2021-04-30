@@ -5,8 +5,8 @@ source("ed_vs_fa_functions.R")
 # Simulate data.
 set.seed(1)
 n <- 200
-U <- rbind(c(1.0,0.9),
-           c(0.9,1.0))
+U <- rbind(c(1.0,0.5),
+           c(0.5,1.0))
 V <- rbind(c(0.8,0.2),
            c(0.2,1.5))
 T <- U + V
