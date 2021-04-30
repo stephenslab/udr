@@ -14,10 +14,12 @@ X <- rmvnorm(n,sigma = T)
 
 # Perform the EM updates derived using the ED data augmentation.
 numiter <- 20
-fit1 <- ed(X,U,V,numiter)
+U0 <- U
+V0 <- V
+fit1 <- ed(X,U0,V0,numiter)
 
 # Perform the EM updates derived using the FA data augmentation.
-fit2 <- fa(X,U,V,numiter)
+fit2 <- fa(X,U0,V0,numiter)
 
 # Plot the improvement in the solution over time.
 e  <- 1e-10
