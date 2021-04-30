@@ -5,8 +5,8 @@ ed <- function (X, U, V, numiter = 100) {
   
   # These two variables are used to keep track of the algorithm's
   # progress.
-  loglik <- rep(0,numiter)
-  maxd   <- rep(0,numiter)
+  loglik  <- rep(0,numiter)
+  maxdiff <- rep(0,numiter)
   
   # Iterate the EM updates.
   for (iter in 1:numiter) {
@@ -25,8 +25,11 @@ ed <- function (X, U, V, numiter = 100) {
     # M STEP
     # ------
     # Update the prior covariance matrix, U.
-    # TO DO.
-
+    U <- n*S
+    for (i in 1:n)
+      U <- U + tcrossprod(mu[i,])
+    U <- U/n
+    
     # Update the residual covariance matrix, V.
     V <- n*S
     for (i in 1:n)
@@ -35,11 +38,11 @@ ed <- function (X, U, V, numiter = 100) {
 
     # Record the algorithm's progress.
     T <- U + V
-    loglik[iter] <- sum(dmvnorm(X,sigma = T,log = TRUE))
-    maxd[iter] <- max(max(abs(U - U0)),max(abs(V - V0)))
+    loglik[iter]  <- sum(dmvnorm(X,sigma = T,log = TRUE))
+    maxdiff[iter] <- max(max(abs(U - U0)),max(abs(V - V0)))
   }
 
-  return(list(U = U,V = V,loglik = loglik,maxd = maxd))
+  return(list(U = U,V = V,loglik = loglik,maxdiff = maxdiff))
 }
 
 # TO DO: Explain here what this function does, and how to use it.
