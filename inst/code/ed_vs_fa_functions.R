@@ -26,11 +26,11 @@ ed <- function (X, U, V, numiter = 100) {
     
     # M STEP
     # ------
-    # Update the prior covariance matrix, U.
-    U <- S + crossprod(mu)/n
-    
     # Update the residual covariance matrix, V.
     V <- S + crossprod(X - mu)/n
+    
+    # Update the prior covariance matrix, U.
+    U <- S + crossprod(mu)/n
     
     # Record the algorithm's progress.
     T <- U + V

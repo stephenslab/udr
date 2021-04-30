@@ -28,4 +28,4 @@ y1 <- max(y) - y1 + e
 y2 <- max(y) - y2 + e
 plot(1:numiter,y1,type = "l",lwd = 2,col = "darkorange",log = "y",
      xlab = "iteration",ylab = "loglik diff",ylim = c(e,max(c(y1,y2))))
-lines(1:numiter,y2,col = "dodgerblue",lwd = 2)
+lines(1:numiter,y2,col = "dodgerblue",lwd = 2,lty = "dashed")
