@@ -70,11 +70,16 @@ fa <- function (X, U, V, numiter = 100) {
     S  <- I - t(L) %*% solve(U + V,L)
     mu <- t(solve(U + V,t(X))) %*% L
 
-    # Compute the posterior means (mv) and covariances (Sv) of t he
-    # latent variables v = L*z.
-    mv <- mu %*% t(L)
+    # Compute the posterior means (mv) and covariances (Sv) of the
+    # latent variables v = L*z. These two lines of code should give
+    # the same result as
+    #
+    #   Sv <- solve(solve(U) + solve(V))
+    #   mv <- t(Sv %*% solve(V,t(X)))
+    #
     Sv <- L %*% S %*% t(L)
-    
+    mv <- mu %*% t(L)
+
     # M STEP
     # ------
     # Update V.
