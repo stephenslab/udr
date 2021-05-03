@@ -257,23 +257,21 @@ update_prior_covariance_ed_iid <- function (X, U, V, p) {
 # @param V is a 3-d array, in which V[,,j] is the covariance matrix
 # for the jth observation
 update_prior_covariance_rank1_ed_general <- function (X, u, V, p) {
-  n = nrow(X)
-  sigma2 <- rep(NA, n)
-  mu <- rep(NA, n)
-  V.inverse <- c()
+  n      <- nrow(X)
+  m      <- ncol(X)
+  sigma2 <- rep(0,n)
+  mu     <- rep(0,n)
+  uw     <- matrix(0,m,n)
+  Vinvw  <- array(0,c(m,m,n))
   for (i in 1:n){
-    V.inverse[[i]] = solve(V[,,i])
-    sigma2[i] = 1/ (t(u) %*%  V.inverse[[i]] %*% u + 1)
-    mu[i] = sigma2[i] * t(u)%*% V.inverse[[i]] %*% X[i,]
+    A      <- solve(V[,,i])
+    sigma2 <- drop(1/(t(u) %*% A %*% u + 1))
+    mu     <- drop(sigma2 * t(u) %*% A %*% X[i,])
+    theta  <- p[i] * mu
+    Vinvw[,,i] <- p[i] * (mu^2 + sigma2) * A
+    uw[,i] <- theta * A %*% X[i,]
   }
-  theta <- p*mu
-  eta <- p*(mu^2 + sigma2)
-  u.weighted <- lapply(1:n, function(i) theta[i]*V.inverse[[i]]%*% X[i, ])
-  V.inverse.weighted  <- lapply(1:n, function(i) eta[i]*V.inverse[[i]])
-  sum1 <- apply(simplify2array(u.weighted), c(1,2), sum)
-  sum2 <- apply(simplify2array(V.inverse.weighted), c(1,2), sum)
-  vnew <- solve(sum2) %*% sum1
-  return(vnew)
+  return(drop(solve(sliceSums(Vinvw),rowSums(uw))))
 }
 
 # update_prior_covariances_helper = function (X, U, V, P, covtypes, control) {
