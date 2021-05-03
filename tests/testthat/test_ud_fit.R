@@ -145,7 +145,7 @@ test_that(paste("Check R and C++ implementations of prior covariance",
     V[[i]] <- dat$V + 0.01 * sim_unconstrained(2)
   
   # Run ud_fit with unconstrained.update = "ed".
-  control <- list(maxiter = 20,scaled.update = "none",rank1.update = "none",
+  control <- list(maxiter = 20,scaled.update = "none",rank1.update = "ed",
                   unconstrained.update = "ed",version = "R")
   fit1 <- ud_init(X,V = V,control = control)
   capture.output(fit1 <- ud_fit(fit1,control = control))
