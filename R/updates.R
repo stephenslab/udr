@@ -300,30 +300,28 @@ update_prior_covariance_rank1_ed_general <- function (X, u, V, p) {
 update_prior_covariance_scaled_em_iid <- function (X, U0, V, p, minval) {
 
     # Transform data using the trick
-    # Uhat = R^{-T}UR^{-1}
-    # Xhat = XR^{-1}
+    # Uhat = R^{-T}*U*R^{-1}
+    # Xhat = X*R^{-1}
     R    <- chol(V)
-    Uhat <- t(solve(R))%*% U0 %*% solve(R)
+    Uhat <- solve(t(R),U0) %*% solve(R)
     Xhat <- X %*% solve(R)
     
     # Eigenvalue decomposition based on transformed U.
     evd <- eigen(Uhat)
-    lambdas <- ifelse(evd$values < minval,0,evd$values)
+    lambdas <- ifelse(evd$values < minval,minval,evd$values)
 
-    Y <- t(evd$vectors) %*% t(Xhat)  # Y: p by n
-    return(uniroot(function(s) grad_loglik_scale_factor(s,p,Y,lambdas),c(0,1),
-                   extendInt = "yes")$root)
+    Y <- t(Xhat %*% evd$vectors)
+    return(uniroot(function (s) grad_loglik_scale_factor(s,p,Y,lambdas),
+                   c(0,1),extendInt = "yes")$root)
 }
 
-# Function for 1-d search of s value based on eq. (20) in the write-up
-# @param p Weights for one component
+# Function for 1-d search of s value based on eq. (20) in the write-up.
+# @param p Vector of weights.
 # @param s The scaling factor for one component we aim to search for
 # @param Y The transformed data
 # @param lambdas Eigenvalues of U.
 # @return A function of the scalar s.
-grad_loglik_scale_factor <- function (s, p, Y, lambdas) {
-  unweighted_sum <-
-    apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
-                          sum(lambdas/(s*lambdas + 1)))
-  return(sum(p*unweighted_sum))
-}
+grad_loglik_scale_factor <- function (s, p, Y, lambdas)
+  sum(p*apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
+                              sum(lambdas/(s*lambdas + 1))))
+
