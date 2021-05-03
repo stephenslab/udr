@@ -148,8 +148,8 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       names(U_rank1) <- paste("rank1",1:n_rank1,sep = "_")
     for (i in 1:n_rank1) {
       u <- getrank1(U_rank1[[i]])
-      U <- list(u = u,mat = tcrossprod(u))
-      names(U$u) <- colnames(X)
+      U <- list(vec = u,mat = tcrossprod(u))
+      names(U$vec) <- colnames(X)
       rownames(U$mat) <- colnames(X)
       colnames(U$mat) <- colnames(X)
       attr(U,"covtype") <- "rank1"

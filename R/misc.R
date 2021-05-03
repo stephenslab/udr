@@ -35,7 +35,7 @@ issemidef <- function (X, minval = -1e-15)
 # tcrossprod(u) is the nearest rank-1 matrix.
 getrank1 <- function (X) {
   out <- eigen(X)
-  return(sqrt(out$values[1]) * out$vectors[,1])
+  return(with(out,sqrt(values[1]) * vectors[,1]))
 }
 
 # Return a matrix containing the sums over the "slices".

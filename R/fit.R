@@ -223,7 +223,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   if (is.na(control$scaled.update))
     control$scaled.update <- "none"
   if (is.na(control$rank1.update))
-    control$rank1.update  <- "none"
+    control$rank1.update  <- ifelse(is.matrix(fit$V),"teem","ed")
   if (is.na(control$unconstrained.update))
     control$unconstrained.update <- ifelse(is.matrix(fit$V),"teem","none")
   if (!is.matrix(fit$V) & control$resid.update != "none")
@@ -235,7 +235,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-59, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-60, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -285,7 +285,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     colnames(u$mat) <- colnames(u0$mat)
     attr(u,"covtype") <- covtypes[i]
     if (covtypes[i] == "rank1")
-      names(u$u) <- names(u0$u)
+      names(u$vec) <- names(u0$vec)
     else if (covtypes[i] == "scaled")
       rownames(u$U0) <- rownames(u0$U0)
       colnames(u$U0) <- colnames(u0$U0)

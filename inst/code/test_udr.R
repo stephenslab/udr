@@ -14,24 +14,25 @@ w <- c(0.8,0.1,0.075,0.025)
 rownames(V) <- c("d1","d2")
 colnames(V) <- c("d1","d2")
 X <- simulate_ud_data(n,w,U,V)
-numiter <- 20
-fit1 <- ud_init(X,
-                U_scaled = U,
-                U_rank1 = list(tcrossprod(c(-1,1)),tcrossprod(c(1,2))),
-                n_unconstrained = 2,
-                V = V)
-fit2 <- fit1
-fit2$V <- rep(list(V),n)
+numiter <- 40
 control <- list(maxiter = numiter,
                 resid.update = "none",
                 scaled.update = "none",
                 rank1.update = "none",
                 unconstrained.update = "ed",
                 version = "R")
+fit1 <- ud_init(X,
+                U_scaled = U,
+                U_rank1 = list(tcrossprod(c(-1,1)),tcrossprod(c(1,2))),
+                n_unconstrained = 2,
+                V = V,control = control)
+fit2 <- fit1
 control1 <- control
 control2 <- control
+control1$rank1.update <- "ed"
+control2$rank1.update <- "teem"
 fit1 <- ud_fit(fit1,control = control1)
-print(system.time(fit2 <- ud_fit(fit2,control = control2)))
+fit2 <- ud_fit(fit2,control = control2)
 y1 <- fit1$progress$loglik
 y2 <- fit2$progress$loglik
 y0 <- max(c(y1,y2))
