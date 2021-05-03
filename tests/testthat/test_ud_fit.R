@@ -13,19 +13,19 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   # a list, and V is not updated. The updates of the prior covariance
   # matrices U are skipped in this test.
   control  <- list(maxiter = 20,resid.update = "none",scaled.update = "none",
-                   rank1.update = "none",unconstrained.update = "none")
+                   rank1.update = "ed",unconstrained.update = "ed")
   control1 <- control
   control2 <- control
   control1$version <- "R"
   control2$version <- "Rcpp"
   set.seed(1); fit1 <- ud_init(X,V = dat$V,control = control1)
-  set.seed(1); fit2 <- ud_init(X,V = dat$V,control = control2)
+# set.seed(1); fit2 <- ud_init(X,V = dat$V,control = control2)
   set.seed(1); fit3 <- ud_init(X,V = rep(list(dat$V),n),control = control1)
-  set.seed(1); fit4 <- ud_init(X,V = rep(list(dat$V),n),control = control2)
+# set.seed(1); fit4 <- ud_init(X,V = rep(list(dat$V),n),control = control2)
   capture.output(fit1 <- ud_fit(fit1,control = control1))
-  capture.output(fit2 <- ud_fit(fit2,control = control2))
+# capture.output(fit2 <- ud_fit(fit2,control = control2))
   capture.output(fit3 <- ud_fit(fit3,control = control1))
-  capture.output(fit4 <- ud_fit(fit4,control = control2))
+# capture.output(fit4 <- ud_fit(fit4,control = control2))
   
   # The likelihoods should be non-decreasing.
   expect_nondecreasing(fit1$progress$loglik)
@@ -33,16 +33,16 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   # The outputs of all four variants of ud_fit should be the same
   # (except for V and the timings).
   fit1$progress$timing <- 0
-  fit2$progress$timing <- 0
+# fit2$progress$timing <- 0
   fit3$progress$timing <- 0
-  fit4$progress$timing <- 0
+# fit4$progress$timing <- 0
   fit1["V"] <- NULL
-  fit2["V"] <- NULL
+# fit2["V"] <- NULL
   fit3["V"] <- NULL
-  fit4["V"] <- NULL
-  expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
+# fit4["V"] <- NULL
+# expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
   expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
-  expect_equal(fit1,fit4,scale = 1,tolerance = 1e-12)
+# expect_equal(fit1,fit4,scale = 1,tolerance = 1e-12)
 })
 
 test_that(paste("Check R and C++ implementations of residual covariance",
@@ -144,7 +144,7 @@ test_that(paste("Check R and C++ implementations of prior covariance",
   for (i in 1:n)
     V[[i]] <- dat$V + 0.01 * sim_unconstrained(2)
   
-  # Run ud_fit with unconstrained.update = "ed".
+  # Run ud_fit with unconstrained.update = "ed" and rank1.update = "ed".
   control <- list(maxiter = 20,scaled.update = "none",rank1.update = "ed",
                   unconstrained.update = "ed",version = "R")
   fit1 <- ud_init(X,V = V,control = control)

@@ -18,7 +18,7 @@ numiter <- 40
 control <- list(maxiter = numiter,
                 resid.update = "none",
                 scaled.update = "none",
-                rank1.update = "none",
+                rank1.update = "ed",
                 unconstrained.update = "ed",
                 version = "R")
 fit1 <- ud_init(X,
@@ -27,10 +27,11 @@ fit1 <- ud_init(X,
                 n_unconstrained = 2,
                 V = V,control = control)
 fit2 <- fit1
+# fit2$V <- rep(list(fit2$V),n)
 control1 <- control
 control2 <- control
-control1$rank1.update <- "ed"
-control2$rank1.update <- "teem"
+control1$scaled.update <- "none"
+control2$scaled.update <- "em"
 fit1 <- ud_fit(fit1,control = control1)
 fit2 <- ud_fit(fit2,control = control2)
 y1 <- fit1$progress$loglik

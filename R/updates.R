@@ -166,8 +166,8 @@ update_prior_covariance_rank1_none_rcpp <- function (X, U, V, p, minval) {
 # vector of weights associated with the rows of X.
 update_prior_covariance_rank1_ed <- function (X, U, V, p, minval) { 
   if (is.matrix(V)) {
+    n <- nrow(X)
     m <- ncol(X)
-    k <- length(U)
     V <- array(V,c(m,m,n))
     U$vec <- update_prior_covariance_rank1_ed_general(X,U$vec,V,p)
   } else 
@@ -192,9 +192,9 @@ update_prior_covariance_rank1_teem <- function (X, U, V, p, minval) {
   if (!is.matrix(V))
     stop("rank1.update = \"teem\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
-  Unew <- update_prior_covariance_unconstrained_teem(X,U,V,p,minval,r = 1)
-  Unew$vec <- getrank1(Unew$mat)
-  return(Unew)
+  U <- update_prior_covariance_unconstrained_teem(X,U,V,p,minval,r = 1)
+  U$vec <- getrank1(U$mat)
+  return(U)
 }
 
 # This is a more efficient C++ implementation of
@@ -213,6 +213,24 @@ update_prior_covariance_scaled_none <- function (X, U, V, p, minval) {
 # without updating it.
 update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
   return(U)
+}
+
+# Perform an M-step update for a scaled prior ocvariance matrix (U).
+# Input p is a vector of weights associated with the rows of X.
+update_prior_covariance_scaled_em <- function (X, U, V, p, minval) {
+  if (is.matrix(V))
+    U$s <- update_prior_covariance_scaled_em_iid(X,U$U0,V,p,minval)
+  else 
+    stop("update_prior_covariance_scaled_em is not yet implemented for ",
+         "case when V is an array")
+  U$mat <- with(U,s*U0)
+  return(U)
+}
+
+# This is a more efficient C++ implementation of
+# update_prior_covariance_scaled_em.
+update_prior_covariance_scaled_em_rcpp <- function (X, U, V, p, minval) {
+  stop("update_prior_covariance_scaled_em_rcpp is not yet implemented")
 }
 
 # Perform an M-step update for a prior covariance matrix (U) using the
@@ -264,26 +282,22 @@ update_prior_covariance_rank1_ed_general <- function (X, u, V, p) {
   uw     <- matrix(0,m,n)
   Vinvw  <- array(0,c(m,m,n))
   for (i in 1:n){
-    A      <- solve(V[,,i])
-    sigma2 <- drop(1/(t(u) %*% A %*% u + 1))
-    mu     <- drop(sigma2 * t(u) %*% A %*% X[i,])
-    Vinvw[,,i] <- p[i]*(mu^2 + sigma2) * A
-    uw[,i] <- p[i]*mu * A %*% X[i,]
+    A          <- solve(V[,,i])
+    sigma2     <- drop(1/(t(u) %*% A %*% u + 1))
+    mu         <- drop(sigma2*t(u) %*% A %*% X[i,])
+    Vinvw[,,i] <- p[i]*(mu^2 + sigma2)*A
+    uw[,i]     <- p[i]*mu*A %*% X[i,]
   }
   return(drop(solve(sliceSums(Vinvw),rowSums(uw))))
 }
 
-# update_prior_covariances_helper = function (X, U, V, P, covtypes, control) {
-#     if (covtypes[i] == "scaled") {
-#       # Update the scaling factor.
-#       if (control$scaled.update == "em") {
-#           Unew[,,i] <- U[,,i] *
-#             update_prior_scalar(X,U[,,i],V,P[,i],control$minval)
-
-# Update the scaling factor for prior canonical covariance matrix.
-# @param U0 Canonical covariance matrix
+# Update the scaling factor for a prior canonical covariance (U) matrix.
+# @param U0 A (fixed) covariance matrix.
+# @param V A covariance matrix.
 # @return An integer scalar
-update_prior_scalar <- function (X, U0, V, p, minval){
+#
+#' @importFrom stats uniroot
+update_prior_covariance_scaled_em_iid <- function (X, U0, V, p, minval) {
 
     # Transform data using the trick
     # Uhat = R^{-T}UR^{-1}
@@ -301,7 +315,7 @@ update_prior_scalar <- function (X, U0, V, p, minval){
                    extendInt = "yes")$root)
 }
 
-# Function for 1-d search of s value based on eq.(20) in the write-up
+# Function for 1-d search of s value based on eq. (20) in the write-up
 # @param p Weights for one component
 # @param s The scaling factor for one component we aim to search for
 # @param Y The transformed data
