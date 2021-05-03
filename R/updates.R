@@ -215,7 +215,7 @@ update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
   return(U)
 }
 
-# Perform an M-step update for a scaled prior ocvariance matrix (U).
+# Perform an M-step update for a scaled prior covariance matrix (U).
 # Input p is a vector of weights associated with the rows of X.
 update_prior_covariance_scaled_em <- function (X, U, V, p, minval) {
   if (is.matrix(V))
