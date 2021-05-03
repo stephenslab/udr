@@ -267,9 +267,8 @@ update_prior_covariance_rank1_ed_general <- function (X, u, V, p) {
     A      <- solve(V[,,i])
     sigma2 <- drop(1/(t(u) %*% A %*% u + 1))
     mu     <- drop(sigma2 * t(u) %*% A %*% X[i,])
-    theta  <- p[i] * mu
-    Vinvw[,,i] <- p[i] * (mu^2 + sigma2) * A
-    uw[,i] <- theta * A %*% X[i,]
+    Vinvw[,,i] <- p[i]*(mu^2 + sigma2) * A
+    uw[,i] <- p[i]*mu * A %*% X[i,]
   }
   return(drop(solve(sliceSums(Vinvw),rowSums(uw))))
 }
