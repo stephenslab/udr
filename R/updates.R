@@ -298,20 +298,20 @@ update_prior_covariance_rank1_ed_general <- function (X, u, V, p) {
 #' @importFrom stats uniroot
 update_prior_covariance_scaled_em_iid <- function (X, U0, V, p, minval) {
 
-    # Transform data using the trick
-    # Uhat = R^{-T}*U*R^{-1}
-    # Xhat = X*R^{-1}
-    R    <- chol(V)
-    Uhat <- solve(t(R),U0) %*% solve(R)
-    Xhat <- X %*% solve(R)
+  # Transform data using the trick
+  # Uhat = R^{-T}*U*R^{-1}
+  # Xhat = X*R^{-1}
+  R    <- chol(V)
+  Uhat <- solve(t(R),U0) %*% solve(R)
+  Xhat <- X %*% solve(R)
     
-    # Eigenvalue decomposition based on transformed U.
-    evd <- eigen(Uhat)
-    lambdas <- ifelse(evd$values < minval,minval,evd$values)
+  # Eigenvalue decomposition based on transformed U.
+  evd <- eigen(Uhat)
+  lambdas <- ifelse(evd$values < minval,minval,evd$values)
 
-    Y <- t(Xhat %*% evd$vectors)
-    return(uniroot(function (s) grad_loglik_scale_factor(s,p,Y,lambdas),
-                   c(0,1),extendInt = "yes")$root)
+  Y <- t(Xhat %*% evd$vectors)
+  return(uniroot(function (s) grad_loglik_scale_factor(s,p,Y,lambdas),
+                 c(0,1),extendInt = "yes")$root)
 }
 
 # Function for 1-d search of s value based on eq. (20) in the write-up.
