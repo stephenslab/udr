@@ -19,18 +19,18 @@ ed <- function (X, U, V, numiter = 100) {
 
     # E STEP
     # ------
-    # Compute the posterior means (mu) and covariances (S) of the
+    # Compute the posterior means (mv) and covariances (Sv) of the
     # latent variables v.
-    S  <- solve(solve(U) + solve(V))
-    mu <- t(S %*% solve(V,t(X)))
+    Sv <- solve(solve(U) + solve(V))
+    mv <- t(Sv %*% solve(V,t(X)))
     
     # M STEP
     # ------
     # Update the residual covariance matrix, V.
-    V <- S + crossprod(X - mu)/n
+    V <- Sv + crossprod(X - mv)/n
     
     # Update the prior covariance matrix, U.
-    U <- S + crossprod(mu)/n
+    U <- Sv + crossprod(mv)/n
     
     # Record the algorithm's progress.
     T <- U + V
@@ -63,12 +63,12 @@ fa <- function (X, U, V, numiter = 100) {
 
     # E STEP
     # ------
-    # Compute the posterior means (mu) and covariances (S) of the
+    # Compute the posterior means (mz) and covariances (Sz) of the
     # latent variables z. Here, L is the left Cholesky factor of U so
     # that that tcrossprod(L) = U.
     I  <- diag(m)
-    S  <- I - t(L) %*% solve(U + V,L)
-    mu <- t(solve(U + V,t(X))) %*% L
+    Sz <- I - t(L) %*% solve(U + V,L)
+    mz <- t(solve(U + V,t(X))) %*% L
 
     # Compute the posterior means (mv) and covariances (Sv) of the
     # latent variables v = L*z. These two lines of code should give
@@ -77,16 +77,16 @@ fa <- function (X, U, V, numiter = 100) {
     #   Sv <- solve(solve(U) + solve(V))
     #   mv <- t(Sv %*% solve(V,t(X)))
     #
-    Sv <- L %*% S %*% t(L)
-    mv <- mu %*% t(L)
+    Sv <- L %*% Sz %*% t(L)
+    mv <- mz %*% t(L)
 
     # M STEP
     # ------
     # Update V.
     V <- Sv + crossprod(X - mv)/n
 
-    # Update L and U.
-    L <- t(solve(n*S + crossprod(mu),t(crossprod(X,mu))))
+    # Update L (and U).
+    L <- t(solve(n*Sz + crossprod(mz),t(crossprod(X,mz))))
     U <- tcrossprod(L)
     
     # Record the algorithm's progress.
