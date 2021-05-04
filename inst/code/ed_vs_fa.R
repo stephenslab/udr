@@ -1,4 +1,3 @@
-# TO DO: Explain here what this script is for, and how to use it.
 library(mvtnorm)
 source("ed_vs_fa_functions.R")
 
