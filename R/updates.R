@@ -1,6 +1,6 @@
 # Perform an M-step update for the mixture weights in the mixture
 # prior (or no update if update = "none")
-update_mixture_weights_em <- function (P, update) {
+update_mixture_weights_em <- function (P, w, update) {
   if (update == "em")
     wnew <- colSums(P)/nrow(P)
   else if (update == "none")
@@ -256,9 +256,8 @@ update_prior_covariance_ed_general <- function (X, U, V, p) {
 
 # Perform an M-step update for a prior covariance matrix (U) using the
 # update formula derived in Bovy et al (2011), for the special case
-# when the residual covariances V are the same for all data
-# points. Input p is a vector of weights associated with the rows of
-# X.
+# when the residual covariances V are the same for all data points.
+# Input p is a vector of weights associated with the rows of X.
 update_prior_covariance_ed_iid <- function (X, U, V, p) {
   p <- safenormalize(p)
   T <- U + V
