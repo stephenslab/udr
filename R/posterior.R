@@ -74,18 +74,26 @@ compute_posterior_probs_general <- function (X, w, U, V) {
 }
 
 # Compute the n x k matrix of posterior mixture assignment
-# probabilities given current estimates of the model parameters. This
-# implements the E step in the EM algorithm for fitting the Ultimate
-# Deconvolution model. Input argument V may either be an m x m matrix,
-# a list of m x m matrices of length n, or a m x m x n array. Input
-# argument U may either be a list of length k in which U[[i]]$mat is
-# an m x m matrix, or an m x m x k array.
-compute_posterior_probs <- function (X, w, U, V, version = c("Rcpp","R")) {
+# probabilities ("responsibilities") given current estimates of the
+# model parameters. This implements the E step in the EM algorithm for
+# fitting the Ultimate Deconvolution model. Input argument V may
+# either be an m x m matrix, a list of m x m matrices of length n, or
+# a m x m x n array. Input argument U may either be a list of length k
+# in which U[[i]]$mat is an m x m matrix, or an m x m x k array.
+#
+#' @export
+#' 
+compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
   version <- match.arg(version)
 
-  # Process input arguments U and V as needed.
-  if (is.list(U))
-    U <- ulist2array(U)
+  # Check input argument "fit".
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+         "such as the output of ud_init")
+  
+  # Process U and V.
+  U <- ulist2array(fit$U)
+  V <- fit$V
   if (is.list(V))
     V <- list2array(V)
   
@@ -94,17 +102,23 @@ compute_posterior_probs <- function (X, w, U, V, version = c("Rcpp","R")) {
     # Perform the computations for the special case when the same
     # residual variance is used for all samples.
     if (version == "R")
-      P <- compute_posterior_probs_iid(X,w,U,V)
+      fit$P <- compute_posterior_probs_iid(fit$X,fit$w,U,V)
     else if (version == "Rcpp")
-      P <- compute_posterior_probs_iid_rcpp(X,w,U,V)
+      fit$P <- compute_posterior_probs_iid_rcpp(fit$X,fit$w,U,V)
   } else {
       
     # Perform the computations for the more general case when the
     # residual variance is not necessarily the same for all samples.
     if (version == "R")
-      P <- compute_posterior_probs_general(X,w,U,V)
+      fit$P <- compute_posterior_probs_general(fit$X,fit$w,U,V)
     else if (version == "Rcpp")
-      P <- compute_posterior_probs_general_rcpp(X,w,U,V)
+      fit$P <- compute_posterior_probs_general_rcpp(fit$X,fit$w,U,V)
   }
-  return(P)
+
+  # Add row and column names to the responsibilities matrix.
+  rownames(fit$P) <- rownames(fit$X)
+  colnames(fit$P) <- names(fit$U)
+
+  # Output the updated fit.
+  return(fit)
 }

@@ -1,13 +1,22 @@
 # Perform an M-step update for the mixture weights in the mixture
 # prior (or no update if update = "none")
-update_mixture_weights_em <- function (P, w, update) {
+#
+#' @export
+#' 
+update_mixture_weights_em <- function (fit, update) {
+
+  # Update the mixture weights.
   if (update == "em")
-    wnew <- colSums(P)/nrow(P)
-  else if (update == "none")
-    wnew <- w
-  else
+    wnew <- colSums(fit$P)/nrow(fit$P)
+  else if (update != "none")
     stop("control$weights.update == \"",update,"\" is not implemented")
-  return(wnew)
+
+  # Add the names back.
+  names(wnew) <- names(fit$w)
+  
+  # Output the updated fit.
+  fit$w <- wnew
+  return(fit)
 }
 
 # Perform an M-step update for the residual covariance matrix (or no
@@ -16,6 +25,9 @@ update_mixture_weights_em <- function (P, w, update) {
 # compute_posterior_probs. Input argument V should be an m x m
 # matrix. Input argument U may either be a list of length k in which
 # U[[i]]$mat is an m x m matrix, or an m x m x k array.
+#
+#' @export
+#' 
 update_resid_covariance <- function (X, U, V, P, update,
                                      version = c("Rcpp","R")) {
   version <- match.arg(version)
@@ -63,6 +75,9 @@ assign_prior_covariance_updates <- function (covtypes, control) {
 # Perform M-step updates for all the prior covariance matrices U.
 # Input argument V may either be an m x m matrix, a list of m x m
 # matrices of length n, or a m x m x n array.
+#
+#' @export
+#' 
 update_prior_covariances <- function (X, U, V, P, covupdates, minval) {
   k <- length(U)
   if (is.list(V))

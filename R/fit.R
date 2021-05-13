@@ -84,7 +84,7 @@
 #' argument checking is performed. See the documentation and examples
 #' for guidance.
 #'
-#' @param fit0 A previous Ultimate Deconvolution model fit. Typically,
+#' @param fit A previous Ultimate Deconvolution model fit. Typically,
 #'   this will be an output from \code{\link{ud_init}}, or an output
 #'   from a previous call to \code{ud_fit}.
 #'
@@ -188,26 +188,26 @@
 #' 
 #' @export
 #' 
-ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
+ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
     
   # CHECK & PROCESS INPUTS
   # ----------------------
-  # Check input argument "fit0".
-  if (!(is.list(fit0) & inherits(fit0,"ud_fit")))
-    stop("Input argument \"fit0\" should be an object of class \"ud_fit\",",
-         "such as an output of ud_init")
-  fit <- fit0
+  # Check input argument "fit".
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+         "such as the output of ud_init")
   
   # Check the input data matrix, "X".
-  if (missing(X))
-    X <- fit$X
-  if (!(is.matrix(X) & is.numeric(X)))
-    stop("Input argument \"X\" should be a numeric matrix")
-  n <- nrow(X)
-  m <- ncol(X)
-  if (n < 2 | m < 2)
-    stop("Input argument \"X\" should have at least 2 columns and ",
-         "at least 2 rows")
+  if (!missing(X)) {
+    if (!(is.matrix(X) & is.numeric(X)))
+      stop("Input argument \"X\" should be a numeric matrix")
+    if (nrow(X) < 2 | ncol(X) < 2)
+      stop("Input argument \"X\" should have at least 2 columns and ",
+           "at least 2 rows")
+    fit$X <- X
+  }
+  n <- nrow(fit$X)
+  m <- ncol(fit$X)
 
   # Get the number of components in the mixture prior (k).
   k <- length(fit$U)
@@ -235,7 +235,7 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-67, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-68, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -255,16 +255,10 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
     cat(sprintf("max %d updates, conv tol %0.1e\n",
                 control$maxiter,control$tol))
   }
-  
-  # RUN UPDATES
-  # -----------
-  if (verbose)
-    cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
-  if (is.matrix(fit$V))
-    V <- fit$V
-  else
-    V <- list2array(fit$V)
-  out <- ud_fit_main_loop(X,fit$w,fit$U,V,covupdates,control,verbose)
+
+  # RUN EM UPDATES
+  # --------------
+  fit <- ud_fit_em(fit,covupdates,control,verbose)
   
   # Output the updated model. Some attributes such as row and column
   # names may be missing and need to be added back.
@@ -291,17 +285,23 @@ ud_fit <- function (fit0, X, control = list(), verbose = TRUE) {
       colnames(u$U0) <- colnames(u0$U0)
     fit$U[[i]] <- u
   }
-  names(fit$w) <- names(fit0$U)
   names(fit$U) <- names(fit0$U)
   class(fit) <- c("ud_fit","list")
   return(fit)
 }
 
 # This implements the core part of ud_fit.
-ud_fit_main_loop <- function (X, w, U, V, covupdates, control, verbose) {
+#
+#' @export
+#' 
+ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)),
+                       control = list(), verbose = TRUE) {
+
+  # Process the "control" input argument.
+  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
   
   # Get the number of components in the mixture prior.
-  k <- length(w)
+  k <- length(fit$w)
   
   # Set up data structures used in the loop below.
   progress <- as.data.frame(matrix(0,control$maxiter,6))
@@ -309,9 +309,11 @@ ud_fit_main_loop <- function (X, w, U, V, covupdates, control, verbose) {
   progress$iter <- 1:control$maxiter
   
   # Iterate the EM updates.
+  if (verbose)
+    cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
-    
+
     # E-step
     # ------
     # Compute the n x k matrix of posterior mixture assignment

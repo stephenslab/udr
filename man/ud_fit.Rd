@@ -5,12 +5,12 @@
 \alias{ud_fit_control_default}
 \title{Fit Ultimate Deconvolution Model}
 \usage{
-ud_fit(fit0, X, control = list(), verbose = TRUE)
+ud_fit(fit, X, control = list(), verbose = TRUE)
 
 ud_fit_control_default()
 }
 \arguments{
-\item{fit0}{A previous Ultimate Deconvolution model fit. Typically,
+\item{fit}{A previous Ultimate Deconvolution model fit. Typically,
 this will be an output from \code{\link{ud_init}}, or an output
 from a previous call to \code{ud_fit}.}
 
