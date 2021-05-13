@@ -201,9 +201,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   progress <- as.data.frame(matrix(0,0,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   
-  # Compute the n x k matrix of posterior mixture assignment
-  # probabilities ("responsibilities") given the initial estimates of
-  # the model parameters, and finalize the output.
+  # Compute the responsibilities matrix (P), and finalize the output.
   fit <- list(X = X,V = V,U = U,w = w,loglik = loglik,progress = progress)
   class(fit) <- c("ud_fit","list")
   fit <- compute_posterior_probs(fit,control$version)

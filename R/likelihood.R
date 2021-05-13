@@ -1,3 +1,17 @@
+#' @importFrom stats logLik
+#'
+#' @method logLik ud_fit
+#' 
+#' @export
+#' 
+logLik.ud_fit <- function (fit, version = c("Rcpp","R")) {
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+         "such as the output of ud_init")
+  version <- match.arg(version)
+  return(loglik_ud(fit$X,fit$w,fit$U,fit$V,version))
+}
+
 # Compute the log-likelihood for the Ultimate Deconvolution model.
 # Input argument U should either be a list of length k, in which each
 # U[[i]]$mat is an m x m matrix, or an m x m x k array. Input argument

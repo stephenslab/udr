@@ -235,7 +235,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-68, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-69, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -317,8 +317,9 @@ ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)),
     # E-step
     # ------
     # Compute the n x k matrix of posterior mixture assignment
-    # probabilities given current estimates of the model parameters.
-    P <- compute_posterior_probs(X,w,U,V,control$version)
+    # probabilities ("responsibililties") given the current estimates
+    # of the model parameters.
+    fit <- compute_posterior_probs(fit,control$version)
 
     # M-step
     # ------
