@@ -3,12 +3,20 @@
 #
 #' @export
 #' 
-update_mixture_weights_em <- function (fit, update) {
-
+update_mixture_weights_em <- function (fit, update = c("em","none")) {
+  update <- match.arg(update)
+    
+  # Check input argument "fit".
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+         "such as the output of ud_init")
+    
   # Update the mixture weights.
   if (update == "em")
     wnew <- colSums(fit$P)/nrow(fit$P)
-  else if (update != "none")
+  else if (update == "none")
+    wnew <- fit$w
+  else 
     stop("control$weights.update == \"",update,"\" is not implemented")
 
   # Add the names back.
@@ -28,21 +36,40 @@ update_mixture_weights_em <- function (fit, update) {
 #
 #' @export
 #' 
-update_resid_covariance <- function (X, U, V, P, update,
+update_resid_covariance <- function (fit, update = c("em","none"),
                                      version = c("Rcpp","R")) {
+  update  <- match.arg(update)
   version <- match.arg(version)
-  if (is.list(U))
-    U <- ulist2array(U)
+
+  # Check input argument "fit".
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+         "such as the output of ud_init")
+  if (!is.matrix(fit$V))
+    stop("The residual covariance V can only be updated when it is the same ",
+         "for all data points")
+
+  # Process U.
+  U <- ulist2array(fit$U)
+
+  # Update the residual covariance matrix, V.
   if (update == "em") {
     if (version == "R")
-      Vnew <- update_resid_covariance_helper(X,U,V,P)
+      Vnew <- update_resid_covariance_helper(fit$X,U,fit$V,fit$P)
     else if (version == "Rcpp")
-      Vnew <- update_resid_covariance_rcpp(X,U,V,P)
+      Vnew <- update_resid_covariance_rcpp(fit$X,U,fit$V,fit$P)
   } else if (update == "none")
-    Vnew <- V
+    Vnew <- fit$V
   else
     stop("control$resid.update == \"",update,"\" is not implemented")
-  return(Vnew)
+
+  # Add back the row and column names.
+  rownames(Vnew) <- rownames(fit$V)
+  colnames(Vnew) <- colnames(fit$V)
+  
+  # Output the updated fit.
+  fit$V <- Vnew
+  return(fit)
 }
 
 # Implements update_resid_covariance with version = "R".
@@ -78,13 +105,52 @@ assign_prior_covariance_updates <- function (covtypes, control) {
 #
 #' @export
 #' 
-update_prior_covariances <- function (X, U, V, P, covupdates, minval) {
-  k <- length(U)
+update_prior_covariances <-
+  function (fit, covupdates = rep("none",length(fit$U)), minval = 1e-14) {
+
+  # Check input argument "fit".
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+         "such as the output of ud_init")
+
+  # Process V.
+  V <- fit$V
   if (is.list(V))
     V <- list2array(V)
+
+  # Update the prior covariance matrices, U.
+  k <- length(fit$U)
   for (i in 1:k)
-    U[[i]] <- do.call(covupdates[i],list(X = X,U = U[[i]],V = V,p = P[,i],
-                                         minval = minval))
+    fit$U[[i]] <- do.call(covupdates[i],list(X = fit$X,U = fit$U[[i]],V = V,
+                                             p = fit$P[,i],minval = minval))
+
+  # Output the updated fit.
+  return(fit)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+update_prior_covariance_unconstrained <- function (U, mat) {
+  rownames(mat) <- U$mat
+  colnames(mat) <- U$mat
+  U$mat <- mat
+  return(U)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+update_prior_covariance_rank1 <- function (U, vec) {
+  mat <- tcrossprod(vec)
+  names(vec) <- U$vec
+  rownames(mat) <- U$mat
+  colnames(mat) <- U$mat
+  U$vec <- vec
+  U$mat <- mat
+  return(U)
+}
+
+# TO DO: Explain here what this function does, and how to use it.
+update_prior_covariance_scaled <- function (U, s) {
+  U$s   <- s
+  U$mat <- s * U$U0
   return(U)
 }
 
@@ -106,10 +172,10 @@ update_prior_covariance_unconstrained_none_rcpp <- function (X, U, V, p,
 # associated with the rows of X.
 update_prior_covariance_unconstrained_ed <- function (X, U, V, p, minval) {
   if (is.matrix(V))
-    U$mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
+    mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
   else
-    U$mat <- update_prior_covariance_ed_general(X,U$mat,V,p)
-  return(U)
+    mat <- update_prior_covariance_ed_general(X,U$mat,V,p)
+  return(update_prior_covariance_unconstrained(U,mat))
 }
 
 # This is a more efficient C++ implementation of 
@@ -117,11 +183,11 @@ update_prior_covariance_unconstrained_ed <- function (X, U, V, p, minval) {
 update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
                                                            minval) {
   if (is.matrix(V)) 
-    U$mat <- update_prior_covariance_ed_iid_rcpp(X,U$mat,V,p)
+    mat <- update_prior_covariance_ed_iid_rcpp(X,U$mat,V,p)
   else
     stop("update_prior_covariance_unconstrained_ed_rcpp is not yet ",
          "implemented for case when data points are not i.i.d. (different Vs)")
-  return(U)
+  return(update_prior_covariance_unconstrained(U,mat))
 }
 
 # Perform an M-step update for a prior covariance matrix U using the
@@ -146,11 +212,11 @@ update_prior_covariance_unconstrained_teem <- function (X, U, V, p, minval,
   # Find U maximizing the expected complete log-likelihood subject to
   # U being positive definite, with at most r of its eigenvalues being
   # positive.
-  U$mat <- shrink_cov(T,minval,r)
+  mat <- shrink_cov(T,minval,r)
   
   # Recover the solution for the original (untransformed) data.
-  U$mat <- t(R) %*% U$mat %*% R
-  return(U)
+  mat <- t(R) %*% mat %*% R
+  return(update_prior_covariance_unconstrained(U,mat))
 }
 
 # This is a more efficient C++ implementation of 
@@ -160,8 +226,8 @@ update_prior_covariance_unconstrained_teem_rcpp <- function (X, U, V, p,
   if (!is.matrix(V))
     stop("unconstrained.update = \"teem\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
-  U$mat <- update_prior_covariance_teem_iid_rcpp(X,U$mat,V,p,minval)
-  return(U)
+  mat <- update_prior_covariance_teem_iid_rcpp(X,U$mat,V,p,minval)
+  return(update_prior_covariance_unconstrained(U,mat))
 }
 
 # This function simply returns the rank-1 prior covariance matrix
@@ -184,11 +250,10 @@ update_prior_covariance_rank1_ed <- function (X, U, V, p, minval) {
     n <- nrow(X)
     m <- ncol(X)
     V <- array(V,c(m,m,n))
-    U$vec <- update_prior_covariance_rank1_ed_general(X,U$vec,V,p)
+    vec <- update_prior_covariance_rank1_ed_general(X,U$vec,V,p)
   } else 
-    U$vec <- update_prior_covariance_rank1_ed_general(X,U$vec,V,p)
-  U$mat <- tcrossprod(U$vec)
-  return(U)
+    vec <- update_prior_covariance_rank1_ed_general(X,U$vec,V,p)
+  return(update_prior_covariance_rank1(U,vec))
 }
 
 # This is a more efficient C++ implementation of
@@ -207,9 +272,9 @@ update_prior_covariance_rank1_teem <- function (X, U, V, p, minval) {
   if (!is.matrix(V))
     stop("rank1.update = \"teem\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
-  U <- update_prior_covariance_unconstrained_teem(X,U,V,p,minval,r = 1)
-  U$vec <- getrank1(U$mat)
-  return(U)
+  mat <- update_prior_covariance_unconstrained_teem(X,U,V,p,minval,r = 1)
+  vec <- getrank1(mat)
+  return(update_prior_covariance_rank1(U,vec))
 }
 
 # This is a more efficient C++ implementation of
@@ -234,12 +299,11 @@ update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
 # Input p is a vector of weights associated with the rows of X.
 update_prior_covariance_scaled_em <- function (X, U, V, p, minval) {
   if (is.matrix(V))
-    U$s <- update_prior_covariance_scaled_em_iid(X,U$U0,V,p,minval)
+    s <- update_prior_covariance_scaled_em_iid(X,U$U0,V,p,minval)
   else 
     stop("update_prior_covariance_scaled_em is not yet implemented for ",
          "case when V is an array")
-  U$mat <- with(U,s*U0)
-  return(U)
+  return(update_prior_covariance_scaled(U,s))
 }
 
 # This is a more efficient C++ implementation of
