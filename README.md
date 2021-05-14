@@ -27,7 +27,7 @@ Once you have installed the package, load it into your environment:
 library(udr)
 ```
 
-Work through the [introductory vignette][intro-vignette] illustrating
+Work through the [introductory vignette][intro-vignette] illustrating 
 the methods on a small simulated data set:
 
 ```R
