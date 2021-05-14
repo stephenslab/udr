@@ -147,6 +147,7 @@
 #' # This is the simplest invocation of ud_init.
 #' fit1 <- ud_init(X)
 #' fit1 <- ud_fit(fit1)
+#' logLik(fit1)
 #' summary(fit1)
 #' plot(fit1$progress$iter,
 #'      max(fit1$progress$loglik) - fit1$progress$loglik + 0.1,
@@ -157,6 +158,7 @@
 #' # of the defaults.
 #' fit2 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
 #' fit2 <- ud_fit(fit2)
+#' logLik(fit2)
 #' summary(fit2)
 #' plot(fit2$progress$iter,
 #'      max(fit2$progress$loglik) - fit2$progress$loglik + 0.1,
@@ -236,7 +238,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-74, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-75, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else

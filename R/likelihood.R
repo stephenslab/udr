@@ -1,27 +1,36 @@
-#' @importFrom stats logLik
-#'
-#' @title Title Goes Here
+#' @title Ultimate Deconvolution Model Likelihoods
 #' 
-#' @description Description goes here.
+#' @description Compute the log-likelihood for the Ultimate
+#' Deconvolution model.
 #'
-#' @param object Describe input argument "fit" here.
+#' @param object An Ultimate Deconvolution model fit. Typically,
+#'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
-#' @param version Description of input argument "version" here.
+#' @param version When \code{version == "R"}, the computations are
+#'   performed entirely in R; when \code{version == "Rcpp"}, an Rcpp
+#'   implementation is used.
 #'
 #' @param \dots Additional arguments (unused).
 #' 
-#' @return Describe the return value here.
+#' @return A number giving the log-likelihood for the model.
+#'
+#' @seealso \code{\link{ud_init}}, \code{\link{ud_fit}}
 #' 
 #' @method logLik ud_fit
 #' 
+#' @importFrom stats logLik
+#'
 #' @export
 #' 
 logLik.ud_fit <- function (object, version = c("Rcpp","R"), ...) {
+  version <- match.arg(version)
   if (!(is.list(object) & inherits(object,"ud_fit")))
     stop("Input argument \"object\" should be an object of class \"ud_fit\",",
          "such as the output of ud_init")
-  version <- match.arg(version)
-  return(loglik_ud(object$X,object$w,object$U,object$V,version))
+  out <- loglik_ud(object$X,object$w,object$U,object$V,version)
+  class(out) <- "logLik"
+  attr(out,"df") <- as.numeric(NA)
+  return(out)
 }
 
 # Compute the log-likelihood for the Ultimate Deconvolution model.

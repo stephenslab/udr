@@ -18,18 +18,20 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   control1$version <- "R"
   control2$version <- "Rcpp"
   set.seed(1); fit1 <- ud_init(X,V = dat$V,control = control1)
-# set.seed(1); fit2 <- ud_init(X,V = dat$V,control = control2)
   set.seed(1); fit3 <- ud_init(X,V = rep(list(dat$V),n),control = control1)
-# set.seed(1); fit4 <- ud_init(X,V = rep(list(dat$V),n),control = control2)
   capture.output(fit1 <- ud_fit(fit1,control = control1))
-# capture.output(fit2 <- ud_fit(fit2,control = control2))
   capture.output(fit3 <- ud_fit(fit3,control = control1))
+# set.seed(1); fit2 <- ud_init(X,V = dat$V,control = control2)
+# set.seed(1); fit4 <- ud_init(X,V = rep(list(dat$V),n),control = control2)
+# capture.output(fit2 <- ud_fit(fit2,control = control2))
 # capture.output(fit4 <- ud_fit(fit4,control = control2))
   
-  # Check likelihood computing using logLik.
-  expect_equal(logLik(fit1),fit1$loglik,scale = 1,tolerance = 1e-15)
+  # Check likelihood computations using logLik.
+  expect_equal(as.numeric(logLik(fit1)),fit1$loglik,scale=1,tolerance=1e-15)
+  expect_equal(as.numeric(logLik(fit3)),fit3$loglik,scale=1,tolerance=1e-15)
+  expect_s3_class(logLik(fit1),"logLik")
+  expect_s3_class(logLik(fit3),"logLik")
 # expect_equal(logLik(fit2),fit2$loglik,scale = 1,tolerance = 1e-15)
-  expect_equal(logLik(fit3),fit3$loglik,scale = 1,tolerance = 1e-15)
 # expect_equal(logLik(fit4),fit4$loglik,scale = 1,tolerance = 1e-15)
   
   # The likelihoods should be non-decreasing.
@@ -38,15 +40,15 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   # The outputs of all four variants of ud_fit should be the same
   # (except for V and the timings).
   fit1$progress$timing <- 0
-# fit2$progress$timing <- 0
   fit3$progress$timing <- 0
-# fit4$progress$timing <- 0
   fit1["V"] <- NULL
-# fit2["V"] <- NULL
   fit3["V"] <- NULL
+  expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
+# fit2$progress$timing <- 0
+# fit4$progress$timing <- 0
+# fit2["V"] <- NULL
 # fit4["V"] <- NULL
 # expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
-  expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
 # expect_equal(fit1,fit4,scale = 1,tolerance = 1e-12)
 })
 

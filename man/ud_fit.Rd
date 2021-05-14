@@ -158,6 +158,7 @@ X <- simulate_ud_data(n,w,U,V)
 # This is the simplest invocation of ud_init.
 fit1 <- ud_init(X)
 fit1 <- ud_fit(fit1)
+logLik(fit1)
 summary(fit1)
 plot(fit1$progress$iter,
      max(fit1$progress$loglik) - fit1$progress$loglik + 0.1,
@@ -168,6 +169,7 @@ plot(fit1$progress$iter,
 # of the defaults.
 fit2 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
 fit2 <- ud_fit(fit2)
+logLik(fit2)
 summary(fit2)
 plot(fit2$progress$iter,
      max(fit2$progress$loglik) - fit2$progress$loglik + 0.1,
