@@ -4,22 +4,24 @@
 #' 
 #' @description Description goes here.
 #'
-#' @param fit Describe input argument "fit" here.
+#' @param object Describe input argument "fit" here.
 #'
-#' @param version Description input argument "version" here.
+#' @param version Description of input argument "version" here.
 #'
+#' @param \dots Additional arguments (unused).
+#' 
 #' @return Describe the return value here.
 #' 
 #' @method logLik ud_fit
 #' 
 #' @export
 #' 
-logLik.ud_fit <- function (fit, version = c("Rcpp","R")) {
-  if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+logLik.ud_fit <- function (object, version = c("Rcpp","R"), ...) {
+  if (!(is.list(object) & inherits(object,"ud_fit")))
+    stop("Input argument \"object\" should be an object of class \"ud_fit\",",
          "such as the output of ud_init")
   version <- match.arg(version)
-  return(loglik_ud(fit$X,fit$w,fit$U,fit$V,version))
+  return(loglik_ud(object$X,object$w,object$U,object$V,version))
 }
 
 # Compute the log-likelihood for the Ultimate Deconvolution model.

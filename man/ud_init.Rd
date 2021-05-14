@@ -16,26 +16,27 @@ ud_init(
 )
 }
 \arguments{
-\item{X}{The n x m data matrix, in which each row of the matrix is
+\item{X}{An n x m data matrix, in which each row of the matrix is
 an m-dimensional data point. \code{X} should have at least 2 rows
 and 2 columns.}
 
 \item{V}{Either an m x m matrix giving the initial estimate of the
-residual covariance matrix, or a list of m x m covariance matrices,
-one for each data point.}
+residual covariance matrix, or a list of m x m covariance matrices
+of length n.}
 
 \item{n_rank1}{A non-negative integer specifying the number of
 rank-1 covariance matrices included in the mixture prior. Initial
 estimates of the m x m rank-1 covariance matrices are generated at
 random. At most one of \code{n_rank1} and \code{U_rank1} should be
-provided. If neither are specified, 4 rank-1 matrices will be used.}
+provided. If neither are specified, 4 random rank-1 matrices will be
+included.}
 
 \item{n_unconstrained}{A non-negative integer specifying the number
 of unconstrained covariance matrices included in the mixture
 prior. Initial estimates of the m x m covariance matrices are
 generated at random. At most one of \code{n_unconstrained} and
 \code{U_unconstrained} should be provided. If neither are
-specified, 4 unconstrained matrices are used.}
+specified, 4 random unconstrained matrices will be included.}
 
 \item{U_scaled}{A list specifying initial estimates of the scaled
 covariance matrices in the mixture prior.}
@@ -61,4 +62,7 @@ An object of class "ud_fit". See \code{\link{ud_fit}} for
 \description{
 Initialize an Ultimate Deconvolution model fit. See
   \code{\link{ud_fit}} for background and model definition.
+}
+\seealso{
+\code{\link{ud_fit}}
 }

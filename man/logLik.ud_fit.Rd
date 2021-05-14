@@ -4,12 +4,14 @@
 \alias{logLik.ud_fit}
 \title{Title Goes Here}
 \usage{
-\method{logLik}{ud_fit}(fit, version = c("Rcpp", "R"))
+\method{logLik}{ud_fit}(object, version = c("Rcpp", "R"), ...)
 }
 \arguments{
-\item{fit}{Describe input argument "fit" here.}
+\item{object}{Describe input argument "fit" here.}
 
-\item{version}{Description input argument "version" here.}
+\item{version}{Description of input argument "version" here.}
+
+\item{\dots}{Additional arguments (unused).}
 }
 \value{
 Describe the return value here.

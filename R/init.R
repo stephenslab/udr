@@ -3,26 +3,27 @@
 #' @description Initialize an Ultimate Deconvolution model fit. See
 #'   \code{\link{ud_fit}} for background and model definition.
 #' 
-#' @param X The n x m data matrix, in which each row of the matrix is
+#' @param X An n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point. \code{X} should have at least 2 rows
 #'   and 2 columns.
 #'
 #' @param V Either an m x m matrix giving the initial estimate of the
-#'   residual covariance matrix, or a list of m x m covariance matrices,
-#'   one for each data point.
+#'   residual covariance matrix, or a list of m x m covariance matrices
+#'   of length n.
 #'
 #' @param n_rank1 A non-negative integer specifying the number of
 #'   rank-1 covariance matrices included in the mixture prior. Initial
 #'   estimates of the m x m rank-1 covariance matrices are generated at
 #'   random. At most one of \code{n_rank1} and \code{U_rank1} should be
-#'   provided. If neither are specified, 4 rank-1 matrices will be used.
+#'   provided. If neither are specified, 4 random rank-1 matrices will be
+#'   included.
 #' 
 #' @param n_unconstrained A non-negative integer specifying the number
 #'   of unconstrained covariance matrices included in the mixture
 #'   prior. Initial estimates of the m x m covariance matrices are
 #'   generated at random. At most one of \code{n_unconstrained} and
 #'   \code{U_unconstrained} should be provided. If neither are
-#'   specified, 4 unconstrained matrices are used.
+#'   specified, 4 random unconstrained matrices will be included.
 #'
 #' @param U_scaled A list specifying initial estimates of the scaled
 #'   covariance matrices in the mixture prior.
@@ -44,6 +45,8 @@
 #' @return An object of class "ud_fit". See \code{\link{ud_fit}} for
 #'   details.
 #'
+#' @seealso \code{\link{ud_fit}}
+#' 
 #' @export
 #'
 ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
@@ -193,15 +196,14 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     }
   }
 
-  # Compute the log-likelihood.
-  loglik <- loglik_ud(X,w,U,V,control$version)
-
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.
   progress <- as.data.frame(matrix(0,0,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   
-  # Compute the responsibilities matrix (P), and finalize the output.
+  # Compute the log-likelihood and the responsibilities matrix (P), and
+  # finalize the output.
+  loglik <- loglik_ud(X,w,U,V,control$version)
   fit <- list(X = X,V = V,U = U,w = w,loglik = loglik,progress = progress)
   class(fit) <- c("ud_fit","list")
   fit <- compute_posterior_probs(fit,control$version)

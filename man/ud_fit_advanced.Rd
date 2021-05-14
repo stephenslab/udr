@@ -50,7 +50,7 @@ update_prior_covariances(
 Describe the outputs here.
 }
 \description{
-Description of advanced fitting functions goes here.
+Here we describe the low-level model fitting interface.
 }
 \examples{
 # Add examples here.

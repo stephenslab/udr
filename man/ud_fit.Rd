@@ -11,7 +11,7 @@ ud_fit_control_default()
 }
 \arguments{
 \item{fit}{A previous Ultimate Deconvolution model fit. Typically,
-this will be an output from \code{\link{ud_init}}, or an output
+this will be an output of \code{\link{ud_init}} or an output
 from a previous call to \code{ud_fit}.}
 
 \item{X}{The n x m data matrix, in which each row of the matrix is
@@ -29,27 +29,23 @@ of the \code{progress} return value.}
 \value{
 A list object with the following elements:
 
-\item{w}{A vector containing the estimated prior mixture
-  weights. When \code{control$update.w = "none"}, this will be the
-  same as the \code{w} provided as input.}
+\item{w}{A vector containing the estimated mixture weights in the
+  mixture-of-normals prior.}
 
-\item{U}{A list containing the estimated prior covariance matrices. When
-  \code{control$update.U = "none"}, this will be the same as the \code{U}
-  provided as input.}
+\item{U}{A list containing the estimated prior covariance matrices.}
 
-\item{V}{The estimated residual covariance matrix. When
-  \code{control$update.S = "none"}, this will be the same as the \code{S}
-  provided as input.}
+\item{V}{The estimated residual covariance matrix, or a list of
+  fixed covariance matrices.}
 
 \item{loglik}{The log-likelihood at the current settings of the
-  model parameters, \code{w}, \code{U} and \code{S}.}
+  model parameters.}
   
 \item{progress}{A data frame containing detailed information about
   the algorithm's progress. The columns of the data frame are:
   "iter", the iteration number; "loglik", the log-likelihood at the
   current estimates of the model parameters; "delta.w", the largest
   change in the mixture weights; "delta.u", the largest change in the
-  prior covariance matrices; "delta.s", the largest change in the
+  prior covariance matrices; "delta.v", the largest change in the
   residual covariance matrix; and "timing", the elapsed time in
   seconds (recorded using \code{\link{proc.time}}).}
 }
@@ -66,24 +62,27 @@ In the Ultimate Deconvolution (UD) model, the
 m-dimensional observation \eqn{x} is drawn from a mixture of
 multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0,
 T_k)}, where \eqn{k \geq 2} is the number of mixture components,
-the \eqn{w_j}'s are the mixture weights, and each \eqn{T_j = V +
-U_j} is a covariance matrix. This is the marginal density derived
-from a model in which \eqn{x} is multivariate normal with mean
-\eqn{y} and covariance \eqn{V}, and the underlying, or "latent",
-signal \eqn{y} is in turn modeled by a mixture prior in which each
-mixture component \eqn{j} is multivariate normal with zero mean and
+the \eqn{w_j}'s are mixture weights, and each \eqn{T_j = V_j + U_j}
+is a covariance matrix. This is the marginal density derived from a
+model in which \eqn{x} is multivariate normal with mean \eqn{y} and
+covariance \eqn{V}, and the underlying, or "latent", signal \eqn{y}
+is in turn modeled by a mixture prior in which each mixture
+component \eqn{j} is multivariate normal with zero mean and
 covariance matrix \eqn{U_j}. This model is a useful special case of
-the "Extreme Deconvolution" (ED) model (Bovy \emph{et al}, 2011).
+the "Extreme Deconvolution" (ED) model (Bovy \emph{et al}, 2011),
+and is closely related to the factor analysis model (Rubin and
+Thayer, 1982).
 
 Two variants of the UD model are implemented: one in which the
 residual covariance V is the same for all data points, and another
 in which V is different for each data point. In the first case,
-this covariance matrix may be estimated.
+V may be estimated.
 
-The UD model is fit by expectation-maximization (EM). The
-\code{control} argument is a list in which any of the following
-named components will override the default optimization algorithm
-settings (as they are defined by \code{ud_fit_control_default}):
+The UD model is fit by an expectation-maximization (EM)
+algorithm. The \code{control} argument can be used to adjust the EM
+settings. It is a list in which any of the following named components
+will override the default algorithm settings (as they are defined
+by \code{ud_fit_control_default}):
 
 \describe{
 
@@ -100,23 +99,23 @@ is the same for all data points), EM is used to update V; otherwise,
 no updating is performed.}
 
 \item{\code{scaled.update}}{This setting specifies the updates for
-the scaled prior covariance matrices. Currently, only
-\code{scaled.update = "none"} is allowed.}
+the scaled prior covariance matrices. Possible settings are
+\code{"em"}, \code{"none"} or \code{NA}.}
 
 \item{\code{rank1.update}}{This setting specifies the updates for
-the rank-1 prior covariance matrices. Currently, only
-\code{rank1.update = "none"} is allowed.}
+the rank-1 prior covariance matrices. Possible settings are
+\code{"em"}, \code{"none"} or \code{NA}.}
 
 \item{\code{unconstrained.update}}{This setting determines the
 updates used to estimate the unconstrained prior covariance
-matrices. Two variants of EM are implemented: \code{update.U = "ed"},
-the EM updates described by Bovy \emph{et al} (2011); and
+matrices. Two variants of EM are implemented: \code{update.U =
+"ed"}, the EM updates described by Bovy \emph{et al} (2011); and
 \code{update.U = "teem"}, "truncated eigenvalue
 expectation-maximization", in which the M-step update for each
 covariance matrix \code{U[[j]]} is solved by truncating the
 eigenvalues in a spectral decomposition of the unconstrained
-maximimum likelihood estimate (MLE) of \code{U[j]]}. The latter
-method provides greater freedom in the updates.}
+maximimum likelihood estimate (MLE) of \code{U[j]]}. Other possible
+settings include \code{"none"} and code{NA}.}
 
 \item{\code{version}}{R and C++ implementations of the model
 fitting algorithm are provided; these are selected with
@@ -130,8 +129,8 @@ updates are halted when the largest change in the model parameters
 between two successive updates is less than \code{tol}.}
 
 \item{\code{minval}}{Minimum eigenvalue allowed in the residual
-  covariance(s) \code{V} and the prior covariance matrices
-  \code{U}.}}
+covariance(s) \code{V} and the prior covariance matrices
+\code{U}.}}
 
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples
@@ -181,6 +180,9 @@ J. Bovy, D. W. Hogg and S. T. Roweis (2011). Extreme Deconvolution:
 inferring complete distribution functions from noisy, heterogeneous
 and incomplete observations. \emph{Annals of Applied Statistics},
 \bold{5}, 1657–1677. doi:10.1214/10-AOAS439
+
+D. B. Rubin and D. T. Thayer (1982). EM algorithms for ML factor
+analysis. Psychometrika \bold{47}, 69-76. doi:10.1007/BF02293851
 
 A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
 (2018). Bayesian semiparametric multivariate density deconvolution.
