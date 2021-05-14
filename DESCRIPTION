@@ -1,7 +1,7 @@
 Encoding: UTF-8
 Type: Package
 Package: udr
-Version: 0.3-73
+Version: 0.3-74
 Date: 2021-05-14
 Title: Ultimate Deconvolution for Multivariate Normal Means
 Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),

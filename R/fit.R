@@ -81,7 +81,7 @@
 #'
 #' \item{\code{minval}}{Minimum eigenvalue allowed in the residual
 #' covariance(s) \code{V} and the prior covariance matrices
-#' \code{U}.}}
+#' \code{U}. Should be a small, positive number.}}
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
@@ -236,7 +236,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-73, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-74, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else

@@ -130,7 +130,7 @@ between two successive updates is less than \code{tol}.}
 
 \item{\code{minval}}{Minimum eigenvalue allowed in the residual
 covariance(s) \code{V} and the prior covariance matrices
-\code{U}.}}
+\code{U}. Should be a small, positive number.}}
 
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples

@@ -10,9 +10,8 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   X   <- dat$X
 
   # Run the R and C++ implementations of ud_fit when V is a matrix or
-  # a list, and V is not updated. The updates of the prior covariance
-  # matrices U are skipped in this test.
-  control  <- list(maxiter = 20,resid.update = "none",scaled.update = "none",
+  # a list, and V is not updated.
+  control  <- list(maxiter = 20,resid.update = "none",scaled.update = "em",
                    rank1.update = "ed",unconstrained.update = "ed")
   control1 <- control
   control2 <- control
@@ -43,6 +42,12 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
 # expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
   expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
 # expect_equal(fit1,fit4,scale = 1,tolerance = 1e-12)
+
+  # Check likelihood computing using logLik.
+  expect_equal(logLik(fit1),fit1$loglik,scale = 1,tolerance = 1e-15)
+# expect_equal(logLik(fit2),fit2$loglik,scale = 1,tolerance = 1e-15)
+  expect_equal(logLik(fit3),fit3$loglik,scale = 1,tolerance = 1e-15)
+# expect_equal(logLik(fit4),fit4$loglik,scale = 1,tolerance = 1e-15)
 })
 
 test_that(paste("Check R and C++ implementations of residual covariance",
