@@ -27,7 +27,8 @@ iteration. For interpretation of the columns, see the description
 of the \code{progress} return value.}
 }
 \value{
-A list object with the following elements:
+An Ultimate Deconvolution model fit. It is a list object
+with the following elements:
 
 \item{w}{A vector containing the estimated mixture weights in the
   mixture-of-normals prior.}
@@ -61,7 +62,7 @@ deconvolution.
 In the Ultimate Deconvolution (UD) model, the
 m-dimensional observation \eqn{x} is drawn from a mixture of
 multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0,
-T_k)}, where \eqn{k \geq 2} is the number of mixture components,
+T_k)}, where \eqn{k \ge 2} is the number of mixture components,
 the \eqn{w_j}'s are mixture weights, and each \eqn{T_j = V_j + U_j}
 is a covariance matrix. This is the marginal density derived from a
 model in which \eqn{x} is multivariate normal with mean \eqn{y} and

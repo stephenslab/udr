@@ -12,7 +12,7 @@
 #' @details In the Ultimate Deconvolution (UD) model, the
 #' m-dimensional observation \eqn{x} is drawn from a mixture of
 #' multivariate normals, \eqn{x ~ w_1 N(0, T_1) + ... + w_k N(0,
-#' T_k)}, where \eqn{k \geq 2} is the number of mixture components,
+#' T_k)}, where \eqn{k \ge 2} is the number of mixture components,
 #' the \eqn{w_j}'s are mixture weights, and each \eqn{T_j = V_j + U_j}
 #' is a covariance matrix. This is the marginal density derived from a
 #' model in which \eqn{x} is multivariate normal with mean \eqn{y} and
@@ -103,7 +103,8 @@
 #'   iteration. For interpretation of the columns, see the description
 #'   of the \code{progress} return value.
 #'
-#' @return A list object with the following elements:
+#' @return An Ultimate Deconvolution model fit. It is a list object
+#' with the following elements:
 #'
 #' \item{w}{A vector containing the estimated mixture weights in the
 #'   mixture-of-normals prior.}
@@ -166,7 +167,6 @@
 #'      ylab = "dist to best loglik")
 #' 
 #' @references
-#'
 #' J. Bovy, D. W. Hogg and S. T. Roweis (2011). Extreme Deconvolution:
 #' inferring complete distribution functions from noisy, heterogeneous
 #' and incomplete observations. \emph{Annals of Applied Statistics},
@@ -238,7 +238,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-75, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-76, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -264,24 +264,31 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   return(ud_fit_em(fit,covupdates,control,verbose))
 }
 
-# This implements the core part of ud_fit.
-#
 #' @rdname ud_fit_advanced
 #'
-#' @title Title Goes Here
+#' @title Low-Level Interface for Fitting Ultimate Deconvolution Models
 #' 
 #' @description Here we describe the low-level model fitting interface.
 #'
-#' @param fit Describe input argument "fit" here.
+#' @details Add details here.
+#' 
+#' @param fit An Ultimate Deconvolution model fit. Typically,
+#'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
 #' @param covupdates Describe input argument "covupdates" here.
 #'
-#' @param control Describe input argumennt "control" here.
+#' @param control A list of parameters controlling the behaviour of
+#'   the model fitting and initialization. See \sQuote{Details}.
 #'
-#' @param verbose Describe input argument "verbose" here.
+#' @param verbose When \code{verbose = TRUE}, information about the
+#'   algorithm's progress is printed to the console at each
+#'   iteration.
 #'
-#' @return Describe the outputs here.
+#' @return An Ultimate Deconvolution model fit. See
+#'   \code{\link{ud_fit}} for details.
 #'
+#' @seealso \code{\link{ud_init}}, \code{\link{ud_fit}}
+#' 
 #' @examples
 #' # Add examples here.
 #' 

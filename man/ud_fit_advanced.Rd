@@ -6,7 +6,8 @@
 \alias{update_mixture_weights_em}
 \alias{update_resid_covariance}
 \alias{update_prior_covariances}
-\title{Title Goes Here}
+\alias{assign_prior_covariance_updates}
+\title{Low-Level Interface for Fitting Ultimate Deconvolution Models}
 \usage{
 ud_fit_em(
   fit,
@@ -30,30 +31,45 @@ update_prior_covariances(
   covupdates = rep("none", length(fit$U)),
   minval = 1e-14
 )
+
+assign_prior_covariance_updates(covtypes, control)
 }
 \arguments{
-\item{fit}{Describe input argument "fit" here.}
+\item{fit}{An Ultimate Deconvolution model fit. Typically,
+this will be an output of \code{\link{ud_init}} or \code{ud_fit}.}
 
 \item{covupdates}{Describe input argument "covupdates" here.}
 
-\item{control}{Describe input argumennt "control" here.}
+\item{control}{A list of parameters controlling the behaviour of
+the model fitting and initialization. See \sQuote{Details}.}
 
-\item{verbose}{Describe input argument "verbose" here.}
+\item{verbose}{When \code{verbose = TRUE}, information about the
+algorithm's progress is printed to the console at each
+iteration.}
 
 \item{version}{Describe input argument "version" here.}
 
 \item{update}{Describe input argument "update" here.}
 
 \item{minval}{Describe input argument "minval" here.}
+
+\item{covtypes}{Describe input argument "covtypes" here.}
 }
 \value{
-Describe the outputs here.
+An Ultimate Deconvolution model fit. See
+  \code{\link{ud_fit}} for details.
 }
 \description{
 Here we describe the low-level model fitting interface.
 }
+\details{
+Add details here.
+}
 \examples{
 # Add examples here.
 
+}
+\seealso{
+\code{\link{ud_init}}, \code{\link{ud_fit}}
 }
 \keyword{internal}

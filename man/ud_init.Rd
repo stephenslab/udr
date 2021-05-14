@@ -56,8 +56,8 @@ initialized at random.}
 the model initialization. See \code{\link{ud_fit}} for details.}
 }
 \value{
-An object of class "ud_fit". See \code{\link{ud_fit}} for
-  details.
+An Ultimate Deconvolution model fit. See
+  \code{\link{ud_fit}} for details.
 }
 \description{
 Initialize an Ultimate Deconvolution model fit. See

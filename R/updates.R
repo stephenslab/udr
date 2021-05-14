@@ -128,6 +128,13 @@ update_resid_covariance_helper <- function (X, U, V, P) {
 # based on the (1) the covariance matrix types and (2) the control
 # settings. The return value is a character vector with one entry for
 # each prior covariance matrix.
+#
+#' @rdname ud_fit_advanced
+#'
+#' @param covtypes Describe input argument "covtypes" here.
+#' 
+#' @export
+#' 
 assign_prior_covariance_updates <- function (covtypes, control) {
   k <- length(covtypes)
   covupdates <- rep(as.character(NA),k)

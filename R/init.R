@@ -42,8 +42,8 @@
 #' @param control A list of parameters controlling the behaviour of
 #'   the model initialization. See \code{\link{ud_fit}} for details.
 #'
-#' @return An object of class "ud_fit". See \code{\link{ud_fit}} for
-#'   details.
+#' @return An Ultimate Deconvolution model fit. See
+#'   \code{\link{ud_fit}} for details.
 #'
 #' @seealso \code{\link{ud_fit}}
 #' 
