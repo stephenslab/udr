@@ -1,5 +1,15 @@
 #' @importFrom stats logLik
 #'
+#' @title Title Goes Here
+#' 
+#' @description Description goes here.
+#'
+#' @param fit Describe input argument "fit" here.
+#'
+#' @param version Description input argument "version" here.
+#'
+#' @return Describe the return value here.
+#' 
 #' @method logLik ud_fit
 #' 
 #' @export

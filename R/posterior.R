@@ -1,4 +1,3 @@
-
 # Compute the n x k matrix of posterior mixture assignment
 # probabilities ("responsibilities") given current estimates of the
 # model parameters. This implements the E step in the EM algorithm for
@@ -7,6 +6,10 @@
 # a m x m x n array. Input argument U may either be a list of length k
 # in which U[[i]]$mat is an m x m matrix, or an m x m x k array.
 #
+#' @rdname ud_fit_advanced
+#'
+#' @param version Describe input argument "version" here.
+#' 
 #' @export
 #' 
 compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
@@ -22,7 +25,8 @@ compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
   V <- fit$V
   if (is.list(V))
     V <- list2array(V)
-  
+
+  # Compute the responsibilities matrix.
   if (is.matrix(V)) {
 
     # Perform the computations for the special case when the same

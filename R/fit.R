@@ -234,7 +234,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-70, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-71, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -262,6 +262,27 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
 
 # This implements the core part of ud_fit.
 #
+#' @rdname ud_fit_advanced
+#'
+#' @title Title Goes Here
+#' 
+#' @description Description of advanced fitting functions goes here.
+#'
+#' @param fit Describe input argument "fit" here.
+#'
+#' @param covupdates Describe input argument "covupdates" here.
+#'
+#' @param control Describe input argumennt "control" here.
+#'
+#' @param verbose Describe input argument "verbose" here.
+#'
+#' @return Describe the outputs here.
+#'
+#' @examples
+#' # Add examples here.
+#' 
+#' @keywords internal
+#' 
 #' @export
 #' 
 ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)), 
@@ -298,10 +319,10 @@ ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)),
     if (is.matrix(V))
       Vnew <- update_resid_covariance(fit,control$resid.update,
                                       control$version)$V
-    
+
     # Update the scaled prior covariance matrices.
     Unew <- update_prior_covariances(fit,covupdates,control$minval)$U
-    
+
     # Update the mixture weights.
     wnew <- update_mixture_weights_em(fit,control$weights.update)$w
   
@@ -309,10 +330,10 @@ ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)),
     # other quantities, and report the algorithm's progress to the
     # console if requested.
     loglik <- loglik_ud(fit$X,wnew,Unew,Vnew,control$version)
-    dw     <- max(abs(w - wnew))
-    dU     <- max(abs(ulist2array(U) - ulist2array(Unew)))
-    if (is.matrix(V))
-      dV <- max(abs(V - Vnew))
+    dw <- max(abs(fit$w - wnew))
+    dU <- max(abs(ulist2array(fit$U) - ulist2array(Unew)))
+    if (is.matrix(fit$V))
+      dV <- max(abs(fit$V - Vnew))
     else
       dV <- 0
     t2 <- proc.time()

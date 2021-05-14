@@ -1,6 +1,10 @@
 # Perform an M-step update for the mixture weights in the mixture
 # prior (or no update if update = "none")
 #
+#' @rdname ud_fit_advanced
+#' 
+#' @param update Describe input argument "update" here.
+#' 
 #' @export
 #' 
 update_mixture_weights_em <- function (fit, update = c("em","none")) {
@@ -34,6 +38,8 @@ update_mixture_weights_em <- function (fit, update = c("em","none")) {
 # matrix. Input argument U may either be a list of length k in which
 # U[[i]]$mat is an m x m matrix, or an m x m x k array.
 #
+#' @rdname ud_fit_advanced
+#' 
 #' @export
 #' 
 update_resid_covariance <- function (fit, update = c("em","none"),
@@ -72,6 +78,40 @@ update_resid_covariance <- function (fit, update = c("em","none"),
   return(fit)
 }
 
+# Perform M-step updates for all the prior covariance matrices U.
+# Input argument V may either be an m x m matrix, a list of m x m
+# matrices of length n, or a m x m x n array.
+#
+#' @rdname ud_fit_advanced
+#'
+#' @param minval Describe input argument "minval" here.
+#' 
+#' @export
+#' 
+update_prior_covariances <-
+  function (fit, covupdates = rep("none",length(fit$U)), minval = 1e-14) {
+
+  # Check input argument "fit".
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
+         "such as the output of ud_init")
+
+  # Process V.
+  V <- fit$V
+  if (is.list(V))
+    V <- list2array(V)
+
+  # Update the prior covariance matrices, U.
+  k <- length(fit$U)
+  for (i in 1:k) {
+    fit$U[[i]] <- do.call(covupdates[i],list(X = fit$X,U = fit$U[[i]],V = V,
+                                             p = fit$P[,i],minval = minval))
+  }
+  
+  # Output the updated fit.
+  return(fit)
+}
+
 # Implements update_resid_covariance with version = "R".
 update_resid_covariance_helper <- function (X, U, V, P) {
   n <- nrow(X)
@@ -99,39 +139,10 @@ assign_prior_covariance_updates <- function (covtypes, control) {
   return(covupdates)
 }
 
-# Perform M-step updates for all the prior covariance matrices U.
-# Input argument V may either be an m x m matrix, a list of m x m
-# matrices of length n, or a m x m x n array.
-#
-#' @export
-#' 
-update_prior_covariances <-
-  function (fit, covupdates = rep("none",length(fit$U)), minval = 1e-14) {
-
-  # Check input argument "fit".
-  if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
-         "such as the output of ud_init")
-
-  # Process V.
-  V <- fit$V
-  if (is.list(V))
-    V <- list2array(V)
-
-  # Update the prior covariance matrices, U.
-  k <- length(fit$U)
-  for (i in 1:k)
-    fit$U[[i]] <- do.call(covupdates[i],list(X = fit$X,U = fit$U[[i]],V = V,
-                                             p = fit$P[,i],minval = minval))
-
-  # Output the updated fit.
-  return(fit)
-}
-
 # TO DO: Explain here what this function does, and how to use it.
 update_prior_covariance_unconstrained <- function (U, mat) {
-  rownames(mat) <- U$mat
-  colnames(mat) <- U$mat
+  rownames(mat) <- rownames(U$mat)
+  colnames(mat) <- colnames(U$mat)
   U$mat <- mat
   return(U)
 }
@@ -139,9 +150,9 @@ update_prior_covariance_unconstrained <- function (U, mat) {
 # TO DO: Explain here what this function does, and how to use it.
 update_prior_covariance_rank1 <- function (U, vec) {
   mat <- tcrossprod(vec)
-  names(vec) <- U$vec
-  rownames(mat) <- U$mat
-  colnames(mat) <- U$mat
+  names(vec) <- names(U$vec)
+  rownames(mat) <- rownames(U$mat)
+  colnames(mat) <- colnames(U$mat)
   U$vec <- vec
   U$mat <- mat
   return(U)
@@ -272,7 +283,7 @@ update_prior_covariance_rank1_teem <- function (X, U, V, p, minval) {
   if (!is.matrix(V))
     stop("rank1.update = \"teem\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
-  mat <- update_prior_covariance_unconstrained_teem(X,U,V,p,minval,r = 1)
+  mat <- update_prior_covariance_unconstrained_teem(X,U,V,p,minval,r = 1)$mat
   vec <- getrank1(mat)
   return(update_prior_covariance_rank1(U,vec))
 }
