@@ -11,7 +11,7 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
 
   # Run the R and C++ implementations of ud_fit when V is a matrix or
   # a list, and V is not updated.
-  control  <- list(maxiter = 20,resid.update = "none",scaled.update = "em",
+  control  <- list(maxiter = 20,resid.update = "none",scaled.update = "none",
                    rank1.update = "ed",unconstrained.update = "ed")
   control1 <- control
   control2 <- control
@@ -26,9 +26,15 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   capture.output(fit3 <- ud_fit(fit3,control = control1))
 # capture.output(fit4 <- ud_fit(fit4,control = control2))
   
+  # Check likelihood computing using logLik.
+  expect_equal(logLik(fit1),fit1$loglik,scale = 1,tolerance = 1e-15)
+# expect_equal(logLik(fit2),fit2$loglik,scale = 1,tolerance = 1e-15)
+  expect_equal(logLik(fit3),fit3$loglik,scale = 1,tolerance = 1e-15)
+# expect_equal(logLik(fit4),fit4$loglik,scale = 1,tolerance = 1e-15)
+  
   # The likelihoods should be non-decreasing.
   expect_nondecreasing(fit1$progress$loglik)
-  
+
   # The outputs of all four variants of ud_fit should be the same
   # (except for V and the timings).
   fit1$progress$timing <- 0
@@ -42,12 +48,6 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
 # expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
   expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
 # expect_equal(fit1,fit4,scale = 1,tolerance = 1e-12)
-
-  # Check likelihood computing using logLik.
-  expect_equal(logLik(fit1),fit1$loglik,scale = 1,tolerance = 1e-15)
-# expect_equal(logLik(fit2),fit2$loglik,scale = 1,tolerance = 1e-15)
-  expect_equal(logLik(fit3),fit3$loglik,scale = 1,tolerance = 1e-15)
-# expect_equal(logLik(fit4),fit4$loglik,scale = 1,tolerance = 1e-15)
 })
 
 test_that(paste("Check R and C++ implementations of residual covariance",
