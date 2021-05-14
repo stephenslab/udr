@@ -234,7 +234,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-71, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-72, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -266,7 +266,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
 #'
 #' @title Title Goes Here
 #' 
-#' @description Description of advanced fitting functions goes here.
+#' @description Here we describe the low-level model fitting interface.
 #'
 #' @param fit Describe input argument "fit" here.
 #'
@@ -315,8 +315,8 @@ ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)),
     # M-step
     # ------
     # Update the residual covariance matrix.
-    Vnew <- V
-    if (is.matrix(V))
+    Vnew <- fit$V
+    if (is.matrix(fit$V))
       Vnew <- update_resid_covariance(fit,control$resid.update,
                                       control$version)$V
 
