@@ -9,7 +9,7 @@ using namespace arma;
 void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V, 
 				     const vec& p);
 
-void update_prior_covariance_teem (const mat& X, mat& U, const mat& V, 
+void update_prior_covariance_ted (const mat& X, mat& U, const mat& V, 
 				   const vec& p, double minval);
 
 void update_resid_covariance (const mat& X, const cube& U, const mat& V,
@@ -41,13 +41,13 @@ arma::mat update_prior_covariance_ed_iid_rcpp (const arma::mat& X,
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-arma::mat update_prior_covariance_teem_iid_rcpp (const arma::mat& X, 
-						 const arma::mat& U,
-						 const arma::mat& V,
-						 const arma::vec& p,
-						 double minval) {
+arma::mat update_prior_covariance_ted_iid_rcpp (const arma::mat& X, 
+						const arma::mat& U,
+						const arma::mat& V,
+						const arma::vec& p,
+						double minval) {
   mat Unew = U;
-  update_prior_covariance_teem(X,Unew,V,p,minval);
+  update_prior_covariance_ted(X,Unew,V,p,minval);
   return Unew;
 }
 
@@ -87,8 +87,8 @@ void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V,
 // calculations, and d is a vector of length m also storing an
 // intermediate result. Also note that data matrix X is modified to
 // perform the update, so should not be reused.
-void update_prior_covariance_teem (const mat& X, mat& U, const mat& V, 
-				   const vec& p, double minval) {
+void update_prior_covariance_ted (const mat& X, mat& U, const mat& V, 
+				  const vec& p, double minval) {
   mat R = chol(V,"upper");
   mat X1 = X;
 

@@ -63,7 +63,7 @@ test_that(paste("Check R and C++ implementations of residual covariance",
 
   # Run the R and C++ implementations of ud_fit.
   control <- list(maxiter = 20,resid.update = "em",scaled.update = "none",
-                  rank1.update = "none",unconstrained.update = "teem")
+                  rank1.update = "none",unconstrained.update = "ted")
   control1 <- control
   control2 <- control
   control1$version <- "R"
@@ -117,9 +117,9 @@ test_that(paste("Check R and C++ implementations of prior covariance",
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
   expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
 
-  # Run ud_fit with unconstrained.update = "teem".
+  # Run ud_fit with unconstrained.update = "ted".
   control <- list(maxiter = 20,resid.update = "em",scaled.update = "none",
-                  rank1.update = "none",unconstrained.update = "teem")
+                  rank1.update = "none",unconstrained.update = "ted")
   control1 <- control
   control2 <- control
   control1$version <- "R"

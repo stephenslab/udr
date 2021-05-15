@@ -51,22 +51,22 @@
 #'
 #' \item{\code{scaled.update}}{This setting specifies the updates for
 #' the scaled prior covariance matrices. Possible settings are
-#' \code{"em"}, \code{"none"} or \code{NA}.}
+#' \code{"fa"}, \code{"none"} or \code{NA}.}
 #' 
 #' \item{\code{rank1.update}}{This setting specifies the updates for
 #' the rank-1 prior covariance matrices. Possible settings are
-#' \code{"em"}, \code{"none"} or \code{NA}.}
+#' \code{"ed"}, \code{"ted"}, \code{"none"} or \code{NA}.}
 #' 
 #' \item{\code{unconstrained.update}}{This setting determines the
 #' updates used to estimate the unconstrained prior covariance
 #' matrices. Two variants of EM are implemented: \code{update.U =
 #' "ed"}, the EM updates described by Bovy \emph{et al} (2011); and
-#' \code{update.U = "teem"}, "truncated eigenvalue
-#' expectation-maximization", in which the M-step update for each
-#' covariance matrix \code{U[[j]]} is solved by truncating the
-#' eigenvalues in a spectral decomposition of the unconstrained
-#' maximimum likelihood estimate (MLE) of \code{U[j]]}. Other possible
-#' settings include \code{"none"} and code{NA}.}
+#' \code{update.U = "ted"}, "truncated eigenvalue decomposition", in
+#' which the M-step update for each covariance matrix \code{U[[j]]} is
+#' solved by truncating the eigenvalues in a spectral decomposition of
+#' the unconstrained maximimum likelihood estimate (MLE) of
+#' \code{U[j]]}. Other possible settings include \code{"none"} or
+#' code{NA}.}
 #'
 #' \item{\code{version}}{R and C++ implementations of the model
 #' fitting algorithm are provided; these are selected with
@@ -225,11 +225,11 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   if (is.na(control$resid.update))
     control$resid.update <- ifelse(is.matrix(fit$V),"em","none")
   if (is.na(control$scaled.update))
-    control$scaled.update <- ifelse(is.matrix(fit$V),"em","none")
+    control$scaled.update <- ifelse(is.matrix(fit$V),"fa","none")
   if (is.na(control$rank1.update))
-    control$rank1.update  <- ifelse(is.matrix(fit$V),"teem","ed")
+    control$rank1.update  <- ifelse(is.matrix(fit$V),"ted","ed")
   if (is.na(control$unconstrained.update))
-    control$unconstrained.update <- ifelse(is.matrix(fit$V),"teem","none")
+    control$unconstrained.update <- ifelse(is.matrix(fit$V),"ted","none")
   if (!is.matrix(fit$V) & control$resid.update != "none")
     stop("Residual covariance V can only be updated when it is the same ",
          "for all data points")
@@ -238,7 +238,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-76, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-77, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -378,9 +378,9 @@ ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)),
 ud_fit_control_default <- function()
   list(weights.update       = "em",  # em or none
        resid.update         = NA,    # em, none or NA
-       scaled.update        = NA,    # em, none or NA
-       rank1.update         = NA,    # teem, ed, none or NA
-       unconstrained.update = NA,    # teem, ed, none or NA
+       scaled.update        = NA,    # fa, none or NA
+       rank1.update         = NA,    # ted, ed, none or NA
+       unconstrained.update = NA,    # ted, ed, none or NA
        version              = "R",   # R or Rcpp
        maxiter              = 20,
        minval               = 1e-14,

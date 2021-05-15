@@ -101,22 +101,22 @@ no updating is performed.}
 
 \item{\code{scaled.update}}{This setting specifies the updates for
 the scaled prior covariance matrices. Possible settings are
-\code{"em"}, \code{"none"} or \code{NA}.}
+\code{"fa"}, \code{"none"} or \code{NA}.}
 
 \item{\code{rank1.update}}{This setting specifies the updates for
 the rank-1 prior covariance matrices. Possible settings are
-\code{"em"}, \code{"none"} or \code{NA}.}
+\code{"ed"}, \code{"ted"}, \code{"none"} or \code{NA}.}
 
 \item{\code{unconstrained.update}}{This setting determines the
 updates used to estimate the unconstrained prior covariance
 matrices. Two variants of EM are implemented: \code{update.U =
 "ed"}, the EM updates described by Bovy \emph{et al} (2011); and
-\code{update.U = "teem"}, "truncated eigenvalue
-expectation-maximization", in which the M-step update for each
-covariance matrix \code{U[[j]]} is solved by truncating the
-eigenvalues in a spectral decomposition of the unconstrained
-maximimum likelihood estimate (MLE) of \code{U[j]]}. Other possible
-settings include \code{"none"} and code{NA}.}
+\code{update.U = "ted"}, "truncated eigenvalue decomposition", in
+which the M-step update for each covariance matrix \code{U[[j]]} is
+solved by truncating the eigenvalues in a spectral decomposition of
+the unconstrained maximimum likelihood estimate (MLE) of
+\code{U[j]]}. Other possible settings include \code{"none"} or
+code{NA}.}
 
 \item{\code{version}}{R and C++ implementations of the model
 fitting algorithm are provided; these are selected with

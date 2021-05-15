@@ -215,10 +215,10 @@ update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
 # vector of weights associated with the rows of X. Input r specifies
 # an optional constraint on U; when r < n, where U is an n x n matrix,
 # at most r of the eigenvalues are positive in the updated matrix.
-update_prior_covariance_unconstrained_teem <- function (X, U, V, p, minval,
+update_prior_covariance_unconstrained_ted <- function (X, U, V, p, minval,
                                                         r = ncol(X)) {
   if (!is.matrix(V))
-    stop("unconstrained.update = \"teem\" does not work for case when data ",
+    stop("unconstrained.update = \"ted\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
     
   # Transform the data so that the residual covariance is I, then
@@ -238,13 +238,13 @@ update_prior_covariance_unconstrained_teem <- function (X, U, V, p, minval,
 }
 
 # This is a more efficient C++ implementation of 
-# update_prior_covariance_unconstrained_teem.
-update_prior_covariance_unconstrained_teem_rcpp <- function (X, U, V, p,
+# update_prior_covariance_unconstrained_ted.
+update_prior_covariance_unconstrained_ted_rcpp <- function (X, U, V, p,
                                                              minval) {
   if (!is.matrix(V))
-    stop("unconstrained.update = \"teem\" does not work for case when data ",
+    stop("unconstrained.update = \"ted\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
-  mat <- update_prior_covariance_teem_iid_rcpp(X,U$mat,V,p,minval)
+  mat <- update_prior_covariance_ted_iid_rcpp(X,U$mat,V,p,minval)
   return(update_prior_covariance_unconstrained(U,mat))
 }
 
@@ -284,21 +284,21 @@ update_prior_covariance_rank1_ed_rcpp <- function (X, U, V, p, minval) {
 # using the "eigenvalue truncation" technique. Note that input U is
 # not used, and is included only for consistency with the other
 # update_prior_covariance functions. See
-# update_prior_covariance_unconstrained_teem for more information
+# update_prior_covariance_unconstrained_ted for more information
 # about the inputs.
-update_prior_covariance_rank1_teem <- function (X, U, V, p, minval) {
+update_prior_covariance_rank1_ted <- function (X, U, V, p, minval) {
   if (!is.matrix(V))
-    stop("rank1.update = \"teem\" does not work for case when data ",
+    stop("rank1.update = \"ted\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
-  mat <- update_prior_covariance_unconstrained_teem(X,U,V,p,minval,r = 1)$mat
+  mat <- update_prior_covariance_unconstrained_ted(X,U,V,p,minval,r = 1)$mat
   vec <- getrank1(mat)
   return(update_prior_covariance_rank1(U,vec))
 }
 
 # This is a more efficient C++ implementation of
-# update_prior_covariance_rank1_teem.
-update_prior_covariance_rank1_teem_rcpp <- function (X, U, V, p, minval) {
-  stop("update_prior_covariance_rank1_teem_rcpp is not yet implemented")
+# update_prior_covariance_rank1_ted.
+update_prior_covariance_rank1_ted_rcpp <- function (X, U, V, p, minval) {
+  stop("update_prior_covariance_rank1_ted_rcpp is not yet implemented")
 }
 
 # This function simply returns the scaled prior covariance matrix
@@ -315,19 +315,19 @@ update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
 
 # Perform an M-step update for a scaled prior covariance matrix (U).
 # Input p is a vector of weights associated with the rows of X.
-update_prior_covariance_scaled_em <- function (X, U, V, p, minval) {
+update_prior_covariance_scaled_fa <- function (X, U, V, p, minval) {
   if (is.matrix(V))
-    s <- update_prior_covariance_scaled_em_iid(X,U$U0,V,p,minval)
+    s <- update_prior_covariance_scaled_fa_iid(X,U$U0,V,p,minval)
   else 
-    stop("update_prior_covariance_scaled_em is not yet implemented for ",
+    stop("update_prior_covariance_scaled_fa is not yet implemented for ",
          "case when V is an array")
   return(update_prior_covariance_scaled(U,s))
 }
 
 # This is a more efficient C++ implementation of
-# update_prior_covariance_scaled_em.
-update_prior_covariance_scaled_em_rcpp <- function (X, U, V, p, minval) {
-  stop("update_prior_covariance_scaled_em_rcpp is not yet implemented")
+# update_prior_covariance_scaled_fa.
+update_prior_covariance_scaled_fa_rcpp <- function (X, U, V, p, minval) {
+  stop("update_prior_covariance_scaled_fa_rcpp is not yet implemented")
 }
 
 # Perform an M-step update for a prior covariance matrix (U) using the
@@ -393,7 +393,7 @@ update_prior_covariance_rank1_ed_general <- function (X, u, V, p) {
 # @return An integer scalar
 #
 #' @importFrom stats uniroot
-update_prior_covariance_scaled_em_iid <- function (X, U0, V, p, minval) {
+update_prior_covariance_scaled_fa_iid <- function (X, U0, V, p, minval) {
 
   # Transform data using the trick
   # Uhat = R^{-T}*U*R^{-1}

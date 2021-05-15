@@ -21,8 +21,8 @@ update_prior_covariance_ed_iid_rcpp <- function(X, U, V, p) {
     .Call('_udr_update_prior_covariance_ed_iid_rcpp', PACKAGE = 'udr', X, U, V, p)
 }
 
-update_prior_covariance_teem_iid_rcpp <- function(X, U, V, p, minval) {
-    .Call('_udr_update_prior_covariance_teem_iid_rcpp', PACKAGE = 'udr', X, U, V, p, minval)
+update_prior_covariance_ted_iid_rcpp <- function(X, U, V, p, minval) {
+    .Call('_udr_update_prior_covariance_ted_iid_rcpp', PACKAGE = 'udr', X, U, V, p, minval)
 }
 
 update_resid_covariance_rcpp <- function(X, U, V, P) {
