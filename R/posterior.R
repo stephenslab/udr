@@ -8,7 +8,26 @@
 #
 #' @rdname ud_fit_advanced
 #'
+#' @title Low-Level Interface for Fitting Ultimate Deconvolution Models
+#' 
+#' @description Here we describe the low-level model fitting interface.
+#'
+#' @details Add details here.
+#' 
+#' @param fit An Ultimate Deconvolution model fit. Typically,
+#'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
+#'
 #' @param version Describe input argument "version" here.
+#' 
+#' @return An Ultimate Deconvolution model fit. See
+#'   \code{\link{ud_fit}} for details.
+#'
+#' @seealso \code{\link{ud_init}}, \code{\link{ud_fit}}
+#' 
+#' @examples
+#' # Add examples here.
+#' 
+#' @keywords internal
 #' 
 #' @export
 #' 
@@ -17,8 +36,7 @@ compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
   
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
-         "such as the output of ud_init")
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
   
   # Process U and V.
   U <- ulist2array(fit$U)

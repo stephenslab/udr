@@ -25,8 +25,7 @@
 logLik.ud_fit <- function (object, version = c("Rcpp","R"), ...) {
   version <- match.arg(version)
   if (!(is.list(object) & inherits(object,"ud_fit")))
-    stop("Input argument \"object\" should be an object of class \"ud_fit\",",
-         "such as the output of ud_init")
+    stop("Input argument \"object\" should be an object of class \"ud_fit\"")
   out <- loglik_ud(object$X,object$w,object$U,object$V,version)
   class(out) <- "logLik"
   attr(out,"df") <- as.numeric(NA)

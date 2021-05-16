@@ -12,8 +12,7 @@ update_mixture_weights_em <- function (fit, update = c("em","none")) {
     
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
-         "such as the output of ud_init")
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
     
   # Update the mixture weights.
   if (update == "em")
@@ -49,8 +48,7 @@ update_resid_covariance <- function (fit, update = c("em","none"),
 
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
-         "such as the output of ud_init")
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
   if (!is.matrix(fit$V))
     stop("The residual covariance V can only be updated when it is the same ",
          "for all data points")
@@ -78,23 +76,70 @@ update_resid_covariance <- function (fit, update = c("em","none"),
   return(fit)
 }
 
+# Determine the functions for updating the prior covariance matrices
+# based on the (1) the covariance matrix types and (2) the control
+# settings. The return value is a character vector with one entry for
+# each prior covariance matrix.
+#
+#' @rdname ud_fit_advanced
+#'
+#' @param control A list of parameters controlling the behaviour of
+#'   the model fitting and initialization. See \code{\link{ud_fit}} for
+#'   details.
+#' 
+#' @export
+#' 
+assign_prior_covariance_updates <- function (fit, control = list()) {
+
+  # Check input argument "fit".
+  if (!(is.list(fit) & inherits(fit,"ud_fit")))
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
+  
+  # Check and process the optimization settings.
+  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
+  if (is.na(control$scaled.update))
+    control$scaled.update <- ifelse(is.matrix(fit$V),"fa","none")
+  if (is.na(control$rank1.update))
+    control$rank1.update  <- ifelse(is.matrix(fit$V),"ted","ed")
+  if (is.na(control$unconstrained.update))
+    control$unconstrained.update <- ifelse(is.matrix(fit$V),"ted","none")
+    
+  # Extract the "covtype" attribute from the prior covariance (U)
+  # matrices.
+  covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
+
+  # Determine the names of the functions used to update the prior
+  # covariance matrices.
+  k <- length(covtypes)
+  covupdates <- rep(as.character(NA),k)
+  for (i in 1:k)
+    covupdates[i] <- paste0("update_prior_covariance_",covtypes[i],"_",
+                            control[[paste(covtypes[i],"update",sep = ".")]],
+                            ifelse(control$version == "Rcpp","_rcpp",""))
+  names(covupdates) <- names(fit$U)
+  return(list(control = control,covupdates = covupdates))
+}
+
 # Perform M-step updates for all the prior covariance matrices U.
 # Input argument V may either be an m x m matrix, a list of m x m
 # matrices of length n, or a m x m x n array.
 #
 #' @rdname ud_fit_advanced
 #'
+#' @param covtypes Describe input argument "covtypes" here.
+#' 
 #' @param minval Describe input argument "minval" here.
 #' 
 #' @export
 #' 
 update_prior_covariances <-
-  function (fit, covupdates = rep("none",length(fit$U)), minval = 1e-14) {
+  function (fit,
+            covupdates = assign_prior_covariance_updates(fit)$covupdates,
+            minval = 1e-14) {
 
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
-         "such as the output of ud_init")
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
 
   # Process V.
   V <- fit$V
@@ -122,28 +167,6 @@ update_resid_covariance_helper <- function (X, U, V, P) {
     Vnew <- Vnew + out$S1 + tcrossprod(X[i,] - out$mu1)
   }
   return(Vnew/n)
-}
-
-# Determine the functions for updating the prior covariance matrices
-# based on the (1) the covariance matrix types and (2) the control
-# settings. The return value is a character vector with one entry for
-# each prior covariance matrix.
-#
-#' @rdname ud_fit_advanced
-#'
-#' @param covtypes Describe input argument "covtypes" here.
-#' 
-#' @export
-#' 
-assign_prior_covariance_updates <- function (covtypes, control) {
-  k <- length(covtypes)
-  covupdates <- rep(as.character(NA),k)
-  for (i in 1:k)
-    covupdates[i] <- paste0("update_prior_covariance_",covtypes[i],"_",
-                            control[[paste(covtypes[i],"update",sep = ".")]],
-                            ifelse(control$version == "Rcpp","_rcpp",""))
-  names(covupdates) <- names(covtypes)
-  return(covupdates)
 }
 
 # TO DO: Explain here what this function does, and how to use it.

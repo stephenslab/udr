@@ -194,12 +194,9 @@
 #' 
 ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
     
-  # CHECK & PROCESS INPUTS
-  # ----------------------
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\",",
-         "such as the output of ud_init")
+    stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
   
   # Check the input data matrix, "X".
   if (!missing(X)) {
@@ -224,21 +221,17 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
   if (is.na(control$resid.update))
     control$resid.update <- ifelse(is.matrix(fit$V),"em","none")
-  if (is.na(control$scaled.update))
-    control$scaled.update <- ifelse(is.matrix(fit$V),"fa","none")
-  if (is.na(control$rank1.update))
-    control$rank1.update  <- ifelse(is.matrix(fit$V),"ted","ed")
-  if (is.na(control$unconstrained.update))
-    control$unconstrained.update <- ifelse(is.matrix(fit$V),"ted","none")
   if (!is.matrix(fit$V) & control$resid.update != "none")
     stop("Residual covariance V can only be updated when it is the same ",
          "for all data points")
-  covupdates <- assign_prior_covariance_updates(covtypes,control)
+  out        <- assign_prior_covariance_updates(fit,control)
+  control    <- out$control
+  covupdates <- out$covupdates
   
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-77, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-78, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -259,49 +252,13 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
                 control$maxiter,control$tol))
   }
 
-  # PERFORM EM UPDATES
-  # ------------------
+  # Perform EM updates.
   return(ud_fit_em(fit,covupdates,control,verbose))
 }
 
-#' @rdname ud_fit_advanced
-#'
-#' @title Low-Level Interface for Fitting Ultimate Deconvolution Models
-#' 
-#' @description Here we describe the low-level model fitting interface.
-#'
-#' @details Add details here.
-#' 
-#' @param fit An Ultimate Deconvolution model fit. Typically,
-#'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
-#'
-#' @param covupdates Describe input argument "covupdates" here.
-#'
-#' @param control A list of parameters controlling the behaviour of
-#'   the model fitting and initialization. See \sQuote{Details}.
-#'
-#' @param verbose When \code{verbose = TRUE}, information about the
-#'   algorithm's progress is printed to the console at each
-#'   iteration.
-#'
-#' @return An Ultimate Deconvolution model fit. See
-#'   \code{\link{ud_fit}} for details.
-#'
-#' @seealso \code{\link{ud_init}}, \code{\link{ud_fit}}
-#' 
-#' @examples
-#' # Add examples here.
-#' 
-#' @keywords internal
-#' 
-#' @export
-#' 
-ud_fit_em <- function (fit, covupdates = rep("none",length(fit$U)), 
-                       control = list(), verbose = TRUE) {
+# This implements the core part of ud_fit.
+ud_fit_em <- function (fit, covupdates, control, verbose) {
 
-  # Process the "control" input argument.
-  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
-  
   # Get the number of components in the mixture prior.
   k <- length(fit$w)
   
