@@ -7,7 +7,7 @@
 #' 
 #' @export
 #' 
-update_mixture_weights_em <- function (fit, update = c("em","none")) {
+update_mixture_weights <- function (fit, update = c("em","none")) {
   update <- match.arg(update)
     
   # Check input argument "fit".

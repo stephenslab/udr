@@ -25,7 +25,51 @@
 #' @seealso \code{\link{ud_init}}, \code{\link{ud_fit}}
 #' 
 #' @examples
-#' # Add examples here.
+#' # Simulate data from a UD model.
+#' set.seed(1)
+#' n <- 4000
+#' V <- rbind(c(0.8,0.2),
+#'            c(0.2,1.5))
+#' U <- list(none   = rbind(c(0,0),
+#'                          c(0,0)),
+#'           shared = rbind(c(1.0,0.9),
+#'                          c(0.9,1.0)),
+#'           only1  = rbind(c(1,0),
+#'                          c(0,0)),
+#'           only2  = rbind(c(0,0),
+#'                          c(0,1)))
+#' w <- c(0.8,0.1,0.075,0.025)
+#' rownames(V) <- c("d1","d2")
+#' colnames(V) <- c("d1","d2")
+#' X <- simulate_ud_data(n,w,U,V)
+#' 
+#' # Perform 4 EM updates.
+#' fit1 <- ud_init(X)
+#' fit1 <- ud_fit(fit1,control = list(maxiter = 4))
+#'
+#' # Update the responsibilities matrix.
+#' fit2 <- compute_posterior_probs(fit1)
+#'
+#' # Update the mixture weights.
+#' fit2 <- update_mixture_weights(fit2)
+#'
+#' # Update the residual covariance, V.
+#' fit2 <- update_resid_covariance(fit2)
+#'
+#' # Update the prior covariance matrices, U, using the defaults.
+#' fit2 <- update_prior_covariances(fit2)
+#'
+#' # Update only the unconstrained prior covariance matrices using the
+#' # truncated eigenvalue decomposition ("ted") algorithm.
+#' control <- list(scaled.update = "none",
+#'                 rank1.update = "none",
+#'                 unconstrained.update = "ted")
+#' updates <- assign_prior_covariance_updates(fit,control)$covupdates
+#' fit2 <- update_prior_covariances(fit2,updates)
+#' 
+#' # Compute the new log-likelihood and compare the old one.
+#' print(logLik(fit1),digits = 8)
+#' print(logLik(fit2),digits = 8)
 #' 
 #' @keywords internal
 #' 
@@ -38,7 +82,7 @@ compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
     stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
   
-  # Process U and V.
+  # Get the prior (U) and residual (V) covariance matrices.
   U <- ulist2array(fit$U)
   V <- fit$V
   if (is.list(V))

@@ -231,7 +231,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-79, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-81, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -292,7 +292,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     Unew <- update_prior_covariances(fit,covupdates,control$minval)$U
 
     # Update the mixture weights.
-    wnew <- update_mixture_weights_em(fit,control$weights.update)$w
+    wnew <- update_mixture_weights(fit,control$weights.update)$w
   
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
