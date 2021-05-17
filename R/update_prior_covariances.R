@@ -1,8 +1,3 @@
-# Determine the functions for updating the prior covariance matrices
-# based on the (1) the covariance matrix types and (2) the control
-# settings. The return value is a character vector with one entry for
-# each prior covariance matrix.
-#
 #' @rdname ud_fit_advanced
 #'
 #' @param control A list of parameters controlling the behaviour of

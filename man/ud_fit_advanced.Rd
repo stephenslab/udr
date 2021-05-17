@@ -48,7 +48,8 @@ details.}
 \item{covtypes}{Describe input argument "covtypes" here.}
 }
 \value{
-An Ultimate Deconvolution model fit. See
+All functions except \code{assign_prior_covariance_updates}
+  return an Ultimate Deconvolution model fit; see
   \code{\link{ud_fit}} for details.
 }
 \description{
@@ -69,6 +70,12 @@ mixture weights in the mixture prior (or no update if \code{update
 
 \code{update_resid_covariance} performs an M-step update for the
 residual covariance matrix, V (or no update if \code{update = "none"}).
+
+\code{assign_prior_covariance_updates} determine the functions for
+updating the prior covariance matrices based on the the covariance
+matrix types and the control settings. The \code{"covupdates"}
+return value is a character vector with one entry for each prior
+covariance matrix.
 }
 \examples{
 # Simulate data from a UD model.

@@ -19,6 +19,12 @@
 #' \code{update_resid_covariance} performs an M-step update for the
 #' residual covariance matrix, V (or no update if \code{update = "none"}).
 #'
+#' \code{assign_prior_covariance_updates} determine the functions for
+#' updating the prior covariance matrices based on the the covariance
+#' matrix types and the control settings. The \code{"covupdates"}
+#' return value is a character vector with one entry for each prior
+#' covariance matrix.
+#' 
 #' @param fit An Ultimate Deconvolution model fit. Typically,
 #'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
@@ -26,7 +32,8 @@
 #'   implementation is used; when \code{version = "Rcpp"}, the more
 #'   efficient C++ implementation is used.
 #' 
-#' @return An Ultimate Deconvolution model fit. See
+#' @return All functions except \code{assign_prior_covariance_updates}
+#'   return an Ultimate Deconvolution model fit; see
 #'   \code{\link{ud_fit}} for details.
 #'
 #' @seealso \code{\link{ud_init}}, \code{\link{ud_fit}}
