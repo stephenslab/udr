@@ -35,7 +35,9 @@ this will be an output of \code{\link{ud_init}} or \code{ud_fit}.}
 implementation is used; when \code{version = "Rcpp"}, the more
 efficient C++ implementation is used.}
 
-\item{update}{Describe input argument "update" here.}
+\item{update}{The method to use for updating the prior mixture
+weights or the residual covariance matrix; see \code{\link{ud_fit}}
+for details.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model fitting and initialization. See \code{\link{ud_fit}} for
@@ -60,6 +62,10 @@ users.
 posterior mixture assignment probabilities ("responsibilities")
 given current estimates of the model parameters. This implements
 the E step in the EM algorithm.
+
+\code{update_mixture_weights} performs an M-step update for the
+mixture weights in the mixture prior (or no update if \code{update
+= "none"}).
 }
 \examples{
 # Simulate data from a UD model.

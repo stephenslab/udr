@@ -1,9 +1,8 @@
-# Perform an M-step update for the mixture weights in the mixture
-# prior (or no update if update = "none")
-#
 #' @rdname ud_fit_advanced
 #' 
-#' @param update Describe input argument "update" here.
+#' @param update The method to use for updating the prior mixture
+#'  weights or the residual covariance matrix; see \code{\link{ud_fit}}
+#'  for details.
 #' 
 #' @export
 #' 

@@ -12,6 +12,10 @@
 #' given current estimates of the model parameters. This implements
 #' the E step in the EM algorithm.
 #'
+#' \code{update_mixture_weights} performs an M-step update for the
+#' mixture weights in the mixture prior (or no update if \code{update
+#' = "none"}).
+#'
 #' @param fit An Ultimate Deconvolution model fit. Typically,
 #'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
