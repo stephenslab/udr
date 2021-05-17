@@ -16,6 +16,9 @@
 #' mixture weights in the mixture prior (or no update if \code{update
 #' = "none"}).
 #'
+#' \code{update_resid_covariance} performs an M-step update for the
+#' residual covariance matrix, V (or no update if \code{update = "none"}).
+#'
 #' @param fit An Ultimate Deconvolution model fit. Typically,
 #'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
@@ -65,10 +68,9 @@
 #'
 #' # Update only the unconstrained prior covariance matrices using the
 #' # truncated eigenvalue decomposition ("ted") algorithm.
-#' control <- list(scaled.update = "none",
-#'                 rank1.update = "none",
+#' control <- list(scaled.update = "none",rank1.update = "none",
 #'                 unconstrained.update = "ted")
-#' updates <- assign_prior_covariance_updates(fit,control)$covupdates
+#' updates <- assign_prior_covariance_updates(fit2,control)$covupdates
 #' fit2 <- update_prior_covariances(fit2,updates)
 #' 
 #' # Compute the new log-likelihood and compare the old one.

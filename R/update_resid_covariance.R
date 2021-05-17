@@ -1,10 +1,3 @@
-# Perform an M-step update for the residual covariance matrix (or no
-# update if update = "none"). Input argument P should be the n x k
-# matrix of posterior mixture assignment probabilities returned by
-# compute_posterior_probs. Input argument V should be an m x m
-# matrix. Input argument U may either be a list of length k in which
-# U[[i]]$mat is an m x m matrix, or an m x m x k array.
-#
 #' @rdname ud_fit_advanced
 #' 
 #' @export

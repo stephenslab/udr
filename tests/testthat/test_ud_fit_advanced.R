@@ -12,7 +12,7 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
 
   # Perform 4 EM updates.
   fit <- ud_init(X)
-  capture.output(fit <- ud_fit(fit1,control = list(maxiter = 4)))
+  capture.output(fit <- ud_fit(fit,control = list(maxiter = 4)))
 
   # Update the responsibilities matrix.
   control <- list(scaled.update = "none",rank1.update = "none")
