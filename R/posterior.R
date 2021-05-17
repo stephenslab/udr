@@ -1,23 +1,23 @@
-# Compute the n x k matrix of posterior mixture assignment
-# probabilities ("responsibilities") given current estimates of the
-# model parameters. This implements the E step in the EM algorithm for
-# fitting the Ultimate Deconvolution model. Input argument V may
-# either be an m x m matrix, a list of m x m matrices of length n, or
-# a m x m x n array. Input argument U may either be a list of length k
-# in which U[[i]]$mat is an m x m matrix, or an m x m x k array.
-#
 #' @rdname ud_fit_advanced
 #'
 #' @title Low-Level Interface for Fitting Ultimate Deconvolution Models
 #' 
-#' @description Here we describe the low-level model fitting interface.
+#' @description These functions allow for more fine-grained fitting of
+#' Ultimate Deconvolution models. Only minimal argument checking is
+#' performed and this interface should only be used by experienced
+#' users.
 #'
-#' @details Add details here.
-#' 
+#' @details \code{compute_posterior_probs} returns the matrix of
+#' posterior mixture assignment probabilities ("responsibilities")
+#' given current estimates of the model parameters. This implements
+#' the E step in the EM algorithm.
+#'
 #' @param fit An Ultimate Deconvolution model fit. Typically,
 #'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
-#' @param version Describe input argument "version" here.
+#' @param version When \code{version = "R"}, the R-only
+#'   implementation is used; when \code{version = "Rcpp"}, the more
+#'   efficient C++ implementation is used.
 #' 
 #' @return An Ultimate Deconvolution model fit. See
 #'   \code{\link{ud_fit}} for details.

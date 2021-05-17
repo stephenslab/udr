@@ -31,7 +31,9 @@ update_resid_covariance(
 \item{fit}{An Ultimate Deconvolution model fit. Typically,
 this will be an output of \code{\link{ud_init}} or \code{ud_fit}.}
 
-\item{version}{Describe input argument "version" here.}
+\item{version}{When \code{version = "R"}, the R-only
+implementation is used; when \code{version = "Rcpp"}, the more
+efficient C++ implementation is used.}
 
 \item{update}{Describe input argument "update" here.}
 
@@ -48,10 +50,16 @@ An Ultimate Deconvolution model fit. See
   \code{\link{ud_fit}} for details.
 }
 \description{
-Here we describe the low-level model fitting interface.
+These functions allow for more fine-grained fitting of
+Ultimate Deconvolution models. Only minimal argument checking is
+performed and this interface should only be used by experienced
+users.
 }
 \details{
-Add details here.
+\code{compute_posterior_probs} returns the matrix of
+posterior mixture assignment probabilities ("responsibilities")
+given current estimates of the model parameters. This implements
+the E step in the EM algorithm.
 }
 \examples{
 # Simulate data from a UD model.
