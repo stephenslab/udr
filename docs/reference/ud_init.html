@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Initialize Ultimate Deconvolution Model — ud_init • udr</title>
+<title>Initialize Ultimate Deconvolution Model Fit — ud_init • udr</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Initialize Ultimate Deconvolution Model — ud_init" />
-<meta property="og:description" content="Initialize an Ultimate Deconvolution model. See
+<meta property="og:title" content="Initialize Ultimate Deconvolution Model Fit — ud_init" />
+<meta property="og:description" content="Initialize an Ultimate Deconvolution model fit. See
   ud_fit for background and model definition." />
 
 
@@ -73,7 +73,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-85</span>
       </span>
     </div>
 
@@ -106,13 +106,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Initialize Ultimate Deconvolution Model</h1>
+    <h1>Initialize Ultimate Deconvolution Model Fit</h1>
     <small class="dont-index">Source: <a href='https://github.com/stephenslab/udr/blob/master/R/init.R'><code>R/init.R</code></a></small>
     <div class="hidden name"><code>ud_init.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Initialize an Ultimate Deconvolution model. See
+    <p>Initialize an Ultimate Deconvolution model fit. See
   <code><a href='ud_fit.html'>ud_fit</a></code> for background and model definition.</p>
     </div>
 
@@ -121,7 +121,7 @@
   <span class='kw'>V</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>)),
   <span class='no'>n_rank1</span>,
   <span class='no'>n_unconstrained</span>,
-  <span class='kw'>U_scaled</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>indep</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>)), <span class='kw'>iden</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>), <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>))),
+  <span class='kw'>U_scaled</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>indep</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/diag.html'>diag</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>)), <span class='kw'>equal</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>), <span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>X</span>))),
   <span class='no'>U_rank1</span>,
   <span class='no'>U_unconstrained</span>,
   <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>()
@@ -132,15 +132,15 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>X</th>
-      <td><p>The n x m data matrix, in which each row of the matrix is
-an m-dimensional data point. The number of rows and columns should
-be 2 or more.</p></td>
+      <td><p>An n x m data matrix, in which each row of the matrix is
+an m-dimensional data point. <code>X</code> should have at least 2 rows
+and 2 columns.</p></td>
     </tr>
     <tr>
       <th>V</th>
       <td><p>Either an m x m matrix giving the initial estimate of the
-residual covariance matrix, or a list of m x m "standard error"
-matrices, one for each data point.</p></td>
+residual covariance matrix, or a list of m x m covariance matrices
+of length n.</p></td>
     </tr>
     <tr>
       <th>n_rank1</th>
@@ -148,7 +148,8 @@ matrices, one for each data point.</p></td>
 rank-1 covariance matrices included in the mixture prior. Initial
 estimates of the m x m rank-1 covariance matrices are generated at
 random. At most one of <code>n_rank1</code> and <code>U_rank1</code> should be
-provided. If neither are specified, 4 rank-1 matrices will be used.</p></td>
+provided. If neither are specified, 4 random rank-1 matrices will be
+included.</p></td>
     </tr>
     <tr>
       <th>n_unconstrained</th>
@@ -157,7 +158,7 @@ of unconstrained covariance matrices included in the mixture
 prior. Initial estimates of the m x m covariance matrices are
 generated at random. At most one of <code>n_unconstrained</code> and
 <code>U_unconstrained</code> should be provided. If neither are
-specified, 4 unconstrained matrices are used.</p></td>
+specified, 4 random unconstrained matrices will be included.</p></td>
     </tr>
     <tr>
       <th>U_scaled</th>
@@ -188,8 +189,11 @@ the model initialization. See <code><a href='ud_fit.html'>ud_fit</a></code> for 
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>An object of class "ud_fit". See <code><a href='ud_fit.html'>ud_fit</a></code> for
-  details.</p>
+    <p>An Ultimate Deconvolution model fit. See
+  <code><a href='ud_fit.html'>ud_fit</a></code> for details.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='ud_fit.html'>ud_fit</a></code></p></div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

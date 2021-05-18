@@ -77,7 +77,7 @@ deconvolution." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-29</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-85</span>
       </span>
     </div>
 
@@ -124,7 +124,7 @@ it can also be viewed as a method for multivariate density
 deconvolution.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>ud_fit</span>(<span class='no'>fit0</span>, <span class='no'>X</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+    <pre class="usage"><span class='fu'>ud_fit</span>(<span class='no'>fit</span>, <span class='no'>X</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
 <span class='fu'>ud_fit_control_default</span>()</pre>
 
@@ -132,9 +132,9 @@ deconvolution.</p>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>fit0</th>
+      <th>fit</th>
       <td><p>A previous Ultimate Deconvolution model fit. Typically,
-this will be an output from <code><a href='ud_init.html'>ud_init</a></code>, or an output
+this will be an output of <code><a href='ud_init.html'>ud_init</a></code> or an output
 from a previous call to <code>ud_fit</code>.</p></td>
     </tr>
     <tr>
@@ -159,28 +159,25 @@ of the <code>progress</code> return value.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list object with the following elements:</p>
-<dt>w</dt><dd><p>A vector containing the estimated prior mixture
-  weights. When <code>control$update.w = "none"</code>, this will be the
-  same as the <code>w</code> provided at input.</p></dd>
+    <p>An Ultimate Deconvolution model fit. It is a list object
+with the following elements:</p>
+<dt>w</dt><dd><p>A vector containing the estimated mixture weights in the
+  mixture-of-normals prior.</p></dd>
 
-<dt>U</dt><dd><p>A list containing the estimated prior covariance matrices. When
-  <code>control$update.U = "none"</code>, this will be the same as the <code>U</code>
-  provided at input.</p></dd>
+<dt>U</dt><dd><p>A list containing the estimated prior covariance matrices.</p></dd>
 
-<dt>V</dt><dd><p>The estimated residual covariance matrix. When
-  <code>control$update.S = "none"</code>, this will be the same as the <code>S</code>
-  provided at input.</p></dd>
+<dt>V</dt><dd><p>The estimated residual covariance matrix, or a list of
+  fixed covariance matrices.</p></dd>
 
 <dt>loglik</dt><dd><p>The log-likelihood at the current settings of the
-  model parameters, <code>w</code>, <code>U</code> and <code>S</code>.</p></dd>
+  model parameters.</p></dd>
   
 <dt>progress</dt><dd><p>A data frame containing detailed information about
   the algorithm's progress. The columns of the data frame are:
   "iter", the iteration number; "loglik", the log-likelihood at the
   current estimates of the model parameters; "delta.w", the largest
   change in the mixture weights; "delta.u", the largest change in the
-  prior covariance matrices; "delta.s", the largest change in the
+  prior covariance matrices; "delta.v", the largest change in the
   residual covariance matrix; and "timing", the elapsed time in
   seconds (recorded using <code><a href='https://rdrr.io/r/base/proc.time.html'>proc.time</a></code>).</p></dd>
 
@@ -189,23 +186,26 @@ of the <code>progress</code> return value.</p></td>
     <p>In the Ultimate Deconvolution (UD) model, the
 m-dimensional observation \(x\) is drawn from a mixture of
 multivariate normals, \(x ~ w_1 N(0, T_1) + ... + w_k N(0,
-T_k)\), where \(k\) is the number of mixture components, the
-\(w_j\)'s are the mixture weights, and each \(T_j = V + U_j\)
+T_k)\), where \(k \ge 2\) is the number of mixture components,
+the \(w_j\)'s are mixture weights, and each \(T_j = V_j + U_j\)
 is a covariance matrix. This is the marginal density derived from a
 model in which \(x\) is multivariate normal with mean \(y\) and
 covariance \(V\), and the underlying, or "latent", signal \(y\)
 is in turn modeled by a mixture prior in which each mixture
 component \(j\) is multivariate normal with zero mean and
 covariance matrix \(U_j\). This model is a useful special case of
-the "Extreme Deconvolution" (ED) model (Bovy <em>et al</em>, 2011).</p>
+the "Extreme Deconvolution" (ED) model (Bovy <em>et al</em>, 2011),
+and is closely related to the factor analysis model (Rubin and
+Thayer, 1982).</p>
 <p>Two variants of the UD model are implemented: one in which the
 residual covariance V is the same for all data points, and another
 in which V is different for each data point. In the first case,
-this covariance matrix may be estimated.</p>
-<p>The UD model is fit by expectation-maximization (EM). The
-<code>control</code> argument is a list in which any of the following
-named components will override the default optimization algorithm
-settings (as they are defined by <code>ud_fit_control_default</code>):</p>
+V may be estimated.</p>
+<p>The UD model is fit by an expectation-maximization (EM)
+algorithm. The <code>control</code> argument can be used to adjust the EM
+settings. It is a list in which any of the following named components
+will override the default algorithm settings (as they are defined
+by <code>ud_fit_control_default</code>):</p>
 <dl'>
 
 <dt><code>weights.update</code></dt><dd><p>When <code>weights.update = "em"</code>, the
@@ -214,27 +214,30 @@ mixture weights are updated via EM; when <code>weights.update =
 
 <dt><code>resid.update</code></dt><dd><p>When <code>resid.update = "em"</code>, the
 residual covariance matrix is updated via EM; when
-<code>resid.update = "none", the residual covariance matrix is not
-updated.</code></p></dd>
+<code>resid.update = "none"</code>, the residual covariance matrix is not
+updated. When <code>resid.update = NA</code>, the update is determined by
+V; if V is a matrix (that is, the case when the residual covariance
+is the same for all data points), EM is used to update V; otherwise,
+no updating is performed.</p></dd>
 
 <dt><code>scaled.update</code></dt><dd><p>This setting specifies the updates for
-the scaled prior covariance matrices. Currently, only
-<code>scaled.update = "none"</code> is allowed.</p></dd>
+the scaled prior covariance matrices. Possible settings are
+<code>"fa"</code>, <code>"none"</code> or <code>NA</code>.</p></dd>
 
 <dt><code>rank1.update</code></dt><dd><p>This setting specifies the updates for
-the rank-1 prior covariance matrices. Currently, only
-<code>rank1.update = "none"</code> is allowed.</p></dd>
+the rank-1 prior covariance matrices. Possible settings are
+<code>"ed"</code>, <code>"ted"</code>, <code>"none"</code> or <code>NA</code>.</p></dd>
 
 <dt><code>unconstrained.update</code></dt><dd><p>This setting determines the
 updates used to estimate the unconstrained prior covariance
-matrices. Two variants of EM are implemented: <code>update.U = "ed"</code>,
-the EM updates described by Bovy <em>et al</em> (2011); and
-<code>update.U = "teem"</code>, "truncated eigenvalue
-expectation-maximization", in which the M-step update for each
-covariance matrix <code>U[[j]]</code> is solved by truncating the
-eigenvalues in a spectral decomposition of the unconstrained
-maximimum likelihood estimate (MLE) of <code>U[j]]</code>. The latter
-method provides greater freedom in the updates.</p></dd>
+matrices. Two variants of EM are implemented: <code>update.U =
+"ed"</code>, the EM updates described by Bovy <em>et al</em> (2011); and
+<code>update.U = "ted"</code>, "truncated eigenvalue decomposition", in
+which the M-step update for each covariance matrix <code>U[[j]]</code> is
+solved by truncating the eigenvalues in a spectral decomposition of
+the unconstrained maximimum likelihood estimate (MLE) of
+<code>U[j]]</code>. Other possible settings include <code>"none"</code> or
+codeNA.</p></dd>
 
 <dt><code>version</code></dt><dd><p>R and C++ implementations of the model
 fitting algorithm are provided; these are selected with
@@ -248,8 +251,8 @@ updates are halted when the largest change in the model parameters
 between two successive updates is less than <code>tol</code>.</p></dd>
 
 <dt><code>minval</code></dt><dd><p>Minimum eigenvalue allowed in the residual
-  covariance(s) <code>V</code> and the prior covariance matrices
-  <code>U</code>.</p></dd>
+covariance(s) <code>V</code> and the prior covariance matrices
+<code>U</code>. Should be a small, positive number.</p></dd>
 </dl>
 
 <p>Using this function requires some care; currently only minimal
@@ -261,6 +264,8 @@ for guidance.</p>
 inferring complete distribution functions from noisy, heterogeneous
 and incomplete observations. <em>Annals of Applied Statistics</em>,
 <b>5</b>, 1657–1677. doi:10.1214/10-AOAS439</p>
+<p>D. B. Rubin and D. T. Thayer (1982). EM algorithms for ML factor
+analysis. Psychometrika <b>47</b>, 69-76. doi:10.1007/BF02293851</p>
 <p>A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
 (2018). Bayesian semiparametric multivariate density deconvolution.
 <em>Journal of the American Statistical Association</em> <b>113</b>,
@@ -291,34 +296,34 @@ of the Royal Statistical Society, Series B</em> <b>75</b>,
 
 <span class='co'># This is the simplest invocation of ud_init.</span>
 <span class='no'>fit1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='ud_init.html'>ud_init</a></span>(<span class='no'>X</span>)
-<span class='no'>fit1</span> <span class='kw'>&lt;-</span> <span class='fu'>ud_fit</span>(<span class='no'>fit1</span>)</div><div class='output co'>#&gt; Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):
+<span class='no'>fit1</span> <span class='kw'>&lt;-</span> <span class='fu'>ud_fit</span>(<span class='no'>fit1</span>)</div><div class='output co'>#&gt; Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-85, "R"):
 #&gt; data points are i.i.d. (same V)
 #&gt; prior covariances: 2 scaled, 4 rank-1, 4 unconstrained
-#&gt; prior covariance updates: none (scaled), none (rank-1), ed (unconstrained)
+#&gt; prior covariance updates: scaled (fa), rank-1 (ted), unconstrained (ted)
 #&gt; mixture weights update: em
 #&gt; residual covariance update: em
 #&gt; max 20 updates, conv tol 1.0e-06
 #&gt; iter          log-likelihood |w - w'| |U - U'| |V - V'|
-#&gt;    1 -1.2427686311528083e+04 4.09e-02 3.30e+00 2.63e-01
-#&gt;    2 -1.2304140122123885e+04 1.56e-02 6.93e-01 1.23e-01
-#&gt;    3 -1.2258787778612572e+04 1.12e-02 3.24e-01 6.34e-02
-#&gt;    4 -1.2238592114352827e+04 8.25e-03 1.96e-01 3.61e-02
-#&gt;    5 -1.2228634107038721e+04 5.99e-03 1.36e-01 2.18e-02
-#&gt;    6 -1.2223365009974717e+04 4.28e-03 1.03e-01 1.37e-02
-#&gt;    7 -1.2220373469123095e+04 2.99e-03 8.10e-02 8.66e-03
-#&gt;    8 -1.2218531401439679e+04 2.04e-03 6.59e-02 7.05e-03
-#&gt;    9 -1.2217291566752165e+04 1.66e-03 5.48e-02 6.21e-03
-#&gt;   10 -1.2216382082357368e+04 1.46e-03 4.64e-02 5.52e-03
-#&gt;   11 -1.2215664664949669e+04 1.31e-03 3.99e-02 4.94e-03
-#&gt;   12 -1.2215066880822524e+04 1.20e-03 3.47e-02 4.47e-03
-#&gt;   13 -1.2214549269280509e+04 1.12e-03 3.06e-02 4.08e-03
-#&gt;   14 -1.2214089216000202e+04 1.06e-03 2.73e-02 3.75e-03
-#&gt;   15 -1.2213672954458118e+04 1.01e-03 2.45e-02 3.47e-03
-#&gt;   16 -1.2213291541480336e+04 9.76e-04 2.22e-02 3.23e-03
-#&gt;   17 -1.2212938791490886e+04 9.47e-04 2.02e-02 3.03e-03
-#&gt;   18 -1.2212610186332380e+04 9.22e-04 1.85e-02 2.85e-03
-#&gt;   19 -1.2212302278259031e+04 9.00e-04 1.71e-02 2.69e-03
-#&gt;   20 -1.2212012347524636e+04 8.81e-04 1.58e-02 2.55e-03</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit1</span>)</div><div class='output co'>#&gt; Model overview:
+#&gt;    1 -1.2218124901048504e+04 4.09e-02 4.70e+00 2.63e-01
+#&gt;    2 -1.2207202968003554e+04 2.24e-03 1.61e-01 4.94e-02
+#&gt;    3 -1.2204417672445234e+04 7.66e-04 2.46e-01 1.24e-02
+#&gt;    4 -1.2202886598844168e+04 2.11e-04 8.83e-02 7.27e-03
+#&gt;    5 -1.2201796622401382e+04 1.74e-04 8.06e-02 5.84e-03
+#&gt;    6 -1.2200987449361346e+04 1.72e-04 7.07e-02 4.87e-03
+#&gt;    7 -1.2200370063898208e+04 1.56e-04 5.97e-02 4.65e-03
+#&gt;    8 -1.2199885683989782e+04 1.54e-04 4.76e-02 4.19e-03
+#&gt;    9 -1.2199491766510911e+04 1.50e-04 4.50e-02 3.78e-03
+#&gt;   10 -1.2199159264518366e+04 1.45e-04 4.61e-02 3.36e-03
+#&gt;   11 -1.2198869698996561e+04 1.43e-04 4.65e-02 2.97e-03
+#&gt;   12 -1.2198612551558699e+04 1.55e-04 4.59e-02 2.60e-03
+#&gt;   13 -1.2198382689153303e+04 1.61e-04 4.43e-02 2.25e-03
+#&gt;   14 -1.2198177932000039e+04 1.63e-04 4.18e-02 1.92e-03
+#&gt;   15 -1.2197997324019223e+04 1.60e-04 3.83e-02 1.60e-03
+#&gt;   16 -1.2197839686357604e+04 1.55e-04 3.43e-02 1.30e-03
+#&gt;   17 -1.2197703188908119e+04 1.49e-04 3.00e-02 1.03e-03
+#&gt;   18 -1.2197585426841866e+04 1.42e-04 2.57e-02 7.91e-04
+#&gt;   19 -1.2197483771764697e+04 1.35e-04 2.16e-02 5.82e-04
+#&gt;   20 -1.2197395696869638e+04 1.30e-04 2.00e-02 5.33e-04</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/stats/logLik.html'>logLik</a></span>(<span class='no'>fit1</span>)</div><div class='output co'>#&gt; 'log Lik.' -12197.4 (df=NA)</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit1</span>)</div><div class='output co'>#&gt; Model overview:
 #&gt;   Number of data points: 4000
 #&gt;   Dimension of data points: 2
 #&gt; Data points are i.i.d. (same V)
@@ -326,41 +331,41 @@ of the Royal Statistical Society, Series B</em> <b>75</b>,
 #&gt;   Number of rank-1 prior covariances: 4
 #&gt;   Number of unconstrained prior covariances: 4
 #&gt; Evaluation of fit (20 updates performed):
-#&gt;   Log-likelihood: -1.221201234752e+04</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit1</span>$<span class='no'>progress</span>$<span class='no'>iter</span>,
+#&gt;   Log-likelihood: -1.219739569687e+04</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit1</span>$<span class='no'>progress</span>$<span class='no'>iter</span>,
      <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='no'>fit1</span>$<span class='no'>progress</span>$<span class='no'>loglik</span>) - <span class='no'>fit1</span>$<span class='no'>progress</span>$<span class='no'>loglik</span> + <span class='fl'>0.1</span>,
      <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"l"</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"dodgerblue"</span>,<span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>,<span class='kw'>log</span> <span class='kw'>=</span> <span class='st'>"y"</span>,<span class='kw'>xlab</span> <span class='kw'>=</span> <span class='st'>"iteration"</span>,
      <span class='kw'>ylab</span> <span class='kw'>=</span> <span class='st'>"dist to best loglik"</span>)</div><div class='img'><img src='ud_fit-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'># This is a more complex invocation of ud_init that overrides some</span>
 <span class='co'># of the defaults.</span>
 <span class='no'>fit2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='ud_init.html'>ud_init</a></span>(<span class='no'>X</span>,<span class='kw'>U_scaled</span> <span class='kw'>=</span> <span class='no'>U</span>,<span class='kw'>n_rank1</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>n_unconstrained</span> <span class='kw'>=</span> <span class='fl'>1</span>,<span class='kw'>V</span> <span class='kw'>=</span> <span class='no'>V</span>)
-<span class='no'>fit2</span> <span class='kw'>&lt;-</span> <span class='fu'>ud_fit</span>(<span class='no'>fit2</span>)</div><div class='output co'>#&gt; Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-29, "Rcpp"):
+<span class='no'>fit2</span> <span class='kw'>&lt;-</span> <span class='fu'>ud_fit</span>(<span class='no'>fit2</span>)</div><div class='output co'>#&gt; Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-85, "R"):
 #&gt; data points are i.i.d. (same V)
 #&gt; prior covariances: 4 scaled, 1 rank-1, 1 unconstrained
-#&gt; prior covariance updates: none (scaled), none (rank-1), ed (unconstrained)
+#&gt; prior covariance updates: scaled (fa), rank-1 (ted), unconstrained (ted)
 #&gt; mixture weights update: em
 #&gt; residual covariance update: em
 #&gt; max 20 updates, conv tol 1.0e-06
 #&gt; iter          log-likelihood |w - w'| |U - U'| |V - V'|
-#&gt;    1 -1.2363711051186072e+04 7.30e-02 5.73e+00 2.57e-01
-#&gt;    2 -1.2292274931142549e+04 2.05e-02 7.56e-01 1.03e-01
-#&gt;    3 -1.2267494111926884e+04 1.64e-02 3.05e-01 4.38e-02
-#&gt;    4 -1.2256023670976268e+04 1.30e-02 1.72e-01 1.77e-02
-#&gt;    5 -1.2249093233304877e+04 1.06e-02 1.14e-01 6.70e-03
-#&gt;    6 -1.2243997672931913e+04 8.94e-03 8.32e-02 3.43e-03
-#&gt;    7 -1.2239833645896120e+04 7.75e-03 6.47e-02 3.78e-03
-#&gt;    8 -1.2236269664286576e+04 6.84e-03 5.26e-02 5.02e-03
-#&gt;    9 -1.2233162270327024e+04 6.11e-03 4.41e-02 5.42e-03
-#&gt;   10 -1.2230432724775706e+04 5.49e-03 3.78e-02 5.40e-03
-#&gt;   11 -1.2228026901640827e+04 4.94e-03 3.29e-02 5.17e-03
-#&gt;   12 -1.2225902045468960e+04 4.46e-03 2.91e-02 4.85e-03
-#&gt;   13 -1.2224022190861437e+04 4.03e-03 2.59e-02 4.50e-03
-#&gt;   14 -1.2222356363655990e+04 3.65e-03 2.32e-02 4.16e-03
-#&gt;   15 -1.2220877682381668e+04 3.30e-03 2.10e-02 3.84e-03
-#&gt;   16 -1.2219562768089942e+04 2.99e-03 1.91e-02 3.54e-03
-#&gt;   17 -1.2218391279794114e+04 2.71e-03 1.77e-02 3.26e-03
-#&gt;   18 -1.2217345519259270e+04 2.45e-03 1.65e-02 3.01e-03
-#&gt;   19 -1.2216410086581143e+04 2.23e-03 1.55e-02 2.78e-03
-#&gt;   20 -1.2215571578679148e+04 2.02e-03 1.46e-02 2.58e-03</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit2</span>)</div><div class='output co'>#&gt; Model overview:
+#&gt;    1 -1.2211234169952773e+04 7.30e-02 6.88e+00 2.57e-01
+#&gt;    2 -1.2203118709196298e+04 3.35e-03 2.02e-01 8.16e-02
+#&gt;    3 -1.2201982742279066e+04 1.03e-03 1.07e-01 8.71e-03
+#&gt;    4 -1.2201482431507115e+04 3.31e-04 3.16e-02 1.17e-02
+#&gt;    5 -1.2201141974419708e+04 2.34e-04 3.54e-02 5.07e-03
+#&gt;    6 -1.2200891544388001e+04 1.89e-04 2.79e-02 5.81e-03
+#&gt;    7 -1.2200699430870367e+04 1.73e-04 2.47e-02 4.86e-03
+#&gt;    8 -1.2200547790124814e+04 1.65e-04 2.15e-02 4.53e-03
+#&gt;    9 -1.2200425168914082e+04 1.62e-04 1.90e-02 4.15e-03
+#&gt;   10 -1.2200323997214227e+04 1.59e-04 1.69e-02 3.87e-03
+#&gt;   11 -1.2200239004257683e+04 1.58e-04 1.52e-02 3.62e-03
+#&gt;   12 -1.2200166538989928e+04 1.57e-04 1.37e-02 3.42e-03
+#&gt;   13 -1.2200103923338407e+04 1.55e-04 1.24e-02 3.24e-03
+#&gt;   14 -1.2200049181168368e+04 1.55e-04 1.13e-02 3.09e-03
+#&gt;   15 -1.2200000828293631e+04 1.54e-04 1.03e-02 2.96e-03
+#&gt;   16 -1.2199957731849045e+04 1.54e-04 9.49e-03 2.84e-03
+#&gt;   17 -1.2199919014627860e+04 1.53e-04 8.75e-03 2.73e-03
+#&gt;   18 -1.2199883988086289e+04 1.53e-04 8.09e-03 2.63e-03
+#&gt;   19 -1.2199852125100053e+04 1.53e-04 7.51e-03 2.54e-03
+#&gt;   20 -1.2199822962554748e+04 1.52e-04 6.98e-03 2.46e-03</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/stats/logLik.html'>logLik</a></span>(<span class='no'>fit2</span>)</div><div class='output co'>#&gt; 'log Lik.' -12199.82 (df=NA)</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>fit2</span>)</div><div class='output co'>#&gt; Model overview:
 #&gt;   Number of data points: 4000
 #&gt;   Dimension of data points: 2
 #&gt; Data points are i.i.d. (same V)
@@ -368,7 +373,7 @@ of the Royal Statistical Society, Series B</em> <b>75</b>,
 #&gt;   Number of rank-1 prior covariances: 1
 #&gt;   Number of unconstrained prior covariances: 1
 #&gt; Evaluation of fit (20 updates performed):
-#&gt;   Log-likelihood: -1.221557157868e+04</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit2</span>$<span class='no'>progress</span>$<span class='no'>iter</span>,
+#&gt;   Log-likelihood: -1.219982296255e+04</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>fit2</span>$<span class='no'>progress</span>$<span class='no'>iter</span>,
      <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>max</a></span>(<span class='no'>fit2</span>$<span class='no'>progress</span>$<span class='no'>loglik</span>) - <span class='no'>fit2</span>$<span class='no'>progress</span>$<span class='no'>loglik</span> + <span class='fl'>0.1</span>,
      <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"l"</span>,<span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"dodgerblue"</span>,<span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>2</span>,<span class='kw'>log</span> <span class='kw'>=</span> <span class='st'>"y"</span>,<span class='kw'>xlab</span> <span class='kw'>=</span> <span class='st'>"iteration"</span>,
      <span class='kw'>ylab</span> <span class='kw'>=</span> <span class='st'>"dist to best loglik"</span>)</div><div class='img'><img src='ud_fit-2.png' alt='' width='700' height='433' /></div><div class='input'>

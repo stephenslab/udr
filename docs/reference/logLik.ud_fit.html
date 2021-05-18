@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • udr</title>
+<title>Ultimate Deconvolution Model Likelihoods — logLik.ud_fit • udr</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,9 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Ultimate Deconvolution Model Likelihoods — logLik.ud_fit" />
+<meta property="og:description" content="Compute the log-likelihood for the Ultimate
+Deconvolution model." />
 
 
 
@@ -58,7 +60,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -102,66 +104,49 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Ultimate Deconvolution Model Likelihoods</h1>
+    <small class="dont-index">Source: <a href='https://github.com/stephenslab/udr/blob/master/R/likelihood.R'><code>R/likelihood.R</code></a></small>
+    <div class="hidden name"><code>logLik.ud_fit.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Compute the log-likelihood for the Ultimate
+Deconvolution model.</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='co'># S3 method for ud_fit</span>
+<span class='fu'><a href='https://rdrr.io/r/stats/logLik.html'>logLik</a></span>(<span class='no'>object</span>, <span class='kw'>version</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"Rcpp"</span>, <span class='st'>"R"</span>), <span class='no'>...</span>)</pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="logLik.ud_fit.html">logLik(<i>&lt;ud_fit&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Ultimate Deconvolution Model Likelihoods</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="simulate_ud_data.html">simulate_ud_data()</a></code> </p>
-        </td>
-        <td><p>Simulate Data from Ultimate Deconvolution Model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="summary.ud_fit.html">summary(<i>&lt;ud_fit&gt;</i>)</a></code> <code><a href="summary.ud_fit.html">print(<i>&lt;summary.ud_fit&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Summarize Ultimate Deconvolution Fit</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="ud_fit.html">ud_fit()</a></code> <code><a href="ud_fit.html">ud_fit_control_default()</a></code> </p>
-        </td>
-        <td><p>Fit Ultimate Deconvolution Model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="ud_init.html">ud_init()</a></code> </p>
-        </td>
-        <td><p>Initialize Ultimate Deconvolution Model Fit</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>object</th>
+      <td><p>An Ultimate Deconvolution model fit. Typically,
+this will be an output of <code><a href='ud_init.html'>ud_init</a></code> or <code>ud_fit</code>.</p></td>
+    </tr>
+    <tr>
+      <th>version</th>
+      <td><p>When <code>version == "R"</code>, the computations are
+performed entirely in R; when <code>version == "Rcpp"</code>, an Rcpp
+implementation is used.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Additional arguments (unused).</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A number giving the log-likelihood for the model.</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='ud_init.html'>ud_init</a></code>, <code><a href='ud_fit.html'>ud_fit</a></code></p></div>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
