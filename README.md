@@ -14,7 +14,7 @@ the [Extreme Deconvolution method][ed].
 Install the package and build the vignette:
 
 ```R
-devtools::install_github("stephenslab/udr",build_vignettes = TRUE)
+remotes::install_github("stephenslab/udr")
 ```
 
 Note that installing the package will require a C++ compiler setup

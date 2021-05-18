@@ -46,48 +46,50 @@ w <- c(0.8,0.1,0.075,0.025)
 X <- simulate_ud_data(n,w,U,V)
 ```
 
-This is the most basic usage:
+This is the most basic usage, using the default settings:
 
 ```{r ud-fit-1}
 fit0 <- ud_init(X)
 fit1 <- ud_fit(fit0)
 ```
 
-The default model is a mixture with a total of $K = 10$ mixture
-components with 2 scaled, 4 rank-1, and 4 unconstrained prior
-covariance matrices $U_k$:
+The default model is a mixture with $K = 10$ mixture components: 2 scaled
+scaled, 4 rank-1 and 4 unconstrained prior covariance matrices $U_k$:
 
 ```{r ud-fit-2}
 summary(fit1)
 ```
 
-The function `ud_init` is a flexible interface for design a variety of
-UD models. For example,
+The function `ud_init` is a flexible interface for defining a variety
+of UD models. For example,
 
 ```{r ud-fit-3}
 fit0 <- ud_init(X,U_scaled = U,n_rank1 = 1,n_unconstrained = 1,V = V)
 fit2 <- ud_fit(fit0)
+summary(fit2)
 ```
 
 The `ud_fit` interface also allows for flexibly re-fitting a model;
 that is, a `ud_fit` output can be used in another call to `ud_fit`.
+There is also a more advanced model fitting interface for more
+fine-grained control; see `help(ud_fit_advanced)` for details.
 
 Notice that the data do not need to be passed to `ud_fit` because they
-are already embedded in the `ud_fit` output. However, one can pass a
-new data set `X` to `ud_fit`.
+are already embedded in the `ud_fit` output. However, one can also
+pass a new data set `X` to `ud_fit`.
 
 The `control` argument to `ud_fit` controls the optimization of the
 model parameters. For example, the unconstrained prior covariance
-matrices are by default optimized using the Extreme Deconvolution (ED)
-updates, and we can replace these with the new "truncated eigenvalue"
-EM (TEEM) updates:
+matrices are by default optimized using the "truncated eigenvalue
+decomposition" (TED) updates, and we can replace these with the
+Extreme Deconvolution (ED) updates:
 
 ```{r ud-fit-4}
-fit3 <- ud_fit(fit0,control = list(unconstrained.update = "teem"))
+fit3 <- ud_fit(fit0,control = list(unconstrained.update = "ed"))
 ```
 
-Notice that the likelihood is slightly higher with the TEEM updates,
-reflecting the fact that the TEEM updates have greater freedom to
+Notice that the likelihood is slightly higher with the TED updates,
+reflecting the fact that the TED updates have greater freedom to
 optimize the covariance matrices.
 
 These are the current model fitting defaults:
@@ -96,32 +98,28 @@ These are the current model fitting defaults:
 unlist(ud_fit_control_default())
 ```
 
-The most intensive computations are implemented in R (`version = R`)
-and C++ (`version = Rcpp`); both versions should return the same, or
-nearly the same output, but the C++ version can be much faster.
-
-The default updates for the scaled and rank-1 prior covariance
-matrices are `"none"`; they have not yet been implemented.
+The most intensive computations are implemented in R (`control$version
+= R`) and C++ (`control$version = Rcpp`); both versions should return
+the same, or nearly the same output, but the C++ version can sometimes
+be much faster.
 
 In some cases each sample might have different measurement error, and
-udr can handle such cases by specifying `V` as a list instead of a matrix:
+udr can handle such cases by specifying `V` as a list instead of a
+matrix:
 
 ```{r ud-fit-5}
 fit0 <- ud_init(X,V = rep(list(V),n))
+fit4 <- ud_fit(fit0)
 ```
 
-However, the ED update has not yet been implemented for this case.
-(The TEEM update is not applicable to this case).
-
-```{r ud-fit-6}
-fit5 <- ud_fit(fit0,control = list(unconstrained.update = "none"))
-```
+The TED updates cannot be applied to this setting, so the ED updates
+must be used instead.
 
 Session info
 ------------
 
 This is the version of R and the packages that were used to generate
-these results.
+these results:
 
 ```{r session-info}
 sessionInfo()
