@@ -43,9 +43,11 @@ for details.}
 the model fitting and initialization. See \code{\link{ud_fit}} for
 details.}
 
-\item{minval}{Describe input argument "minval" here.}
+\item{covupdates}{Functions or character strings naming the
+functions to be called for updating the prior covariance matrices.}
 
-\item{covtypes}{Describe input argument "covtypes" here.}
+\item{minval}{Minimum eigenvalue allowed in the prior covariance
+matrices. Should be a small, positive number.}
 }
 \value{
 All functions except \code{assign_prior_covariance_updates}
@@ -76,6 +78,9 @@ updating the prior covariance matrices based on the the covariance
 matrix types and the control settings. The \code{"covupdates"}
 return value is a character vector with one entry for each prior
 covariance matrix.
+
+\code{update_prior_covariances} performs an M-step update for all
+the prior covariance matrices, U.
 }
 \examples{
 # Simulate data from a UD model.

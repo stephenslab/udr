@@ -14,10 +14,10 @@ update_resid_covariance <- function (fit, update = c("em","none"),
     stop("The residual covariance V can only be updated when it is the same ",
          "for all data points")
 
-  # Process U.
+  # Get the prior covariance matrices.
   U <- ulist2array(fit$U)
 
-  # Update the residual covariance matrix, V.
+  # Update the residual covariance matrix.
   if (update == "em") {
     if (version == "R")
       Vnew <- update_resid_covariance_helper(fit$X,U,fit$V,fit$P)

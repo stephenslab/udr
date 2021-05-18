@@ -37,15 +37,13 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
   return(list(control = control,covupdates = covupdates))
 }
 
-# Perform M-step updates for all the prior covariance matrices U.
-# Input argument V may either be an m x m matrix, a list of m x m
-# matrices of length n, or a m x m x n array.
-#
 #' @rdname ud_fit_advanced
 #'
-#' @param covtypes Describe input argument "covtypes" here.
+#' @param covupdates Functions or character strings naming the
+#'   functions to be called for updating the prior covariance matrices.
 #' 
-#' @param minval Describe input argument "minval" here.
+#' @param minval Minimum eigenvalue allowed in the prior covariance
+#'   matrices. Should be a small, positive number.
 #' 
 #' @export
 #' 
@@ -58,23 +56,25 @@ update_prior_covariances <-
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
     stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
 
-  # Process V.
+  # Get the residual covariance matrix or matrices.
   V <- fit$V
   if (is.list(V))
     V <- list2array(V)
 
-  # Update the prior covariance matrices, U.
+  # Update the prior covariance matrices.
   k <- length(fit$U)
-  for (i in 1:k) {
+  for (i in 1:k)
     fit$U[[i]] <- do.call(covupdates[i],list(X = fit$X,U = fit$U[[i]],V = V,
                                              p = fit$P[,i],minval = minval))
-  }
   
   # Output the updated fit.
   return(fit)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Update the data structure for an unconstrained prior covariance
+# matrix. Input "U" is the current data structure, and "mat" is the
+# newly estimated matrix. This function is called in the
+# update_prior_covariance_unconstrained_* functions below.
 update_prior_covariance_unconstrained <- function (U, mat) {
   rownames(mat) <- rownames(U$mat)
   colnames(mat) <- colnames(U$mat)
@@ -82,7 +82,11 @@ update_prior_covariance_unconstrained <- function (U, mat) {
   return(U)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Update the data structure for a rank-1 prior covariance matrix.
+# Input U is the current data structure, and "vec" is a vector
+# containing the new estimates, such that the new rank-1 matrix is
+# tcrossprod(vec). This function is called in the
+# update_prior_covariance_rank1_* functions below.
 update_prior_covariance_rank1 <- function (U, vec) {
   mat <- tcrossprod(vec)
   names(vec) <- names(U$vec)
@@ -93,7 +97,10 @@ update_prior_covariance_rank1 <- function (U, vec) {
   return(U)
 }
 
-# TO DO: Explain here what this function does, and how to use it.
+# Update the data structure for a scaled prior covariance matrix.
+# Input U is the current data structure, and "s" is the new estimate
+# of the scaling factor. This function is called in the
+# update_prior_covariance_scaled_* functions below.
 update_prior_covariance_scaled <- function (U, s) {
   U$s   <- s
   U$mat <- s * U$U0
@@ -144,7 +151,7 @@ update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
 # an optional constraint on U; when r < n, where U is an n x n matrix,
 # at most r of the eigenvalues are positive in the updated matrix.
 update_prior_covariance_unconstrained_ted <- function (X, U, V, p, minval,
-                                                        r = ncol(X)) {
+                                                       r = ncol(X)) {
   if (!is.matrix(V))
     stop("unconstrained.update = \"ted\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")

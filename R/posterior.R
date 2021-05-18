@@ -25,6 +25,9 @@
 #' return value is a character vector with one entry for each prior
 #' covariance matrix.
 #' 
+#' \code{update_prior_covariances} performs an M-step update for all
+#' the prior covariance matrices, U.
+#'
 #' @param fit An Ultimate Deconvolution model fit. Typically,
 #'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
