@@ -91,9 +91,9 @@
 #'   this will be an output of \code{\link{ud_init}} or an output
 #'   from a previous call to \code{ud_fit}.
 #'
-#' @param X The n x m data matrix, in which each row of the matrix is
+#' @param X Optional n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point. The number of rows and columns should
-#'   be 2 or more.
+#'   be 2 or more. When not provided, \code{fit$X} is used.
 #' 
 #' @param control A list of parameters controlling the behaviour of
 #'   the model fitting and initialization. See \sQuote{Details}.
@@ -106,6 +106,8 @@
 #' @return An Ultimate Deconvolution model fit. It is a list object
 #' with the following elements:
 #'
+#' \item{X}{The data matrix used to fix the model.}
+#' 
 #' \item{w}{A vector containing the estimated mixture weights in the
 #'   mixture-of-normals prior.}
 #'
@@ -114,6 +116,10 @@
 #' \item{V}{The estimated residual covariance matrix, or a list of
 #'   fixed covariance matrices.}
 #'
+#' \item{P}{The responsibilities matrix in which \code{P[i,j]} is the
+#'   posterior mixture probability for data point i and mixture
+#'   component j.}
+#'  
 #' \item{loglik}{The log-likelihood at the current settings of the
 #'   model parameters.}
 #'   
@@ -231,7 +237,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-85, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-86, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else

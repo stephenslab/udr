@@ -14,9 +14,9 @@ ud_fit_control_default()
 this will be an output of \code{\link{ud_init}} or an output
 from a previous call to \code{ud_fit}.}
 
-\item{X}{The n x m data matrix, in which each row of the matrix is
+\item{X}{Optional n x m data matrix, in which each row of the matrix is
 an m-dimensional data point. The number of rows and columns should
-be 2 or more.}
+be 2 or more. When not provided, \code{fit$X} is used.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model fitting and initialization. See \sQuote{Details}.}
@@ -30,6 +30,8 @@ of the \code{progress} return value.}
 An Ultimate Deconvolution model fit. It is a list object
 with the following elements:
 
+\item{X}{The data matrix used to fix the model.}
+
 \item{w}{A vector containing the estimated mixture weights in the
   mixture-of-normals prior.}
 
@@ -38,6 +40,10 @@ with the following elements:
 \item{V}{The estimated residual covariance matrix, or a list of
   fixed covariance matrices.}
 
+\item{P}{The responsibilities matrix in which \code{P[i,j]} is the
+  posterior mixture probability for data point i and mixture
+  component j.}
+ 
 \item{loglik}{The log-likelihood at the current settings of the
   model parameters.}
   
