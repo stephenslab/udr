@@ -21,16 +21,26 @@ list2array <- function (x) {
 ulist2array <- function (x)
   list2array(lapply(x,function (e) "[["(e,"mat")))
 
-# Returns TRUE if and only if the matrix is symmetric positive
-# definite.
-isposdef <- function (X)
-  is.matrix(tryCatch(chol(X),error = function (e) NULL))
-
 # Returns TRUE if and only if the matrix is (symmetric) positive
 # semi-definite.
-issemidef <- function (X, minval = -1e-15) 
+issemidef <- function (X, minval = -1e-15)
   all(eigen(X)$values > minval)
 
+# For symmetric matrix X, return the matrix Y that is "closest" to X
+# but also positive definite. By "closest", we mean that X - Y has the
+# smallest Frobenius norm possible. See Nocedal & Wright (2006),
+# p. 50, for background.
+makeposdef <- function (X, minval = 1e-8) {
+  out <- eigen(X)
+  d <- out$values
+  if (all(d > minval))
+    return(X)
+  else {
+    d <- pmax(d,minval)
+    return(tcrossprod(out$vectors %*% diag(sqrt(d))))
+  }
+}
+  
 # For symmetric semi-definite matrix X, return u such that
 # tcrossprod(u) is the nearest rank-1 matrix.
 getrank1 <- function (X) {

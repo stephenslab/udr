@@ -67,19 +67,26 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
   
   # Check input argument "V".
-  msg <- paste("Input argument \"V\" should either be a positive",
-               "semi-definite matrix, or a list of positive semi-definite",
-               "matrices, with one matrix per row of \"X\"")
+  modified <- FALSE
   if (is.matrix(V)) {
-    if (!issemidef(V))
-      stop(msg)
+    if (!issemidef(V)) {
+      V <- makeposdef(V)
+      modified <- TRUE
+    }
   } else {
     if (length(V) != n)
-      stop(msg)
+      stop("Input argument \"V\" should either be a positive ",
+           "semi-definite matrix, or a list of positive semi-definite ",
+           "matrices, with one matrix per row of \"X\"")
     for (i in 1:n)
-      if (!issemidef(V[[i]]))
-        stop(msg)
+      if (!issemidef(V[[i]])) {
+         V[[i]] <- makeposdef(V[[i]])
+         modified <- TRUE
+      }
   }
+  if (modified)
+    warning("Input argument \"V\" was modified because one or more ",
+            "matrices were not positive semi-definite")
   
   # Process inputs n_rank1 and U_rank1. If U_rank1 is not provided,
   # randomly initialize the rank-1 covariance matrices.
@@ -122,14 +129,27 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
 
   # Verify that all scaled and unconstrained matrices are
   # positive semi-definite.
+  modified <- FALSE
   if (n_scaled > 0)
     for (i in 1:n_scaled)
-      if (!issemidef(U_scaled[[i]]))
-        stop("All U_scaled matrices should be positive semi-definite")
+      if (!issemidef(U_scaled[[i]])) {
+        U_scaled[[i]] <- makeposdef(U_scaled[[i]])
+        modified <- TRUE
+      }
+  if (modified)
+    warning("Input argument \"U_scaled\" was modified because one or more ",
+            "matrices were not positive semi-definite")
+  
+  modified <- FALSE
   if (n_unconstrained > 0)
     for (i in 1:n_unconstrained)
-      if (!issemidef(U_unconstrained[[i]]))
-        stop("All U_unconstrained matrices should be positive semi-definite")
+      if (!issemidef(U_unconstrained[[i]])) {
+        U_unconstrained[[i]] <- makeposdef(U_unconstrained[[i]])
+        modified <- TRUE
+      }
+  if (modified)
+    warning("Input argument \"U_unconstrained\" was modified because one ",
+            "or more matrices were not positive semi-definite")
 
   # Set up the data structure for the unconstrained covariance matrices.
   if (n_unconstrained > 0) {

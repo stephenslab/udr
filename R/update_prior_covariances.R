@@ -50,7 +50,7 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
 update_prior_covariances <-
   function (fit,
             covupdates = assign_prior_covariance_updates(fit)$covupdates,
-            minval = 1e-14) {
+            minval = 1e-8) {
 
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
