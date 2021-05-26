@@ -75,9 +75,13 @@
 #' \item{\code{maxiter}}{The upper limit on the number of updates
 #' to perform.}
 #'
-#' \item{\code{tol}}{Convergence tolerance for the optimization; the
-#' updates are halted when the largest change in the model parameters
-#' between two successive updates is less than \code{tol}.}
+#' \item{\code{tol}}{The updates are halted when the largest change in
+#' the model parameters between two successive updates is less than
+#' \code{tol}.}
+#'
+#' \item{\code{tol.lik}}{The updates are halted when the change in
+#' increase in the likelihood between two successive iterations is
+#' less than \code{tol.lik}.}
 #'
 #' \item{\code{minval}}{Minimum eigenvalue allowed in the residual
 #' covariance(s) \code{V} and the prior covariance matrices
@@ -237,7 +241,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-86, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-87, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -254,8 +258,8 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
     cat(sprintf("mixture weights update: %s\n",control$weights.update))
     if (is.matrix(fit$V))
       cat(sprintf("residual covariance update: %s\n",control$resid.update))
-    cat(sprintf("max %d updates, conv tol %0.1e\n",
-                control$maxiter,control$tol))
+    cat(sprintf("max %d updates, tol=%0.1e, tol.lik=%0.1e\n",
+                control$maxiter,control$tol,control$tol.lik))
   }
 
   # Perform EM updates.
@@ -320,16 +324,18 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
       cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dV))
 
     # Apply the parameter updates, and check convergencce.
-    fit$w <- wnew
-    fit$U <- Unew
-    fit$V <- Vnew
-    if (max(dw,dU,dV) < control$tol)
+    dparam     <- max(dw,dU,dV)
+    dloglik    <- loglik - fit$loglik
+    fit$loglik <- loglik
+    fit$w      <- wnew
+    fit$U      <- Unew
+    fit$V      <- Vnew
+    if (dparam < control$tol | dloglik < log(1 + control$tol.lik))
       break
   }
 
   # Output the parameters of the updated model, and a record of the
   # algorithm's progress over time.
-  fit$loglik <- loglik_ud(fit$X,fit$w,fit$U,fit$V,control$version)
   fit$progress <- rbind(fit$progress,progress[1:iter,])
   return(fit)
 }
@@ -347,4 +353,5 @@ ud_fit_control_default <- function()
        version              = "R",   # R or Rcpp
        maxiter              = 20,
        minval               = 1e-14,
-       tol                  = 1e-6)
+       tol                  = 1e-6,
+       tol.lik              = 1e-3)

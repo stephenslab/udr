@@ -131,9 +131,13 @@ fitting algorithm are provided; these are selected with
 \item{\code{maxiter}}{The upper limit on the number of updates
 to perform.}
 
-\item{\code{tol}}{Convergence tolerance for the optimization; the
-updates are halted when the largest change in the model parameters
-between two successive updates is less than \code{tol}.}
+\item{\code{tol}}{The updates are halted when the largest change in
+the model parameters between two successive updates is less than
+\code{tol}.}
+
+\item{\code{tol.lik}}{The updates are halted when the change in
+increase in the likelihood between two successive iterations is
+less than \code{tol.lik}.}
 
 \item{\code{minval}}{Minimum eigenvalue allowed in the residual
 covariance(s) \code{V} and the prior covariance matrices
