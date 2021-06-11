@@ -7,7 +7,7 @@
 
 R package implementing fast statistical algorithms for solving the
 multivariate normal means problem via empirical Bayes, building on
-the [Extreme Deconvolution method][ed].
+the [Extreme Deconvolution method][ed]. 
 
 ## Quick Start
 
