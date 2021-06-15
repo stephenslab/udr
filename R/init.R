@@ -51,7 +51,8 @@
 #'
 ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
                      U_scaled = list(indep = diag(ncol(X)),
-                                     equal = matrix(1,ncol(X),ncol(X))),
+                                     equal = matrix(1,ncol(X),ncol(X)) +
+                                                    1e-8 * diag(ncol(X))),
                      U_rank1, U_unconstrained, control = list()) {
 
   # Check the input data matrix, "X".
