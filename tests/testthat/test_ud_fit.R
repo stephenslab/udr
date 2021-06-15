@@ -27,8 +27,8 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
 # capture.output(fit4 <- ud_fit(fit4,control = control2))
   
   # Check likelihood computations using logLik.
-  expect_equal(as.numeric(logLik(fit1)),fit1$loglik,scale=1,tolerance=1e-15)
-  expect_equal(as.numeric(logLik(fit3)),fit3$loglik,scale=1,tolerance=1e-15)
+  expect_equal(as.numeric(logLik(fit1)),fit1$loglik,scale=1,tolerance=1e-12)
+  expect_equal(as.numeric(logLik(fit3)),fit3$loglik,scale=1,tolerance=1e-12)
   expect_s3_class(logLik(fit1),"logLik")
   expect_s3_class(logLik(fit3),"logLik")
 # expect_equal(logLik(fit2),fit2$loglik,scale = 1,tolerance = 1e-15)

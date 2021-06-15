@@ -9,7 +9,8 @@ ud_init(
   V = diag(ncol(X)),
   n_rank1,
   n_unconstrained,
-  U_scaled = list(indep = diag(ncol(X)), equal = matrix(1, ncol(X), ncol(X))),
+  U_scaled = list(indep = diag(ncol(X)), equal = matrix(1, ncol(X), ncol(X)) + 1e-08 *
+    diag(ncol(X))),
   U_rank1,
   U_unconstrained,
   control = list()
