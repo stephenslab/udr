@@ -253,9 +253,9 @@ update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
 update_prior_covariance_scaled_fa <- function (X, U, V, p, minval) {
   if (is.matrix(V))
     s <- update_prior_covariance_scaled_fa_iid(X,U$U0,V,p,minval)
-  else 
-    stop("update_prior_covariance_scaled_fa is not yet implemented for ",
-         "case when V is an array")
+  else
+    s <- update_prior_covariance_scaled_fa_general(X, U$U0, V, p, U$s)
+
   return(update_prior_covariance_scaled(U,s))
 }
 
@@ -356,3 +356,24 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas)
   sum(p*apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
                               sum(lambdas/(s*lambdas + 1))))
 
+
+update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s){
+  
+  n = nrow(X)
+  vec <- getrank1(U0)
+  
+  sigma2 = rep(NA, n)
+  mu = rep(NA, n)
+  V.inverse = c()
+
+  for (i in 1:n){
+    V.inverse[[i]] = solve(V[,,i])
+    sigma2[i] = 1/ (t(vec) %*%  V.inverse[[i]] %*% vec + 1/s)
+    mu[i] = sigma2[i] * t(vec)%*% V.inverse[[i]] %*% X[i,]
+  }
+
+  eta = mu^2 + sigma2
+  scalar = sum(p*eta)/sum(p)
+  
+  return(scalar)
+}
