@@ -305,7 +305,7 @@ update_prior_covariance_ed_iid <- function (X, U, V, p) {
 # @param u is a vector
 # @param V is a 3-d array, in which V[,,j] is the covariance matrix
 # for the jth observation
-update_prior_covariance_rank1_ed_general <- function (X, u, V, p) {
+update_prior_covariance_rank1_fa_general <- function (X, u, V, p) {
   n      <- nrow(X)
   m      <- ncol(X)
   sigma2 <- rep(0,n)
