@@ -183,86 +183,26 @@ update_prior_covariance_unconstrained_ted_rcpp <- function (X, U, V, p,
   return(update_prior_covariance_unconstrained(U,mat))
 }
 
-# This function simply returns the rank-1 prior covariance matrix
-# without updating it.
-update_prior_covariance_rank1_none <- function (X, U, V, p, minval) {
-  return(U)
-}
-
-# This function simply returns the rank-1 prior covariance matrix
-# without updating it.
-update_prior_covariance_rank1_none_rcpp <- function (X, U, V, p, minval) {
-  return(U)
-}
-
-# Perform an M-step update for a rank-1 prior covariance (U) using the
-# update formula derived originally by David Gerard. Input p is a
-# vector of weights associated with the rows of X.
-update_prior_covariance_rank1_ed <- function (X, U, V, p, minval) { 
-  if (is.matrix(V)) {
-    n <- nrow(X)
-    m <- ncol(X)
-    V <- array(V,c(m,m,n))
-    vec <- update_prior_covariance_rank1_ed_general(X,U$vec,V,p)
-  } else 
-    vec <- update_prior_covariance_rank1_ed_general(X,U$vec,V,p)
-  return(update_prior_covariance_rank1(U,vec))
-}
-
-# This is a more efficient C++ implementation of
-# update_prior_covariance_rank1_ed.
-update_prior_covariance_rank1_ed_rcpp <- function (X, U, V, p, minval) {
-  stop("update_prior_covariance_rank1_ed_rcpp is not yet implemented") 
-}
-
-# Perform an M-step update for a rank-1 prior covariance matrix U
-# using the "eigenvalue truncation" technique. Note that input U is
-# not used, and is included only for consistency with the other
-# update_prior_covariance functions. See
-# update_prior_covariance_unconstrained_ted for more information
-# about the inputs.
-update_prior_covariance_rank1_ted <- function (X, U, V, p, minval) {
-  if (!is.matrix(V))
-    stop("rank1.update = \"ted\" does not work for case when data ",
-         "points are not i.i.d. (different Vs)")
-  mat <- update_prior_covariance_unconstrained_ted(X,U,V,p,minval,r = 1)$mat
-  vec <- getrank1(mat)
-  return(update_prior_covariance_rank1(U,vec))
-}
-
-# This is a more efficient C++ implementation of
-# update_prior_covariance_rank1_ted.
-update_prior_covariance_rank1_ted_rcpp <- function (X, U, V, p, minval) {
-  stop("update_prior_covariance_rank1_ted_rcpp is not yet implemented")
-}
-
-# This function simply returns the scaled prior covariance matrix
-# without updating it.
-update_prior_covariance_scaled_none <- function (X, U, V, p, minval) {
-  return(U)
-}
-
-# This function simply returns the scaled prior covariance matrix
-# without updating it.
-update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
-  return(U)
-}
-
-# Perform an M-step update for a scaled prior covariance matrix (U).
-# Input p is a vector of weights associated with the rows of X.
-update_prior_covariance_scaled_fa <- function (X, U, V, p, minval) {
-  if (is.matrix(V))
-    s <- update_prior_covariance_scaled_fa_iid(X,U$U0,V,p,minval)
-  else
-    s <- update_prior_covariance_scaled_fa_general(X, U$U0, V, p, U$s)
-
-  return(update_prior_covariance_scaled(U,s))
-}
-
-# This is a more efficient C++ implementation of
-# update_prior_covariance_scaled_fa.
-update_prior_covariance_scaled_fa_rcpp <- function (X, U, V, p, minval) {
-  stop("update_prior_covariance_scaled_fa_rcpp is not yet implemented")
+                     
+#' Perform an M-step update for unconstrained prior covariance matrix U 
+#' using factor analyzer in the special case of V_j = I. 
+#' (See eq.(74) in main write-up)
+#' @param X contains observed data of size n \times r.
+#' @param U the estimate of U in previous iteration
+#' @param p is a vector of weights
+update_prior_covariance_unconstrained_fa <- function(X, U, p){
+  n = nrow(X)
+  r = nrow(U)
+  Q = get_mat_Q(U, r)
+  I = diag(r)
+  
+  Sigma = solve(t(Q) %*% Q + I)
+  bmat = X %*% Q %*% Sigma   # n by r matrix
+  
+  A = t(X) %*% (p*bmat)
+  B =  t(bmat) %*% (p*bmat) + sum(p)*Sigma
+  Q = A %*% solve(B)
+  return(Q%*% t(Q))
 }
 
 # Perform an M-step update for a prior covariance matrix (U) using the
@@ -298,6 +238,64 @@ update_prior_covariance_ed_iid <- function (X, U, V, p) {
   return(U - U %*% B + X1)
 }
 
+             
+                     
+# This function simply returns the rank-1 prior covariance matrix
+# without updating it.
+update_prior_covariance_rank1_none <- function (X, U, V, p, minval) {
+  return(U)
+}
+
+# This function simply returns the rank-1 prior covariance matrix
+# without updating it.
+update_prior_covariance_rank1_none_rcpp <- function (X, U, V, p, minval) {
+  return(U)
+}
+
+# Perform an M-step update for a rank-1 prior covariance (U) using the
+# update formula derived originally by David Gerard. Input p is a
+# vector of weights associated with the rows of X.
+update_prior_covariance_rank1_fa <- function (X, U, V, p, minval) { 
+  if (is.matrix(V)) {
+    n <- nrow(X)
+    m <- ncol(X)
+    V <- array(V,c(m,m,n))
+    vec <- update_prior_covariance_rank1_fa_iid(X,U$vec,p)
+  } else 
+    vec <- update_prior_covariance_rank1_fa_general(X,U$vec,V,p)
+  return(update_prior_covariance_rank1(U,vec))
+}
+
+# This is a more efficient C++ implementation of
+# update_prior_covariance_rank1_ed.
+update_prior_covariance_rank1_ed_rcpp <- function (X, U, V, p, minval) {
+  stop("update_prior_covariance_rank1_ed_rcpp is not yet implemented") 
+}
+
+# Perform an M-step update for a rank-1 prior covariance matrix U
+# using the "eigenvalue truncation" technique. Note that input U is
+# not used, and is included only for consistency with the other
+# update_prior_covariance functions. See
+# update_prior_covariance_unconstrained_ted for more information
+# about the inputs.
+update_prior_covariance_rank1_ted <- function (X, U, V, p, minval) {
+  if (!is.matrix(V))
+    stop("rank1.update = \"ted\" does not work for case when data ",
+         "points are not i.i.d. (different Vs)")
+  mat <- update_prior_covariance_unconstrained_ted(X,U,V,p,minval,r = 1)$mat
+  vec <- getrank1(mat)
+  return(update_prior_covariance_rank1(U,vec))
+}
+
+# This is a more efficient C++ implementation of
+# update_prior_covariance_rank1_ted.
+update_prior_covariance_rank1_ted_rcpp <- function (X, U, V, p, minval) {
+  stop("update_prior_covariance_rank1_ted_rcpp is not yet implemented")
+}
+
+
+
+
 # Perform an M-step update for a prior rank-1 matrix, allowing for
 # residual covariance matrices that differ among the data samples
 # (rows of X).
@@ -321,6 +319,54 @@ update_prior_covariance_rank1_fa_general <- function (X, u, V, p) {
   }
   return(drop(solve(sliceSums(Vinvw),rowSums(uw))))
 }
+                   
+                     
+#' Perform an M-step update for rank1 prior covariance matrix U 
+#' using factor analyzer in the special case of V_j = I. 
+#' @param X contains observed data of size n \times r.
+#' @param u the estimate of vector that forms the rank1 U in previous iteration
+#' @param p is a vector of weights
+update_prior_covariance_rank1_fa_iid <- function (X, u, p) {
+  n      <- nrow(X)
+  m      <- ncol(X)
+  sigma2 <- drop(1/(t(u) %*% u + 1))
+  mu <- sigma2*drop(t(u) %*% t(X)) # length-n vector
+  theta <- mu*p
+  eta <- p*(mu^2+sigma2)
+  
+  u = 1/sum(eta)* colSums(theta*X)
+  return(u)
+}
+      
+                     
+# This function simply returns the scaled prior covariance matrix
+# without updating it.
+update_prior_covariance_scaled_none <- function (X, U, V, p, minval) {
+  return(U)
+}
+
+# This function simply returns the scaled prior covariance matrix
+# without updating it.
+update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
+  return(U)
+}
+
+# Perform an M-step update for a scaled prior covariance matrix (U).
+# Input p is a vector of weights associated with the rows of X.
+update_prior_covariance_scaled_fa <- function (X, U, V, p, minval) {
+  if (is.matrix(V))
+    s <- update_prior_covariance_scaled_iid(X,U$U0,V,p,minval)
+  else
+    s <- update_prior_covariance_scaled_fa_general(X, U$U0, V, p, U$s, r)
+
+  return(update_prior_covariance_scaled(U,s))
+}
+
+# This is a more efficient C++ implementation of
+# update_prior_covariance_scaled_fa.
+update_prior_covariance_scaled_fa_rcpp <- function (X, U, V, p, minval) {
+  stop("update_prior_covariance_scaled_fa_rcpp is not yet implemented")
+}
 
 # Update the scaling factor for a prior canonical covariance (U) matrix.
 # @param U0 A (fixed) covariance matrix.
@@ -328,7 +374,7 @@ update_prior_covariance_rank1_fa_general <- function (X, u, V, p) {
 # @return An integer scalar
 #
 #' @importFrom stats uniroot
-update_prior_covariance_scaled_fa_iid <- function (X, U0, V, p, minval) {
+update_prior_covariance_scaled_iid <- function (X, U0, V, p, minval) {
 
   # Transform data using the trick
   # Uhat = R^{-T}*U*R^{-1}
@@ -355,25 +401,78 @@ update_prior_covariance_scaled_fa_iid <- function (X, U0, V, p, minval) {
 grad_loglik_scale_factor <- function (s, p, Y, lambdas)
   sum(p*apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
                               sum(lambdas/(s*lambdas + 1))))
-
-
-update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s){
+                     
+#' Perform an M-step update for estimating the scalar for prior covariance matrix U0
+#' in the general case where V_j can vary for different observations. U0 can be rank-deficient.
+#' @param X contains observed data of size n \times r.
+#' 
+#' @param U0 A known canonical covariance of size r \times r. 
+#' @param V is a 3-d array, in which V[,,j] is the covariance matrix
+# for the jth observation
+#' @param p is a vector of weights
+#' @param s is the scalar estimate in previous iteration
+#' @param r is the rank of U0
+update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s, r){
   
   n = nrow(X)
-  vec <- getrank1(U0)
+  Q = get_mat_Q(U0, r)
+  I = diag(r)
   
-  sigma2 = rep(NA, n)
-  mu = rep(NA, n)
+  Sigma = c()
   V.inverse = c()
-
+  b = c()
+  B = c()
+  trB = rep(NA, n)  # trace of Bmat 
+  
   for (i in 1:n){
     V.inverse[[i]] = solve(V[,,i])
-    sigma2[i] = 1/ (t(vec) %*%  V.inverse[[i]] %*% vec + 1/s)
-    mu[i] = sigma2[i] * t(vec)%*% V.inverse[[i]] %*% X[i,]
+    Sigma[[i]] = solve(t(Q)%*% V.inverse[[i]] %*% Q + I/s)
+    b[[i]] = t(t(X[i, ])%*% V.inverse[[i]] %*% Q %*% Sigma[[i]])
+    B[[i]] = b[[i]] %*% t(b[[i]])+Sigma[[i]]
+    trB[i] = sum(diag(B[[i]]))
   }
-
-  eta = mu^2 + sigma2
-  scalar = sum(p*eta)/sum(p)
   
-  return(scalar)
+  if (r ==1){
+    s = sum(p*B)/sum(p)
+  }else{
+    s = sum(trB*p)/(sum(p)*r)
+  }
+  
+  return(s)
+}
+                     
+                     
+#' Perform an M-step update for estimating the scalar for prior covariance matrix U0
+#' in the special case of V_j = I. U0 can be rank-deficient
+#' 
+#' @param X contains observed data of size n \times r.
+#' @param U0 A known canonical covariance of size r \times r. 
+#' @param p is a vector of weights
+#' @param s is the scalar estimate in previous iteration
+#' @param r is the rank of U0
+update_prior_covariance_scaled_fa_iid <- function(X, U0, p, s, r){
+  
+  n = nrow(X)
+  Q = get_mat_Q(U0, r)
+  I = diag(r)
+  
+  Sigma = solve(t(Q) %*% Q + I/s)
+  bmat = X %*% Q %*% Sigma   # n by r matrix to store b_j
+  
+  
+  B = c()
+  trB = rep(NA, n)  # trace of Bmat 
+  
+  for (i in 1:n){
+    B[[i]] = bmat[i, ] %*% t(bmat[i, ])+ Sigma
+    trB[i] = sum(diag(B[[i]]))
+  }
+  
+  if (r ==1){
+    s = sum(p*B)/sum(p)
+  }else{
+    s = sum(trB*p)/(sum(p)*r)
+  }
+  
+  return(s)
 }
