@@ -47,6 +47,15 @@ getrank1 <- function (X) {
   out <- eigen(X)
   return(with(out,sqrt(values[1]) * vectors[,1]))
 }
+                    
+#' Function to calculate matrix Q where U=QQ^T when U is rank-deficient. 
+#' @param U is the rank-deficient matrix to decompose
+#' @param r is the rank of U.
+get_mat_Q = function(U, r){
+  evd = eigen(U)
+  mat =  evd$vectors[, 1:r] %*% (sqrt(evd$values[1:r])* diag(r))
+  return(mat)
+}
 
 # Return a matrix containing the sums over the "slices".
 sliceSums <- function (x)
