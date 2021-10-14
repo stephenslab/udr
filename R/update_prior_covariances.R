@@ -405,7 +405,6 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas)
 #' Perform an M-step update for estimating the scalar for prior covariance matrix U0
 #' in the general case where V_j can vary for different observations. U0 can be rank-deficient.
 #' @param X contains observed data of size n \times r.
-#' 
 #' @param U0 A known canonical covariance of size r \times r. 
 #' @param V is a 3-d array, in which V[,,j] is the covariance matrix
 # for the jth observation
@@ -443,8 +442,7 @@ update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s, r){
                      
                      
 #' Perform an M-step update for estimating the scalar for prior covariance matrix U0
-#' in the special case of V_j = I. U0 can be rank-deficient
-#' 
+#' in the special case of V_j = I. U0 can be rank-deficient.
 #' @param X contains observed data of size n \times r.
 #' @param U0 A known canonical covariance of size r \times r. 
 #' @param p is a vector of weights
