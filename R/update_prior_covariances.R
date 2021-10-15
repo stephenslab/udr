@@ -17,7 +17,7 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
   if (is.na(control$scaled.update))
     control$scaled.update <- ifelse(is.matrix(fit$V),"fa","none")
   if (is.na(control$rank1.update))
-    control$rank1.update  <- ifelse(is.matrix(fit$V),"ted","ed")
+    control$rank1.update  <- ifelse(is.matrix(fit$V),"ted","fa")
   if (is.na(control$unconstrained.update))
     control$unconstrained.update <- ifelse(is.matrix(fit$V),"ted","none")
     
