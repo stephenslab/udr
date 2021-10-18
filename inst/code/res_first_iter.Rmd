@@ -1,0 +1,84 @@
+---
+title: "Result at first iteration"
+author: "Yunqi Yang"
+date: "10/13/2021"
+output: html_document
+---
+
+### Description:
+
+This file is used to produce results for each type of algorithm at the first iteration for benchmarking purposes.
+
+## Unconstrained subproblem
+```{r  }
+
+# Simulate data for unconstrained subproblem
+seed = 1
+n = 500
+U = diag(2)
+V = diag(2)
+X = simulate_one_component(seed, n, U, V)
+
+p = runif(n)
+U.init = udr:::sim_unconstrained(2)
+U.init = udr:::create_unconstrained_matrix_struct(X, U.init)
+
+```
+
+
+```{r  }
+
+# Unconstrained updates: result for one iteration 
+res.ted <- update_prior_covariance_unconstrained_ted(X, U.init, V, p, minval = 0)
+res.fa <- update_prior_covariance_unconstrained_fa(X, U.init$mat, p)
+res.ed_iid <- update_prior_covariance_ed_iid(X, U.init$mat,V, p)
+
+```
+
+
+## Scaled subproblem
+```{r  }
+
+seed = 1
+n = 500
+U = matrix(c(1,0,0,0), ncol = 2, nrow = 2)
+V = diag(2)
+X = simulate_one_component(seed, n, U, V)
+
+
+minval = 0
+p = runif(n)
+U.init = udr:::sim_rank1(2)
+U.init <- create_scaled_matrix_struct(X, U.init)
+```
+
+
+```{r  }
+
+# Scaled updates: result for one iteration 
+res.scaled_iid <- update_prior_covariance_scaled_iid(X, U.init$U0, V, p, minval)
+
+r <- sum(eigen(U.init$U0)$values > 1e-15)
+V.g <- simplify2array(replicate(n, V, simplify=FALSE))
+res.scaled_general <- update_prior_covariance_scaled_fa_general(X, U.init$U0, V.g, p, U.init$s, r)
+
+```
+
+
+
+## Rank1 subproblem
+```{r  }
+
+# Rank1 updates: result for one iteration 
+set.seed(1)
+
+U.init <- create_rank1_matrix_struct(X, udr:::sim_rank1(2))
+
+res.rank1_ted <- update_prior_covariance_rank1_ted(X, U.init, V, p, minval)$mat
+res.rank1_fa <- update_prior_covariance_rank1_fa_iid(X, U.init$vec, p)
+
+```
+
+
+
+
