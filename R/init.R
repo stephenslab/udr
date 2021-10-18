@@ -157,12 +157,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     if (is.null(names(U_unconstrained)))
       names(U_unconstrained) <- paste0("unconstrained",1:n_unconstrained)
     for (i in 1:n_unconstrained) {
-      U <- U_unconstrained[[i]]
-      rownames(U) <- colnames(X)
-      colnames(U) <- colnames(X)
-      U <- list(mat = U)
-      attr(U,"covtype") <- "unconstrained"
-      U_unconstrained[[i]] <- U
+      U_unconstrained[[i]] <- create_unconstrained_matrix_struct(X, U_unconstrained[[i]])
     }
   }
 
@@ -171,13 +166,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     if (is.null(names(U_rank1)))
       names(U_rank1) <- paste("rank1",1:n_rank1,sep = "_")
     for (i in 1:n_rank1) {
-      u <- getrank1(U_rank1[[i]])
-      U <- list(vec = u,mat = tcrossprod(u))
-      names(U$vec) <- colnames(X)
-      rownames(U$mat) <- colnames(X)
-      colnames(U$mat) <- colnames(X)
-      attr(U,"covtype") <- "rank1"
-      U_rank1[[i]] <- U
+      U_rank1[[i]] <- create_rank1_matrix_struct(X, U_rank1[[i]])
     }
   }
 
@@ -186,12 +175,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     if (is.null(names(U_scaled)))
       names(U_scaled) <- paste("scaled",1:n_scaled,sep = "_")
     for (i in 1:n_scaled) {
-      U <- U_scaled[[i]]
-      rownames(U) <- colnames(X)
-      colnames(U) <- colnames(X)
-      U <- list(s = 1,U0 = U,mat = U)
-      attr(U,"covtype") <- "scaled"
-      U_scaled[[i]] <- U
+      U_scaled[[i]] <- create_scaled_matrix_struct(X, U_scaled[[i]])
     }
   }
 
@@ -229,4 +213,33 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   class(fit) <- c("ud_fit","list")
   fit <- compute_posterior_probs(fit,control$version)
   return(fit)
+}
+
+#' Function to create the data structure for unconstrained matrix
+create_unconstrained_matrix_struct <- function(X, U_unconstrained){
+  rownames(U_unconstrained) <- colnames(X)
+  colnames(U_unconstrained) <- colnames(X)
+  U <- list(mat = U_unconstrained)
+  attr(U,"covtype") <- "unconstrained"
+  return(U)
+}
+
+#' Function to create the data structure for rank1 matrix
+create_rank1_matrix_struct <- function(X, U_rank1){
+  u <- getrank1(U_rank1)
+  U <- list(vec = u,mat = tcrossprod(u))
+  names(U$vec) <- colnames(X)
+  rownames(U$mat) <- colnames(X)
+  colnames(U$mat) <- colnames(X)
+  attr(U,"covtype") <- "rank1"
+  return(U)
+}
+
+#' Function to create the data structure for scaled matrix
+create_scaled_matrix_struct <- function(X, U_scaled){
+  rownames(U_scaled) <- colnames(X)
+  colnames(U_scaled) <- colnames(X)
+  U <- list(s = 1,U0 = U_scaled, mat = U_scaled)
+  attr(U,"covtype") <- "scaled"
+  return(U)
 }
