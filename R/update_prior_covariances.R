@@ -375,7 +375,8 @@ update_prior_covariance_scaled_fa_rcpp <- function (X, U, V, p, minval) {
 # @return An integer scalar
 #
 #' @importFrom stats uniroot
-update_prior_covariance_scaled_iid <- function (X, U0, V, p, minval) {
+#' This name needs to be changed...It's an exact algorithm. Using em is to match the current control list 
+update_prior_covariance_scaled_em <- function (X, U0, V, p, minval) {
 
   # Transform data using the trick
   # Uhat = R^{-T}*U*R^{-1}
