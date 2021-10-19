@@ -354,12 +354,13 @@ update_prior_covariance_scaled_none_rcpp <- function (X, U, V, p, minval) {
 # Perform an M-step update for a scaled prior covariance matrix (U).
 # Input p is a vector of weights associated with the rows of X.
 update_prior_covariance_scaled_fa <- function (X, U, V, p, minval) {
-  if (is.matrix(V))
+  if (is.matrix(V)){
     s <- update_prior_covariance_scaled_iid(X,U$U0,V,p,minval)
-  else
+    }
+  else{
     r <- sum(eigen(U$U0)$values > 1e-15)
     s <- update_prior_covariance_scaled_fa_general(X, U$U0, V, p, U$s, r)
-
+    }
   return(update_prior_covariance_scaled(U,s))
 }
 
