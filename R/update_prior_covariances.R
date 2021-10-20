@@ -75,7 +75,7 @@ update_prior_covariances <-
 # matrix. Input "U" is the current data structure, and "mat" is the
 # newly estimated matrix. This function is called in the
 # update_prior_covariance_unconstrained_* functions below.
-update_prior_covariance_unconstrained <- function (U, mat) {
+update_prior_covariance_unconstrained_struct <- function (U, mat) {
   rownames(mat) <- rownames(U$mat)
   colnames(mat) <- colnames(U$mat)
   U$mat <- mat
@@ -87,7 +87,7 @@ update_prior_covariance_unconstrained <- function (U, mat) {
 # containing the new estimates, such that the new rank-1 matrix is
 # tcrossprod(vec). This function is called in the
 # update_prior_covariance_rank1_* functions below.
-update_prior_covariance_rank1 <- function (U, vec) {
+update_prior_covariance_rank1_struct <- function (U, vec) {
   mat <- tcrossprod(vec)
   names(vec) <- names(U$vec)
   rownames(mat) <- rownames(U$mat)
@@ -101,7 +101,7 @@ update_prior_covariance_rank1 <- function (U, vec) {
 # Input U is the current data structure, and "s" is the new estimate
 # of the scaling factor. This function is called in the
 # update_prior_covariance_scaled_* functions below.
-update_prior_covariance_scaled <- function (U, s) {
+update_prior_covariance_scaled_struct <- function (U, s) {
   U$s   <- s
   U$mat <- s * U$U0
   return(U)
@@ -128,7 +128,7 @@ update_prior_covariance_unconstrained_ed <- function (X, U, V, p, minval) {
     mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
   else
     mat <- update_prior_covariance_ed_general(X,U$mat,V,p)
-  return(update_prior_covariance_unconstrained(U,mat))
+  return(update_prior_covariance_unconstrained_struct(U,mat))
 }
 
 # This is a more efficient C++ implementation of 
@@ -140,7 +140,7 @@ update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
   else
     stop("update_prior_covariance_unconstrained_ed_rcpp is not yet ",
          "implemented for case when data points are not i.i.d. (different Vs)")
-  return(update_prior_covariance_unconstrained(U,mat))
+  return(update_prior_covariance_unconstrained_struct(U,mat))
 }
 
 # Perform an M-step update for a prior covariance matrix U using the
@@ -169,7 +169,7 @@ update_prior_covariance_unconstrained_ted <- function (X, U, V, p, minval,
   
   # Recover the solution for the original (untransformed) data.
   mat <- t(R) %*% mat %*% R
-  return(update_prior_covariance_unconstrained(U,mat))
+  return(update_prior_covariance_unconstrained_struct(U,mat))
 }
 
 # This is a more efficient C++ implementation of 
@@ -180,7 +180,7 @@ update_prior_covariance_unconstrained_ted_rcpp <- function (X, U, V, p,
     stop("unconstrained.update = \"ted\" does not work for case when data ",
          "points are not i.i.d. (different Vs)")
   mat <- update_prior_covariance_ted_iid_rcpp(X,U$mat,V,p,minval)
-  return(update_prior_covariance_unconstrained(U,mat))
+  return(update_prior_covariance_unconstrained_struct(U,mat))
 }
 
                      
@@ -263,7 +263,7 @@ update_prior_covariance_rank1_fa <- function (X, U, V, p, minval) {
     vec <- update_prior_covariance_rank1_fa_iid(X,U$vec,p)
   } else 
     vec <- update_prior_covariance_rank1_fa_general(X,U$vec,V,p)
-  return(update_prior_covariance_rank1(U,vec))
+  return(update_prior_covariance_rank1_struct(U,vec))
 }
 
 # This is a more efficient C++ implementation of
@@ -284,7 +284,7 @@ update_prior_covariance_rank1_ted <- function (X, U, V, p, minval) {
          "points are not i.i.d. (different Vs)")
   mat <- update_prior_covariance_unconstrained_ted(X,U,V,p,minval,r = 1)$mat
   vec <- getrank1(mat)
-  return(update_prior_covariance_rank1(U,vec))
+  return(update_prior_covariance_rank1_struct(U,vec))
 }
 
 # This is a more efficient C++ implementation of
@@ -361,7 +361,7 @@ update_prior_covariance_scaled_fa <- function (X, U, V, p, minval) {
     r <- sum(eigen(U$U0)$values > 1e-15)
     s <- update_prior_covariance_scaled_fa_general(X, U$U0, V, p, U$s, r)
     }
-  return(update_prior_covariance_scaled(U,s))
+  return(update_prior_covariance_scaled_struct(U,s))
 }
 
 # This is a more efficient C++ implementation of
@@ -391,7 +391,7 @@ update_prior_covariance_scaled_iid <- function (X, U0, V, p, minval) {
 
   Y <- t(Xhat %*% evd$vectors)
   return(uniroot(function (s) grad_loglik_scale_factor(s,p,Y,lambdas),
-                 c(0,1),extendInt = "yes")$root)
+                 c(0,1e6))$root)
 }
 
 # Function for 1-d search of s value based on eq. (20) in the write-up.
@@ -458,8 +458,6 @@ update_prior_covariance_scaled_fa_iid <- function(X, U0, p, s, r){
   
   Sigma = solve(t(Q) %*% Q + I/s)
   bmat = X %*% Q %*% Sigma   # n by r matrix to store b_j
-  
-  
   B = c()
   trB = rep(NA, n)  # trace of Bmat 
   
@@ -473,6 +471,5 @@ update_prior_covariance_scaled_fa_iid <- function(X, U0, p, s, r){
   }else{
     s = sum(trB*p)/(sum(p)*r)
   }
-  
   return(s)
 }
