@@ -55,3 +55,18 @@ simulate_one_component <- function(seed, n, U, V) {
   }
   return(X)
 }
+
+#' function for computing the weighted log-likelihood for one single component
+loglik_weighted_single_component <- function (X, U, V, p) {
+  n <- nrow(X)
+  y <- rep(0,n)
+  if (is.matrix(V))
+    for (i in 1:n){
+      y[i] <- y[i] + p[i] * dmvnorm(X[i,],sigma = V + U, log = TRUE)
+    }
+  else
+    for (i in 1:n){
+      y[i] <- y[i] + p[i] * dmvnorm(X[i,],sigma = V[,,i] + U, log = TRUE)
+    }
+  return(sum(y))
+}
