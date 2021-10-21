@@ -1,0 +1,108 @@
+---
+title: "Result at first iteration"
+author: "Yunqi Yang"
+date: "10/13/2021"
+output: html_document
+---
+
+### Description:
+
+This file is used to produce results for each type of algorithm at the first iteration for benchmarking purposes.
+
+## Unconstrained subproblem
+```{r  }
+
+# Simulate data for unconstrained subproblem
+seed <- 1
+n <- 500
+U <- diag(2)
+V <- diag(2)
+X <- simulate_one_component(seed, n, U, V)
+
+# Initialization
+p <- runif(n)
+U.init <- sim_unconstrained(2)
+U.init <- create_unconstrained_matrix_struct(X, U.init)
+
+```
+
+
+```{r  }
+
+# Unconstrained updates: result for one iteration 
+U.ted <- update_prior_covariance_unconstrained_ted(X, U.init, V, p, minval = 0)$mat
+U.fa <- update_prior_covariance_unconstrained_fa(X, U.init$mat, p)
+U.ed_iid <- update_prior_covariance_ed_iid(X, U.init$mat,V, p)
+
+
+save(U.ted, file = 'U_ted.rds')
+save(U.fa, file = 'U_fa.rds')
+save(U.ed_iid, file = 'U_ed.rds')
+
+```
+
+
+## Scaled subproblem
+```{r  }
+# Simulate data
+seed <- 1
+n <- 500
+U0 <- matrix(c(1,0,0,0), ncol = 2, nrow = 2)
+V <- diag(2)
+V.g <- simplify2array(replicate(n, V, simplify=FALSE))
+X <- simulate_one_component(seed, n, U0, V)
+
+
+# Initialization
+U <- create_scaled_matrix_struct(X, sim_rank1(2))
+minval <- 0
+p <- runif(n)
+```
+
+
+```{r  }
+
+# Scaled updates: result for one iteration 
+scalar.iid <- update_prior_covariance_scaled_iid(X, U$U0, V, p, minval)
+
+r <- sum(eigen(U$U0)$values > 1e-15)
+scalar.general <- update_prior_covariance_scaled_fa_general(X, U$U0, V.g, p, U$s, r)
+
+save(scalar.iid, file = 'scalar_iid.rds')
+save(scalar.general, file = 'scalar_general.rds')
+```
+
+
+
+## Rank1 subproblem
+```{r  }
+# Simulate data
+seed <- 1
+n <- 500
+U.true <- matrix(c(1,0,0,0), ncol = 2, nrow = 2)
+V <- diag(2)
+V.g <- simplify2array(replicate(n, V, simplify=FALSE))
+X <- simulate_one_component(seed, n, U.true, V)
+
+```
+
+
+
+```{r  }
+
+# Intialization 
+U <- create_rank1_matrix_struct(X, sim_rank1(2))
+p <- runif(n)
+minval <- 0
+
+# Rank1 updates: result for one iteration 
+rank1_ted <- update_prior_covariance_rank1_ted(X, U, V, p, minval)$vec
+rank1_fa <- update_prior_covariance_rank1_fa_iid(X, U$vec, p)
+save(rank1_ted, file = 'rank1_ted.rds')
+save(rank1_fa, file = 'rank1_fa.rds')
+
+```
+
+
+
+
