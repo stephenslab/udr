@@ -118,18 +118,18 @@ update_prior_covariance_unconstrained_ted_rcpp <- function (X, U, V, p,
 #' @param U the estimate of U in previous iteration
 #' @param p is a vector of weights
 update_prior_covariance_unconstrained_fa <- function(X, U, p){
-  n = nrow(X)
-  r = nrow(U)
-  Q = get_mat_Q(U, r)
-  I = diag(r)
+  n <- nrow(X)
+  r <- nrow(U)
+  Q <- get_mat_Q(U, r)
+  I <- diag(r)
   
-  Sigma = solve(t(Q) %*% Q + I)
-  bmat = X %*% Q %*% Sigma   # n by r matrix
-  
-  A = t(X) %*% (p*bmat)
-  B =  t(bmat) %*% (p*bmat) + sum(p)*Sigma
-  Q = A %*% solve(B)
-  return(Q%*% t(Q))
+  Sigma <- solve(t(Q) %*% Q + I)
+  bmat <- X %*% Q %*% Sigma   # n by r matrix
+  A <- crossprod(X, p*bmat) # t(X) %*% (p*bmat)
+  B <-  crossprod(bmat, p*bmat) + sum(p)*Sigma
+  Q <- A %*% solve(B)
+  mat <- tcrossprod(Q)
+  return(mat)
 }
 
 # Perform an M-step update for a prior covariance matrix (U) using the
@@ -256,11 +256,10 @@ update_prior_covariance_rank1_fa_general <- function (X, u, V, p) {
 update_prior_covariance_rank1_fa_iid <- function (X, u, p) {
   n      <- nrow(X)
   m      <- ncol(X)
-  sigma2 <- drop(1/(t(u) %*% u + 1))
-  mu <- sigma2*drop(t(u) %*% t(X)) # length-n vector
+  sigma2 <- drop(1/(crossprod(u) + 1))
+  mu <- sigma2*drop(tcrossprod(u, X)) # length-n vector
   theta <- mu*p
   eta <- p*(mu^2+sigma2)
-  
   u = 1/sum(eta)* colSums(theta*X)
   return(u)
 }
@@ -355,8 +354,8 @@ update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s, r){
   for (i in 1:n){
     V.inverse[[i]] = solve(V[,,i])
     Sigma[[i]] = solve(t(Q)%*% V.inverse[[i]] %*% Q + I/s)
-    b[[i]] = t(t(X[i, ])%*% V.inverse[[i]] %*% Q %*% Sigma[[i]])
-    B[[i]] = b[[i]] %*% t(b[[i]])+Sigma[[i]]
+    b[[i]] = t(X[i, ])%*% V.inverse[[i]] %*% Q %*% Sigma[[i]]
+    B[[i]] = crossprod(b[[i]])+ Sigma[[i]]
     trB[i] = sum(diag(B[[i]]))
   }
   
@@ -389,7 +388,7 @@ update_prior_covariance_scaled_fa_iid <- function(X, U0, p, s, r){
   trB = rep(NA, n)  # trace of Bmat 
   
   for (i in 1:n){
-    B[[i]] = bmat[i, ] %*% t(bmat[i, ])+ Sigma
+    B[[i]] = tcrossprod(bmat[i, ]) + Sigma
     trB[i] = sum(diag(B[[i]]))
   }
   
