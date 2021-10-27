@@ -1,4 +1,135 @@
 
+test_that("ted unconstrained produce same result as before", {
+  
+  # load previous result
+  load('U_ted.rds')
+  
+  # Simulate the same data as used in previous result
+  seed <- 1
+  n <- 500
+  U <- diag(2)
+  V <- diag(2)
+  X <- simulate_one_component(seed, n, U, V)
+
+  # Initialization
+  p <- runif(n)
+  U.init <- sim_unconstrained(2)
+  U.init <- create_unconstrained_matrix_struct(X, U.init)
+  U <- update_prior_covariance_unconstrained_ted(X, U.init, V, p, minval = 0)$mat
+  expect_equal(U, U_ted)
+})
+
+
+test_that("fa unconstrained produce same result as before", {
+  
+  # load previous result
+  load('U_fa.rds')
+  
+  # Simulate the same data as used in previous result
+  seed <- 1
+  n <- 500
+  U <- diag(2)
+  V <- diag(2)
+  X <- simulate_one_component(seed, n, U, V)
+
+  # Initialization
+  p <- runif(n)
+  U.init <- sim_unconstrained(2)
+  U.init <- create_unconstrained_matrix_struct(X, U.init)
+  U <- update_prior_covariance_unconstrained_fa(X, U.init$mat, p)
+  expect_equal(U, U_fa)
+})
+
+
+test_that("ed unconstrained produce same result as before", {
+  
+  # load previous result
+  load('U_ed.rds')
+  
+  # Simulate the same data as used in previous result
+  seed <- 1
+  n <- 500
+  U <- diag(2)
+  V <- diag(2)
+  X <- simulate_one_component(seed, n, U, V)
+
+  # Initialization
+  p <- runif(n)
+  U.init <- sim_unconstrained(2)
+  U.init <- create_unconstrained_matrix_struct(X, U.init)
+  U <- update_prior_covariance_ed_iid(X, U.init$mat,V, p)
+  expect_equal(U, U_ed)
+})
+
+
+test_that("fa scaled_general produce same result as before", {
+  
+  # load previous result
+  load('scalar_general.rds')
+  
+  # Simulate data
+  seed <- 1
+  n <- 500
+  U0 <- matrix(c(1,0,0,0), ncol = 2, nrow = 2)
+  V <- diag(2)
+  V.g <- replicate(n, V, simplify="array")
+  X <- simulate_one_component(seed, n, U0, V)
+
+  # Initialization
+  U <- create_scaled_matrix_struct(X, sim_rank1(2))
+  minval <- 0
+  p <- runif(n)
+  r <- sum(eigen(U$U0)$values > 1e-15)
+  
+  scalar  <- update_prior_covariance_scaled_fa_general(X, U$U0, V.g, p, U$s, r)
+  expect_equal(scalar, scalar_general)
+})
+
+
+test_that("fa rank1_iid produce same result as before", {
+  
+  load("rank1_fa.rds")
+  
+  # Simulate data
+  seed <- 1
+  n <- 500
+  U.true <- matrix(c(1,0,0,0), ncol = 2, nrow = 2)
+  V <- diag(2)
+  V.g <- replicate(n, V, simplify="array")
+  X <- simulate_one_component(seed, n, U.true, V)
+  
+  # Intialization 
+  U <- create_rank1_matrix_struct(X, sim_rank1(2))
+  p <- runif(n)
+  minval <- 0
+  rank1 <- update_prior_covariance_rank1_fa_iid(X, U$vec, p)
+  
+  expect_equal(rank1_fa, rank1)
+})
+
+
+test_that("ted rank1 produce same result as before", {
+  
+  load("rank1_ted.rds")
+  # Simulate data
+  seed <- 1
+  n <- 500
+  U.true <- matrix(c(1,0,0,0), ncol = 2, nrow = 2)
+  V <- diag(2)
+  V.g <- replicate(n, V, simplify="array")
+  X <- simulate_one_component(seed, n, U.true, V)
+  
+  
+  # Intialization 
+  U <- create_rank1_matrix_struct(X, sim_rank1(2))
+  p <- runif(n)
+  minval <- 0
+
+  rank1 <- update_prior_covariance_rank1_ted(X, U, V, p, minval)$vec
+  expect_equal(rank1_ted, rank1)
+})
+
+
 test_that("unconstrained FA increases loglikelihood", {
   
   # Simulate data
