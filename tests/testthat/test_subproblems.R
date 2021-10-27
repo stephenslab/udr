@@ -62,27 +62,27 @@ test_that("ed unconstrained produce same result as before", {
 })
 
 
-test_that("fa scaled_general produce same result as before", {
+test_that("fa scaled_iid produce same result as before", {
   
   # load previous result
-  load('scalar_general.rds')
-  
+  load('scalar.rds')
   # Simulate data
   seed <- 1
   n <- 500
-  U0 <- matrix(c(1,0,0,0), ncol = 2, nrow = 2)
-  V <- diag(2)
-  V.g <- replicate(n, V, simplify="array")
+  U0 <- diag(c(1,1,0))
+  V <- diag(3)
   X <- simulate_one_component(seed, n, U0, V)
 
   # Initialization
-  U <- create_scaled_matrix_struct(X, sim_rank1(2))
+  U <- create_scaled_matrix_struct(X, U0)
   minval <- 0
   p <- runif(n)
   r <- sum(eigen(U$U0)$values > 1e-15)
   
-  scalar  <- update_prior_covariance_scaled_fa_general(X, U$U0, V.g, p, U$s, r)
-  expect_equal(scalar, scalar_general)
+  scalar  <- update_prior_covariance_scaled_fa_iid(X, U$U0, p, U$s, r)
+  U <- update_prior_covariance_scaled_struct(U, scalar)
+  
+  expect_equal(U$mat, U_scalar$mat)
 })
 
 
@@ -294,5 +294,43 @@ test_that("rank1 fa_general vs. fa_iid", {
   }
   expect_equal(logliks_general, logliks_iid)
   expect_equal(U.iid, U.general)
+})
+
+
+test_that("scaled fa_general vs. fa_iid", {
+  # Simulate data
+  seed <- 1
+  n <- 500
+  U0 <- diag(c(1,1,0))
+  V <- diag(3)
+  V.g <- replicate(n, V, simplify="array")
+  X <- simulate_one_component(seed, n, U0, V)
+
+  # Initialization
+  minval <- 0
+  maxiter <- 10
+  logliks_iid <- rep(NA, maxiter)
+  logliks_general <- rep(NA, maxiter)
+  U.iid <- create_scaled_matrix_struct(X, U0)
+  U.general <- create_scaled_matrix_struct(X, U0)
+  r <- sum(eigen(U$U0)$values > 1e-15)
+  p <- runif(n)
+
+  for (i in 1:maxiter){
+    scalar_iid <- update_prior_covariance_scaled_fa_iid(X, U.iid$U0, p, U.iid$s, r)
+    Unew.iid <- update_prior_covariance_scaled_struct(U.iid, scalar_iid)
+    
+    scalar_general <- update_prior_covariance_scaled_fa_general(X, U.general$U0, V.g, p, U.general$s, r)
+    Unew.general <- update_prior_covariance_scaled_struct(U.general, scalar_general)
+    
+    U.iid <- Unew.iid
+    U.general <- Unew.general
+    
+    logliks_iid[i] <- loglik_weighted_single_component(X, U.iid$mat, V, p)
+    logliks_general[i] <- loglik_weighted_single_component(X, U.general$mat, V.g, p)
+  }
+
+  expect_equal(logliks_iid, logliks_general)
+  expect_equal(U.iid$mat, U.general$mat)
 })
 

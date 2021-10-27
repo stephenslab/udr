@@ -43,37 +43,24 @@ save(U_ed, file = 'U_ed.rds')
 
 ## Scaled subproblem
 ```{r  }
+
+# Simulate data
 seed <- 1
 n <- 500
-U0 <- matrix(c(1,0,0,0), ncol = 2, nrow = 2)
-V <- diag(2)
-V.g <- replicate(n, V, simplify="array")
+U0 <- diag(c(1,1,0))
+V <- diag(3)
 X <- simulate_one_component(seed, n, U0, V)
-
 
 # Initialization
 U <- create_scaled_matrix_struct(X, U0)
 minval <- 0
 p <- runif(n)
-```
-
-
-```{r  }
-
-# Scaled updates: result for one iteration 
-scalar_iid <- update_prior_covariance_scaled_iid(X, U$U0, V, p, minval)
-U_scalar_iid <- update_prior_covariance_scaled_struct(U, scalar_iid)
-
 r <- sum(eigen(U$U0)$values > 1e-15)
-scalar_general <- update_prior_covariance_scaled_fa_general(X, U$U0, V.g, p, U$s, r)
-U_scalar_general <- update_prior_covariance_scaled_struct(U, scalar_general)
-
-save(U_scalar_iid, file = 'scalar_iid.rds')
-save(U_scalar_general, file = 'scalar_general.rds')
-
-
+  
+scalar  <- update_prior_covariance_scaled_fa_iid(X, U$U0, p, U$s, r)
+U_scalar <- update_prior_covariance_scaled_struct(U, scalar)
+save(U_scalar, file = 'scalar.rds')
 ```
-
 
 
 ## Rank1 subproblem
@@ -87,7 +74,6 @@ V.g <- simplify2array(replicate(n, V, simplify=FALSE))
 X <- simulate_one_component(seed, n, U.true, V)
 
 ```
-
 
 
 ```{r  }
