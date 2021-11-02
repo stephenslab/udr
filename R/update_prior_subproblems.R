@@ -316,8 +316,13 @@ update_prior_covariance_scaled_iid <- function (X, U0, V, p, minval) {
   lambdas <- ifelse(evd$values < minval,minval,evd$values)
 
   Y <- t(Xhat %*% evd$vectors)
-  return(uniroot(function (s) grad_loglik_scale_factor(s,p,Y,lambdas),
-                 c(0,1e6))$root)
+  dev_zero <- grad_loglik_scale_factor(0, p, Y, lambdas) 
+  if dev_zero <= 0{
+    return(0)
+  }else{
+    return(uniroot(function (s) grad_loglik_scale_factor(s,p,Y,lambdas),
+                   c(0,1e6))$root)
+  }
 }
 
 # Function for 1-d search of s value based on eq. (20) in the write-up.
@@ -328,7 +333,9 @@ update_prior_covariance_scaled_iid <- function (X, U0, V, p, minval) {
 # @return A function of the scalar s.
 grad_loglik_scale_factor <- function (s, p, Y, lambdas)
   sum(p*apply(Y,2,function(y) sum(lambdas*y^2/((s*lambdas + 1)^2)) -
-                              sum(lambdas/(s*lambdas + 1))))
+                sum(lambdas/(s*lambdas + 1))))
+
+  
                      
 #' Perform an M-step update for estimating the scalar for prior covariance matrix U0
 #' in the general case where V_j can vary for different observations. U0 can be rank-deficient.
