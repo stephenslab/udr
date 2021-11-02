@@ -317,7 +317,7 @@ update_prior_covariance_scaled_iid <- function (X, U0, V, p, minval) {
 
   Y <- t(Xhat %*% evd$vectors)
   dev_zero <- grad_loglik_scale_factor(0, p, Y, lambdas) 
-  if dev_zero <= 0{
+  if (dev_zero <= 0){
     return(0)
   }else{
     return(uniroot(function (s) grad_loglik_scale_factor(s,p,Y,lambdas),
