@@ -367,7 +367,7 @@ update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s, r){
   }
   
   if (r ==1){
-    s = sum(p*B)/sum(p)
+    s = sum(p*unlist(B))/sum(p)
   }else{
     s = sum(trB*p)/(sum(p)*r)
   }
