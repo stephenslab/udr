@@ -5,8 +5,7 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-void ted (const mat& X, const mat& V, const vec& p, mat& U, double minval,
-	  unsigned int r);
+void ted (const mat& X, const vec& p, mat& U, double minval, unsigned int r);
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -16,20 +15,18 @@ void ted (const mat& X, const mat& V, const vec& p, mat& U, double minval,
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-arma::mat ted_rcpp (const arma::mat& X, const arma::mat& V, const arma::vec& p,
-		    double minval, unsigned int r) {
+arma::mat ted_rcpp (const arma::mat& X, const arma::vec& p, double minval, 
+		    unsigned int r) {
   unsigned int m = X.n_cols;
   mat U(m,m);
-  ted(X,V,p,U,minval,r);
+  ted(X,p,U,minval,r);
   return U;
 }
 
 // Perform an M-step update for one of the prior covariance matrices
 // using the eigenvalue-truncation technique described in Won et al
 // (2013).
-void ted (const mat& X, const mat& V, const vec& p, mat& U, double minval,
-	  unsigned int r) {
-  mat R = chol(V,"upper");
+void ted (const mat& X, const vec& p, mat& U, double minval, unsigned int r) {
   mat X1 = X;
 
   // Transform the data so that the residual covariance is I, then
@@ -37,13 +34,9 @@ void ted (const mat& X, const mat& V, const vec& p, mat& U, double minval,
   vec p1 = p;
   safenormalize(p1);
   scale_rows(X1,sqrt(p1));
-  X1 *= inv(R);
   mat T = crossprod(X1);
 
   // Find U maximizing the expected complete log-likelihood subject to
   // U being positive definite.
   shrink_cov(T,U,minval,r);
-
-  // Recover the solution for the original (untransformed) data.
-  U = trans(R) * U * R;
 }

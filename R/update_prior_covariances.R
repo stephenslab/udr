@@ -63,9 +63,11 @@ update_prior_covariances <-
 
     # Update the prior covariances in the i.i.d. case (when all the
     # residual variances V are the same).
+    R <- chol(fit$V)
+    Y <- fit$X %*% solve(R)
     for (i in 1:k)
-      fit$U[[i]] <- do.call(covupdates[i],list(X = fit$X,U = fit$U[[i]],
-                                               V = fit$V,p = fit$P[,i]))
+      fit$U[[i]] <- do.call(covupdates[i],list(Y = Y,U = fit$U[[i]],
+                                               R = R,p = fit$P[,i]))
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
@@ -118,15 +120,15 @@ update_prior_covariance_struct_scaled <- function (U, s) {
 
 # These functions return the unconstrained prior covariance matrix
 # without updating it.
-update_prior_covariance_scaled_none_iid                <- function (X,U,V,p) U
-update_prior_covariance_scaled_none_iid_rcpp           <- function (X,U,V,p) U
+update_prior_covariance_scaled_none_iid                <- function (Y,U,R,p) U
+update_prior_covariance_scaled_none_iid_rcpp           <- function (Y,U,R,p) U
+update_prior_covariance_rank1_none_iid                 <- function (Y,U,R,p) U
+update_prior_covariance_rank1_none_iid_rcpp            <- function (Y,U,R,p) U
+update_prior_covariance_unconstrained_none_iid         <- function (Y,U,R,p) U
+update_prior_covariance_unconstrained_none_iid_rcpp    <- function (Y,U,R,p) U
 update_prior_covariance_scaled_none_notiid             <- function (X,U,V,p) U
 update_prior_covariance_scaled_none_notiid_rcpp        <- function (X,U,V,p) U
-update_prior_covariance_rank1_none_iid                 <- function (X,U,V,p) U
-update_prior_covariance_rank1_none_iid_rcpp            <- function (X,U,V,p) U
 update_prior_covariance_rank1_none_notiid              <- function (X,U,V,p) U
 update_prior_covariance_rank1_none_notiid_rcpp         <- function (X,U,V,p) U
-update_prior_covariance_unconstrained_none_iid         <- function (X,U,V,p) U
-update_prior_covariance_unconstrained_none_iid_rcpp    <- function (X,U,V,p) U
 update_prior_covariance_unconstrained_none_notiid      <- function (X,U,V,p) U
 update_prior_covariance_unconstrained_none_notiid_rcpp <- function (X,U,V,p) U

@@ -68,17 +68,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // ted_rcpp
-arma::mat ted_rcpp(const arma::mat& X, const arma::mat& V, const arma::vec& p, double minval, unsigned int r);
-RcppExport SEXP _udr_ted_rcpp(SEXP XSEXP, SEXP VSEXP, SEXP pSEXP, SEXP minvalSEXP, SEXP rSEXP) {
+arma::mat ted_rcpp(const arma::mat& X, const arma::vec& p, double minval, unsigned int r);
+RcppExport SEXP _udr_ted_rcpp(SEXP XSEXP, SEXP pSEXP, SEXP minvalSEXP, SEXP rSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type minval(minvalSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type r(rSEXP);
-    rcpp_result_gen = Rcpp::wrap(ted_rcpp(X, V, p, minval, r));
+    rcpp_result_gen = Rcpp::wrap(ted_rcpp(X, p, minval, r));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -116,7 +115,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_udr_loglik_ud_notiid_rcpp", (DL_FUNC) &_udr_loglik_ud_notiid_rcpp, 4},
     {"_udr_compute_posterior_probs_iid_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_iid_rcpp, 4},
     {"_udr_compute_posterior_probs_notiid_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_notiid_rcpp, 4},
-    {"_udr_ted_rcpp", (DL_FUNC) &_udr_ted_rcpp, 5},
+    {"_udr_ted_rcpp", (DL_FUNC) &_udr_ted_rcpp, 4},
     {"_udr_update_prior_covariance_ed_iid_rcpp", (DL_FUNC) &_udr_update_prior_covariance_ed_iid_rcpp, 4},
     {"_udr_update_resid_covariance_rcpp", (DL_FUNC) &_udr_update_resid_covariance_rcpp, 4},
     {NULL, NULL, 0}
