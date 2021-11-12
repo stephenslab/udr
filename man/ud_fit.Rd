@@ -166,7 +166,7 @@ rownames(V) <- c("d1","d2")
 colnames(V) <- c("d1","d2")
 X <- simulate_ud_data(n,w,U,V)
 
-# This is the simplest invocation of ud_init.
+# This is the simplest invocation of ud_init and ud_fit.
 fit1 <- ud_init(X)
 fit1 <- ud_fit(fit1)
 logLik(fit1)

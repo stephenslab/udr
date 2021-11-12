@@ -9,9 +9,6 @@ using namespace arma;
 void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V, 
 				     const vec& p);
 
-void update_prior_covariance_ted (const mat& X, mat& U, const mat& V, 
-				   const vec& p, double minval);
-
 void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 			      const mat& P, mat& Vnew);
 
@@ -30,24 +27,6 @@ arma::mat update_prior_covariance_ed_iid_rcpp (const arma::mat& X,
 					       const arma::vec& p) {
   mat Unew = U;
   update_prior_covariance_ed_iid(X,Unew,V,p);
-  return Unew;
-}
-
-// Perform an M-step update for a prior covariance matrix U using the
-// "eigenvalue truncation" technique described in Won et al (2013).
-// Note that input U is not used, and is included only for consistency
-// with the other update_prior_covariance functions. Input p is a
-// vector of weights associated with the rows of X.
-//
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export]]
-arma::mat update_prior_covariance_ted_iid_rcpp (const arma::mat& X, 
-						const arma::mat& U,
-						const arma::mat& V,
-						const arma::vec& p,
-						double minval) {
-  mat Unew = U;
-  update_prior_covariance_ted(X,Unew,V,p,minval);
   return Unew;
 }
 
@@ -78,34 +57,6 @@ void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V,
   mat B = solve(T,U);
   X1 *= B;
   U += crossprod(X1) - U*B;
-}
-
-// Perform an M-step update for one of the prior covariance matrices
-// using the eigenvalue-truncation technique described in Won et al
-// (2013). Input R should be R = chol(V,"upper"). Inputs T and Y are
-// matrices of the same dimension as U and V storing intermediate
-// calculations, and d is a vector of length m also storing an
-// intermediate result. Also note that data matrix X is modified to
-// perform the update, so should not be reused.
-void update_prior_covariance_ted (const mat& X, mat& U, const mat& V, 
-				  const vec& p, double minval) {
-  mat R = chol(V,"upper");
-  mat X1 = X;
-
-  // Transform the data so that the residual covariance is I, then
-  // compute the maximum-likelhood estimate (MLE) for T = U + I.
-  vec p1 = p;
-  safenormalize(p1);
-  scale_rows(X1,sqrt(p1));
-  X1 *= inv(R);
-  mat T = crossprod(X1);
-
-  // Find U maximizing the expected complete log-likelihood subject to
-  // U being positive definite.
-  shrink_cov(T,U,minval);
-
-  // Recover the solution for the original (untransformed) data.
-  U = trans(R) * U * R;
 }
 
 // Perform an M-step update for the residual covariance matrix.

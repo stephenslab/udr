@@ -155,7 +155,7 @@
 #' colnames(V) <- c("d1","d2")
 #' X <- simulate_ud_data(n,w,U,V)
 #' 
-#' # This is the simplest invocation of ud_init.
+#' # This is the simplest invocation of ud_init and ud_fit.
 #' fit1 <- ud_init(X)
 #' fit1 <- ud_fit(fit1)
 #' logLik(fit1)
@@ -241,7 +241,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-93, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-94, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -282,7 +282,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
-
+    
     # E-step
     # ------
     # Compute the n x k matrix of posterior mixture assignment
@@ -300,7 +300,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
 
     # Update the scaled prior covariance matrices.
     Unew <- update_prior_covariances(fit,covupdates,control$minval)$U
-
+    
     # Update the mixture weights.
     wnew <- update_mixture_weights(fit,control$weights.update)$w
   

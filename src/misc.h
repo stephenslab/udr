@@ -14,6 +14,7 @@ arma::rowvec softmax       (const arma::rowvec & x);
 void         safenormalize (arma::vec& x);
 arma::mat    crossprod     (const arma::mat& X);
 double       ldmvnorm      (const arma::vec& x, const arma::mat& L);
-void         shrink_cov    (const arma::mat& T, arma::mat& U, double minval);
+void         shrink_cov    (const arma::mat& T, arma::mat& U, 
+			    double minval, unsigned int r);
 
 #endif

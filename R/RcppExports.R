@@ -17,12 +17,12 @@ compute_posterior_probs_general_rcpp <- function(X, w, U, V) {
     .Call('_udr_compute_posterior_probs_general_rcpp', PACKAGE = 'udr', X, w, U, V)
 }
 
-update_prior_covariance_ed_iid_rcpp <- function(X, U, V, p) {
-    .Call('_udr_update_prior_covariance_ed_iid_rcpp', PACKAGE = 'udr', X, U, V, p)
+ted_rcpp <- function(X, V, p, minval, r) {
+    .Call('_udr_ted_rcpp', PACKAGE = 'udr', X, V, p, minval, r)
 }
 
-update_prior_covariance_ted_iid_rcpp <- function(X, U, V, p, minval) {
-    .Call('_udr_update_prior_covariance_ted_iid_rcpp', PACKAGE = 'udr', X, U, V, p, minval)
+update_prior_covariance_ed_iid_rcpp <- function(X, U, V, p) {
+    .Call('_udr_update_prior_covariance_ed_iid_rcpp', PACKAGE = 'udr', X, U, V, p)
 }
 
 update_resid_covariance_rcpp <- function(X, U, V, P) {

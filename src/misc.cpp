@@ -4,6 +4,16 @@ using namespace arma;
 
 // INLINE FUNCTION DEFINITIONS
 // ---------------------------
+// Return a or b, which ever is smaller.
+inline double min (double a, double b) {
+  double y;
+  if (a < b)
+    y = a;
+  else
+    y = b;
+  return y;
+}
+
 // Return a or b, which ever is larger.
 inline double max (double a, double b) {
   double y;
@@ -58,15 +68,20 @@ double ldmvnorm (const vec& x, const mat& L) {
 // Find the n x n matrix U + I that best approximates T satisfying the
 // constraint that U is positive definite. This is achieved by setting
 // any eigenvalues of T less than 1 to 1 + minval, or, equivalently,
-// setting any eigenvalues of U less than zero to be minval. The
-// output is a positive definite matrix, U.
-void shrink_cov (const mat& T, mat& U, double minval) {
+// setting any eigenvalues of U less than zero to be minval. The output
+// is a positive definite matrix, U. When r < n, U is additionally
+// constrained so that at most r of its eigenvalues are positive.
+void shrink_cov (const mat& T, mat& U, double minval, unsigned int r) {
   unsigned int n = T.n_rows;
+  r = min(r,n);
   mat Y(n,n);
   vec d(n);
   eig_sym(d,Y,T);
   for (unsigned int i = 0; i < n; i++)
     d(i) = max(d(i) - 1,minval);
+  if (r < n)
+    for (unsigned int i = n - r; i-- > 0; ) 
+      d(i) = minval;
 
   // These next few lines are equivalent to
   //
