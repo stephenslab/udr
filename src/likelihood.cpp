@@ -6,8 +6,8 @@ using namespace arma;
 // ---------------------
 double loglik_ud_iid (const mat& X, const vec& w, const cube& U, const mat& V);
 
-double loglik_ud_general (const mat& X, const vec& w, const cube& U, 
-			  const cube& V);
+double loglik_ud_notiid (const mat& X, const vec& w, const cube& U, 
+			 const cube& V);
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -27,9 +27,9 @@ double loglik_ud_iid_rcpp (const arma::mat& X, const arma::vec& w,
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-double loglik_ud_general_rcpp (const arma::mat& X, const arma::vec& w, 
+double loglik_ud_notiid_rcpp (const arma::mat& X, const arma::vec& w, 
 			       const arma::cube& U, const arma::cube& V) {
-  return loglik_ud_general(X,w,U,V);
+  return loglik_ud_notiid(X,w,U,V);
 }
 
 // Compute the log-likelihood for the Ultimate Deconvolution model
@@ -65,8 +65,8 @@ double loglik_ud_iid (const mat& X, const vec& w, const cube& U,
 // Compute the log-likelihood for the Ultimate Deconvolution model
 // when the residual covariance is not necessarily the same for all
 // samples.
-double loglik_ud_general (const mat& X, const vec& w, const cube& U, 
-			  const cube& V) {
+double loglik_ud_notiid (const mat& X, const vec& w, const cube& U, 
+			 const cube& V) {
   
   // Get the number of rows (n) and columns (m) of X, and the number
   // of mixture components (k).

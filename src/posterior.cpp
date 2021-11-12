@@ -9,9 +9,9 @@ using namespace arma;
 void compute_posterior_probs_iid (const mat& X, const vec& w, const cube& U,
 				  const mat& V, mat& P);
 
-void compute_posterior_probs_general (const mat& X, const vec& w, 
-				      const cube& U, const cube& V, 
-				      mat& P);
+void compute_posterior_probs_notiid (const mat& X, const vec& w, 
+				     const cube& U, const cube& V, 
+				     mat& P);
 
 // FUNCTION DEFINITIONS
 // --------------------
@@ -40,14 +40,14 @@ arma::mat compute_posterior_probs_iid_rcpp (const arma::mat& X,
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
-arma::mat compute_posterior_probs_general_rcpp (const arma::mat& X,
-						const arma::vec& w,
-						const arma::cube& U,
-						const arma::cube& V) {
+arma::mat compute_posterior_probs_notiid_rcpp (const arma::mat& X,
+					       const arma::vec& w,
+					       const arma::cube& U,
+					       const arma::cube& V) {
   unsigned int n = X.n_rows;
   unsigned int k = w.n_elem;
   mat P(n,k);
-  compute_posterior_probs_general(X,w,U,V,P);
+  compute_posterior_probs_notiid(X,w,U,V,P);
   return P;
 }
 
@@ -88,9 +88,9 @@ void compute_posterior_probs_iid (const mat& X, const vec& w, const cube& U,
 // probabilities given current estimates of the model parameters for
 // the more general case when the residual variance is not necessarily
 // the same for all samples.
-void compute_posterior_probs_general (const mat& X, const vec& w, 
-				      const cube& U, const cube& V, 
-				      mat& P) {
+void compute_posterior_probs_notiid (const mat& X, const vec& w, 
+				     const cube& U, const cube& V, 
+				     mat& P) {
   
   // Get the number of rows (n) and columns (m) of the data matrix, and
   // the number of components in the mixture prior (k).

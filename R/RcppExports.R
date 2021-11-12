@@ -5,16 +5,16 @@ loglik_ud_iid_rcpp <- function(X, w, U, V) {
     .Call('_udr_loglik_ud_iid_rcpp', PACKAGE = 'udr', X, w, U, V)
 }
 
-loglik_ud_general_rcpp <- function(X, w, U, V) {
-    .Call('_udr_loglik_ud_general_rcpp', PACKAGE = 'udr', X, w, U, V)
+loglik_ud_notiid_rcpp <- function(X, w, U, V) {
+    .Call('_udr_loglik_ud_notiid_rcpp', PACKAGE = 'udr', X, w, U, V)
 }
 
 compute_posterior_probs_iid_rcpp <- function(X, w, U, V) {
     .Call('_udr_compute_posterior_probs_iid_rcpp', PACKAGE = 'udr', X, w, U, V)
 }
 
-compute_posterior_probs_general_rcpp <- function(X, w, U, V) {
-    .Call('_udr_compute_posterior_probs_general_rcpp', PACKAGE = 'udr', X, w, U, V)
+compute_posterior_probs_notiid_rcpp <- function(X, w, U, V) {
+    .Call('_udr_compute_posterior_probs_notiid_rcpp', PACKAGE = 'udr', X, w, U, V)
 }
 
 ted_rcpp <- function(X, V, p, minval, r) {

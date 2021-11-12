@@ -25,9 +25,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// loglik_ud_general_rcpp
-double loglik_ud_general_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::cube& V);
-RcppExport SEXP _udr_loglik_ud_general_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
+// loglik_ud_notiid_rcpp
+double loglik_ud_notiid_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::cube& V);
+RcppExport SEXP _udr_loglik_ud_notiid_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -35,7 +35,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type V(VSEXP);
-    rcpp_result_gen = Rcpp::wrap(loglik_ud_general_rcpp(X, w, U, V));
+    rcpp_result_gen = Rcpp::wrap(loglik_ud_notiid_rcpp(X, w, U, V));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -53,9 +53,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_posterior_probs_general_rcpp
-arma::mat compute_posterior_probs_general_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::cube& V);
-RcppExport SEXP _udr_compute_posterior_probs_general_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
+// compute_posterior_probs_notiid_rcpp
+arma::mat compute_posterior_probs_notiid_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::cube& V);
+RcppExport SEXP _udr_compute_posterior_probs_notiid_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -63,7 +63,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type U(USEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type V(VSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_posterior_probs_general_rcpp(X, w, U, V));
+    rcpp_result_gen = Rcpp::wrap(compute_posterior_probs_notiid_rcpp(X, w, U, V));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -113,9 +113,9 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_udr_loglik_ud_iid_rcpp", (DL_FUNC) &_udr_loglik_ud_iid_rcpp, 4},
-    {"_udr_loglik_ud_general_rcpp", (DL_FUNC) &_udr_loglik_ud_general_rcpp, 4},
+    {"_udr_loglik_ud_notiid_rcpp", (DL_FUNC) &_udr_loglik_ud_notiid_rcpp, 4},
     {"_udr_compute_posterior_probs_iid_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_iid_rcpp, 4},
-    {"_udr_compute_posterior_probs_general_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_general_rcpp, 4},
+    {"_udr_compute_posterior_probs_notiid_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_notiid_rcpp, 4},
     {"_udr_ted_rcpp", (DL_FUNC) &_udr_ted_rcpp, 5},
     {"_udr_update_prior_covariance_ed_iid_rcpp", (DL_FUNC) &_udr_update_prior_covariance_ed_iid_rcpp, 4},
     {"_udr_update_resid_covariance_rcpp", (DL_FUNC) &_udr_update_resid_covariance_rcpp, 4},

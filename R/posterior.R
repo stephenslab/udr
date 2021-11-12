@@ -118,9 +118,9 @@ compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
     # Perform the computations for the more general case when the
     # residual variance is not necessarily the same for all samples.
     if (version == "R")
-      fit$P <- compute_posterior_probs_general(fit$X,fit$w,U,V)
+      fit$P <- compute_posterior_probs_notiid(fit$X,fit$w,U,V)
     else if (version == "Rcpp")
-      fit$P <- compute_posterior_probs_general_rcpp(fit$X,fit$w,U,V)
+      fit$P <- compute_posterior_probs_notiid_rcpp(fit$X,fit$w,U,V)
   }
 
   # Add row and column names to the responsibilities matrix.
@@ -157,7 +157,7 @@ compute_posterior_probs_iid <- function (X, w, U, V) {
 # the same for all samples.
 #
 #' @importFrom mvtnorm dmvnorm
-compute_posterior_probs_general <- function (X, w, U, V) {
+compute_posterior_probs_notiid <- function (X, w, U, V) {
       
   # Get the number of samples (n) and the number of components in the
   # mixture prior (k).

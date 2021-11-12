@@ -59,9 +59,9 @@ loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
     # Compute the log-likelihood in the case when the residual
     # variance is not necessarily the same for all samples.
     if (version == "Rcpp")
-      y <- loglik_ud_general_rcpp(X,w,U,V)
+      y <- loglik_ud_notiid_rcpp(X,w,U,V)
     else if (version == "R")
-      y <- loglik_ud_general_helper(X,w,U,V)
+      y <- loglik_ud_notiid_helper(X,w,U,V)
   }
   return(y)
 }
@@ -83,7 +83,7 @@ loglik_ud_iid_helper <- function (X, w, U, V) {
 # necessarily the same for all samples.
 #
 #' @importFrom mvtnorm dmvnorm
-loglik_ud_general_helper <- function (X, w, U, V) {
+loglik_ud_notiid_helper <- function (X, w, U, V) {
   n <- nrow(X)
   k <- length(w)
   y <- rep(0,n)
