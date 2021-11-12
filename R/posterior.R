@@ -109,10 +109,10 @@ compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
 
     # Perform the computations for the special case when the same
     # residual variance is used for all samples.
-    # if (version == "R")
+     if (version == "R")
       fit$P <- compute_posterior_probs_iid(fit$X,fit$w,U,V)
-    # else if (version == "Rcpp")
-    #   fit$P <- compute_posterior_probs_iid_rcpp(fit$X,fit$w,U,V)
+    else if (version == "Rcpp")
+      fit$P <- compute_posterior_probs_iid_rcpp(fit$X,fit$w,U,V)
   } else {
       
     # Perform the computations for the more general case when the
