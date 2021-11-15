@@ -119,13 +119,18 @@ update_prior_covariance_struct_scaled <- function (U, s) {
 }
 
 # These functions return the unconstrained prior covariance matrix
-# without updating it.
+# without updating in the i.i.d. case when the residual variance V is
+# the same for all data points.
 update_prior_covariance_scaled_none_iid                <- function (Y,U,R,p) U
 update_prior_covariance_scaled_none_iid_rcpp           <- function (Y,U,R,p) U
 update_prior_covariance_rank1_none_iid                 <- function (Y,U,R,p) U
 update_prior_covariance_rank1_none_iid_rcpp            <- function (Y,U,R,p) U
 update_prior_covariance_unconstrained_none_iid         <- function (Y,U,R,p) U
 update_prior_covariance_unconstrained_none_iid_rcpp    <- function (Y,U,R,p) U
+
+# These functions return the unconstrained prior covariance matrix
+# without updating it in the non-i.i.d. case when the residual
+# variance V is not the same for all data points.
 update_prior_covariance_scaled_none_notiid             <- function (X,U,V,p) U
 update_prior_covariance_scaled_none_notiid_rcpp        <- function (X,U,V,p) U
 update_prior_covariance_rank1_none_notiid              <- function (X,U,V,p) U

@@ -42,16 +42,16 @@ update_prior_covariance_rank1_ted_iid_rcpp <- function (Y, U, R, p,
 
 # These functions are defined only to provide more informative error
 # messages.
-update_prior_covariance_ted_notiid <- function (Y, U, R, p)
+update_prior_covariance_ted_notiid <- function (X, U, V, p)
   stop("unconstrained.update = \"ted\" does not work for case when data ",
        "points are not i.i.d. (different Vs)")
-update_prior_covariance_rank1_ted_notiid <- function (Y,U,R,p)
+update_prior_covariance_rank1_ted_notiid <- function (X, U, V, p)
   update_prior_covariance_ted_notiid(Y,U,R,p)
-update_prior_covariance_rank1_ted_notiid_rcpp <- function (Y,U,R,p)
+update_prior_covariance_rank1_ted_notiid_rcpp <- function (X, U, V, p)
   update_prior_covariance_ted_notiid(Y,U,R,p)
-update_prior_covariance_unconstrained_ted_notiid <- function (Y,U,R,p)
+update_prior_covariance_unconstrained_ted_notiid <- function (X, U, V, p)
   update_prior_covariance_ted_notiid(Y,U,R,p)
-update_prior_covariance_unconstrained_ted_notiid_rcpp <- function (Y,U,R,p)
+update_prior_covariance_unconstrained_ted_notiid_rcpp <- function (X, U, V, p)
   update_prior_covariance_ted_notiid(Y,U,R,p)
 
 # Perform an M-step update for a prior covariance matrix U using the
