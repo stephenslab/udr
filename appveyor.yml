@@ -4,10 +4,6 @@ init:
         Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
         Import-Module '..\appveyor-tool.ps1'
 
-branches:
-  only:
-    - master
-
 install:
   ps: Bootstrap
 
@@ -19,7 +15,7 @@ environment:
     WARNINGS_ARE_ERRORS:
     R_VERSION: release
     R_ARCH: x64
-    R_CHECK_ARGS: --no-manual --as-cran
+    R_CHECK_ARGS: --no-manual --no-exammples --as-cran
 
 # This is the minimal set of R packages needed to run "R CMD check" on
 # the package.
