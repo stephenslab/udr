@@ -152,31 +152,29 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     warning("Input argument \"U_unconstrained\" was modified because one ",
             "or more matrices were not positive semi-definite")
 
-  # Set up the data structure for the unconstrained covariance matrices.
-  if (n_unconstrained > 0) {
-    if (is.null(names(U_unconstrained)))
-      names(U_unconstrained) <- paste0("unconstrained",1:n_unconstrained)
-    for (i in 1:n_unconstrained) {
-      U_unconstrained[[i]] <- create_unconstrained_matrix_struct(X, U_unconstrained[[i]])
-    }
+  # Set up the data structure for the scaled covariance matrices.
+  if (n_scaled > 0) {
+    if (is.null(names(U_scaled)))
+      names(U_scaled) <- paste("scaled",1:n_scaled,sep = "_")
+    for (i in 1:n_scaled)
+      U_scaled[[i]] <- create_prior_covariance_struct_scaled(X,U_scaled[[i]])
   }
 
   # Set up the data structure for the rank-1 covariance matrices.
   if (n_rank1 > 0) {
     if (is.null(names(U_rank1)))
       names(U_rank1) <- paste("rank1",1:n_rank1,sep = "_")
-    for (i in 1:n_rank1) {
-      U_rank1[[i]] <- create_rank1_matrix_struct(X, U_rank1[[i]])
-    }
+    for (i in 1:n_rank1)
+      U_rank1[[i]] <- create_prior_covariance_struct_rank1(X,U_rank1[[i]])
   }
 
-  # Set up the data structure for the scaled covariance matrices.
-  if (n_scaled > 0) {
-    if (is.null(names(U_scaled)))
-      names(U_scaled) <- paste("scaled",1:n_scaled,sep = "_")
-    for (i in 1:n_scaled) {
-      U_scaled[[i]] <- create_scaled_matrix_struct(X, U_scaled[[i]])
-    }
+  # Set up the data structure for the unconstrained covariance matrices.
+  if (n_unconstrained > 0) {
+    if (is.null(names(U_unconstrained)))
+      names(U_unconstrained) <- paste0("unconstrained",1:n_unconstrained)
+    for (i in 1:n_unconstrained)
+      U_unconstrained[[i]] <-
+        create_prior_covariance_struct_unconstrained(X,U_unconstrained[[i]])
   }
 
   # Combine the prior covariances matrices into a single list.
@@ -203,43 +201,15 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
 
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.
-  progress <- as.data.frame(matrix(0,0,6))
+  progress        <- as.data.frame(matrix(0,0,6))
   names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
   
   # Compute the log-likelihood and the responsibilities matrix (P), and
   # finalize the output.
-  loglik <- loglik_ud(X,w,U,V,control$version)
-  fit <- list(X = X,V = V,U = U,w = w,loglik = loglik,progress = progress)
+  loglik     <- loglik_ud(X,w,U,V,control$version)
+  fit        <- list(X = X,V = V,U = U,w = w,loglik = loglik,
+                     progress = progress)
   class(fit) <- c("ud_fit","list")
-  fit <- compute_posterior_probs(fit,control$version)
+  fit        <- compute_posterior_probs(fit,control$version)
   return(fit)
-}
-
-#' Function to create the data structure for unconstrained matrix
-create_unconstrained_matrix_struct <- function(X, U_unconstrained){
-  rownames(U_unconstrained) <- colnames(X)
-  colnames(U_unconstrained) <- colnames(X)
-  U <- list(mat = U_unconstrained)
-  attr(U,"covtype") <- "unconstrained"
-  return(U)
-}
-
-#' Function to create the data structure for rank1 matrix
-create_rank1_matrix_struct <- function(X, U_rank1){
-  u <- getrank1(U_rank1)
-  U <- list(vec = u,mat = tcrossprod(u))
-  names(U$vec) <- colnames(X)
-  rownames(U$mat) <- colnames(X)
-  colnames(U$mat) <- colnames(X)
-  attr(U,"covtype") <- "rank1"
-  return(U)
-}
-
-#' Function to create the data structure for scaled matrix
-create_scaled_matrix_struct <- function(X, U_scaled){
-  rownames(U_scaled) <- colnames(X)
-  colnames(U_scaled) <- colnames(X)
-  U <- list(s = 1,U0 = U_scaled, mat = U_scaled)
-  attr(U,"covtype") <- "scaled"
-  return(U)
 }
