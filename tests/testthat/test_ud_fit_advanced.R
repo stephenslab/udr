@@ -53,8 +53,13 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
   dat <- simulate_ud_data_2d(n)
   X   <- dat$X
 
+  # Vary the measurement error slightly for each observation.
+  V <- vector("list",n)
+  for (i in 1:n)
+    V[[i]] <- dat$V + 0.01 * sim_unconstrained(2)
+  
   # Perform 4 EM updates.
-  fit <- ud_init(X,V = rep(list(dat$V),n))
+  fit <- ud_init(X,V = V)
   control <- list(scaled.update = "none",rank1.update = "none",
                   unconstrained.update = "none")
   capture.output(fit <- ud_fit(fit,control = c(control,list(maxiter = 4))))

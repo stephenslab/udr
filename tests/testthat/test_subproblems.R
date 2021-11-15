@@ -1,5 +1,6 @@
 
 test_that("ted unconstrained produce same result as before", {
+  skip("These tests are not ready to be performed.")
   
   # load previous result
   load('U_ted.rds')
@@ -21,6 +22,7 @@ test_that("ted unconstrained produce same result as before", {
 
 
 test_that("fa unconstrained produce same result as before", {
+  skip("These tests are not ready to be performed.")
   
   # load previous result
   load('U_fa.rds')
@@ -42,6 +44,7 @@ test_that("fa unconstrained produce same result as before", {
 
 
 test_that("ed unconstrained produce same result as before", {
+  skip("These tests are not ready to be performed.")
   
   # load previous result
   load('U_ed.rds')
@@ -63,6 +66,7 @@ test_that("ed unconstrained produce same result as before", {
 
 
 test_that("fa scaled_iid produce same result as before", {
+  skip("These tests are not ready to be performed.")
   
   # load previous result
   load('scalar.rds')
@@ -87,6 +91,7 @@ test_that("fa scaled_iid produce same result as before", {
 
 
 test_that("fa rank1_iid produce same result as before", {
+  skip("These tests are not ready to be performed.")
   
   load("rank1_fa.rds")
   
@@ -109,6 +114,7 @@ test_that("fa rank1_iid produce same result as before", {
 
 
 test_that("ted rank1 produce same result as before", {
+  skip("These tests are not ready to be performed.")
   
   load("rank1_ted.rds")
   # Simulate data
@@ -131,6 +137,7 @@ test_that("ted rank1 produce same result as before", {
 
 
 test_that("unconstrained FA increases loglikelihood", {
+  skip("These tests are not ready to be performed.")
   
   # Simulate data
   seed <- 1
@@ -154,6 +161,8 @@ test_that("unconstrained FA increases loglikelihood", {
 })
 
 test_that("unconstrained ED_iid increases loglikelihood", {
+  skip("These tests are not ready to be performed.")
+  
   # Simulate data
   seed <- 1
   n <- 500
@@ -176,6 +185,7 @@ test_that("unconstrained ED_iid increases loglikelihood", {
 })
 
 test_that("scaled FA_general increases loglikelihood", {
+  skip("These tests are not ready to be performed.")
   
   # Simulate data
   seed <- 1
@@ -202,6 +212,7 @@ test_that("scaled FA_general increases loglikelihood", {
 })
 
 test_that("rank1 FA_iid increases loglikelihood", {
+  skip("These tests are not ready to be performed.")
   
   # Simulate data
   seed <- 1
@@ -228,6 +239,7 @@ test_that("rank1 FA_iid increases loglikelihood", {
 
 
 test_that("unconstrained ED_general vs. ED_iid", {
+  skip("These tests are not ready to be performed.")
   
   set.seed(1)
   # Simulate data
@@ -261,6 +273,8 @@ test_that("unconstrained ED_general vs. ED_iid", {
 
 
 test_that("rank1 fa_general vs. fa_iid", {
+  skip("These tests are not ready to be performed.")
+  
   set.seed(1)
   # Simulate data
   n <- 500
@@ -298,6 +312,8 @@ test_that("rank1 fa_general vs. fa_iid", {
 
 
 test_that("scaled fa_general vs. fa_iid", {
+  skip("These tests are not ready to be performed.")
+  
   # Simulate data
   seed <- 1
   n <- 500
