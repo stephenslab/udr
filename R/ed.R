@@ -1,6 +1,18 @@
 # Perform an M-step update for a prior covariance (U) using the update
-# formula derived in Bovy et al (2011).
-update_prior_covariance_unconstrained_ed_iid <- function (X, U, V, p, minval) {
+# formula derived in Bovy et al (2011), for the special case when the
+# samples are i.i.d. (same V).
+update_prior_covariance_unconstrained_ed_iid <- function (Y, U, R, p) {
+  if (is.matrix(V))
+    mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
+  else
+    mat <- update_prior_covariance_ed_general(X,U$mat,V,p)
+  return(update_prior_covariance_unconstrained_struct(U,mat))
+}
+
+# Perform an M-step update for a prior covariance (U) using the update
+# formula derived in Bovy et al (2011), allow for different residual
+# variances V among the samples.
+update_prior_covariance_unconstrained_ed_notiid <- function (X, U, V, p, minval) {
   if (is.matrix(V))
     mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
   else
