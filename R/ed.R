@@ -1,7 +1,6 @@
 # Perform an M-step update for a prior covariance (U) using the update
-# formula derived in Bovy et al (2011). Input p is a vector of weights
-# associated with the rows of X.
-update_prior_covariance_unconstrained_ed <- function (X, U, V, p, minval) {
+# formula derived in Bovy et al (2011).
+update_prior_covariance_unconstrained_ed_iid <- function (X, U, V, p, minval) {
   if (is.matrix(V))
     mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
   else

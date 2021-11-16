@@ -61,17 +61,28 @@ update_prior_covariances <-
   k <- length(fit$U)
   if (is.matrix(fit$V)) {
 
+    # Transform the data X to Y so that Y ~ N(0,I + U'), where U' =
+    # (R*U^{-1}*R^T)^{-1}.
+    out <- simplify_covariance(X,V)
+    R   <- out$R
+    Y   <- out$Y
+    
     # Update the prior covariances in the i.i.d. case (when all the
-    # residual variances V are the same).
-    R <- chol(fit$V)
-    Y <- fit$X %*% solve(R)
+    # residual variances V are the same). The inputs to each update
+    # are: Y, the transformed data; U, the current covariance matrix
+    # estimate; R = chol(V); and p, a vector of mixture weights
+    # associated with the rows of X (or Y).
     for (i in 1:k)
       fit$U[[i]] <- do.call(covupdates[i],list(Y = Y,U = fit$U[[i]],
                                                R = R,p = fit$P[,i]))
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
-    # residual variances V are not all the same).
+    # residual variances V are not all the same). The inputs to each
+    # update are: X, the data matrix; U, the current covariance matrix
+    # estimate; V, the residual variances stored in an m x m x n
+    # array, where n = nrow(X) and m = ncol(X); and p, a vector of
+    # mixture weights associated with the rows of X.
     V <- fit$V
     if (is.list(V))
       V <- list2array(V)
@@ -115,9 +126,9 @@ create_prior_covariance_struct_unconstrained <- function (X, U) {
 }
 
 # Update the data structure for a scaled prior covariance matrix.
-# Input U is the current data structure, and "s" is the new estimate
-# of the scaling factor. This function is called in the
-# update_prior_covariance_scaled_* functions below.
+# Input "U" is the current data structure, and "s" is the new estimate
+# of the scaling factor. This function is used in the
+# update_prior_covariance_scaled_* functions.
 update_prior_covariance_struct_scaled <- function (U, s) {
   U$s   <- s
   U$mat <- s * U$U0
@@ -125,9 +136,10 @@ update_prior_covariance_struct_scaled <- function (U, s) {
 }
 
 # Update the data structure for a rank-1 prior covariance matrix.
-# Input U is the current data structure, and "vec" is a vector
+# Input "U" is the current data structure, and "vec" is a vector
 # containing the new estimates, such that the new rank-1 matrix is
-# tcrossprod(vec).
+# tcrossprod(vec). This function is used in the
+# update_prior_covariance_rank1_* functions.
 update_prior_covariance_struct_rank1 <- function (U, vec) {
   mat <- tcrossprod(vec)
   names(vec) <- names(U$vec)
@@ -140,7 +152,8 @@ update_prior_covariance_struct_rank1 <- function (U, vec) {
 
 # Update the data structure for an unconstrained prior covariance
 # matrix. Input "U" is the current data structure, and "mat" is the
-# newly estimated matrix.
+# newly estimated matrix. This function is used in the
+# update_prior_covariance_unconstrained_* functions.
 update_prior_covariance_struct_unconstrained <- function (U, mat) {
   rownames(mat) <- rownames(U$mat)
   colnames(mat) <- colnames(U$mat)
@@ -160,7 +173,7 @@ update_prior_covariance_unconstrained_none_iid_rcpp <- function (Y,U,R,p) U
 
 # These functions return the unconstrained prior covariance matrix
 # without updating it in the non-i.i.d. case when the residual
-# variance V is not the same for all data points.
+# variances V are not the same for all data points.
 update_prior_covariance_scaled_none_notiid             <- function (X,U,V,p) U
 update_prior_covariance_scaled_none_notiid_rcpp        <- function (X,U,V,p) U
 update_prior_covariance_rank1_none_notiid              <- function (X,U,V,p) U

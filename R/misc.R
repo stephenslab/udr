@@ -61,6 +61,14 @@ get_mat_Q = function(U, r){
 sliceSums <- function (x)
   rowSums(x,dims = 2)
 
+# Let x ~ N(0,U + V). Then this is equivalent to y ~ N(0,I + U'),
+# where U' = (R*U^{-1}*R^T)^{-1}, Y = X*R^{-1}, and R = chol(V). 
+simplify_covariance <- function (X, V) {
+  R <- chol(V)
+  Y <- X %*% solve(R)
+  return(Y = Y,R = R)
+}
+
 # Find the n x n matrix U + I that best approximates T satisfying the
 # constraint that U is positive definite. This is achieved by setting
 # any eigenvalues of T less than 1 to 1 + minval, or, equivalently,
