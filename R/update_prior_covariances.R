@@ -76,7 +76,7 @@ update_prior_covariances <-
     # associated with the rows of X (or Y). The output is the new
     # estimate of U in the model x[i,] ~ N(0,U + V).
     for (i in 1:k)
-      fit$U[[i]] <- doCall(covupdates[i],
+      fit$U[[i]] <- doCall(.fcn = covupdates[i],
                            args = list(Y = Y,U = fit$U[[i]],R = R,
                                        p = fit$P[,i]))
   } else {
@@ -92,7 +92,7 @@ update_prior_covariances <-
     if (is.list(V))
       V <- list2array(V)
     for (i in 1:k)
-      fit$U[[i]] <- doCall(covupdates[i],
+      fit$U[[i]] <- doCall(.fcn = covupdates[i],
                            args = list(X = fit$X,U = fit$U[[i]],V = V,
                                        p = fit$P[,i]))
   }
