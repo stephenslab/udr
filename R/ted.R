@@ -52,20 +52,21 @@ update_prior_covariance_unconstrained_ted_notiid_rcpp <- function (X, U, V, p)
   update_prior_covariance_ted_notiid(Y,U,R,p)
 
 # Perform an M-step update for a prior covariance matrix U using the
-# "eigenvalue truncation" technique described in Won et al (2013).
-# Input p is a vector of weights associated with the rows of Y. Input
-# r specifies an optional constraint on U; when r < n, where U is an n
-# x n matrix, at most r of the eigenvalues are positive in the updated
-# matrix.
+# "eigenvalue truncation" technique described in Won et al
+# (2013). (This update can also be viewed as computing
+# maximum-likelihood estimates of the parameters in the probabilistic
+# PCA model.) Input p is a vector of weights associated with the rows
+# of Y. Input r specifies an optional constraint on U; when r < n,
+# where U is an n x n matrix, at most r of the eigenvalues are
+# positive in the updated matrix.
 ted <- function (Y, p, minval = 0, r = ncol(Y)) {
     
-  # Transform the data so that the residual covariance is I, then
-  # compute the maximum-likelhood estimate (MLE) for T = U + I.
-  p <- safenormalize(p)
-  T <- crossprod(sqrt(p)*Y)
+  # Account for the weights by scaling the rows of Y.
+  T <- crossprod(sqrt(safenormalize(p))*Y)
   
-  # Find U maximizing the expected complete log-likelihood subject to
-  # U being positive definite, with at most r of its eigenvalues being
-  # positive.
+  # Find U maximizing the likelihood under the model y ~ N(0,I + U),
+  # subject to U being a symmetric positive definite (s.p.d.) matrix,
+  # and with the additional constraint that at most r of its
+  # eigenvalues are positive.
   return(shrink_cov(T,minval,r))
 }
