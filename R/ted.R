@@ -10,7 +10,7 @@ update_prior_covariance_unconstrained_ted_iid <- function (Y, U, R, p,
 }
 
 # This is a more efficient C++ implementation of 
-# update_prior_covariance_unconstrained_ted_idd.
+# update_prior_covariance_unconstrained_ted_iid.
 update_prior_covariance_unconstrained_ted_iid_rcpp <- function (Y, U, R, p,
                                                                 minval = 0) {
   mat <- ted_rcpp(Y,p,minval,r = ncol(Y))
@@ -25,19 +25,16 @@ update_prior_covariance_unconstrained_ted_iid_rcpp <- function (Y, U, R, p,
 update_prior_covariance_rank1_ted_iid <- function (Y, U, R, p, minval = 0) {
   mat <- ted(Y,p,minval = minval,r = 1)
   mat <- t(R) %*% mat %*% R
-  vec <- getrank1(mat)
-  return(update_prior_covariance_struct_rank1(U,vec))
+  return(update_prior_covariance_struct_rank1(U,getrank1(mat)))
 }
 
 # This is a more efficient C++ implementation of
-# update_prior_covariance_rank1_ted_idd. (This is not yet implemented,
-# so currently it just calls the R function.)
+# update_prior_covariance_rank1_ted_iid.
 update_prior_covariance_rank1_ted_iid_rcpp <- function (Y, U, R, p,
                                                         minval = 0) {
   mat <- ted_rcpp(Y,p,minval = minval,r = 1)
   mat <- t(R) %*% mat %*% R
-  vec <- getrank1(mat)
-  return(update_prior_covariance_struct_rank1(U,vec))
+  return(update_prior_covariance_struct_rank1(U,getrank1(mat)))
 }
 
 # These functions are defined only to provide more informative error

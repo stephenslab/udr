@@ -66,7 +66,7 @@ sliceSums <- function (x)
 simplify_covariance <- function (X, V) {
   R <- chol(V)
   Y <- X %*% solve(R)
-  return(Y = Y,R = R)
+  return(list(Y = Y,R = R))
 }
 
 # Find the n x n matrix U + I that best approximates T satisfying the

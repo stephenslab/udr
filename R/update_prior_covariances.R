@@ -63,7 +63,7 @@ update_prior_covariances <-
 
     # Transform the data X to Y so that Y ~ N(0,I + U'), where U' =
     # (R*U^{-1}*R^T)^{-1}.
-    out <- simplify_covariance(X,V)
+    out <- simplify_covariance(fit$X,fit$V)
     R   <- out$R
     Y   <- out$Y
     
@@ -71,7 +71,8 @@ update_prior_covariances <-
     # residual variances V are the same). The inputs to each update
     # are: Y, the transformed data; U, the current covariance matrix
     # estimate; R = chol(V); and p, a vector of mixture weights
-    # associated with the rows of X (or Y).
+    # associated with the rows of X (or Y). The output is the new
+    # estimate of U in the model x[i,] ~ N(0,U + V).
     for (i in 1:k)
       fit$U[[i]] <- do.call(covupdates[i],list(Y = Y,U = fit$U[[i]],
                                                R = R,p = fit$P[,i]))
@@ -82,7 +83,8 @@ update_prior_covariances <-
     # update are: X, the data matrix; U, the current covariance matrix
     # estimate; V, the residual variances stored in an m x m x n
     # array, where n = nrow(X) and m = ncol(X); and p, a vector of
-    # mixture weights associated with the rows of X.
+    # mixture weights associated with the rows of X. The output is the
+    # new estimate of U is the model x[i,] ~ N(0,U + V[[i]]).
     V <- fit$V
     if (is.list(V))
       V <- list2array(V)
