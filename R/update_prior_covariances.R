@@ -46,8 +46,6 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
 #' @param minval Minimum eigenvalue allowed in the prior covariance
 #'   matrices. Should be a small, positive number.
 #'
-#' @importFrom R.utils doCall
-#' 
 #' @export
 #' 
 update_prior_covariances <-
@@ -76,9 +74,9 @@ update_prior_covariances <-
     # associated with the rows of X (or Y). The output is the new
     # estimate of U in the model x[i,] ~ N(0,U + V).
     for (i in 1:k)
-      fit$U[[i]] <- doCall(.fcn = covupdates[i],
-                           args = list(Y = Y,U = fit$U[[i]],R = R,
-                                       p = fit$P[,i]))
+      fit$U[[i]] <- do.call(covupdates[i],
+                            list(Y = Y,U = fit$U[[i]],R = R,p = fit$P[,i],
+                                 minval = minval))
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
@@ -92,9 +90,9 @@ update_prior_covariances <-
     if (is.list(V))
       V <- list2array(V)
     for (i in 1:k)
-      fit$U[[i]] <- doCall(.fcn = covupdates[i],
-                           args = list(X = fit$X,U = fit$U[[i]],V = V,
-                                       p = fit$P[,i]))
+      fit$U[[i]] <- do.call(covupdates[i],
+                            list(X = fit$X,U = fit$U[[i]],V = V,p = fit$P[,i],
+                                 minval = minval))
   }
   
   # Output the updated fit.
@@ -170,19 +168,19 @@ update_prior_covariance_struct_unconstrained <- function (U, mat) {
 # These functions return the unconstrained prior covariance matrix
 # without updating in the i.i.d. case when the residual variance V is
 # the same for all data points.
-update_prior_covariance_scaled_none_iid             <- function (Y,U,R,p) U
-update_prior_covariance_scaled_none_iid_rcpp        <- function (Y,U,R,p) U
-update_prior_covariance_rank1_none_iid              <- function (Y,U,R,p) U
-update_prior_covariance_rank1_none_iid_rcpp         <- function (Y,U,R,p) U
-update_prior_covariance_unconstrained_none_iid      <- function (Y,U,R,p) U
-update_prior_covariance_unconstrained_none_iid_rcpp <- function (Y,U,R,p) U
+update_prior_covariance_scaled_none_iid             <- function (Y,U,R,p,...) U
+update_prior_covariance_scaled_none_iid_rcpp        <- function (Y,U,R,p,...) U
+update_prior_covariance_rank1_none_iid              <- function (Y,U,R,p,...) U
+update_prior_covariance_rank1_none_iid_rcpp         <- function (Y,U,R,p,...) U
+update_prior_covariance_unconstrained_none_iid      <- function (Y,U,R,p,...) U
+update_prior_covariance_unconstrained_none_iid_rcpp <- function (Y,U,R,p,...) U
 
 # These functions return the unconstrained prior covariance matrix
 # without updating it in the non-i.i.d. case when the residual
 # variances V are not the same for all data points.
-update_prior_covariance_scaled_none_notiid             <- function (X,U,V,p) U
-update_prior_covariance_scaled_none_notiid_rcpp        <- function (X,U,V,p) U
-update_prior_covariance_rank1_none_notiid              <- function (X,U,V,p) U
-update_prior_covariance_rank1_none_notiid_rcpp         <- function (X,U,V,p) U
-update_prior_covariance_unconstrained_none_notiid      <- function (X,U,V,p) U
-update_prior_covariance_unconstrained_none_notiid_rcpp <- function (X,U,V,p) U
+update_prior_covariance_scaled_none_notiid             <- function (X,U,V,p,...) U
+update_prior_covariance_scaled_none_notiid_rcpp        <- function (X,U,V,p,...) U
+update_prior_covariance_rank1_none_notiid              <- function (X,U,V,p,...) U
+update_prior_covariance_rank1_none_notiid_rcpp         <- function (X,U,V,p,...) U
+update_prior_covariance_unconstrained_none_notiid      <- function (X,U,V,p,...) U
+update_prior_covariance_unconstrained_none_notiid_rcpp <- function (X,U,V,p,...) U

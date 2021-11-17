@@ -2,8 +2,8 @@
 # "eigenvalue truncation" technique described in Won et al
 # (2013). Note that input U is not used, and is included only for
 # consistency with the other update functions.
-update_prior_covariance_unconstrained_ted_iid <- function (Y, U, R, p,
-                                                           minval = 0) {
+update_prior_covariance_unconstrained_ted_iid <-
+  function (Y, U, R, p, minval = 0, ...) {
   mat <- ted(Y,p,minval)
   mat <- t(R) %*% mat %*% R
   return(update_prior_covariance_struct_unconstrained(U,mat))
@@ -11,8 +11,8 @@ update_prior_covariance_unconstrained_ted_iid <- function (Y, U, R, p,
 
 # This is a more efficient C++ implementation of 
 # update_prior_covariance_unconstrained_ted_iid.
-update_prior_covariance_unconstrained_ted_iid_rcpp <- function (Y, U, R, p,
-                                                                minval = 0) {
+update_prior_covariance_unconstrained_ted_iid_rcpp <-
+  function (Y, U, R, p, minval = 0, ...) {
   mat <- ted_rcpp(Y,p,minval,r = ncol(Y))
   mat <- t(R) %*% mat %*% R
   return(update_prior_covariance_struct_unconstrained(U,mat))
@@ -22,7 +22,8 @@ update_prior_covariance_unconstrained_ted_iid_rcpp <- function (Y, U, R, p,
 # using the "eigenvalue truncation" technique. Note that input U is
 # not used, and is included only for consistency with the other update
 # functions.
-update_prior_covariance_rank1_ted_iid <- function (Y, U, R, p, minval = 0) {
+update_prior_covariance_rank1_ted_iid <-
+  function (Y, U, R, p, minval = 0, ...) {
   mat <- ted(Y,p,minval = minval,r = 1)
   mat <- t(R) %*% mat %*% R
   return(update_prior_covariance_struct_rank1(U,getrank1(mat)))
@@ -30,8 +31,8 @@ update_prior_covariance_rank1_ted_iid <- function (Y, U, R, p, minval = 0) {
 
 # This is a more efficient C++ implementation of
 # update_prior_covariance_rank1_ted_iid.
-update_prior_covariance_rank1_ted_iid_rcpp <- function (Y, U, R, p,
-                                                        minval = 0) {
+update_prior_covariance_rank1_ted_iid_rcpp <-
+  function (Y, U, R, p, minval = 0, ...) {
   mat <- ted_rcpp(Y,p,minval = minval,r = 1)
   mat <- t(R) %*% mat %*% R
   return(update_prior_covariance_struct_rank1(U,getrank1(mat)))
@@ -39,16 +40,16 @@ update_prior_covariance_rank1_ted_iid_rcpp <- function (Y, U, R, p,
 
 # These functions are defined only to provide more informative error
 # messages.
-update_prior_covariance_ted_notiid <- function (X, U, V, p)
+update_prior_covariance_ted_notiid <- function (X, U, V, p, ...)
   stop("unconstrained.update = \"ted\" does not work for case when data ",
        "points are not i.i.d. (different Vs)")
-update_prior_covariance_rank1_ted_notiid <- function (X, U, V, p)
+update_prior_covariance_rank1_ted_notiid <- function (X, U, V, p, ...)
   update_prior_covariance_ted_notiid(Y,U,R,p)
-update_prior_covariance_rank1_ted_notiid_rcpp <- function (X, U, V, p)
+update_prior_covariance_rank1_ted_notiid_rcpp <- function (X, U, V, p, ...)
   update_prior_covariance_ted_notiid(Y,U,R,p)
-update_prior_covariance_unconstrained_ted_notiid <- function (X, U, V, p)
+update_prior_covariance_unconstrained_ted_notiid <- function (X, U, V, p, ...)
   update_prior_covariance_ted_notiid(Y,U,R,p)
-update_prior_covariance_unconstrained_ted_notiid_rcpp <- function (X, U, V, p)
+update_prior_covariance_unconstrained_ted_notiid_rcpp <- function (X,U,V,p,...)
   update_prior_covariance_ted_notiid(Y,U,R,p)
 
 # Perform an M-step update for a prior covariance matrix U using the
