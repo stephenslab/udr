@@ -80,7 +80,7 @@ test_that(paste("Check R and C++ implementations of residual covariance",
   # The ud_fit outputs should be the same (except for the timings).
   fit1$progress$timing <- 0
   fit2$progress$timing <- 0
-  expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
+  expect_equal(fit1,fit2,scale = 1,tolerance = 1e-8)
 })
 
 test_that(paste("Check R and C++ implementations of prior covariance",
