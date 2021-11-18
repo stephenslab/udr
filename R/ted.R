@@ -3,7 +3,7 @@
 # (2013). Note that input U is not used, and is included only for
 # consistency with the other update functions.
 update_prior_covariance_unconstrained_ted_iid <-
-  function (Y, U, R, p, minval = 0, ...) {
+  function (X, U, R, p, minval = 0, ...) {
   mat <- ted(Y,p,minval)
   mat <- t(R) %*% mat %*% R
   return(update_prior_covariance_struct_unconstrained(U,mat))
@@ -12,7 +12,7 @@ update_prior_covariance_unconstrained_ted_iid <-
 # This is a more efficient C++ implementation of 
 # update_prior_covariance_unconstrained_ted_iid.
 update_prior_covariance_unconstrained_ted_iid_rcpp <-
-  function (Y, U, R, p, minval = 0, ...) {
+  function (X, U, R, p, minval = 0, ...) {
   mat <- ted_rcpp(Y,p,minval,r = ncol(Y))
   mat <- t(R) %*% mat %*% R
   return(update_prior_covariance_struct_unconstrained(U,mat))

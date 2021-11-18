@@ -51,9 +51,9 @@ getrank1 <- function (X) {
 #' Function to calculate matrix Q where U=QQ^T when U is rank-deficient. 
 #' @param U is the rank-deficient matrix to decompose
 #' @param r is the rank of U.
-get_mat_Q = function(U, r){
+get_mat_Q = function (U, r) {
   evd = eigen(U)
-  mat =  evd$vectors[, 1:r] %*% (sqrt(evd$values[1:r])* diag(r))
+  mat = evd$vectors[,1:r] %*% (sqrt(evd$values[1:r]) * diag(r))
   return(mat)
 }
 
@@ -61,12 +61,22 @@ get_mat_Q = function(U, r){
 sliceSums <- function (x)
   rowSums(x,dims = 2)
 
-# Let x ~ N(0,U + V). Then this is equivalent to y ~ N(0,I + U'),
-# where U' = (R*U^{-1}*R^T)^{-1}, Y = X*R^{-1}, and R = chol(V). 
-simplify_covariance <- function (X, V) {
+# If x ~ N(0,U + V), then y ~ N(0,I + U1), where y = x*R^{-1}, U1 =
+# (R*U^{-1}*R^T)^{-1} and R = chol(V). This function returns
+# quantities Y, U1 and R. Note U may either be a matrix or a list of
+# matrices.
+simplify_covariance <- function (X, U, V) {
   R <- chol(V)
   Y <- X %*% solve(R)
-  return(list(Y = Y,R = R))
+  is_matrix <- is.matrix(U)
+  if (is_matrix)
+    U <- list(U)
+  n <- length(U)
+  for (i in 1:n)
+    U[[i]] <- t(solve(R)) %*% U[[i]] %*% solve(R)
+  if (is_matrix)
+    U <- U[[1]]
+  return(list(Y = Y,U1 = U,R = R))
 }
 
 # Find the n x n matrix U + I that best approximates T satisfying the
