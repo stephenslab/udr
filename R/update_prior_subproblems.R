@@ -58,6 +58,16 @@ update_prior_covariance_unconstrained_ed <- function (X, U, V, p, minval) {
   return(update_prior_covariance_unconstrained_struct(U,mat))
 }
 
+
+
+update_prior_covariance_unconstrained_fa <- function(X, U, V, p, minval){
+  if (is.matrix(V))
+    mat <- update_prior_covariance_unconstrained_fa_iid(X, U$mat,p)
+  else
+    stop("unconstrained FA doesn't work for non-iid case")
+  return(update_prior_covariance_unconstrained_struct(U, mat))
+}
+
 # This is a more efficient C++ implementation of 
 # update_prior_covariance_unconstrained_ed.
 update_prior_covariance_unconstrained_ed_rcpp <- function (X, U, V, p,
@@ -117,7 +127,7 @@ update_prior_covariance_unconstrained_ted_rcpp <- function (X, U, V, p,
 #' @param X contains observed data of size n \times r.
 #' @param U the estimate of U in previous iteration
 #' @param p is a vector of weights
-update_prior_covariance_unconstrained_fa <- function(X, U, p){
+update_prior_covariance_unconstrained_fa_iid <- function(X, U, p){
   n <- nrow(X)
   r <- nrow(U)
   Q <- get_mat_Q(U, r)
