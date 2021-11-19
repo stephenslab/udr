@@ -72,7 +72,6 @@ update_prior_covariances <-
 
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
     fit <- unsimplify_model(fit)
-    browser()
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
@@ -127,7 +126,7 @@ simplify_model <- function (fit) {
   for (i in 1:k) {
     u <- fit$U[[i]]
     f <- paste("transform_prior_covariance_struct",attr(u,"covtype"),sep="_")
-    fit$U[[i]] <- do.call(f,list(U = u,A = t(Rinv)))
+    fit$U[[i]] <- do.call(f,list(U = u,A = Rinv))
   }
   fit["V"] <- NULL
   return(fit)
