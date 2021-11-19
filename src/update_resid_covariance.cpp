@@ -6,30 +6,11 @@ using namespace arma;
 
 // FUNCTION DECLARATIONS
 // ---------------------
-void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V, 
-				     const vec& p);
-
 void update_resid_covariance (const mat& X, const cube& U, const mat& V,
 			      const mat& P, mat& Vnew);
 
 // FUNCTION DEFINITIONS
 // --------------------
-// Perform an M-step update for a prior covariance matrix U using
-// the update formula derived in Bovy et al (2011), for the special
-// case when the residual covariances V are the same for all data
-// points.
-//
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::export]]
-arma::mat update_prior_covariance_ed_iid_rcpp (const arma::mat& X, 
-					       const arma::mat& U, 
-					       const arma::mat& V, 
-					       const arma::vec& p) {
-  mat Unew = U;
-  update_prior_covariance_ed_iid(X,Unew,V,p);
-  return Unew;
-}
-
 // Perform an M-step update for the residual covariance matrix.
 //
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -41,22 +22,6 @@ arma::mat update_resid_covariance_rcpp (const arma::mat& X,
   mat Vnew = V;
   update_resid_covariance(X,U,V,P,Vnew);
   return Vnew;
-}
-
-// Perform an M-step update for one of the prior covariance matrices
-// using the update formula derived in Bovy et al (2011), for the
-// special case when all the residual covariance matrices V are all
-// the same.
-void update_prior_covariance_ed_iid (const mat& X, mat& U, const mat& V, 
-				     const vec& p) {
-  vec p1 = p;
-  mat X1 = X;
-  safenormalize(p1);
-  scale_rows(X1,sqrt(p1));
-  mat T = V + U;
-  mat B = solve(T,U);
-  X1 *= B;
-  U += crossprod(X1) - U*B;
 }
 
 // Perform an M-step update for the residual covariance matrix.
@@ -94,4 +59,3 @@ void update_resid_covariance (const mat& X, const cube& U, const mat& V,
   }
   Vnew /= n;
 }
-

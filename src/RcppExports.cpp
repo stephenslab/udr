@@ -11,6 +11,19 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// ed_iid_rcpp
+arma::mat ed_iid_rcpp(const arma::mat& X, const arma::mat& U, const arma::vec& p);
+RcppExport SEXP _udr_ed_iid_rcpp(SEXP XSEXP, SEXP USEXP, SEXP pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type U(USEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type p(pSEXP);
+    rcpp_result_gen = Rcpp::wrap(ed_iid_rcpp(X, U, p));
+    return rcpp_result_gen;
+END_RCPP
+}
 // loglik_ud_iid_rcpp
 double loglik_ud_iid_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
 RcppExport SEXP _udr_loglik_ud_iid_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
@@ -81,20 +94,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// update_prior_covariance_ed_iid_rcpp
-arma::mat update_prior_covariance_ed_iid_rcpp(const arma::mat& X, const arma::mat& U, const arma::mat& V, const arma::vec& p);
-RcppExport SEXP _udr_update_prior_covariance_ed_iid_rcpp(SEXP XSEXP, SEXP USEXP, SEXP VSEXP, SEXP pSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type U(USEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type V(VSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type p(pSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_prior_covariance_ed_iid_rcpp(X, U, V, p));
-    return rcpp_result_gen;
-END_RCPP
-}
 // update_resid_covariance_rcpp
 arma::mat update_resid_covariance_rcpp(const arma::mat& X, const arma::cube& U, const arma::mat& V, const arma::mat& P);
 RcppExport SEXP _udr_update_resid_covariance_rcpp(SEXP XSEXP, SEXP USEXP, SEXP VSEXP, SEXP PSEXP) {
@@ -111,12 +110,12 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_udr_ed_iid_rcpp", (DL_FUNC) &_udr_ed_iid_rcpp, 3},
     {"_udr_loglik_ud_iid_rcpp", (DL_FUNC) &_udr_loglik_ud_iid_rcpp, 4},
     {"_udr_loglik_ud_notiid_rcpp", (DL_FUNC) &_udr_loglik_ud_notiid_rcpp, 4},
     {"_udr_compute_posterior_probs_iid_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_iid_rcpp, 4},
     {"_udr_compute_posterior_probs_notiid_rcpp", (DL_FUNC) &_udr_compute_posterior_probs_notiid_rcpp, 4},
     {"_udr_ted_rcpp", (DL_FUNC) &_udr_ted_rcpp, 4},
-    {"_udr_update_prior_covariance_ed_iid_rcpp", (DL_FUNC) &_udr_update_prior_covariance_ed_iid_rcpp, 4},
     {"_udr_update_resid_covariance_rcpp", (DL_FUNC) &_udr_update_resid_covariance_rcpp, 4},
     {NULL, NULL, 0}
 };
