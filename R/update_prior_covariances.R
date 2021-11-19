@@ -61,20 +61,18 @@ update_prior_covariances <-
   k <- length(fit$U)
   if (is.matrix(fit$V)) {
 
-    # Transform the data X to Y so that Y ~ N(0,I + U1).
-    fit1 <- simplify_model(fit)
+    # Transform the data x to x' so that x' ~ N(0,U' + I).
+    fit <- simplify_model(fit)
 
-    # Update the prior covariances in the i.i.d. case (when all the
-    # residual variances V are the same). The inputs to each update
-    # are: Y, the transformed data, such that y ~ N(0,I + U); U, the
-    # current covariance matrix estimate; R = chol(V); and p, a vector
-    # of mixture weights associated with the rows of X (or Y). The
-    # output is the new estimate of U in the model x[i,] ~ N(0,U + V).
-    for (i in 1:k) {
+    # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
+    for (i in 1:k)
       fit$U[[i]] <- do.call(covupdates[i],
-                            list(X = fit1$X,U = out1$U,R = fit1$R,
-                                 p = fit1$P[,i],minval = minval))
-    }
+                             list(X = fit$X,U = fit$U[[i]],
+                                  p = fit$P[,i],minval = minval))
+
+    # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
+    fit <- unsimplify_model(fit)
+    browser()
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
@@ -89,8 +87,8 @@ update_prior_covariances <-
       V <- list2array(V)
     for (i in 1:k)
       fit$U[[i]] <- do.call(covupdates[i],
-                            list(X = fit$X,U = fit$U[[i]],V = V,p = fit$P[,i],
-                                 minval = minval))
+                            list(X = fit$X,U = fit$U[[i]],V = V,
+                                 p = fit$P[,i],minval = minval))
   }
   
   # Output the updated fit.
@@ -100,12 +98,12 @@ update_prior_covariances <-
 # These functions return the unconstrained prior covariance matrix
 # without updating in the i.i.d. case when the residual variance V is
 # the same for all data points.
-update_prior_covariance_scaled_none_iid             <- function (X,U,R,...) U
-update_prior_covariance_scaled_none_iid_rcpp        <- function (X,U,R,...) U
-update_prior_covariance_rank1_none_iid              <- function (X,U,R,...) U
-update_prior_covariance_rank1_none_iid_rcpp         <- function (X,U,R,...) U
-update_prior_covariance_unconstrained_none_iid      <- function (X,U,R,...) U
-update_prior_covariance_unconstrained_none_iid_rcpp <- function (X,U,R,...) U
+update_prior_covariance_scaled_none_iid             <- function (X,U,p,...) U
+update_prior_covariance_scaled_none_iid_rcpp        <- function (X,U,p,...) U
+update_prior_covariance_rank1_none_iid              <- function (X,U,p,...) U
+update_prior_covariance_rank1_none_iid_rcpp         <- function (X,U,p,...) U
+update_prior_covariance_unconstrained_none_iid      <- function (X,U,p,...) U
+update_prior_covariance_unconstrained_none_iid_rcpp <- function (X,U,p,...) U
 
 # These functions return the unconstrained prior covariance matrix
 # without updating it in the non-i.i.d. case when the residual
@@ -117,7 +115,7 @@ update_prior_covariance_rank1_none_notiid_rcpp        <-function(X,U,V,p,...) U
 update_prior_covariance_unconstrained_none_notiid     <-function(X,U,V,p,...) U
 update_prior_covariance_unconstrained_none_notiid_rcpp<-function(X,U,V,p,...) U
 
-# Transform data x ~ N(0,U + V) to obtain equivalent model x' ~ N(0,U + I).
+# Transform data x ~ N(0,U + V) to obtain equivalent model x' ~ N(0,U' + I).
 # Note that U should be a list of matrices; the transformation is
 # applied to each of the matrices. The Cholesky factor R = chol(V) is
 # also returned.
@@ -132,5 +130,20 @@ simplify_model <- function (fit) {
     fit$U[[i]] <- do.call(f,list(U = u,A = t(Rinv)))
   }
   fit["V"] <- NULL
+  return(fit)
+}
+
+# Undo the changes to the ud_fit object made by simplify_model(fit).
+unsimplify_model <- function (fit) {
+  k     <- length(fit$U)
+  R     <- fit$R
+  fit$X <- fit$X %*% R
+  fit$V <- crossprod(fit$R)
+  for (i in 1:k) {
+    u <- fit$U[[i]]
+    f <- paste("transform_prior_covariance_struct",attr(u,"covtype"),sep="_")
+    fit$U[[i]] <- do.call(f,list(U = u,A = R))
+  }
+  fit["R"] <- NULL
   return(fit)
 }
