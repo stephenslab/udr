@@ -30,17 +30,17 @@ update_prior_covariance_rank1_ted_iid_rcpp <- function (X, U, p, minval = 0,
 
 # These functions are defined only to provide more informative error
 # messages.
-update_prior_covariance_ted_notiid <- function (X, U, V, p, ...)
-  stop("unconstrained.update = \"ted\" does not work for case when data ",
-       "points are not i.i.d. (different Vs)")
-update_prior_covariance_rank1_ted_notiid <- function (X, U, V, p, ...)
-  update_prior_covariance_ted_notiid(X,U,V,p)
-update_prior_covariance_rank1_ted_notiid_rcpp <- function (X, U, V, p, ...)
-  update_prior_covariance_ted_notiid(X,U,V,p)
-update_prior_covariance_unconstrained_ted_notiid <- function (X, U, V, p, ...)
-  update_prior_covariance_ted_notiid(X,U,V,p)
+update_prior_covariance_ted_invalid <- function()
+  stop("control$unconstrained.update = \"ted\" does not work for case when ",
+       "data points are not i.i.d. (different Vs)")
+update_prior_covariance_rank1_ted_notiid              <- function (X,U,V,p,...)
+  update_prior_covariance_ted_invalid()
+update_prior_covariance_rank1_ted_notiid_rcpp         <- function (X,U,V,p,...)
+  update_prior_covariance_ted_invalid()
+update_prior_covariance_unconstrained_ted_notiid      <- function (X,U,V,p,...)
+  update_prior_covariance_ted_invalid()
 update_prior_covariance_unconstrained_ted_notiid_rcpp <- function (X,U,V,p,...)
-  update_prior_covariance_ted_notiid(X,U,V,p)
+  update_prior_covariance_ted_invalid()
 
 # Perform an M-step update for a prior covariance matrix U using the
 # "eigenvalue truncation" technique described in Won et al (2013).

@@ -1,6 +1,6 @@
 # Perform an M-step update for a prior covariance (U) using the update
-# formula derived in Bovy et al (2011), for the special case when the
-# samples are i.i.d. (same V).
+# formula derived in Bovy et al (2011), for the special case when V =
+# I for all samples; that is, the model is x ~ N(0,U + I).
 update_prior_covariance_unconstrained_ed_iid <- function (X, U, p, ...)
   update_prior_covariance_struct_unconstrained(U,ed_iid(X,U$mat,p))
 
@@ -12,13 +12,37 @@ update_prior_covariance_unconstrained_ed_iid_rcpp <- function (X, U, p, ...)
 # Perform an M-step update for a prior covariance (U) using the update
 # formula derived in Bovy et al (2011), allow for different residual
 # variances V among the samples.
-update_prior_covariance_unconstrained_ed_notiid <- function (X, U, V, p, minval) {
-  if (is.matrix(V))
-    mat <- update_prior_covariance_ed_iid(X,U$mat,V,p)
-  else
-    mat <- update_prior_covariance_ed_general(X,U$mat,V,p)
-  return(update_prior_covariance_unconstrained_struct(U,mat))
-}
+update_prior_covariance_unconstrained_ed_notiid <- function (X, U, V, p, ...)
+  update_prior_covariance_struct_unconstrained(U,ed(X,U$mat,V,p))
+
+# This is a more efficient C++ implementation of
+# update_prior_covariance_rank1_ed_notiid. (The C++ version has not yet been
+# implemented, so for now we simply all the R implementation.)
+update_prior_covariance_unconstrained_ed_notiid_rcpp <- function (X, U, V, p,
+                                                                  ...)
+  update_prior_covariance_struct_unconstrained(U,ed(X,U$mat,V,p))
+
+# These functions are defined only to provide more informative error
+# messages.
+update_prior_covariance_ed_invalid <- function (X, U, V, p, ...)
+  stop("control$scale.update = \"ed\" and control$rank1.update = \"ed\" ",
+       "are not valid choices")
+update_prior_covariance_scaled_ed_iid         <- function (X, U, p, ...)
+  update_prior_covariance_ed_invalid()
+update_prior_covariance_scaled_ed_iid_rcpp    <- function (X, U, p,...)
+  update_prior_covariance_ed_invalid()
+update_prior_covariance_rank1_ed_iid          <- function (X, U, p, ...)
+  update_prior_covariance_ed_invalid()
+update_prior_covariance_rank1_ed_iid_rcpp     <- function (X, U, p, ...)
+  update_prior_covariance_ed_invalid()
+update_prior_covariance_scaled_ed_notiid      <- function (X, U, V, p, ...)
+  update_prior_covariance_ed_invalid()
+update_prior_covariance_scaled_ed_notiid_rcpp <- function (X, U, V, p,...)
+  update_prior_covariance_ed_invalid()
+update_prior_covariance_rank1_ed_notiid       <- function (X, U, V, p, ...)
+  update_prior_covariance_ed_invalid()
+update_prior_covariance_rank1_ed_notiid_rcpp  <- function (X, U, V, p, ...)
+  update_prior_covariance_ed_invalid()
 
 # Update the prior covariance matrix (U) in the model x ~ N(0,U + I)
 # using the update formula derived in Bovy et al (2011). Input p is a
@@ -38,7 +62,7 @@ ed_iid <- function (X, U, p) {
 # @param U is a matrix
 # @param V is a 3-d array, in which V[,,j] is the covariance matrix
 # for the jth observation
-update_prior_covariance_ed_general <- function (X, U, V, p) {
+ed <- function (X, U, V, p) {
   n  <- nrow(X)
   m  <- ncol(X)
   B  <- array(0,c(m,m,n))
@@ -52,9 +76,4 @@ update_prior_covariance_ed_general <- function (X, U, V, p) {
   return(Unew)
 }
 
-# This is a more efficient C++ implementation of
-# update_prior_covariance_rank1_ed.
-update_prior_covariance_rank1_ed_rcpp <- function (X, U, V, p, minval) {
-  stop("update_prior_covariance_rank1_ed_rcpp is not yet implemented") 
-}
 
