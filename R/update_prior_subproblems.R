@@ -138,8 +138,8 @@ update_prior_covariance_unconstrained_fa_iid <- function(X, U, p){
   A <- crossprod(X, p*bmat) # t(X) %*% (p*bmat)
   B <-  crossprod(bmat, p*bmat) + sum(p)*Sigma
   Q <- A %*% solve(B)
-  mat <- tcrossprod(Q)
-  return(mat)
+  Unew <- tcrossprod(Q)
+  return(Unew)
 }
 
 # Perform an M-step update for a prior covariance matrix (U) using the
