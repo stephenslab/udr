@@ -44,12 +44,12 @@ update_prior_covariance_struct_scaled <- function (U, s) {
 # tcrossprod(vec). This function is used in the
 # update_prior_covariance_rank1_* functions.
 update_prior_covariance_struct_rank1 <- function (U, vec) {
-  mat <- tcrossprod(vec)
-  names(vec) <- names(U$vec)
+  mat           <- tcrossprod(vec)
+  names(vec)    <- names(U$vec)
   rownames(mat) <- rownames(U$mat)
   colnames(mat) <- colnames(U$mat)
-  U$vec <- vec
-  U$mat <- mat
+  U$vec         <- vec
+  U$mat         <- mat
   return(U)
 }
 
@@ -68,8 +68,13 @@ update_prior_covariance_struct_unconstrained <- function (U, mat) {
 # function applies the affine transformation y = a*x to the prior
 # covariance matrix U in which U is a scaled matrix.
 transform_prior_covariance_struct_scaled <- function (U, A) {
-  U$U0  <- t(A) %*% U$U0 %*% A
+  x <- rownames(U$U0)
+  U$U0 <- t(A) %*% U$U0 %*% A
   U$mat <- U$s * U$U0
+  rownames(U$U0)  <- x
+  colnames(U$U0)  <- x
+  rownames(U$mat) <- x
+  colnames(U$mat) <- x
   return(U)
 }
 
@@ -77,8 +82,12 @@ transform_prior_covariance_struct_scaled <- function (U, A) {
 # function applies the affine transformation y = a*x to the prior
 # covariance matrix U in which U is a rank-1 unconstrained matrix.
 transform_prior_covariance_struct_rank1 <- function (U, A) {
+  x <- names(U$vec)
   U$vec <- drop(crossprod(A,U$vec))
   U$mat <- tcrossprod(U$vec)
+  names(U$vec)    <- x
+  rownames(U$mat) <- x
+  colnames(U$mat) <- x
   return(U)
 }
 
@@ -86,6 +95,9 @@ transform_prior_covariance_struct_rank1 <- function (U, A) {
 # function applies the affine transformation y = a*x to the prior
 # covariance matrix U in which U is an unconstrained matrix.
 transform_prior_covariance_struct_unconstrained <- function (U, A) {
+  x <- rownames(U$mat)
   U$mat <- t(A) %*% U$mat %*% A
+  rownames(U$mat) <- x
+  colnames(U$mat) <- x
   return(U)
 }

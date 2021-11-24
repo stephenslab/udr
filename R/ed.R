@@ -75,5 +75,3 @@ ed <- function (X, U, V, p) {
   Unew <- (sliceSums(bb) + sliceSums(B))/sum(p)
   return(Unew)
 }
-
-

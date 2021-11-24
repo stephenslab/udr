@@ -42,6 +42,19 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
   fit1 <- update_prior_covariances(fit1,updates1)
   fit2 <- update_prior_covariances(fit2,updates2)
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-14)
+
+  # Update the prior covariance matrices, U, using the ED updates.
+  control <- list(scaled.update = "none",rank1.update = "none",
+                  unconstrained.update = "ed")
+  control1 <- control
+  control2 <- control
+  control1$version <- "R"
+  control2$version <- "Rcpp"
+  updates1 <- assign_prior_covariance_updates(fit1,control1)$covupdates
+  updates2 <- assign_prior_covariance_updates(fit2,control2)$covupdates
+  fit1 <- update_prior_covariances(fit1,updates1)
+  fit2 <- update_prior_covariances(fit2,updates2)
+  expect_equal(fit1,fit2,scale = 1,tolerance = 1e-14)
 })
 
 test_that(paste("R and C++ implementations of advanced model fitting ",
