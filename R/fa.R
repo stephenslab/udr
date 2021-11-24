@@ -73,7 +73,6 @@ update_prior_covariance_rank1_fa_iid <- function (X, u, p) {
   u = 1/sum(eta)* colSums(theta*X)
   return(u)
 }
-      
                     
 # Perform an M-step update for a scaled prior covariance matrix (U).
 # Input p is a vector of weights associated with the rows of X.

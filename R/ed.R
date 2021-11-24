@@ -57,11 +57,7 @@ ed_iid <- function (X, U, p) {
 
 # Perform an M-step update for a prior covariance matrix (U) using the
 # update formula derived in Bovy et al (2011), allowing for residual
-# covariance matrices that differ among the data samples (rows of X).
-# @param p is a vector of weights
-# @param U is a matrix
-# @param V is a 3-d array, in which V[,,j] is the covariance matrix
-# for the jth observation
+# covariance matrices V that differ among the data samples (rows of X).
 ed <- function (X, U, V, p) {
   n  <- nrow(X)
   m  <- ncol(X)
@@ -72,6 +68,5 @@ ed <- function (X, U, V, p) {
     bb[,,i] <- tcrossprod(((sqrt(p[i])*U) %*% Tinv) %*% X[i,])
     B[,,i]  <- p[i]*(U - (U %*% Tinv) %*% U)
   }
-  Unew <- (sliceSums(bb) + sliceSums(B))/sum(p)
-  return(Unew)
+  return((sliceSums(bb) + sliceSums(B))/sum(p))
 }
