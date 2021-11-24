@@ -128,7 +128,7 @@ simplify_model <- function (fit) {
     f <- paste("transform_prior_covariance_struct",attr(u,"covtype"),sep="_")
     fit$U[[i]] <- do.call(f,list(U = u,A = Rinv))
   }
-  fit["V"] <- NULL
+  fit$V <- as.numeric(NA)
   return(fit)
 }
 
@@ -143,6 +143,6 @@ unsimplify_model <- function (fit) {
     f <- paste("transform_prior_covariance_struct",attr(u,"covtype"),sep="_")
     fit$U[[i]] <- do.call(f,list(U = u,A = R))
   }
-  fit["R"] <- NULL
+  fit$R <- as.numeric(NA)
   return(fit)
 }

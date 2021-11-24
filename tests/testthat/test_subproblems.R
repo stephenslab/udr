@@ -329,7 +329,7 @@ test_that("scaled fa_general vs. fa_iid", {
   logliks_general <- rep(NA, maxiter)
   U.iid <- create_scaled_matrix_struct(X, U0)
   U.general <- create_scaled_matrix_struct(X, U0)
-  r <- sum(eigen(U$U0)$values > 1e-15)
+  r <- sum(eigen(U0)$values > 1e-15)
   p <- runif(n)
 
   for (i in 1:maxiter){

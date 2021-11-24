@@ -241,7 +241,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-119, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-120, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -282,6 +282,11 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
+
+    # Store the current estimates of the model parameters.
+    V0 <- fit$V
+    U0 <- fit$U
+    w0 <- fit$w
     
     # E-step
     # ------
@@ -293,25 +298,23 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # M-step
     # ------
     # Update the residual covariance matrix.
-    Vnew <- fit$V
     if (is.matrix(fit$V))
-      Vnew <- update_resid_covariance(fit,control$resid.update,
-                                      control$version)$V
+      fit <- update_resid_covariance(fit,control$resid.update,control$version)
 
     # Update the scaled prior covariance matrices.
-    Unew <- update_prior_covariances(fit,covupdates,control$minval)$U
-    
+    fit <- update_prior_covariances(fit,covupdates,control$minval)
+
     # Update the mixture weights.
-    wnew <- update_mixture_weights(fit,control$weights.update)$w
-  
+    fit <- update_mixture_weights(fit,control$weights.update)
+
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
-    loglik <- loglik_ud(fit$X,wnew,Unew,Vnew,control$version)
-    dw     <- max(abs(fit$w - wnew))
-    dU     <- max(abs(ulist2array(fit$U) - ulist2array(Unew)))
+    loglik <- loglik_ud(fit$X,fit$w,fit$U,fit$V,control$version)
+    dw <- max(abs(fit$w - w0))
+    dU <- max(abs(ulist2array(fit$U) - ulist2array(U0)))
     if (is.matrix(fit$V))
-      dV <- max(abs(fit$V - Vnew))
+      dV <- max(abs(fit$V - V0))
     else
       dV <- 0
     t2 <- proc.time()
@@ -323,13 +326,10 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     if (verbose)
       cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dV))
 
-    # Apply the parameter updates, and check convergencce.
+    # Check convergence.
     dparam     <- max(dw,dU,dV)
     dloglik    <- loglik - fit$loglik
     fit$loglik <- loglik
-    fit$w      <- wnew
-    fit$U      <- Unew
-    fit$V      <- Vnew
     if (dparam < control$tol | dloglik < log(1 + control$tol.lik))
       break
   }
@@ -337,6 +337,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
   # Output the parameters of the updated model, and a record of the
   # algorithm's progress over time.
   fit$progress <- rbind(fit$progress,progress[1:iter,])
+  fit["R"] <- NULL
   return(fit)
 }
 
