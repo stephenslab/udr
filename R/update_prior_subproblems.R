@@ -133,7 +133,7 @@ update_prior_covariance_unconstrained_fa_iid <- function(X, U, p){
   Q <- get_mat_Q(U, r)
   I <- diag(r)
   
-  Sigma <- solve(t(Q) %*% Q + I)
+  Sigma <- solve(crossprod(Q) + I)
   bmat <- X %*% Q %*% Sigma   # n by r matrix
   A <- crossprod(X, p*bmat) # t(X) %*% (p*bmat)
   B <-  crossprod(bmat, p*bmat) + sum(p)*Sigma
@@ -156,12 +156,13 @@ update_prior_covariance_ed_general <- function (X, U, V, p) {
   bb <- array(0,c(m,m,n))
   for (i in 1:n) {
     Tinv    <- solve(U + V[,,i])
-    bb[,,i] <- tcrossprod(((sqrt(p[i])*U) %*% Tinv) %*% X[i,])
+    bb[,,i] <- tcrossprod((sqrt(p[i])*U) %*% (Tinv %*% X[i,]))
     B[,,i]  <- p[i]*(U - (U %*% Tinv) %*% U)
   }
   Unew <- (sliceSums(bb) + sliceSums(B))/sum(p)
   return(Unew)
 }
+
 
 # Perform an M-step update for a prior covariance matrix (U) using the
 # update formula derived in Bovy et al (2011), for the special case
@@ -249,8 +250,9 @@ update_prior_covariance_rank1_fa_general <- function (X, u, V, p) {
   Vinvw  <- array(0,c(m,m,n))
   for (i in 1:n){
     A          <- solve(V[,,i])
-    sigma2     <- drop(1/(t(u) %*% A %*% u + 1))
-    mu         <- drop(sigma2*t(u) %*% A %*% X[i,])
+    utA        <- crossprod(u, A)
+    sigma2     <- drop(1/(utA %*% u + 1))    # t(u) %*% A
+    mu         <- drop(sigma2 * utA %*% X[i,])
     Vinvw[,,i] <- p[i]*(mu^2 + sigma2)*A
     uw[,i]     <- p[i]*mu*A %*% X[i,]
   }
@@ -363,15 +365,18 @@ update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s, r){
   I = diag(r)
   
   Sigma = c()
-  V.inverse = c()
+  V.inverse = c() 
+  VinvQ = c()
   b = c()
   B = c()
   trB = rep(NA, n)  # trace of Bmat 
   
   for (i in 1:n){
     V.inverse[[i]] = solve(V[,,i])
-    Sigma[[i]] = solve(t(Q)%*% V.inverse[[i]] %*% Q + I/s)
-    b[[i]] = t(X[i, ])%*% V.inverse[[i]] %*% Q %*% Sigma[[i]]
+    VinvQ[[i]] = solve(V[,,i]) %*% Q
+
+    Sigma[[i]] = solve(crossprod(Q, VinvQ[[i]]) + I/s)    #t(Q) %*% VinvQ[[i]])
+    b[[i]] = crossprod(X[i, ], VinvQ[[i]]) %*% Sigma[[i]]
     B[[i]] = crossprod(b[[i]])+ Sigma[[i]]
     trB[i] = sum(diag(B[[i]]))
   }
@@ -399,7 +404,7 @@ update_prior_covariance_scaled_fa_iid <- function(X, U0, p, s, r){
   Q = get_mat_Q(U0, r)
   I = diag(r)
   
-  Sigma = solve(t(Q) %*% Q + I/s)
+  Sigma = solve(crossprod(Q) + I/s)
   bmat = X %*% Q %*% Sigma   # n by r matrix to store b_j
   B = c()
   trB = rep(NA, n)  # trace of Bmat 

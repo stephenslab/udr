@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // loglik_ud_iid_rcpp
 double loglik_ud_iid_rcpp(const arma::mat& X, const arma::vec& w, const arma::cube& U, const arma::mat& V);
 RcppExport SEXP _udr_loglik_ud_iid_rcpp(SEXP XSEXP, SEXP wSEXP, SEXP USEXP, SEXP VSEXP) {
