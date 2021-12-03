@@ -121,26 +121,6 @@ update_prior_covariance_unconstrained_ted_rcpp <- function (X, U, V, p,
 }
 
                      
-#' Perform an M-step update for unconstrained prior covariance matrix U 
-#' using factor analyzer in the special case of V_j = I. 
-#' (See eq.(74) in main write-up)
-#' @param X contains observed data of size n \times r.
-#' @param U the estimate of U in previous iteration
-#' @param p is a vector of weights
-update_prior_covariance_unconstrained_fa_iid <- function(X, U, p){
-  n <- nrow(X)
-  r <- nrow(U)
-  Q <- get_mat_Q(U, r)
-  I <- diag(r)
-  
-  Sigma <- solve(crossprod(Q) + I)
-  bmat <- X %*% Q %*% Sigma   # n by r matrix
-  A <- crossprod(X, p*bmat) # t(X) %*% (p*bmat)
-  B <-  crossprod(bmat, p*bmat) + sum(p)*Sigma
-  Q <- A %*% solve(B)
-  Unew <- tcrossprod(Q)
-  return(Unew)
-}
 
 # Perform an M-step update for a prior covariance matrix (U) using the
 # update formula derived in Bovy et al (2011), allowing for residual
@@ -348,76 +328,5 @@ grad_loglik_scale_factor <- function (s, p, Y, lambdas)
                 sum(lambdas/(s*lambdas + 1))))
 
   
-                     
-#' Perform an M-step update for estimating the scalar for prior covariance matrix U0
-#' in the general case where V_j can vary for different observations. U0 can be rank-deficient.
-#' @param X contains observed data of size n \times r.
-#' @param U0 A known canonical covariance of size r \times r. 
-#' @param V is a 3-d array, in which V[,,j] is the covariance matrix
-# for the jth observation
-#' @param p is a vector of weights
-#' @param s is the scalar estimate in previous iteration
-#' @param r is the rank of U0
-update_prior_covariance_scaled_fa_general <- function(X, U0, V, p, s, r){
-  
-  n = nrow(X)
-  Q = get_mat_Q(U0, r)
-  I = diag(r)
-  
-  Sigma = c()
-  V.inverse = c() 
-  VinvQ = c()
-  b = c()
-  B = c()
-  trB = rep(NA, n)  # trace of Bmat 
-  
-  for (i in 1:n){
-    V.inverse[[i]] = solve(V[,,i])
-    VinvQ[[i]] = solve(V[,,i]) %*% Q
-
-    Sigma[[i]] = solve(crossprod(Q, VinvQ[[i]]) + I/s)    #t(Q) %*% VinvQ[[i]])
-    b[[i]] = crossprod(X[i, ], VinvQ[[i]]) %*% Sigma[[i]]
-    B[[i]] = crossprod(b[[i]])+ Sigma[[i]]
-    trB[i] = sum(diag(B[[i]]))
-  }
-  
-  if (r ==1){
-    s = sum(p*unlist(B))/sum(p)
-  }else{
-    s = sum(trB*p)/(sum(p)*r)
-  }
-  
-  return(s)
-}
-                     
-                     
-#' Perform an M-step update for estimating the scalar for prior covariance matrix U0
-#' in the special case of V_j = I. U0 can be rank-deficient.
-#' @param X contains observed data of size n \times r.
-#' @param U0 A known canonical covariance of size r \times r. 
-#' @param p is a vector of weights
-#' @param s is the scalar estimate in previous iteration
-#' @param r is the rank of U0
-update_prior_covariance_scaled_fa_iid <- function(X, U0, p, s, r){
-  
-  n = nrow(X)
-  Q = get_mat_Q(U0, r)
-  I = diag(r)
-  
-  Sigma = solve(crossprod(Q) + I/s)
-  bmat = X %*% Q %*% Sigma   # n by r matrix to store b_j
-  B = c()
-  trB = rep(NA, n)  # trace of Bmat 
-  
-  for (i in 1:n){
-    B[[i]] = tcrossprod(bmat[i, ]) + Sigma
-    trB[i] = sum(diag(B[[i]]))
-  }
-  
-  if (r ==1){
-    s = sum(p*unlist(B))/sum(p)
-  }else{
-    s = sum(trB*p)/(sum(p)*r)
-  }
-  return(s)
-}
+                   
+   

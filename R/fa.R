@@ -14,14 +14,14 @@ update_prior_covariance_unconstrained_fa_notiid <- function (X, U, V, p, ...)
 # that is, the model is x ~ N(0,sU + I).
 update_prior_covariance_scaled_fa_iid <- function (X, U, p, ...){
   r <- sum(eigen(U$U0)$values > 1e-15)
-  update_prior_covariance_struct_scaled(U, fa_scaled_iid(X, U$U0, p, U$s, r))
+  update_prior_covariance_struct_scaled(U, fa_scaled_iid(X, U$U0, p, U$s))
 }
 
 # Perform an M-step update for a scaled prior covariance (U) using factor
 # analysis, allowing for different residual variances V among the samples.
 update_prior_covariance_scaled_fa_notiid <- function (X, U, V, p, ...){
   r <- sum(eigen(U$U0)$values > 1e-15)
-  update_prior_covariance_struct_scaled(U, fa_scaled_notiid(X, U$U0, V, p, U$s, r))
+  update_prior_covariance_struct_scaled(U, fa_scaled_notiid(X, U$U0, V, p, U$s))
 }
 
 # Perform an M-step update for a rank1 prior covariance matrix U using
@@ -47,7 +47,8 @@ fa_unconstrained <- function(X, U, p){
 
   n <- nrow(X)
   r <- nrow(U)
-  Q <- get_mat_Q(U, r)
+  Q <- get_mat_Q(U)
+  r <- ncol(Q)
   I <- diag(r)
   
   Sigma <- solve(crossprod(Q) + I)
@@ -81,10 +82,11 @@ update_prior_covariance_rank1_fa <- function (X, U, V, p, minval) {
 # @param p is a vector of weights
 # @param s is the scalar estimate in previous iteration
 # @param r is the rank of U0
-fa_scaled_iid<- function(X, U0, p, s, r){
+fa_scaled_iid<- function(X, U0, p, s){
 
   n = nrow(X)
-  Q = get_mat_Q(U0, r)
+  Q = get_mat_Q(U0)
+  r = ncol(Q)
   I = diag(r)
   Sigma = solve(crossprod(Q) + I/s)
   bmat = X %*% Q %*% Sigma   # n by r matrix to store b_j
@@ -114,10 +116,11 @@ fa_scaled_iid<- function(X, U0, p, s, r){
 # @param p is a vector of weights
 # @param s is the scalar estimate in previous iteration
 # @param r is the rank of U0
-fa_scaled_notiid <- function(X, U0, V, p, s, r){
+fa_scaled_notiid <- function(X, U0, V, p, s){
   
   n = nrow(X)
-  Q = get_mat_Q(U0, r)
+  Q = get_mat_Q(U0)
+  r = ncol(Q)
   I = diag(r)
 
   Sigma = c()
