@@ -1,4 +1,3 @@
-
 # Perform an M-step update for unconstrained prior covariance (U) using factor
 # analysis for the special case when V = I for all samples; 
 # that is, the model is x ~ N(0,U + I).
@@ -41,12 +40,12 @@ update_prior_covariance_rank1_fa_notiid <- function (X, U, V, p, ...)
   update_prior_covariance_struct_rank1(U, fa_rank1_notiid(X, U$vec, V, p))
   
 
-#' Perform an M-step update for unconstrained prior covariance matrix U 
-#' using factor analyzer in the special case of V_j = I. 
-#' (See eq.(74) in main write-up)
-#' @param X contains observed data of size n \times r.
-#' @param U the estimate of U in previous iteration
-#' @param p is a vector of weights
+# Perform an M-step update for unconstrained prior covariance matrix U
+# using factor analyzer in the special case of V_j = I.  (See eq.(74)
+# in main writeup.)
+# @param X contains observed data of size n \times r.
+# @param U the estimate of U in previous iteration
+# @param p is a vector of weights
 fa_unconstrained <- function(X, U, p){
 
   n <- nrow(X)
@@ -81,13 +80,14 @@ update_prior_covariance_rank1_fa <- function (X, U, V, p, minval) {
                      
 
                      
-#' Perform an M-step update for estimating the scalar for prior covariance matrix U0
-#' in the special case of V_j = I. U0 can be rank-deficient.
-#' @param X contains observed data of size n \times r.
-#' @param U0 A known canonical covariance of size r \times r. 
-#' @param p is a vector of weights
-#' @param s is the scalar estimate in previous iteration
-#' @param r is the rank of U0
+# Perform an M-step update for estimating the scalar for prior
+# covariance matrix U0 in the special case of V_j = I. U0 can be
+# rank-deficient.
+# @param X contains observed data of size n \times r.
+# @param U0 A known canonical covariance of size r \times r. 
+# @param p is a vector of weights
+# @param s is the scalar estimate in previous iteration
+# @param r is the rank of U0
 fa_scaled_iid<- function(X, U0, p, s, r){
 
   n = nrow(X)
@@ -113,15 +113,16 @@ fa_scaled_iid<- function(X, U0, p, s, r){
 
 
 
-#' Perform an M-step update for estimating the scalar for prior covariance matrix U0
-#' in the general case where V_j can vary for different observations. U0 can be rank-deficient.
-#' @param X contains observed data of size n \times r.
-#' @param U0 A known canonical covariance of size r \times r. 
-#' @param V is a 3-d array, in which V[,,j] is the covariance matrix
-# for the jth observation
-#' @param p is a vector of weights
-#' @param s is the scalar estimate in previous iteration
-#' @param r is the rank of U0
+# Perform an M-step update for estimating the scalar for prior
+# covariance matrix U0 in the general case where V_j can vary for
+# different observations. U0 can be rank-deficient.
+# @param X contains observed data of size n \times r.
+# @param U0 A known canonical covariance of size r \times r. 
+# @param V is a 3-d array, in which V[,,j] is the covariance matrix
+#   for the jth observation
+# @param p is a vector of weights
+# @param s is the scalar estimate in previous iteration
+# @param r is the rank of U0
 fa_scaled_notiid <- function(X, U0, V, p, s, r){
   
   n = nrow(X)
@@ -155,11 +156,11 @@ fa_scaled_notiid <- function(X, U0, V, p, s, r){
 
 
 
-#' Perform an M-step update for rank1 prior covariance matrix U 
-#' using factor analyzer in the special case of V_j = I. 
-#' @param X contains observed data of size n \times r.
-#' @param u the estimate of vector that forms the rank1 U in previous iteration
-#' @param p is a vector of weights
+# Perform an M-step update for rank1 prior covariance matrix U 
+# using factor analyzer in the special case of V_j = I. 
+# @param X contains observed data of size n \times r.
+# @param u the estimate of vector that forms the rank1 U in previous iteration
+# @param p is a vector of weights
 fa_rank1_iid <- function (X, u, p) {
   n      <- nrow(X)
   m      <- ncol(X)
