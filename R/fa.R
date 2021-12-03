@@ -4,12 +4,10 @@
 update_prior_covariance_unconstrained_fa_iid <- function (X, U, p, ...)
   update_prior_covariance_struct_unconstrained(U, fa_unconstrained(X, U$mat, p))
 
-
 # Perform an M-step update for unconstrained prior covariance (U) using factor
 # analysis, allowing for different residual variances V among the samples.
 update_prior_covariance_unconstrained_fa_notiid <- function (X, U, V, p, ...)
   stop("unconstrained_fa_notiid is not yet implemented")
-
 
 # Perform an M-step update for a scaled prior covariance matrix (U) using 
 # factor analysis for the special case when V = I for all samples; 
@@ -19,7 +17,6 @@ update_prior_covariance_scaled_fa_iid <- function (X, U, p, ...){
   update_prior_covariance_struct_scaled(U, fa_scaled_iid(X, U$U0, p, U$s, r))
 }
 
-
 # Perform an M-step update for a scaled prior covariance (U) using factor
 # analysis, allowing for different residual variances V among the samples.
 update_prior_covariance_scaled_fa_notiid <- function (X, U, V, p, ...){
@@ -27,19 +24,19 @@ update_prior_covariance_scaled_fa_notiid <- function (X, U, V, p, ...){
   update_prior_covariance_struct_scaled(U, fa_scaled_notiid(X, U$U0, V, p, U$s, r))
 }
 
-
-# Perform an M-step update for a rank1 prior covariance matrix U using factor analysis
-# for the special case when V = I for all samples; that is, the model is x ~ N(0,U + I).
+# Perform an M-step update for a rank1 prior covariance matrix U using
+# factor analysis for the special case when V = I for all samples;
+# that is, the model is x ~ N(0,U + I).
 update_prior_covariance_rank1_fa_iid <- function (X, U, p, ...)
   update_prior_covariance_struct_rank1(U, fa_rank1_iid(X, U$vec, p))
 
 
-# Perform an M-step update for a rank1 prior covariance matrix U using factor analysis
-# allowing for different residual variances V among the samples.
+# Perform an M-step update for a rank1 prior covariance matrix U using
+# factor analysis allowing for different residual variances V among
+# the samples.
 update_prior_covariance_rank1_fa_notiid <- function (X, U, V, p, ...)
   update_prior_covariance_struct_rank1(U, fa_rank1_notiid(X, U$vec, V, p))
   
-
 # Perform an M-step update for unconstrained prior covariance matrix U
 # using factor analyzer in the special case of V_j = I.  (See eq.(74)
 # in main writeup.)
@@ -75,10 +72,6 @@ update_prior_covariance_rank1_fa <- function (X, U, V, p, minval) {
     vec <- update_prior_covariance_rank1_fa_general(X,U$vec,V,p)
   return(update_prior_covariance_rank1_struct(U,vec))
 }
-
-          
-                     
-
                      
 # Perform an M-step update for estimating the scalar for prior
 # covariance matrix U0 in the special case of V_j = I. U0 can be
@@ -110,8 +103,6 @@ fa_scaled_iid<- function(X, U0, p, s, r){
   }
   return(s)
 }
-
-
 
 # Perform an M-step update for estimating the scalar for prior
 # covariance matrix U0 in the general case where V_j can vary for
@@ -154,8 +145,6 @@ fa_scaled_notiid <- function(X, U0, V, p, s, r){
   return(s)
 }
 
-
-
 # Perform an M-step update for rank1 prior covariance matrix U 
 # using factor analyzer in the special case of V_j = I. 
 # @param X contains observed data of size n \times r.
@@ -171,7 +160,6 @@ fa_rank1_iid <- function (X, u, p) {
   u = 1/sum(eta)* colSums(theta*X)
   return(u)
 }
-
 
 # Perform an M-step update for a prior rank-1 matrix, allowing for
 # residual covariance matrices that differ among the data samples

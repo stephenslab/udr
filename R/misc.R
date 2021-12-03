@@ -51,9 +51,9 @@ getrank1 <- function (X) {
 #' Function to calculate matrix Q where U=QQ^T when U is rank-deficient. 
 #' @param U is the rank-deficient matrix to decompose
 #' @param r is the rank of U.
-get_mat_Q = function (U, r) {
-  evd = eigen(U)
-  mat = evd$vectors[,1:r] %*% (sqrt(evd$values[1:r]) * diag(r))
+get_mat_Q <- function (U, r) {
+  evd <- eigen(U)
+  mat <- evd$vectors[,1:r] %*% (sqrt(evd$values[1:r]) * diag(r))
   return(mat)
 }
 
@@ -97,6 +97,25 @@ softmax <- function (W) {
   a <- apply(W,1,max)
   W <- exp(W - a)
   return(W/rowSums(W))
+}
+
+# Compute mixture of normals log-density in a numerically stable
+# way. Specifically, this function should return the same result as
+#
+#  k <- length(w)
+#  log(sum(sapply(1:k,function (i) w[i] * dmvnorm(x,sigma = U[,,i] + V))))
+#
+# except that the computation is done in a more numerically stable
+# way.
+#
+#' @importFrom mvtnorm dmvnorm
+ldmvnormmix <- function (x, w, U, V) {
+  n <- length(w)
+  y <- rep(0,n)
+  for (i in 1:n)
+    y[i] <- log(w[i]) + dmvnorm(x,sigma = U[,,i] + V,log = TRUE)
+  u <- max(y)
+  return(log(sum(exp(y - u))) + u)
 }
 
 # Randomly generate an m x m symmetric rank-1 matrix.

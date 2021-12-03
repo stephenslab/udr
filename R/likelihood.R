@@ -72,11 +72,10 @@ loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
 #' @importFrom mvtnorm dmvnorm
 loglik_ud_iid_helper <- function (X, w, U, V) {
   n <- nrow(X)
-  k <- length(w)
   y <- rep(0,n)
-  for (j in 1:k)
-    y <- y + w[j] * dmvnorm(X,sigma = V + U[,,j])
-  return(sum(log(y)))
+  for (i in 1:n)
+    y[i] <- ldmvnormmix(X[i,],w,U,V)
+  return(sum(y))
 }
 
 # Compute the log-likelihood when the residual covariance V is not
@@ -85,10 +84,8 @@ loglik_ud_iid_helper <- function (X, w, U, V) {
 #' @importFrom mvtnorm dmvnorm
 loglik_ud_notiid_helper <- function (X, w, U, V) {
   n <- nrow(X)
-  k <- length(w)
   y <- rep(0,n)
   for (i in 1:n)
-    for (j in 1:k)
-      y[i] <- y[i] + w[j] * dmvnorm(X[i,],sigma = V[,,i] + U[,,j])
-  return(sum(log(y)))
+    y[i] <- ldmvnormmix(X[i,],w,U,V[,,i])
+  return(sum(y))
 }
