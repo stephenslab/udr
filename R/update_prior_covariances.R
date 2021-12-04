@@ -66,8 +66,8 @@ update_prior_covariances <-
 
     # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
     for (i in 1:k)
-      fit$U[[i]] <- R.utils::doCall(match.fun(covupdates[i]),
-                             args=list(X = fit$X,U = fit$U[[i]],
+      fit$U[[i]] <- do.call(covupdates[i],
+                             list(X = fit$X,U = fit$U[[i]],
                                   p = fit$P[,i],minval = minval))
 
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).

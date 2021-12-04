@@ -21,9 +21,8 @@ update_prior_covariance_unconstrained_ed_notiid <- function (X, U, V, p, ...)
 update_prior_covariance_unconstrained_ed_notiid_rcpp <- function (X, U, V, p,
                                                                   ...) {
   message("update_prior_covariance_unconstrained_ed_notiid_rcpp is not yet ",
-          "implemented; using update_prior_covariance_struct_unconstrained ",
-          "instead")
-  update_prior_covariance_struct_unconstrained(U,ed(X,U$mat,V,p))
+          "implemented; using R version instead")
+  return(update_prior_covariance_unconstrained_ed_notiid(X,U,V,p,...))
 }
 
 # These functions are defined only to provide more informative error
