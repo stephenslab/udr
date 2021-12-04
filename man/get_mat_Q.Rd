@@ -4,7 +4,7 @@
 \alias{get_mat_Q}
 \title{Function to calculate matrix Q where U=QQ^T when U is rank-deficient.}
 \usage{
-get_mat_Q(U, r)
+get_mat_Q(U)
 }
 \arguments{
 \item{U}{is the rank-deficient matrix to decompose}
