@@ -119,6 +119,12 @@ ldmvnormmix <- function (x, w, U, V) {
   return(log(sum(exp(y - u))) + u)
 }
 
+
+log_sum_exp <- function(y){
+  u <- max(y)
+  return(log(sum(exp(y - u))) + u)
+}
+
 # Randomly generate an m x m symmetric rank-1 matrix.
 #
 #' @importFrom stats rnorm
