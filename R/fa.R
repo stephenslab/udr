@@ -13,14 +13,12 @@ update_prior_covariance_unconstrained_fa_notiid <- function (X, U, V, p, ...)
 # factor analysis for the special case when V = I for all samples; 
 # that is, the model is x ~ N(0,sU + I).
 update_prior_covariance_scaled_fa_iid <- function (X, U, p, ...){
-  r <- sum(eigen(U$U0)$values > 1e-15)
   update_prior_covariance_struct_scaled(U, fa_scaled_iid(X, U$U0, U$Q, p, U$s))
 }
 
 # Perform an M-step update for a scaled prior covariance (U) using factor
 # analysis, allowing for different residual variances V among the samples.
 update_prior_covariance_scaled_fa_notiid <- function (X, U, V, p, ...){
-  r <- sum(eigen(U$U0)$values > 1e-15)
   update_prior_covariance_struct_scaled(U, fa_scaled_notiid(X, U$U0, V, U$Q, p, U$s))
 }
 
