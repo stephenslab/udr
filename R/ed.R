@@ -17,7 +17,7 @@ update_prior_covariance_unconstrained_ed_notiid <- function (X, U, V, p, ...)
 
 # This is a more efficient C++ implementation of
 # update_prior_covariance_rank1_ed_notiid. (The C++ version has not yet been
-# implemented, so for now we simply all the R implementation.)
+# implemented, so for now we simply call the R implementation.)
 update_prior_covariance_unconstrained_ed_notiid_rcpp <- function (X, U, V, p,
                                                                   ...) {
   message("update_prior_covariance_unconstrained_ed_notiid_rcpp is not yet ",

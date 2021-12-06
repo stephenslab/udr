@@ -67,8 +67,8 @@ update_prior_covariances <-
     # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
     for (i in 1:k)
       fit$U[[i]] <- do.call(covupdates[i],
-                             list(X = fit$X,U = fit$U[[i]],
-                                  p = fit$P[,i],minval = minval))
+                            list(X = fit$X,U = fit$U[[i]],
+                                 p = fit$P[,i],minval = minval))
 
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
     fit <- unsimplify_model(fit)
@@ -86,8 +86,8 @@ update_prior_covariances <-
       V <- list2array(V)
     for (i in 1:k)
       fit$U[[i]] <- do.call(covupdates[i],
-                            list(X = fit$X,U = fit$U[[i]],V = V,
-                                 p = fit$P[,i],minval = minval))
+                             list(X = fit$X,U = fit$U[[i]],V = V,
+                                  p = fit$P[,i],minval = minval))
   }
   
   # Output the updated fit.
