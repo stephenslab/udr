@@ -24,7 +24,7 @@ em_scaled_iid <- function(X, U, p, minval){
   evd <- eigen(U)
   lambdas <- ifelse(evd$values < minval,minval,evd$values)
   Y <- t(X %*% evd$vectors)
-  dev_zero <- grad_loglik_scale_factor(0, p, Y, lambdas) 
+  dev_zero <- grad_loglik_scaled_iid(0, p, Y, lambdas) 
   if (dev_zero <= 0){
     return(0)
   }else{
