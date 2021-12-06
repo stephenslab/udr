@@ -48,12 +48,12 @@ getrank1 <- function (X) {
   return(with(out,sqrt(values[1]) * vectors[,1]))
 }
                     
-#' Function to calculate matrix Q where U=QQ^T when U is rank-deficient. 
-#' @param U is the rank-deficient matrix to decompose
-#' @param r is the rank of U.
+# Function to calculate matrix Q where U=QQ^T when U is rank-deficient. 
+# @param U is the rank-deficient matrix to decompose
+# @param r is the rank of U.
 get_mat_Q <- function (U) {
   evd <- eigen(U)
-  r <- sum(evd$values>0)
+  r   <- sum(evd$values>0)
   mat <- evd$vectors[,1:r] %*% (sqrt(evd$values[1:r]) * diag(r))
   return(mat)
 }
@@ -115,12 +115,11 @@ ldmvnormmix <- function (x, w, U, V) {
   y <- rep(0,n)
   for (i in 1:n)
     y[i] <- log(w[i]) + dmvnorm(x,sigma = U[,,i] + V,log = TRUE)
-  u <- max(y)
-  return(log(sum(exp(y - u))) + u)
+  return(log_sum_exp(y))
 }
 
-
-log_sum_exp <- function(y){
+# TO DO: Explain (briefly) what this function does.
+log_sum_exp <- function (y) {
   u <- max(y)
   return(log(sum(exp(y - u))) + u)
 }

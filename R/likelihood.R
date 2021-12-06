@@ -73,12 +73,10 @@ loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
 loglik_ud_iid_helper <- function(X, w, U, V){
   n <- nrow(X)
   k <- length(w)
-  Y <- matrix(0, ncol = k, nrow = n)
-  
-  for (i in 1:k){
-  Y[ ,i] <- log(w[i]) + dmvnorm(X, sigma = U[,,i] + V, log = TRUE)
-  }
-  ll <- apply(Y, 1, function(y) log_sum_exp(y))
+  Y <- matrix(0,n,k)
+  for (i in 1:k)
+    Y[,i] <- log(w[i]) + dmvnorm(X,sigma = U[,,i] + V,log = TRUE)
+  ll <- apply(Y,1,function (y) log_sum_exp(y))
   return(sum(ll))
 }
 

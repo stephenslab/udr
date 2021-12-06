@@ -87,11 +87,9 @@ update_prior_covariance_rank1_fa_notiid_rcpp <- function (X, U, V, p, ...) {
 # Perform an M-step update for unconstrained prior covariance matrix U
 # using factor analyzer in the special case of V_j = I. (See eq. 74 in
 # main writeup.)
-#
 # @param X contains observed data of size n \times r.
 # @param U the estimate of U in previous iteration
 # @param p is a vector of weights
-#
 fa_unconstrained <- function(X, U, Q, p) {
   n <- nrow(X)
   r <- nrow(U)
@@ -115,25 +113,23 @@ fa_unconstrained <- function(X, U, Q, p) {
 # @param s is the scalar estimate in previous iteration
 # @param r is the rank of U0
 fa_scaled_iid<- function(X, U0, Q, p, s){
+  n <- nrow(X)
+  r <- ncol(Q)
+  I <- diag(r)
+  Sigma <- solve(crossprod(Q) + I/s)
+  bmat  <- X %*% Q %*% Sigma   # n by r matrix to store b_j
 
-  n = nrow(X)
-  r = ncol(Q)
-  I = diag(r)
-  Sigma = solve(crossprod(Q) + I/s)
-  bmat = X %*% Q %*% Sigma   # n by r matrix to store b_j
-
-  B = c()
-  trB = rep(NA, n)  # trace of Bmat 
-  for (i in 1:n){
-    B[[i]] = tcrossprod(bmat[i, ]) + Sigma
-    trB[i] = sum(diag(B[[i]]))
+  B   <- c()
+  trB <- rep(as.numeric(NA),n)  # trace of Bmat 
+  for (i in 1:n) {
+    B[[i]] <- tcrossprod(bmat[i,]) + Sigma
+    trB[i] <- sum(diag(B[[i]]))
   }
 
-  if (r ==1){
+  if (r == 1)
     s = sum(p*unlist(B))/sum(p)
-  }else{
+  else
     s = sum(trB*p)/(sum(p)*r)
-  }
   return(s)
 }
 
@@ -148,33 +144,31 @@ fa_scaled_iid<- function(X, U0, Q, p, s){
 # @param s is the scalar estimate in previous iteration
 # @param r is the rank of U0
 fa_scaled_notiid <- function(X, U0, V, Q, p, s){
-  
-  n = nrow(X)
-  r = ncol(Q)
-  I = diag(r)
+  n <- nrow(X)
+  r <- ncol(Q)
+  I <- diag(r)
 
-  Sigma = c()
-  V.inverse = c() 
-  VinvQ = c()
-  b = c()
-  B = c()
-  trB = rep(NA, n)  # trace of Bmat 
+  Sigma     <- c()
+  V.inverse <- c() 
+  VinvQ     <- c()
+  b         <- c()
+  B         <- c()
+  trB       <- rep(as.numeric(NA),n)  # trace of Bmat 
   
-  for (i in 1:n){
-    V.inverse[[i]] = solve(V[,,i])
-    VinvQ[[i]] = solve(V[,,i]) %*% Q
+  for (i in 1:n) {
+    V.inverse[[i]] <- solve(V[,,i])
+    VinvQ[[i]]     <- solve(V[,,i]) %*% Q
 
-    Sigma[[i]] = solve(crossprod(Q, VinvQ[[i]]) + I/s)    #t(Q) %*% VinvQ[[i]])
-    b[[i]] = crossprod(X[i, ], VinvQ[[i]]) %*% Sigma[[i]]
-    B[[i]] = crossprod(b[[i]])+ Sigma[[i]]
-    trB[i] = sum(diag(B[[i]]))
+    Sigma[[i]] <- solve(crossprod(Q,VinvQ[[i]]) + I/s)    #t(Q) %*% VinvQ[[i]])
+    b[[i]]     <- crossprod(X[i,], VinvQ[[i]]) %*% Sigma[[i]]
+    B[[i]]     <- crossprod(b[[i]]) + Sigma[[i]]
+    trB[i]     <- sum(diag(B[[i]]))
   }
   
-  if (r ==1){
-    s = sum(p*unlist(B))/sum(p)
-  }else{
-    s = sum(trB*p)/(sum(p)*r)
-  }
+  if (r == 1)
+    s <- sum(p*unlist(B))/sum(p)
+  else
+    s <- sum(trB*p)/(sum(p)*r)
   return(s)
 }
 
@@ -184,13 +178,11 @@ fa_scaled_notiid <- function(X, U0, V, Q, p, s){
 # @param u the estimate of vector that forms the rank1 U in previous iteration
 # @param p is a vector of weights
 fa_rank1_iid <- function (X, u, p) {
-  n      <- nrow(X)
-  m      <- ncol(X)
-  sigma2 <- drop(1/(crossprod(u) + 1))
-  mu <- sigma2*drop(tcrossprod(u, X)) # length-n vector
-  theta <- mu*p
-  eta <- p*(mu^2+sigma2)
-  u = 1/sum(eta)* colSums(theta*X)
+  sigma2 <- drop(1/(1 + crossprod(u)))
+  mu     <- sigma2*drop(tcrossprod(u,X))  # length-n vector
+  theta  <- mu*p
+  eta    <- p*(mu^2 + sigma2)
+  u      <- 1/sum(eta) * colSums(theta*X)
   return(u)
 }
 
@@ -211,7 +203,7 @@ fa_rank1_notiid<- function (X, u, V, p) {
   for (i in 1:n){
     A          <- solve(V[,,i])
     utA        <- crossprod(u, A)
-    sigma2     <- drop(1/(utA %*% u + 1))    # t(u) %*% A
+    sigma2     <- drop(1/(utA %*% u + 1))  # t(u) %*% A
     mu         <- drop(sigma2 * utA %*% X[i,])
     uw[,i]     <- p[i]*mu*A %*% X[i,]
     Vinvw[,,i] <- p[i]*(mu^2 + sigma2)*A
