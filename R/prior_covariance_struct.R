@@ -74,6 +74,7 @@ transform_prior_covariance_struct_scaled <- function (U, A) {
   x <- rownames(U$U0)
   U$U0 <- t(A) %*% U$U0 %*% A
   U$mat <- U$s * U$U0
+  U$Q <- get_mat_Q(U$U0)
   rownames(U$U0)  <- x
   colnames(U$U0)  <- x
   rownames(U$mat) <- x
