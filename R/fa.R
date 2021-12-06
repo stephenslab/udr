@@ -22,8 +22,8 @@ update_prior_covariance_unconstrained_fa_notiid <- function (X, U, V, p, ...)
 # This is a more efficient C++ implementation of
 # update_prior_covariance_unconstrained_fa_notiid.
 update_prior_covariance_unconstrained_fa_notiid_rcpp <- function (X, U, V, p, ...)
-  stop("unconstrained_prior_covariance_unconstrained_fa_notiid_rcpp is not yet ",
-       "implemented")
+  stop("unconstrained_prior_covariance_unconstrained_fa_notiid_rcpp is not ",
+       "yet implemented")
 
 # Perform an M-step update for a scaled prior covariance matrix (U) using 
 # factor analysis for the special case when V = I for all samples; 
@@ -35,8 +35,8 @@ update_prior_covariance_scaled_fa_iid <- function (X, U, p, ...)
 # update_prior_covariance_scaled_fa_iid. (The C++ version has not yet been
 # implemented, so for now we simply all the R implementation.)
 update_prior_covariance_scaled_fa_iid_rcpp <- function (X, U, p, ...) {
-  message("update_prior_covariance_scaled_fa_iid_rcpp is not yet implemented; ",
-          "using R version instead")
+  message("update_prior_covariance_scaled_fa_iid_rcpp is not yet ",
+          "implemented; using R version instead")
   return(update_prior_covariance_scaled_fa_iid(X,U,p,...))
 }
 
@@ -49,8 +49,8 @@ update_prior_covariance_scaled_fa_notiid <- function (X, U, V, p, ...)
 # update_prior_covariance_scaled_fa_notiid. (The C++ version has not yet been
 # implemented, so for now we simply all the R implementation.)
 update_prior_covariance_scaled_fa_notiid_rcpp <- function (X, U, V, p, ...) {
-  message("update_prior_covariance_scaled_fa_notiid_rcpp is not yet implemented; ",
-          "using R version instead")
+  message("update_prior_covariance_scaled_fa_notiid_rcpp is not yet ",
+          "implemented; using R version instead")
   return(update_prior_covariance_scaled_fa_notiid(X,U,V,p,...))
 }
 
@@ -79,8 +79,8 @@ update_prior_covariance_rank1_fa_notiid <- function (X, U, V, p, ...)
 # update_prior_covariance_rank1_fa_notiid. (The C++ version has not yet been
 # implemented, so for now we simply all the R implementation.)
 update_prior_covariance_rank1_fa_notiid_rcpp <- function (X, U, V, p, ...) {
-  message("update_prior_covariance_rank1_fa_notiid_rcpp is not yet implemented; ",
-          "using R version instead")
+  message("update_prior_covariance_rank1_fa_notiid_rcpp is not yet ",
+          "implemented; using R version instead")
   return(update_prior_covariance_rank1_fa_notiid(X,U,V,p,...))
 }
 
@@ -159,7 +159,7 @@ fa_scaled_notiid <- function(X, U0, V, Q, p, s){
     V.inverse[[i]] <- solve(V[,,i])
     VinvQ[[i]]     <- solve(V[,,i]) %*% Q
 
-    Sigma[[i]] <- solve(crossprod(Q,VinvQ[[i]]) + I/s)    #t(Q) %*% VinvQ[[i]])
+    Sigma[[i]] <- solve(crossprod(Q,VinvQ[[i]]) + I/s) # t(Q) %*% VinvQ[[i]])
     b[[i]]     <- crossprod(X[i,], VinvQ[[i]]) %*% Sigma[[i]]
     B[[i]]     <- crossprod(b[[i]]) + Sigma[[i]]
     trB[i]     <- sum(diag(B[[i]]))
@@ -210,7 +210,3 @@ fa_rank1_notiid<- function (X, u, V, p) {
   }
   return(drop(solve(sliceSums(Vinvw),rowSums(uw))))
 }
-         
-
-
-
