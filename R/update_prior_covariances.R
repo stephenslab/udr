@@ -85,9 +85,9 @@ update_prior_covariances <-
     if (is.list(V))
       V <- list2array(V)
     for (i in 1:k)
-      fit$U[[i]] <- do.call(covupdates[i],
-                            list(X = fit$X,U = fit$U[[i]],V = V,
-                                 p = fit$P[,i],minval = minval))
+      fit$U[[i]] <- R.utils::doCall(match.fun(covupdates[i]),
+                             args=list(X = fit$X,U = fit$U[[i]],V=V,
+                                  p = fit$P[,i],minval = minval))
   }
   
   # Output the updated fit.
