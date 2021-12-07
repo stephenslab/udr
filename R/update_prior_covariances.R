@@ -60,7 +60,7 @@ update_prior_covariances <-
   # Update the prior covariance matrices.
   k <- length(fit$U)
   if (is.matrix(fit$V)) {
-
+    fit0 <- fit
     # Transform the data x to x' so that x' ~ N(0,U' + I).
     fit <- simplify_model(fit)
 
@@ -72,6 +72,14 @@ update_prior_covariances <-
 
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
     fit <- unsimplify_model(fit)
+    # Recover original X and U$U0 to avoid numerical errors through iterations
+    fit$X <- fit0$X
+    covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
+    indx_scaled <- which(covtypes == "scaled")
+    for (indx in indx_scaled){
+      fit$U[[indx]]$U0 <- fit0$U[[indx]]$U0
+      fit$U[[indx]]$Q <- fit0$U[[indx]]$Q
+    }
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
