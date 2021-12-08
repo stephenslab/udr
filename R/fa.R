@@ -113,9 +113,16 @@ fa_unconstrained <- function(X, U, Q, p) {
 # @param s is the scalar estimate in previous iteration
 # @param r is the rank of U0
 fa_scaled_iid<- function(X, U0, Q, p, s){
+
   n <- nrow(X)
   r <- ncol(Q)
   I <- diag(r)
+  mat0 = matrix(0, nrow = ncol(X), ncol = ncol(X))
+
+  if (s == 0 | sum(U0 != mat0) == 0){
+    return (s)
+  }
+  
   Sigma <- solve(crossprod(Q) + I/s)
   bmat  <- X %*% Q %*% Sigma   # n by r matrix to store b_j
 
@@ -144,21 +151,24 @@ fa_scaled_iid<- function(X, U0, Q, p, s){
 # @param s is the scalar estimate in previous iteration
 # @param r is the rank of U0
 fa_scaled_notiid <- function(X, U0, V, Q, p, s){
+
   n <- nrow(X)
   r <- ncol(Q)
   I <- diag(r)
+  mat0 = matrix(0, nrow = ncol(X), ncol = ncol(X))
 
+  if (s == 0 | sum(U0 != mat0) == 0){
+    return (s)
+  }
   Sigma     <- c()
   V.inverse <- c() 
   VinvQ     <- c()
   b         <- c()
   B         <- c()
   trB       <- rep(as.numeric(NA),n)  # trace of Bmat 
-  
   for (i in 1:n) {
     V.inverse[[i]] <- solve(V[,,i])
     VinvQ[[i]]     <- solve(V[,,i]) %*% Q
-
     Sigma[[i]] <- solve(crossprod(Q,VinvQ[[i]]) + I/s) # t(Q) %*% VinvQ[[i]])
     b[[i]]     <- crossprod(X[i,], VinvQ[[i]]) %*% Sigma[[i]]
     B[[i]]     <- crossprod(b[[i]]) + Sigma[[i]]
