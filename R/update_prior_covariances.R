@@ -60,26 +60,27 @@ update_prior_covariances <-
   # Update the prior covariance matrices.
   k <- length(fit$U)
   if (is.matrix(fit$V)) {
-    fit0 <- fit
+
+    fit1 <- fit
     # Transform the data x to x' so that x' ~ N(0,U' + I).
-    fit <- simplify_model(fit)
+    fit1 <- simplify_model(fit1)
 
     # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
+    # Update U in the simpler model and then transform U back
     for (i in 1:k)
-      fit$U[[i]] <- do.call(covupdates[i],
-                            list(X = fit$X,U = fit$U[[i]],
-                                 p = fit$P[,i],minval = minval))
+      u  <- do.call(covupdates[i],
+                    list(X = fit1$X,U = fit1$U[[i]],
+                    p = fit1$P[,i],minval = minval))
 
-    # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
-    fit <- unsimplify_model(fit)
-    # Recover original X and U$U0 to avoid numerical errors through iterations
-    fit$X <- fit0$X
-    covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
-    indx_scaled <- which(covtypes == "scaled")
-    for (indx in indx_scaled){
-      fit$U[[indx]]$U0 <- fit0$U[[indx]]$U0
-      fit$U[[indx]]$Q <- fit0$U[[indx]]$Q
-    }
+      # For scaled_U, only the updated scalar needs to be incorporated. 
+      if (attr(u,"covtype") == "scaled"){
+        fit$U[[i]]$s = u$s
+      }
+      else{
+          # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
+          f <- paste("transform_prior_covariance_struct",attr(u,"covtype"),sep="_")
+          fit$U[[i]] <- do.call(f,list(U = u,A = fit1$R))
+        }
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
