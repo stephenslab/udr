@@ -101,6 +101,7 @@ transform_prior_covariance_struct_rank1 <- function (U, A) {
 transform_prior_covariance_struct_unconstrained <- function (U, A) {
   x <- rownames(U$mat)
   U$mat <- t(A) %*% U$mat %*% A
+  U$Q <- get_mat_Q(U$mat)
   rownames(U$mat) <- x
   colnames(U$mat) <- x
   return(U)
