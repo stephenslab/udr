@@ -53,27 +53,13 @@ double loglik_ud_iid (const mat& X, const vec& w, const cube& U,
 // samples.
 double loglik_ud_notiid (const mat& X, const vec& w, const cube& U, 
 			 const cube& V) {
-  
-  // Get the number of rows (n) and columns (m) of X, and the number
-  // of mixture components (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
-  unsigned int k = w.n_elem;
-
-  // These store intermediate computations.
+  vec y(n);
   vec x(m);
-  mat T(m,m);
-  mat L(m,m);
-  
-  // Compute the log-likelihood for each sample (row of X).
-  vec y(n,fill::zeros);
-  for (unsigned int i = 0; i < n; i++)
-    for (unsigned int j = 0; j < k; j++) {
-      x = trans(X.row(i));
-      T = V.slice(i) + U.slice(j);
-      L = chol(T,"lower");      
-      y(i) += w(j) * exp(ldmvnorm(x,L));
-    }
-  
-  return(sum(log(y)));
+  for (unsigned int i = 0; i < n; i++) {
+    x = trans(X.row(i));
+    y(i) = ldmvnormmix(x,w,U,V.slice(i));
+  }
+  return(sum(y));
 }
