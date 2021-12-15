@@ -13,9 +13,9 @@ Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
              person("Gao","Wang",role="ctb"))
 URL: https://github.com/stephenslab/udr
 BugReports: https://github.com/stephenslab/udr/issues
-Description: Implements fast statistical algorithms for solving the
-    multivariate normal means problem via empirical Bayes, building on
-    the "Extreme Deconvolution" method <DOI:10.1214/10-AOAS439>.
+Description: Implements algorithms for solving the
+    multivariate normal means problem via empirical Bayes. The ``Ultimate Deconvolution" name comes its connection to the 
+    "Extreme Deconvolution" method <DOI:10.1214/10-AOAS439>. The main function is \link{ud_fit}.
 License: MIT + file LICENSE
 Imports: 
     stats,

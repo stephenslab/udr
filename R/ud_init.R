@@ -7,8 +7,8 @@
 #'   an m-dimensional data point. \code{X} should have at least 2 rows
 #'   and 2 columns.
 #'
-#' @param V Either an m x m matrix giving the initial estimate of the
-#'   residual covariance matrix, or a list of m x m covariance matrices
+#' @param V Either an m x m matrix giving the
+#'   residual covariance matrix (assumed equal for every obsevation), or a list of m x m covariance matrices
 #'   of length n.
 #'
 #' @param n_rank1 A non-negative integer specifying the number of
@@ -26,7 +26,7 @@
 #'   specified, 4 random unconstrained matrices will be included.
 #'
 #' @param U_scaled A list specifying initial estimates of the scaled
-#'   covariance matrices in the mixture prior.
+#'   covariance matrices in the mixture prior. (The defaults provide two commonly-used covariance matrices here)
 #' 
 #' @param U_rank1 A list specifying initial estimates of the rank-1
 #'   matrices in the mixture prior. At most one of \code{n_rank1} and
