@@ -32,6 +32,12 @@ void scale_rows (mat& A, const vec& b) {
   A.each_col() %= c;
 }
 
+// Compute log(sum(exp(x))) in a numerically stable way.
+double logsumexp (const vec& x) {
+  double a = max(x);
+  return log(sum(exp(x - a))) + a;
+}
+
 // Return the "softmax" of vector x, y(i) = exp(x(i))/sum(exp(x)), in
 // a way that guards against numerical underflow or overflow. The
 // return value is a vector with entries that sum to 1.
@@ -63,6 +69,28 @@ mat crossprod (const mat& X) {
 double ldmvnorm (const vec& x, const mat& L) {
   double d = norm(solve(L,x),2);
   return -d*d/2 - sum(log(sqrt(2*M_PI)*L.diag()));
+}
+
+// Compute mixture of normals log-density in a numerically stable
+// way. Specifically, this function should return the same result as
+//
+//  k <- length(w)
+//  log(sum(sapply(1:k,function (i) w[i] * dmvnorm(x,sigma = U[,,i] + V))))
+//
+// except that the computation is done in a more numerically stable
+// way.
+double ldmvnormmix (const vec& x, const vec& w, const cube& U, const mat& V) {
+  unsigned int n = w.n_elem;
+  unsigned int m = x.n_elem;
+  vec y(n);
+  mat T(m,m);
+  mat L(m,m);
+  for (unsigned int i = 0; i < n; i++) {
+    T    = U.slice(i) + V;
+    L    = chol(T,"lower");
+    y(i) = log(w(i)) + ldmvnorm(x,L);
+  }
+  return logsumexp(y);
 }
 
 // Find the n x n matrix U + I that best approximates T satisfying the

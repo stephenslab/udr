@@ -36,30 +36,16 @@ double loglik_ud_notiid_rcpp (const arma::mat& X, const arma::vec& w,
 // when the residual covariance is the same for all samples.
 double loglik_ud_iid (const mat& X, const vec& w, const cube& U, 
 		      const mat& V) {
-  
-  // Get the number of rows (n) and columns (m) of X, and the number
-  // of mixture components (k).
   unsigned int n = X.n_rows;
   unsigned int m = X.n_cols;
-  unsigned int k = w.n_elem;
-
-  // These store intermediate computations.
+  vec y(n);
   vec x(m);
-  mat T(m,m);
-  mat L(m,m);
-  
-  // Compute the log-likelihood for each sample (row of X).
-  vec y(n,fill::zeros);
-  for (unsigned int j = 0; j < k; j++) {
-    T = V + U.slice(j);
-    L = chol(T,"lower");      
-    for (unsigned int i = 0; i < n; i++) {
-      x = trans(X.row(i));
-      y(i) += w(j) * exp(ldmvnorm(x,L));
-    }
+  for (unsigned int i = 0; i < n; i++) {
+    x = trans(X.row(i));
+    y(i) = ldmvnormmix(x,w,U,V);
   }
   
-  return(sum(log(y)));
+  return(sum(y));
 }
 
 // Compute the log-likelihood for the Ultimate Deconvolution model
