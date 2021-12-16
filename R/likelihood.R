@@ -22,8 +22,6 @@
 #'
 #' @export
 #' 
-#' 
-#' 
 logLik.ud_fit <- function (object, ...) {
   if (!(is.list(object) & inherits(object,"ud_fit")))
     stop("Input argument \"object\" should be an object of class \"ud_fit\"")
@@ -33,59 +31,7 @@ logLik.ud_fit <- function (object, ...) {
   return(out)
 }
 
-# Compute the log-likelihood for the Ultimate Deconvolution model.
-# Input argument U should either be a list of length k, in which each
-# U[[i]]$mat is an m x m matrix, or an m x m x k array. Input argument
-# V should either be an m x m matrix, a list of matrices of length n,
-# or an m x m x n array, where n is the number of data points.
-loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
-  version <- match.arg(version)
-  
-  # Process input arguments U and V as needed.
-  if (is.list(U))
-    U <- ulist2array(U)
-  if (is.list(V))
-    V <- list2array(V)
-
-  if (is.matrix(V)) {
-
-    # Compute the likelihood in the case when the residual variance is
-    # the same for all samples.
-    if (version == "Rcpp")
-      y <- loglik_ud_iid_rcpp(X,w,U,V)
-    else if (version == "R")
-      y <- loglik_ud_iid_helper(X,w,U,V)
-  } else {
-
-    # Compute the log-likelihood in the case when the residual
-    # variance is not necessarily the same for all samples.
-    if (version == "Rcpp")
-      y <- loglik_ud_notiid_rcpp(X,w,U,V)
-    else if (version == "R")
-      y <- loglik_ud_notiid_helper(X,w,U,V)
-  }
-  return(y)
-}
-
-# Compute the log-likelihood when the residual covariance V is the
-# same for all samples.
-loglik_ud_iid_helper <- function (X, w, U, V) {
-  K <- dim(U)[3] # number of mixture components 
-  n <- nrow(X)
-  loglik_mat = matrix(0, nrow=K, ncol=n)
-  for(k in 1:K){
-    loglik_mat[k,] <- t(dmvnorm(X,sigma = U[,,k] + V,log = TRUE))
-  }
-  return(sum(apply(loglik_mat+log(w),2,log_sum_exp)))
-}
-
-
-# Compute the log-likelihood when the residual covariance V is not
-# necessarily the same for all samples.
-loglik_ud_notiid_helper <- function (X, w, U, V) {
-  n <- nrow(X)
-  y <- rep(0,n)
-  for (i in 1:n)
-    y[i] <- ldmvnormmix(X[i,],w,U,V[,,i])
-  return(sum(y))
+compute_loglik <- function(fit){
+  fit$loglik = as.numeric(logLik(fit))
+  return(fit)
 }

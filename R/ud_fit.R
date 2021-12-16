@@ -291,8 +291,11 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
   # is nice to enusre this is up-to-date after performing M step)
   fit <- compute_loglik_matrix(fit,control$version)
   fit <- compute_posterior_probs(fit)
+  fit <- compute_loglik(fit)
   
   for (iter in 1:control$maxiter) {
+    initial_loglik = fit$loglik #store for checking convergence later
+    
     t1 <- proc.time()
 
     # Store the current estimates of the model parameters.
@@ -321,11 +324,11 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     
     fit <- compute_loglik_matrix(fit,control$version)
     fit <- compute_posterior_probs(fit)
+    fit <- compute_loglik(fit)
     
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
-    loglik <- as.numeric(logLik(fit))
     dw <- max(abs(fit$w - w0))
     dU <- max(abs(ulist2array(fit$U) - ulist2array(U0)))
     if (is.matrix(fit$V))
@@ -333,18 +336,18 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     else
       dV <- 0
     t2 <- proc.time()
-    progress[iter,"loglik"]  <- loglik
+    progress[iter,"loglik"]  <- fit$loglik
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.u"] <- dU 
     progress[iter,"delta.v"] <- dV 
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
-      cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dV))
+      cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,fit$loglik,dw,dU,dV))
 
     # Check convergence.
     dparam     <- max(dw,dU,dV)
-    dloglik    <- loglik - fit$loglik
-    fit$loglik <- loglik
+    dloglik    <- fit$loglik - initial_loglik
+
     if (dparam < control$tol | dloglik < log(1 + control$tol.lik))
       break
   }

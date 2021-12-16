@@ -206,11 +206,11 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   
   # Compute the log-likelihood and the responsibilities matrix (P), and
   # finalize the output.
-  loglik     <- loglik_ud(X,w,U,V,control$version)
-  fit        <- list(X = X,V = V,U = U,w = w,loglik = loglik,
+  fit        <- list(X = X,V = V,U = U,w = w,
                      progress = progress)
   class(fit) <- c("ud_fit","list")
   fit <- compute_loglik_matrix(fit,control$version)
-  fit        <- compute_posterior_probs(fit)
+  fit <- compute_posterior_probs(fit)
+  fit <- compute_loglik(fit)
   return(fit)
 }
