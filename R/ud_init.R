@@ -210,6 +210,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   fit        <- list(X = X,V = V,U = U,w = w,loglik = loglik,
                      progress = progress)
   class(fit) <- c("ud_fit","list")
-  fit        <- compute_posterior_probs(fit,control$version)
+  fit <- compute_loglik_matrix(fit,control$version)
+  fit        <- compute_posterior_probs(fit)
   return(fit)
 }

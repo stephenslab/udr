@@ -16,8 +16,8 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
   capture.output(fit <- ud_fit(fit,control = c(control,list(maxiter = 4))))
 
   # Update the responsibilities matrix.
-  fit1 <- compute_posterior_probs(fit,version = "R")
-  fit2 <- compute_posterior_probs(fit,version = "Rcpp")
+  fit1 <- compute_loglik_matrix(fit,version = "R")
+  fit2 <- compute_loglik_matrix(fit,version = "Rcpp")
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-15)
 
   # Update the mixture weights.
@@ -82,8 +82,8 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
   control2 <- control
   control1$version <- "R"
   control2$version <- "Rcpp"
-  fit1 <- compute_posterior_probs(fit,version = "R")
-  fit2 <- compute_posterior_probs(fit,version = "Rcpp")
+  fit1 <- compute_loglik_matrix(fit,version = "R")
+  fit2 <- compute_loglik_matrix(fit,version = "Rcpp")
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-15)
   
   # Update the mixture weights.

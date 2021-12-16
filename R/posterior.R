@@ -91,87 +91,9 @@
 #' 
 #' @export
 #' 
-compute_posterior_probs <- function (fit, version = c("Rcpp","R")) {
-  version <- match.arg(version)
-  
-  # Check input argument "fit".
-  if (!(is.list(fit) & inherits(fit,"ud_fit")))
-    stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
-  
-  # Get the prior (U) and residual (V) covariance matrices.
-  U <- ulist2array(fit$U)
-  V <- fit$V
-  if (is.list(V))
-    V <- list2array(V)
-
-  # Compute the responsibilities matrix.
-  if (is.matrix(V)) {
-
-    # Perform the computations for the special case when the same
-    # residual variance is used for all samples.
-     if (version == "R")
-      fit$P <- compute_posterior_probs_iid(fit$X,fit$w,U,V)
-    else if (version == "Rcpp")
-      fit$P <- compute_posterior_probs_iid_rcpp(fit$X,fit$w,U,V)
-  } else {
-      
-    # Perform the computations for the more general case when the
-    # residual variance is not necessarily the same for all samples.
-    if (version == "R")
-      fit$P <- compute_posterior_probs_notiid(fit$X,fit$w,U,V)
-    else if (version == "Rcpp")
-      fit$P <- compute_posterior_probs_notiid_rcpp(fit$X,fit$w,U,V)
-  }
-
-  # Add row and column names to the responsibilities matrix.
-  rownames(fit$P) <- rownames(fit$X)
-  colnames(fit$P) <- names(fit$U)
-
-  # Output the updated fit.
+compute_posterior_probs <- function (fit) {
+  fit$P = softmax(t(log(fit$w) + t(fit$loglik_matrix)))
   return(fit)
-}
-
-# This implements the calculations for compute_posterior_probs for the
-# special case when the same residual covariance matrix is used for
-# all samples.
-#
-#' @importFrom mvtnorm dmvnorm
-compute_posterior_probs_iid <- function (X, w, U, V) {
-      
-  # Get the number of samples (n) and the number of components in the
-  # mixture prior (k).
-  n <- nrow(X)
-  k <- length(w)
-
-  # Compute the log-probabilities, stored in an n x k matrix.
-  P <- matrix(0,n,k)
-  for (j in 1:k)
-    P[,j] = log(w[j]) + dmvnorm(X,sigma = V + U[,,j],log = TRUE)
-
-  # Normalize the probabilities so that each row of P sums to 1.
-  return(softmax(P))
-}
-
-# This implements the calculations for compute_posterior_probs for the
-# more general case when the residual covariances are not necessaily
-# the same for all samples.
-#
-#' @importFrom mvtnorm dmvnorm
-compute_posterior_probs_notiid <- function (X, w, U, V) {
-      
-  # Get the number of samples (n) and the number of components in the
-  # mixture prior (k).
-  n <- nrow(X)
-  k <- length(w)
-
-  # Compute the log-probabilities, stored in an n x k matrix.
-  P <- matrix(0,n,k)
-  for (i in 1:n)
-    for (j in 1:k)
-      P[i,j] = log(w[j]) + dmvnorm(X[i,],sigma = V[,,i] + U[,,j],log = TRUE)
-
-  # Normalize the probabilities so that each row of P sums to 1.
-  return(softmax(P))
 }
 
 # Suppose x is drawn from a multivariate normal distribution with mean
@@ -206,7 +128,3 @@ compute_posterior_mvtnorm <- function (x, U, V) {
   return(list(mu1 = mu1,S1 = S1))
 }
 
-compute_posterior_probs_generic = function(fit){
-  fit$P = softmax(t(log(fit$w) + t(fit$loglik_matrix)))
-  return(fit)
-}

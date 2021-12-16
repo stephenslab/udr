@@ -299,7 +299,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # probabilities ("responsibililties") given the current estimates
     # of the model parameters.
     fit <- compute_loglik_matrix(fit,control$version)
-    fit <- compute_posterior_probs_generic(fit)
+    fit <- compute_posterior_probs(fit)
 
     # M-step
     # ------

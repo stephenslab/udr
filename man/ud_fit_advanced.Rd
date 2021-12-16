@@ -9,7 +9,7 @@
 \alias{update_resid_covariance}
 \title{Low-Level Interface for Fitting Ultimate Deconvolution Models}
 \usage{
-compute_posterior_probs(fit, version = c("Rcpp", "R"))
+compute_posterior_probs(fit)
 
 update_mixture_weights(fit, update = c("em", "none"))
 
@@ -31,10 +31,6 @@ update_resid_covariance(
 \item{fit}{An Ultimate Deconvolution model fit. Typically,
 this will be an output of \code{\link{ud_init}} or \code{ud_fit}.}
 
-\item{version}{When \code{version = "R"}, the R-only
-implementation is used; when \code{version = "Rcpp"}, the more
-efficient C++ implementation is used.}
-
 \item{update}{The method to use for updating the prior mixture
 weights or the residual covariance matrix; see \code{\link{ud_fit}}
 for details.}
@@ -48,6 +44,10 @@ functions to be called for updating the prior covariance matrices.}
 
 \item{minval}{Minimum eigenvalue allowed in the prior covariance
 matrices. Should be a small, positive number.}
+
+\item{version}{When \code{version = "R"}, the R-only
+implementation is used; when \code{version = "Rcpp"}, the more
+efficient C++ implementation is used.}
 }
 \value{
 All functions except \code{assign_prior_covariance_updates}
