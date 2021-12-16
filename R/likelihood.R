@@ -22,11 +22,12 @@
 #'
 #' @export
 #' 
-logLik.ud_fit <- function (object, version = c("Rcpp","R"), ...) {
-  version <- match.arg(version)
+#' 
+#' 
+logLik.ud_fit <- function (object, ...) {
   if (!(is.list(object) & inherits(object,"ud_fit")))
     stop("Input argument \"object\" should be an object of class \"ud_fit\"")
-  out <- loglik_ud(object$X,object$w,object$U,object$V,version)
+  out <- sum(apply(t(object$loglik_matrix)+log(object$w),2,log_sum_exp))
   class(out) <- "logLik"
   attr(out,"df") <- as.numeric(NA)
   return(out)

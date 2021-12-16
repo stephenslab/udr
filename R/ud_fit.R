@@ -285,6 +285,13 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
   # Iterate the EM updates.
   if (verbose)
     cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
+  
+  # initial E step (inside the iterates we do M and then E step
+  # because the E step computes the log-likelihood matrix and it 
+  # is nice to enusre this is up-to-date after performing M step)
+  fit <- compute_loglik_matrix(fit,control$version)
+  fit <- compute_posterior_probs(fit)
+  
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
 
@@ -292,17 +299,12 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     V0 <- fit$V
     U0 <- fit$U
     w0 <- fit$w
-    
-    # E-step
-    # ------
-    # Compute the n x k matrix of posterior mixture assignment
-    # probabilities ("responsibililties") given the current estimates
-    # of the model parameters.
-    fit <- compute_loglik_matrix(fit,control$version)
-    fit <- compute_posterior_probs(fit)
 
     # M-step
     # ------
+    # Update the mixture weights.
+    fit <- update_mixture_weights(fit,control$weights.update)
+    
     # Update the residual covariance matrix.
     if (is.matrix(fit$V))
       fit <- update_resid_covariance(fit,control$resid.update,control$version)
@@ -310,13 +312,20 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # Update the scaled prior covariance matrices.
     fit <- update_prior_covariances(fit,covupdates,control$minval)
 
-    # Update the mixture weights.
-    fit <- update_mixture_weights(fit,control$weights.update)
-
+    
+    # E-step
+    # ------
+    # Compute the n x k matrix of posterior mixture assignment
+    # probabilities ("responsibililties") given the current estimates
+    # of the model parameters.
+    
+    fit <- compute_loglik_matrix(fit,control$version)
+    fit <- compute_posterior_probs(fit)
+    
     # Update the "progress" data frame with the log-likelihood and
     # other quantities, and report the algorithm's progress to the
     # console if requested.
-    loglik <- loglik_ud(fit$X,fit$w,fit$U,fit$V,control$version)
+    loglik <- as.numeric(logLik(fit))
     dw <- max(abs(fit$w - w0))
     dU <- max(abs(ulist2array(fit$U) - ulist2array(U0)))
     if (is.matrix(fit$V))
