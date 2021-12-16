@@ -1,4 +1,5 @@
-#' @export
+#' Computes n by K log-likelihood matrix for a ud fit object
+#' 
 compute_loglik_matrix <- function (fit, version = c("Rcpp","R")) {
   version <- match.arg(version)
   

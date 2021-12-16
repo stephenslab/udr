@@ -6,13 +6,9 @@
 #' @param object An Ultimate Deconvolution model fit. Typically,
 #'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
 #'
-#' @param version When \code{version == "R"}, the computations are
-#'   performed entirely in R; when \code{version == "Rcpp"}, an Rcpp
-#'   implementation is used.
-#'
 #' @param \dots Additional arguments (unused).
 #' 
-#' @return A number giving the log-likelihood for the model.
+#' @return A number giving the log-likelihood for the model fit
 #'
 #' @seealso \code{\link{ud_init}}, \code{\link{ud_fit}}
 #' 

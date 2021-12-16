@@ -11,13 +11,9 @@
 this will be an output of \code{\link{ud_init}} or \code{ud_fit}.}
 
 \item{\dots}{Additional arguments (unused).}
-
-\item{version}{When \code{version == "R"}, the computations are
-performed entirely in R; when \code{version == "Rcpp"}, an Rcpp
-implementation is used.}
 }
 \value{
-A number giving the log-likelihood for the model.
+A number giving the log-likelihood for the model fit
 }
 \description{
 Compute the log-likelihood for the Ultimate
