@@ -206,3 +206,7 @@ compute_posterior_mvtnorm <- function (x, U, V) {
   return(list(mu1 = mu1,S1 = S1))
 }
 
+compute_posterior_probs_generic = function(fit){
+  fit$P = softmax(t(log(fit$w) + t(fit$loglik_matrix)))
+  return(fit)
+}

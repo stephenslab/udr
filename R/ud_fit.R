@@ -298,7 +298,8 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # Compute the n x k matrix of posterior mixture assignment
     # probabilities ("responsibililties") given the current estimates
     # of the model parameters.
-    fit <- compute_posterior_probs(fit,control$version)
+    fit <- compute_loglik_matrix(fit,control$version)
+    fit <- compute_posterior_probs_generic(fit)
 
     # M-step
     # ------
