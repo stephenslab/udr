@@ -69,11 +69,13 @@ loglik_ud <- function (X, w, U, V, version = c("Rcpp","R")) {
 # Compute the log-likelihood when the residual covariance V is the
 # same for all samples.
 loglik_ud_iid_helper <- function (X, w, U, V) {
+  K <- dim(U)[3] # number of mixture components 
   n <- nrow(X)
-  y <- rep(0,n)
-  for (i in 1:n)
-    y[i] <- ldmvnormmix(X[i,],w,U,V)
-  return(sum(y))
+  loglik_mat = matrix(0, nrow=K, ncol=n)
+  for(k in 1:K){
+    loglik_mat[k,] <- t(dmvnorm(X,sigma = U[,,k] + V,log = TRUE))
+  }
+  return(sum(apply(loglik_mat+log(w),2,log_sum_exp)))
 }
 
 
