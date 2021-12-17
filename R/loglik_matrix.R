@@ -50,10 +50,10 @@ compute_loglik_matrix <- function (fit, version = c("Rcpp","R")) {
 compute_loglik_matrix_iid <- function (X, U, V) {
   n <- nrow(X)
   k <- dim(U)[3]
-  loglik <- matrix(0,n,k)
+  out <- matrix(0,n,k)
   for (j in 1:k)
-    loglik[,j] = dmvnorm(X,sigma = V + U[,,j],log = TRUE)
-  return(loglik)
+    out[,j] = dmvnorm(X,sigma = V + U[,,j],log = TRUE)
+  return(out)
 }
 
 # This implements the calculations for compute_loglik_matrix for the
@@ -64,9 +64,9 @@ compute_loglik_matrix_iid <- function (X, U, V) {
 compute_loglik_matrix_notiid <- function (X, U, V) {
   n <- nrow(X)
   k <- dim(U)[3]
-  loglik <- matrix(0,n,k)
+  out <- matrix(0,n,k)
   for (i in 1:n)
     for (j in 1:k)
-      loglik[i,j] = dmvnorm(X[i,],sigma = V[,,i] + U[,,j],log = TRUE)
-  return(loglik)
+      out[i,j] = dmvnorm(X[i,],sigma = V[,,i] + U[,,j],log = TRUE)
+  return(out)
 }
