@@ -5,16 +5,8 @@ ed_iid_rcpp <- function(X, U, p) {
     .Call('_udr_ed_iid_rcpp', PACKAGE = 'udr', X, U, p)
 }
 
-loglik_ud_iid_rcpp <- function(X, w, U, V) {
-    .Call('_udr_loglik_ud_iid_rcpp', PACKAGE = 'udr', X, w, U, V)
-}
-
 loglik_ud_notiid_rcpp <- function(X, w, U, V) {
     .Call('_udr_loglik_ud_notiid_rcpp', PACKAGE = 'udr', X, w, U, V)
-}
-
-compute_loglik_matrix_iid_rcpp <- function(X, U, V) {
-    .Call('_udr_compute_loglik_matrix_iid_rcpp', PACKAGE = 'udr', X, U, V)
 }
 
 compute_loglik_matrix_notiid_rcpp <- function(X, U, V) {

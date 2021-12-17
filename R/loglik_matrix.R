@@ -1,5 +1,4 @@
-#' Computes n by K log-likelihood matrix for a ud fit object
-#' 
+# Compute n x k log-likelihood matrix.
 compute_loglik_matrix <- function (fit, version = c("Rcpp","R")) {
   version <- match.arg(version)
   
@@ -17,11 +16,9 @@ compute_loglik_matrix <- function (fit, version = c("Rcpp","R")) {
   if (is.matrix(V)) {
 
     # Perform the computations for the special case when the same
-    # residual variance is used for all samples.
-     if (version == "R")
-      fit$loglik_matrix <- compute_loglik_matrix_iid(fit$X,U,V)
-    else if (version == "Rcpp")
-      fit$loglik_matrix <- compute_loglik_matrix_iid_rcpp(fit$X,U,V)
+    # residual variance is used for all samples. Here the R
+    # implementation is fast so no C++ implementation is provided.
+    fit$loglik_matrix <- compute_loglik_matrix_iid(fit$X,U,V)
   } else {
       
     # Perform the computations for the more general case when the
@@ -46,19 +43,12 @@ compute_loglik_matrix <- function (fit, version = c("Rcpp","R")) {
 #
 #' @importFrom mvtnorm dmvnorm
 compute_loglik_matrix_iid <- function (X, U, V) {
-      
-  # Get the number of samples (n) and the number of components in the
-  # mixture prior (k).
   n <- nrow(X)
-  K <- dim(U)[3]
-
-  # Compute the log-probabilities, stored in an n x k matrix.
-  loglik_matrix <- matrix(0,n,K)
-  for (k in 1:K)
-    loglik_matrix[,k] = dmvnorm(X,sigma = V + U[,,k],log = TRUE)
-
-  # Normalize the probabilities so that each row of P sums to 1.
-  return(loglik_matrix)
+  k <- dim(U)[3]
+  loglik <- matrix(0,n,k)
+  for (j in 1:k)
+    loglik[,j] = dmvnorm(X,sigma = V + U[,,j],log = TRUE)
+  return(loglik)
 }
 
 # This implements the calculations for compute_loglik_matrix for the
@@ -67,20 +57,11 @@ compute_loglik_matrix_iid <- function (X, U, V) {
 #
 #' @importFrom mvtnorm dmvnorm
 compute_loglik_matrix_notiid <- function (X, U, V) {
-      
-  # Get the number of samples (n) and the number of components in the
-  # mixture prior (k).
   n <- nrow(X)
-  K <- dim(U)[3]
-
-  # Compute the log-probabilities, stored in an n x k matrix.
-  loglik_matrix <- matrix(0,n,K)
+  k <- dim(U)[3]
+  loglik <- matrix(0,n,k)
   for (i in 1:n)
-    for (k in 1:K)
-      loglik_matrix[i,k] = dmvnorm(X[i,],sigma = V[,,i] + U[,,k],log = TRUE)
-
-  # Normalize the probabilities so that each row of P sums to 1.
-  return(loglik_matrix)
+    for (j in 1:k)
+      loglik[i,j] = dmvnorm(X[i,],sigma = V[,,i] + U[,,j],log = TRUE)
+  return(loglik)
 }
-
-
