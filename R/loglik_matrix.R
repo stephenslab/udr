@@ -1,4 +1,9 @@
-# Compute n x k log-likelihood matrix.
+#' @rdname ud_fit_advanced
+#'
+#' @keywords internal
+#' 
+#' @export
+#' 
 compute_loglik_matrix <- function (fit, version = c("Rcpp","R")) {
   version <- match.arg(version)
   

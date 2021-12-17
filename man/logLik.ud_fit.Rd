@@ -17,7 +17,7 @@ A number giving the log-likelihood for the model fit
 }
 \description{
 Compute the log-likelihood for the Ultimate
-Deconvolution model.
+  Deconvolution model.
 }
 \seealso{
 \code{\link{ud_init}}, \code{\link{ud_fit}}

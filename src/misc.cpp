@@ -38,15 +38,6 @@ double logsumexp (const vec& x) {
   return log(sum(exp(x - a))) + a;
 }
 
-// Return the "softmax" of vector x, y(i) = exp(x(i))/sum(exp(x)), in
-// a way that guards against numerical underflow or overflow. The
-// return value is a vector with entries that sum to 1.
-rowvec softmax (const rowvec& x) {
-  rowvec y = exp(x - max(x));
-  y /= sum(y);
-  return y;
-}
-
 // Replace x with x/sum(x), but take care of the special case when all
 // the entries are zero, in which case return the vector of all 1/n,
 // where n is the length of x.

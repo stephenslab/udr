@@ -64,8 +64,9 @@
 #' fit1 <- ud_init(X)
 #' fit1 <- ud_fit(fit1,control = list(maxiter = 4))
 #'
-#' # Update the responsibilities matrix.
-#' fit2 <- compute_posterior_probs(fit1)
+#' # Update the log-likelihood matrix and the responsibilities matrix.
+#' fit2 <- compute_loglik_matrix(fit1)
+#' fit2 <- compute_posterior_probs(fit2)
 #'
 #' # Update the mixture weights.
 #' fit2 <- update_mixture_weights(fit2)
@@ -92,7 +93,7 @@
 #' @export
 #' 
 compute_posterior_probs <- function (fit) {
-  fit$P = softmax(t(log(fit$w) + t(fit$loglik_matrix)))
+  fit$P = with(fit,softmax(addtocols(loglik_matrix,w)))
   return(fit)
 }
 

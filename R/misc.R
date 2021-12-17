@@ -79,6 +79,10 @@ shrink_cov <- function (T, minval = 0, r = nrow(T)) {
   return(tcrossprod(out$vectors %*% diag(sqrt(d))))
 }
 
+# For each column i of matrix A, add b[i] to A[,i].
+addtocols <- function (A, b)
+  A + matrix(b,nrow(A),ncol(A),byrow = TRUE)
+
 # Output y = x/sum(x), but take care of the special case when all the
 # entries are zero, in which case return the vector of all 1/n, where
 # n = length(x).

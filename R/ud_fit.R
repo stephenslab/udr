@@ -246,7 +246,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-132, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-133, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -294,7 +294,9 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
   fit <- compute_loglik(fit)
   
   for (iter in 1:control$maxiter) {
-    initial_loglik = fit$loglik #store for checking convergence later
+
+    # Store for checking convergence later.
+    initial_loglik = fit$loglik 
     
     t1 <- proc.time()
 
@@ -314,14 +316,12 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
 
     # Update the scaled prior covariance matrices.
     fit <- update_prior_covariances(fit,covupdates,control$minval)
-
     
     # E-step
     # ------
     # Compute the n x k matrix of posterior mixture assignment
     # probabilities ("responsibililties") given the current estimates
     # of the model parameters.
-    
     fit <- compute_loglik_matrix(fit,control$version)
     fit <- compute_posterior_probs(fit)
     fit <- compute_loglik(fit)

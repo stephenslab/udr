@@ -1,7 +1,7 @@
 #' @title Ultimate Deconvolution Model Likelihoods
 #' 
 #' @description Compute the log-likelihood for the Ultimate
-#' Deconvolution model.
+#'   Deconvolution model.
 #'
 #' @param object An Ultimate Deconvolution model fit. Typically,
 #'   this will be an output of \code{\link{ud_init}} or \code{ud_fit}.
