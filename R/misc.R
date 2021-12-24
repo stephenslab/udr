@@ -53,7 +53,7 @@ getrank1 <- function (X) {
 # @param r is the rank of U.
 get_mat_Q <- function (U) {
   evd <- eigen(U)
-  r   <- sum(evd$values>0)
+  r   <- sum(evd$values>1)
   mat <- evd$vectors[,1:r] %*% (sqrt(evd$values[1:r]) * diag(r))
   return(mat)
 }
