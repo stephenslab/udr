@@ -51,9 +51,9 @@ getrank1 <- function (X) {
 # Function to calculate matrix Q where U=QQ^T when U is rank-deficient. 
 # @param U is the rank-deficient matrix to decompose
 # @param r is the rank of U.
-get_mat_Q <- function (U) {
+get_mat_Q <- function (U, minval = 1e-8) {
   evd <- eigen(U)
-  r   <- sum(evd$values>1)
+  r   <- sum(evd$values>minval)
   mat <- evd$vectors[,1:r] %*% (sqrt(evd$values[1:r]) * diag(r))
   return(mat)
 }
