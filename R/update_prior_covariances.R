@@ -35,7 +35,7 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
                             ifelse(is.matrix(fit$V),"_iid","_notiid"),
                             ifelse(control$version == "Rcpp","_rcpp",""))
   names(covupdates) <- names(fit$U)
-  return(list(control = control,covupdates = covupdates))
+  return(list(control = control, covupdates = covupdates))
 }
 
 #' @rdname ud_fit_advanced
@@ -49,7 +49,7 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
 #' @export
 #' 
 update_prior_covariances <-
-  function (fit,
+  function (fit,            
             covupdates = assign_prior_covariance_updates(fit)$covupdates,
             minval = 1e-8) {
 
@@ -60,27 +60,26 @@ update_prior_covariances <-
   # Update the prior covariance matrices.
   k <- length(fit$U)
   if (is.matrix(fit$V)) {
-
-
-    fit0 <- fit
+    
     # Transform the data x to x' so that x' ~ N(0,U' + I).
-    fit <- simplify_model(fit)
+    fit0 <- simplify_model(fit)
 
     # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
     for (i in 1:k)
-      fit$U[[i]] <- do.call(covupdates[i],
-                            list(X = fit$X,U = fit$U[[i]],
-                                 p = fit$P[,i],minval = minval))
-# Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
-    fit <- unsimplify_model(fit)
-    # Recover original X and U$U0 to avoid numerical errors through iterations
-    fit$X <- fit0$X
+      fit0$U[[i]] <- do.call(covupdates[i],
+                             list(X = fit0$X,U = fit0$U[[i]],
+                                  p = fit0$P[,i],minval = minval))
+    
+    # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
+    fit0 <- unsimplify_model(fit0)
+    
+    # Update the updated prior covariances U in original fit object
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
-    indx_scaled <- which(covtypes == "scaled")
-    for (indx in indx_scaled){
-      fit$U[[indx]]$U0 <- fit0$U[[indx]]$U0
-      fit$U[[indx]]$Q <- fit0$U[[indx]]$Q
-    }  
+    for (i in 1:k){
+      if (covtypes[i] == "scaled")
+        fit$U[[i]]$s <- fit0$U[[i]]$s
+      fit$U[[i]] <- fit0$U[[i]]
+    }
   } else {
 
     # Update the prior covariances in the non-i.i.d. case (when the
