@@ -66,6 +66,9 @@ update_prior_covariances <-
 
     # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
     for (i in 1:k)
+      if (fit0$w[i] == 0){
+        next
+      }
       fit0$U[[i]] <- do.call(covupdates[i],
                              list(X = fit0$X,U = fit0$U[[i]],
                                   p = fit0$P[,i],minval = minval))

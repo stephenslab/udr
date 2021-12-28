@@ -6,7 +6,7 @@
 #' 
 #' @export
 #' 
-update_mixture_weights <- function (fit, update = c("em","none")) {
+update_mixture_weights <- function (fit, update = c("em","none"), minval = 1e-15) {
   update <- match.arg(update)
     
   # Check input argument "fit".
@@ -14,12 +14,16 @@ update_mixture_weights <- function (fit, update = c("em","none")) {
     stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
     
   # Update the mixture weights.
-  if (update == "em")
+  if (update == "em"){
     wnew <- colSums(fit$P)/nrow(fit$P)
-  else if (update == "none")
+    # Set weights < minval to zero exactly
+    indx <- which(wnew < minval)
+    wnew[indx] <- 0
+  } else if (update == "none"){    
     wnew <- fit$w
-  else 
+  } else {
     stop("control$weights.update == \"",update,"\" is not implemented")
+  }
 
   # Add the names back.
   names(wnew) <- names(fit$w)
