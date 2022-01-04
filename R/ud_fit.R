@@ -360,4 +360,5 @@ ud_fit_control_default <- function()
        maxiter              = 20,
        minval               = 1e-8,
        tol                  = 1e-6,
-       tol.lik              = 1e-3)
+       tol.lik              = 1e-3,
+       zero.threshold       = 1e-15)

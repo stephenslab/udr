@@ -6,7 +6,7 @@
 #' 
 #' @export
 #' 
-update_mixture_weights <- function (fit, update = c("em","none"), minval = 1e-15) {
+update_mixture_weights <- function (fit, update = c("em","none"), zero.threshold = 1e-15) {
   update <- match.arg(update)
     
   # Check input argument "fit".
@@ -16,9 +16,9 @@ update_mixture_weights <- function (fit, update = c("em","none"), minval = 1e-15
   # Update the mixture weights.
   if (update == "em"){
     wnew <- colSums(fit$P)/nrow(fit$P)
-    # Set weights < minval to zero exactly
-    indx <- which(wnew < minval)
-    wnew[indx] <- 0
+    # Set columns of Pmat to zero if weight is too small
+    indx <- which(wnew < zero.threshold)
+    fit$P[,indx] <- 0
   } else if (update == "none"){    
     wnew <- fit$w
   } else {
