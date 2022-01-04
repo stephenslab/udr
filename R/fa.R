@@ -90,9 +90,12 @@ update_prior_covariance_rank1_fa_notiid_rcpp <- function (X, U, V, p, ...) {
 # @param X contains observed data of size n \times r.
 # @param U the estimate of U in previous iteration
 # @param p is a vector of weights
-fa_unconstrained <- function(X, U, Q, p) {
+fa_unconstrained <- function(X, U, p) {
+
   n <- nrow(X)
   r <- nrow(U)
+
+  Q <- get_mat_Q(U)
   r <- ncol(Q)
   I <- diag(r)
   

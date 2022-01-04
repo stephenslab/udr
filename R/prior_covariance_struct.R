@@ -24,8 +24,7 @@ create_prior_covariance_struct_rank1  <- function (X, U) {
 create_prior_covariance_struct_unconstrained <- function (X, U) {
   rownames(U) <- colnames(X)
   colnames(U) <- colnames(X)
-  Q <- get_mat_Q(U)
-  U <- list(mat = U, Q = Q)
+  U <- list(mat = U)
   attr(U,"covtype") <- "unconstrained"
   return(U)
 }
@@ -63,7 +62,6 @@ update_prior_covariance_struct_unconstrained <- function (U, mat) {
   rownames(mat) <- rownames(U$mat)
   colnames(mat) <- colnames(U$mat)
   U$mat <- mat
-  U$Q <- get_mat_Q(U$mat)
   return(U)
 }
 
@@ -101,7 +99,6 @@ transform_prior_covariance_struct_rank1 <- function (U, A) {
 transform_prior_covariance_struct_unconstrained <- function (U, A) {
   x <- rownames(U$mat)
   U$mat <- t(A) %*% U$mat %*% A
-  U$Q <- get_mat_Q(U$mat)
   rownames(U$mat) <- x
   colnames(U$mat) <- x
   return(U)
