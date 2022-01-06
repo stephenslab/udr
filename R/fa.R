@@ -2,7 +2,7 @@
 # using factor analysis for the special case when V = I for all
 # samples; that is, the model is x ~ N(0,U + I).
 update_prior_covariance_unconstrained_fa_iid <- function (X, U, p, ...)
-  update_prior_covariance_struct_unconstrained(U,fa_unconstrained(X,U$mat,U$Q,p))
+  update_prior_covariance_struct_unconstrained(U,fa_unconstrained(X,U$mat,p))
 
 # This is a more efficient C++ implementation of
 # update_prior_covariance_unconstrained_fa_iid. (The C++ version has not yet been
