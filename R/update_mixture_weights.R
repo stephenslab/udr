@@ -17,8 +17,6 @@ update_mixture_weights <- function (fit, update = c("em","none"), zero.threshold
   if (update == "em"){
     wnew <- colSums(fit$P)/nrow(fit$P)
     # Set columns of Pmat to zero if weight is too small
-    indx <- which(wnew < zero.threshold)
-    fit$P[,indx] <- 0
   } else if (update == "none"){    
     wnew <- fit$w
   } else {
