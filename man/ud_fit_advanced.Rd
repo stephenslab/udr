@@ -11,7 +11,7 @@
 \usage{
 compute_posterior_probs(fit, version = c("Rcpp", "R"))
 
-update_mixture_weights(fit, update = c("em", "none"))
+update_mixture_weights(fit, update = c("em", "none"), zero.threshold = 1e-15)
 
 assign_prior_covariance_updates(fit, control = list())
 
