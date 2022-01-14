@@ -23,7 +23,7 @@ ulist2array <- function (x)
 
 # Returns TRUE if and only if the matrix is (symmetric) positive
 # semi-definite.
-issemidef <- function (X, minval = -1e-15)
+issemidef <- function (X, minval = -1e-8)
   all(eigen(X)$values > minval)
 
 # For symmetric matrix X, return the matrix Y that is "closest" to X
