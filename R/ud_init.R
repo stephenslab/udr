@@ -180,8 +180,6 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # Combine the prior covariances matrices into a single list.
   U <- c(U_scaled,U_rank1,U_unconstrained)
   k <- length(U)
-  if (k < 2)
-    stop("The total number of prior covariances should be at least 2")
 
   # Initialize the mixture weights.
   w        <- rep(1,k)/k

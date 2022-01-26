@@ -10,7 +10,7 @@ array2list <- function (x) {
 # Convert a list of n x m matrices to an n x m x k array.
 list2array <- function (x) {
   n <- nrow(x[[1]])
-  m <- ncol(x[[2]])
+  m <- ncol(x[[1]])
   k <- length(x)
   return(array(simplify2array(x),c(n,m,k)))
 }

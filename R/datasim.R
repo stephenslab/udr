@@ -34,8 +34,6 @@ simulate_ud_data <- function (n, w, U, V) {
     stop("n should be 2 or greater")
   if (m < 2)
     stop("The univariate case (m = 1) is not implemented")
-  if (k < 2)
-    stop("Input argument \"U\" should be a list of length 2 or more")
   
   # Check the residual covariance matrix.
   if (!issemidef(V))
