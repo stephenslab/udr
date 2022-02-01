@@ -4,18 +4,20 @@
 \alias{simulate_ud_data}
 \title{Simulate Data from Ultimate Deconvolution Model}
 \usage{
-simulate_ud_data(n, w, U, V)
+simulate_ud_data(n, w, U, V = diag(ncol(X)))
 }
 \arguments{
 \item{n}{Number of data points to simulate.}
 
 \item{w}{A numeric vector of length k specifying the prior mixture
 weights. All entries must be non-negative, but need not sum to 1;
-the mixture weights are automatically normalized to sum to 1.}
+the mixture weights are automatically normalized to sum to 1. If
+not provided, all the mixture weights are set to the same value.}
 
 \item{U}{A list of length k specifying the covariance matrices in
 the mixture prior; list element \code{U[[i]]} is the m x m
-covariance matrix for the ith mixture component.}
+covariance matrix for the ith mixture component. For k = 1, U may
+also be a matrix.}
 
 \item{V}{The m x m residual covariance matrix.}
 }

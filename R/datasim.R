@@ -7,11 +7,13 @@
 #' 
 #' @param w A numeric vector of length k specifying the prior mixture
 #'   weights. All entries must be non-negative, but need not sum to 1;
-#'   the mixture weights are automatically normalized to sum to 1.
+#'   the mixture weights are automatically normalized to sum to 1. If
+#'   not provided, all the mixture weights are set to the same value. 
 #'
 #' @param U A list of length k specifying the covariance matrices in
 #'   the mixture prior; list element \code{U[[i]]} is the m x m
-#'   covariance matrix for the ith mixture component.
+#'   covariance matrix for the ith mixture component. For k = 1, U may
+#'   also be a matrix.
 #' 
 #' @param V The m x m residual covariance matrix.
 #'
@@ -24,11 +26,13 @@
 #' 
 #' @export
 #' 
-simulate_ud_data <- function (n, w, U, V) {
+simulate_ud_data <- function (n, w, U, V = diag(ncol(X))) {
       
   # Get the dimension of the data points (m) and the number of
   # mixture components (k).
   m <- nrow(V)
+  if (is.matrix(U))
+    U <- list(U = U)
   k <- length(U)
   if (n < 2)
     stop("n should be 2 or greater")
@@ -45,6 +49,8 @@ simulate_ud_data <- function (n, w, U, V) {
       stop("All \"U\" matrices should be positive semi-definite")
 
   # Check the mixture weights.
+  if (missing(w))
+    w <- rep(1/k,k)
   if (!(is.numeric(w) & length(w) == k & all(w >= 0)))
     stop("Input argument \"w\" should be a vector of length \"k\" ",
          "containing non-negative weights")

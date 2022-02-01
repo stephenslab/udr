@@ -7,9 +7,9 @@
 #'   an m-dimensional data point. \code{X} should have at least 2 rows
 #'   and 2 columns.
 #'
-#' @param V Either an m x m matrix giving the
-#'   residual covariance matrix (assumed equal for every obsevation), or a list of m x m covariance matrices
-#'   of length n.
+#' @param V Either an m x m matrix giving the residual covariance
+#'   matrix for all n data points, or a list of m x m covariance
+#'   matrices of length n.
 #'
 #' @param n_rank1 A non-negative integer specifying the number of
 #'   rank-1 covariance matrices included in the mixture prior. Initial
@@ -26,18 +26,24 @@
 #'   specified, 4 random unconstrained matrices will be included.
 #'
 #' @param U_scaled A list specifying initial estimates of the scaled
-#'   covariance matrices in the mixture prior. (The defaults provide two commonly-used covariance matrices here)
+#'   covariance matrices in the mixture prior. (The default setting
+#'   specifies two commonly used covariance matrices.) In the case of a
+#'   single scaled matrix, \code{U_scaled} may be a matrix instead of a
+#'   list.
 #' 
 #' @param U_rank1 A list specifying initial estimates of the rank-1
 #'   matrices in the mixture prior. At most one of \code{n_rank1} and
 #'   \code{U_rank1} should be provided. If \code{U_rank1} is not given,
-#'   the rank-1 covariates are initialized at random.
+#'   the rank-1 covariates are initialized at random. In the case of a
+#'   single rank-1 matrix, \code{U_rank1} may be a matrix instead of
+#'   list.
 #'
 #' @param U_unconstrained A list specifying initial estimates of the
 #'   unconstrained matrices in the mixture prior. At most one of
 #'   \code{n_unconstrained} and \code{U_unconstrained} should be
 #'   provided. If \code{U_unconstrained} is not given, the matrices are
-#'   initialized at random.
+#'   initialized at random. In the case of a single unconstrained
+#'   matrix, \code{U_unconstrained} may be a matrix instead of a list.
 #' 
 #' @param control A list of parameters controlling the behaviour of
 #'   the model initialization. See \code{\link{ud_fit}} for details.
@@ -104,7 +110,9 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
         U_rank1[[i]] <- sim_rank1(m)
     }
   }
-
+  if (is.matrix(U_rank1))
+    U_rank1 <- list(U_rank1)
+  
   # Process inputs n_unconstrained and U_unconstrained. If
   # U_unconstrained is not provided, randomly initialize the
   # unconstrained covariance matrices.
@@ -122,7 +130,13 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
         U_unconstrained[[i]] <- sim_unconstrained(m)
     }
   }
+  if (is.matrix(U_unconstrained))
+    U_unconstrained <- list(U_unconstrained)
 
+  # Process input U_scaled.
+  if (is.matrix(U_scaled))
+    U_scaled <- list(U_scaled)
+  
   # Get the number of prior covariance matrices of each type.
   n_scaled        <- length(U_scaled)
   n_rank1         <- length(U_rank1)
