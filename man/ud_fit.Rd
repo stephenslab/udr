@@ -103,10 +103,10 @@ mixture weights are updated via EM; when \code{weights.update =
 "none"}, the mixture weights are not updated.}
 
 \item{\code{resid.update}}{When \code{resid.update = "em"}, the
-residual covariance matrix \eqn{V} is updated via an EM step; this option is experimental, not tested 
-and not recommended. When
-\code{resid.update = "none"}, the residual covariance matrices \eqn{V} is not
-updated.}
+residual covariance matrix \eqn{V} is updated via an EM step; this
+option is experimental, not tested and not recommended. When
+\code{resid.update = "none"}, the residual covariance matrices
+\eqn{V} is not updated.}
 
 \item{\code{scaled.update}}{This setting specifies the updates for
 the scaled prior covariance matrices. Possible settings are

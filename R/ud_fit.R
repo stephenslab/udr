@@ -48,10 +48,10 @@
 #' "none"}, the mixture weights are not updated.}
 #'
 #' \item{\code{resid.update}}{When \code{resid.update = "em"}, the
-#' residual covariance matrix \eqn{V} is updated via an EM step; this option is experimental, not tested 
-#' and not recommended. When
-#' \code{resid.update = "none"}, the residual covariance matrices \eqn{V} is not
-#' updated.}
+#' residual covariance matrix \eqn{V} is updated via an EM step; this
+#' option is experimental, not tested and not recommended. When
+#' \code{resid.update = "none"}, the residual covariance matrices
+#' \eqn{V} is not updated.}
 #'
 #' \item{\code{scaled.update}}{This setting specifies the updates for
 #' the scaled prior covariance matrices. Possible settings are
@@ -234,7 +234,14 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
-  if (is.na(control$resid.update)) #set no update as default
+  if (is.na(control$weights.update)) {
+    if (k == 1)
+      control$weights.update <- "none"
+    else
+      control$weights.update <- "em"
+  } else if (k == 1)
+    message("control$weights.update is ignored when k = 1")
+  if (is.na(control$resid.update)) # Set no update as default.
     control$resid.update <- "none"
   if (!is.matrix(fit$V) & control$resid.update != "none")
     stop("Residual covariance V can only be updated when it is the same ",
@@ -246,7 +253,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-133, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-134, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -351,12 +358,12 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
 #' @export
 #' 
 ud_fit_control_default <- function()
-  list(weights.update       = "em",  # "em" or "none"
-       resid.update         = NA,    # "em", "none" or NA
-       scaled.update        = NA,    # "em", "fa", "none" or NA
-       rank1.update         = NA,    # "ted", "fa", "none" or NA
-       unconstrained.update = NA,    # "ted", "ed", "fa", "none" or NA
-       version              = "R",   # "R" or "Rcpp"
+  list(weights.update       = NA,   # "em" or "none"
+       resid.update         = NA,   # "em", "none" or NA
+       scaled.update        = NA,   # "em", "fa", "none" or NA
+       rank1.update         = NA,   # "ted", "fa", "none" or NA
+       unconstrained.update = NA,   # "ted", "ed", "fa", "none" or NA
+       version              = "R",  # "R" or "Rcpp"
        maxiter              = 20,
        minval               = 1e-8,
        tol                  = 1e-6,

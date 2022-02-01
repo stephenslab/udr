@@ -12,19 +12,44 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
     stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
 
-  # Check and process the optimization settings.
-  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
-  if (is.na(control$scaled.update))
-    control$scaled.update <- ifelse(is.matrix(fit$V),"fa","none")
-  if (is.na(control$rank1.update))
-    control$rank1.update  <- ifelse(is.matrix(fit$V),"ted","fa")
-  if (is.na(control$unconstrained.update))
-    control$unconstrained.update <- ifelse(is.matrix(fit$V),"ted","none")
-    
   # Extract the "covtype" attribute from the prior covariance (U)
   # matrices.
   covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
 
+  # Check and process the optimization settings.
+  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
+  if (is.na(control$scaled.update)) {
+    if (any(covtypes == "scaled"))
+      control$scaled.update <- ifelse(is.matrix(fit$V),"fa","none")
+    else
+      control$scaled.update <- "none"
+  } else if (control$scaled.update != "none" & !any(covtypes == "scaled")) {
+    message("control$scaled.update is ignored when no scaled covariances ",
+            "are included in U")
+    control$scaled.update <- "none"
+  }
+  if (is.na(control$rank1.update)) {
+    if (any(covtypes == "rank1"))
+      control$rank1.update  <- ifelse(is.matrix(fit$V),"ted","fa")
+    else
+      control$rank1.update <- "none"
+  } else if (control$rank1.update != "none" & !any(covtypes == "rank1")) {
+    message("control$rank1.update is ignored when no rank-1 covariances ",
+            "are included in U")
+    control$rank1.update <- "none"
+  }
+  if (is.na(control$unconstrained.update)) {
+    if (any(covtypes == "unconstrained"))
+      control$unconstrained.update <- ifelse(is.matrix(fit$V),"ted","none")
+    else
+      control$unconstrained.update <- "none"
+  } else if (control$unconstrained.update != "none" &
+             !any(covtypes == "unconstrained")) {
+    message("control$unconstrained.update is ignored when no unconstrained ",
+            "covariances are included in U")
+    control$unconstrained.update <- "none"
+  }
+    
   # Determine the names of the functions used to update the prior
   # covariance matrices.
   k <- length(covtypes)
