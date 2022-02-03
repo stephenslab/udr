@@ -40,7 +40,7 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   expect_nondecreasing(fit1$progress$loglik)
 
   # The outputs of all four variants of ud_fit should be the same
-  # (except for V and the timings).
+  # (except for V, the Q matrices, and the timings).
   fit1$progress$timing <- 0
   fit2$progress$timing <- 0
   fit3$progress$timing <- 0
@@ -49,6 +49,12 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   fit2["V"] <- NULL
   fit3["V"] <- NULL
   fit4["V"] <- NULL
+  removeQ <- function (U)
+    lapply(U,function (x) { x["Q"] <- NULL; return(x) })
+  fit1$U <- removeQ(fit1$U)
+  fit2$U <- removeQ(fit2$U)
+  fit3$U <- removeQ(fit3$U)
+  fit4$U <- removeQ(fit4$U)
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
   expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
   expect_equal(fit1,fit4,scale = 1,tolerance = 1e-12)
@@ -77,7 +83,12 @@ test_that(paste("Check R and C++ implementations of residual covariance",
   # The likelihoods should be non-decreasing.
   expect_nondecreasing(fit1$progress$loglik)
   
-  # The ud_fit outputs should be the same (except for the timings).
+  # The ud_fit outputs should be the same (except for the Q matrices
+  # and the timings).
+  removeQ <- function (U)
+    lapply(U,function (x) { x["Q"] <- NULL; return(x) })
+  fit1$U <- removeQ(fit1$U)
+  fit2$U <- removeQ(fit2$U)
   fit1$progress$timing <- 0
   fit2$progress$timing <- 0
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
@@ -109,11 +120,17 @@ test_that(paste("Check R and C++ implementations of prior covariance",
   capture.output(fit3 <- ud_fit(fit3,control = control3))
 
   # The likelihoods should be non-decreasing, and all three ud_fit
-  # outputs should be the same (except for the timings).
+  # outputs should be the same (except for V, the Q matrices, and the
+  # timings).
   fit1$progress$timing <- 0
   fit2$progress$timing <- 0
   fit3$progress$timing <- 0
   fit3$V <- fit1$V
+  removeQ <- function (U)
+    lapply(U,function (x) { x["Q"] <- NULL; return(x) })
+  fit1$U <- removeQ(fit1$U)
+  fit2$U <- removeQ(fit2$U)
+  fit3$U <- removeQ(fit3$U)
   expect_nondecreasing(fit1$progress$loglik)
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
   expect_equal(fit1,fit3,scale = 1,tolerance = 1e-12)
@@ -131,7 +148,9 @@ test_that(paste("Check R and C++ implementations of prior covariance",
   capture.output(fit2 <- ud_fit(fit2,control = control2))
   
   # The likelihoods should be non-decreasing, and both ud_fit outputs
-  # should be the same (except for the timings).
+  # should be the same (except for the Q matrices, and the timings).
+  fit1$U <- removeQ(fit1$U)
+  fit2$U <- removeQ(fit2$U)
   fit1$progress$timing <- 0
   fit2$progress$timing <- 0
   expect_nondecreasing(fit1$progress$loglik)
