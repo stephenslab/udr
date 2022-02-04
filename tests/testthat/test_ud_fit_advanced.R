@@ -41,6 +41,10 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
   updates2 <- assign_prior_covariance_updates(fit2,control2)$covupdates
   fit1 <- update_prior_covariances(fit1,updates1)
   fit2 <- update_prior_covariances(fit2,updates2)
+  removeQ <- function (U)
+    lapply(U,function (x) { x["Q"] <- NULL; return(x) })
+  fit1$U <- removeQ(fit1$U)
+  fit2$U <- removeQ(fit2$U)
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-14)
 
   # Update the prior covariance matrices, U, using the ED updates.
@@ -52,8 +56,10 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
   control2$version <- "Rcpp"
   updates1 <- assign_prior_covariance_updates(fit1,control1)$covupdates
   updates2 <- assign_prior_covariance_updates(fit2,control2)$covupdates
-  fit1 <- update_prior_covariances(fit1,updates1)
-  fit2 <- update_prior_covariances(fit2,updates2)
+  fit1   <- update_prior_covariances(fit1,updates1)
+  fit2   <- update_prior_covariances(fit2,updates2)
+  fit1$U <- removeQ(fit1$U)
+  fit2$U <- removeQ(fit2$U)
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-14)
 })
 
