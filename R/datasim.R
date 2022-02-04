@@ -40,7 +40,7 @@ simulate_ud_data <- function (n, w, U, V) {
   if (m < 2)
     stop("The univariate case (m = 1) is not implemented")
   
-  # Check the residual covariance matrix.
+  # Check and prepare the residual covariance matrix.
   if (missing(V))
     V <- diag(nrow(U[[1]]))
   if (!issemidef(V))

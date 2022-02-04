@@ -103,7 +103,9 @@
 #'   an m-dimensional data point. The number of rows and columns should
 #'   be 2 or more. When not provided, \code{fit$X} is used.
 #'
-#' @param newdata Explain here what input argument "newdata" does.
+#' @param newdata Additional n1 x m data matrix treated as
+#'   \dQuote{test data} that can be used to assess progress of model
+#'   fitting.
 #' 
 #' @param control A list of parameters controlling the behaviour of
 #'   the model fitting and initialization. See \sQuote{Details}.
@@ -209,32 +211,37 @@
 #' 
 #' @export
 #' 
-ud_fit <- function (fit, X, newdata = as.numeric(NA), control = list(),
-                    verbose = TRUE) {
+ud_fit <- function (fit, X, newdata, control = list(), verbose = TRUE) {
     
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
     stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
+
+  # Get the dimension of the data points.
+  m <- nrow(fit$U[[1]]$mat)
   
-  # Check the input data matrix, "X".
+  # Check optional input matrix, "X".
   if (!missing(X)) {
     if (!(is.matrix(X) & is.numeric(X)))
       stop("Input argument \"X\" should be a numeric matrix")
-    if (nrow(X) < 2 | ncol(X) < 2)
-      stop("Input argument \"X\" should have at least 2 columns and ",
-           "at least 2 rows")
+    if (nrow(X) < 2)
+      stop("Input argument \"X\" should have at least 2 rows")
+    if (ncol(X) != m)
+      stop("Input matrix \"X\" should be a matrix with m columns ",
+           "(where m is the dimension of the data points)")
     fit$X <- X
   }
   n <- nrow(fit$X)
-  m <- ncol(fit$X)
 
   # Check optional input argument "newdata".
-  if (!any(is.na(newdata))) {
+  if (missing(newdata))
+    newdata <- NULL
+  else {
     if (!(is.matrix(newdata) & is.numeric(newdata)))
-      stop("Input argument \"newdata\" should be NA, or a numeric matrix")
+      stop("Input argument \"newdata\" should be a numeric matrix")
     if (ncol(newdata) != m)
-      stop("Input matrix \"newdata\" should be NA, or a matrix with the ",
-           "same number of columns as \"X\"")
+      stop("Input matrix \"newdata\" should be a matrix with m columns ",
+           "(where m is the dimension of the data points)")
   }
   fit$newdata <- newdata
   
@@ -304,9 +311,10 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
   progress$iter <- 1:control$maxiter
   
   # Iterate the EM updates.
-  if (verbose)
-    cat("iter      log-likelihood log-lik(newdata) |w - w'| |U - U'|",
-        "|V - V'|\n")
+  if (verbose) {
+    cat(sprintf("iter      log-likelihood %s|w - w'| |U - U'| |V - V'|\n",
+                ifelse(is.null(fit$newdata),"","log-lik(newdata) ")))
+   }
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
 
@@ -338,11 +346,11 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # other quantities, and report the algorithm's progress to the
     # console if requested.
     loglik <- loglik_ud(fit$X,fit$w,fit$U,fit$V,control$version)
-    if (!any(is.na(fit$newdata)))
+    if (is.null(fit$newdata))
+      loglik.newdata <- as.numeric(NA)
+    else
       loglik.newdata <- loglik_ud(fit$newdata,fit$w,fit$U,fit$V,
                                   control$version)
-    else
-      loglik.newdata <- as.numeric(NA)
     dw <- max(abs(fit$w - w0))
     dU <- max(abs(ulist2array(fit$U) - ulist2array(U0)))
     if (is.matrix(fit$V))
@@ -357,8 +365,10 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     progress[iter,"delta.v"] <- dV 
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
-      cat(sprintf("%4d %+0.12e %+0.9e %0.2e %0.2e %0.2e\n",
-                  iter,loglik,loglik.newdata,dw,dU,dV))
+      cat(sprintf("%4d %+0.12e %s%0.2e %0.2e %0.2e\n",iter,loglik,
+                  ifelse(is.null(fit$newdata),"",
+                         sprintf("%+0.9e ",loglik.newdata)),
+                  dw,dU,dV))
 
     # Check convergence.
     dparam     <- max(dw,dU,dV)
