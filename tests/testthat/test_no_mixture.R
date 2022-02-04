@@ -11,7 +11,8 @@ test_that("ud_fit works as expected when k = 1",{
   X <- simulate_ud_data(n,U = U)
 
   # Fit an Ultimate Deconvolution model with a single unconstrained U.
-  fit0 <- ud_init(X,V = V,n_unconstrained = 1,n_rank1 = 0,U_scaled = NULL)
+  fit0 <- ud_init(X,V = diag(2),n_unconstrained = 1,n_rank1 = 0,
+                  U_scaled = NULL)
   capture.output(
     fit1 <- ud_fit(fit0,control = list(unconstrained.update = "ted",
                                        version = "R")))
