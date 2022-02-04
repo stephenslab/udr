@@ -1,13 +1,10 @@
 context("ud_init")
 
-test_that(paste("Error is thrown when X has less than 2 rows or columns, or",
-                "when less than 2 prior covariance matrices are requested"),{
+test_that("Error is thrown when X has less than 2 rows or columns",{
   set.seed(1)
   X <- matrix(rnorm(20))
   expect_error(ud_init(X))
   expect_error(ud_init(t(X)))
-  X <- matrix(rnorm(20),10,2)
-  expect_error(ud_init(X,U_scaled = NULL,n_rank1 = 0,n_unconstrained = 1))
 })
 
 test_that("ud_init produces same result when V is a matrix or list",{

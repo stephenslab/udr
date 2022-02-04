@@ -102,6 +102,8 @@
 #' @param X Optional n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point. The number of rows and columns should
 #'   be 2 or more. When not provided, \code{fit$X} is used.
+#'
+#' @param newdata Explain here what input argument "newdata" does.
 #' 
 #' @param control A list of parameters controlling the behaviour of
 #'   the model fitting and initialization. See \sQuote{Details}.
@@ -207,7 +209,8 @@
 #' 
 #' @export
 #' 
-ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
+ud_fit <- function (fit, X, newdata = as.numeric(NA), control = list(),
+                    verbose = TRUE) {
     
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
@@ -225,6 +228,16 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   n <- nrow(fit$X)
   m <- ncol(fit$X)
 
+  # Check optional input argument "newdata".
+  if (!any(is.na(newdata))) {
+    if (!(is.matrix(newdata) & is.numeric(newdata)))
+      stop("Input argument \"newdata\" should be NA, or a numeric matrix")
+    if (ncol(newdata) != m)
+      stop("Input matrix \"newdata\" should be NA, or a matrix with the ",
+           "same number of columns as \"X\"")
+  }
+  fit$newdata <- newdata
+  
   # Get the number of components in the mixture prior (k).
   k <- length(fit$U)
 
@@ -253,7 +266,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-135, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-140, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -285,13 +298,15 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
   k <- length(fit$w)
   
   # Set up data structures used in the loop below.
-  progress <- as.data.frame(matrix(0,control$maxiter,6))
-  names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
+  progress <- as.data.frame(matrix(0,control$maxiter,7))
+  names(progress) <- c("iter","loglik","loglik.newdata","delta.w",
+                       "delta.v","delta.u","timing")
   progress$iter <- 1:control$maxiter
   
   # Iterate the EM updates.
   if (verbose)
-    cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
+    cat("iter      log-likelihood log-lik(newdata) |w - w'| |U - U'|",
+        "|V - V'|\n")
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
 
@@ -323,6 +338,11 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # other quantities, and report the algorithm's progress to the
     # console if requested.
     loglik <- loglik_ud(fit$X,fit$w,fit$U,fit$V,control$version)
+    if (!any(is.na(fit$newdata)))
+      loglik.newdata <- loglik_ud(fit$newdata,fit$w,fit$U,fit$V,
+                                  control$version)
+    else
+      loglik.newdata <- as.numeric(NA)
     dw <- max(abs(fit$w - w0))
     dU <- max(abs(ulist2array(fit$U) - ulist2array(U0)))
     if (is.matrix(fit$V))
@@ -331,12 +351,14 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
       dV <- 0
     t2 <- proc.time()
     progress[iter,"loglik"]  <- loglik
+    progress[iter,"loglik.newdata"] <- loglik.newdata
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.u"] <- dU 
     progress[iter,"delta.v"] <- dV 
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
-      cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dV))
+      cat(sprintf("%4d %+0.12e %+0.9e %0.2e %0.2e %0.2e\n",
+                  iter,loglik,loglik.newdata,dw,dU,dV))
 
     # Check convergence.
     dparam     <- max(dw,dU,dV)

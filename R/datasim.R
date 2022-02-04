@@ -15,7 +15,8 @@
 #'   covariance matrix for the ith mixture component. For k = 1, U may
 #'   also be a matrix.
 #' 
-#' @param V The m x m residual covariance matrix.
+#' @param V The m x m residual covariance matrix. If missing, \code{V}
+#'   is set to the identity matrix.
 #'
 #' @return An n x m matrix in which each row is a draw from the
 #'   Ultimate Deconvolution model.
@@ -26,13 +27,13 @@
 #' 
 #' @export
 #' 
-simulate_ud_data <- function (n, w, U, V = diag(ncol(X))) {
+simulate_ud_data <- function (n, w, U, V) {
       
   # Get the dimension of the data points (m) and the number of
   # mixture components (k).
-  m <- nrow(V)
   if (is.matrix(U))
     U <- list(U = U)
+  m <- nrow(U[[1]])
   k <- length(U)
   if (n < 2)
     stop("n should be 2 or greater")
@@ -40,6 +41,8 @@ simulate_ud_data <- function (n, w, U, V = diag(ncol(X))) {
     stop("The univariate case (m = 1) is not implemented")
   
   # Check the residual covariance matrix.
+  if (missing(V))
+    V <- diag(nrow(U[[1]]))
   if (!issemidef(V))
     stop("Input argument \"V\" should be a positive semi-definite matrix")
   

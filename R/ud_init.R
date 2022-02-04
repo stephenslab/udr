@@ -213,8 +213,9 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
 
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.
-  progress        <- as.data.frame(matrix(0,0,6))
-  names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
+  progress        <- as.data.frame(matrix(0,0,7))
+  names(progress) <- c("iter","loglik","loglik.newdata","delta.w",
+                       "delta.v","delta.u","timing")
   
   # Compute the log-likelihood and the responsibilities matrix (P), and
   # finalize the output.

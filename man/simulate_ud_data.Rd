@@ -4,7 +4,7 @@
 \alias{simulate_ud_data}
 \title{Simulate Data from Ultimate Deconvolution Model}
 \usage{
-simulate_ud_data(n, w, U, V = diag(ncol(X)))
+simulate_ud_data(n, w, U, V)
 }
 \arguments{
 \item{n}{Number of data points to simulate.}
@@ -19,7 +19,8 @@ the mixture prior; list element \code{U[[i]]} is the m x m
 covariance matrix for the ith mixture component. For k = 1, U may
 also be a matrix.}
 
-\item{V}{The m x m residual covariance matrix.}
+\item{V}{The m x m residual covariance matrix. If missing, \code{V}
+is set to the identity matrix.}
 }
 \value{
 An n x m matrix in which each row is a draw from the

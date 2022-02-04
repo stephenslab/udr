@@ -5,7 +5,7 @@
 \alias{ud_fit_control_default}
 \title{Fit Ultimate Deconvolution Model}
 \usage{
-ud_fit(fit, X, control = list(), verbose = TRUE)
+ud_fit(fit, X, newdata = as.numeric(NA), control = list(), verbose = TRUE)
 
 ud_fit_control_default()
 }
@@ -17,6 +17,8 @@ from a previous call to \code{ud_fit}.}
 \item{X}{Optional n x m data matrix, in which each row of the matrix is
 an m-dimensional data point. The number of rows and columns should
 be 2 or more. When not provided, \code{fit$X} is used.}
+
+\item{newdata}{Explain here what input argument "newdata" does.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model fitting and initialization. See \sQuote{Details}.}
