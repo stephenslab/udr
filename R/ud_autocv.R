@@ -1,45 +1,67 @@
 
 
-# Function to split data into train/test
+# Function to perform n-fold cross-validation
 #' @param X: n by R data matrix
-data.split <- function(X){
+#' @param V: R by R residual covariance matrix
+#' @param n_unconstrained: An integer, the number of unconstrained matrix to fit
+#' @param n_rank1: An integer, the number of rank1 matrix to fit
+ud_cv = function(X, V, nfold, n_unconstrained, n_rank1, control, verbose){
   
   n = nrow(X)
-  # split data into train/test: ratio = 4:1
-  indx = sample(1:n, round(n/5), replace = FALSE)
+  size = round(n / nfold)
+  loglik.test = rep(NA, nfold)
   
-  X.test = X[indx, ]
-  X.train = X[-indx, ]
-  return(list(X.test = X.test, X.train = X.train))
-}
-
-
-
-# Function to perform cross-validation 
-#' @param X: n by R data matrix
-#' @param V: residual covariance matrix
-#' @param grid_k: A list of Ks to experiment with
-udr_fit_cv = function(X, V, grid_k = c(1,2,3,4,6,8,10,20,30,40,50,100), control=list()){
-  
-  X.train = data.split(X)$X.train
-  X.test = data.split(X)$X.test
-  nk = length(grid_k)
-  loglik.test = c(-Inf, rep(NA, n))
-  
-  # Train model based on different k and evaluate if 
-  # test log-likelihood decreases
-  for (i in 1:nk){
+  for (i in 1:nfold){
+    # split data
+    start = 1+(i-1)*size
+    end = ifelse(i==nfold, n, i*size)
+    X.test = X[start:end, ]
+    X.train = X[-c(start:end), ]
     
-    fit1 <- ud_init(X, n_unconstrained = grid_k[i], n_rank1 = 0, U_scaled = NULL, V = V)
+    # fit model 
+    fit1 <- ud_init(X.train, n_unconstrained = n_unconstrained, n_rank1 = n_rank1, U_scaled = NULL, V = V)
     fit2 <- ud_fit(fit1,control = list(unconstrained.update = "ted", rank1.update = "ted",
-                                       resid.update = 'none', maxiter = 100, tol = 1e-5),verbose = FALSE)
+                                       resid.update = 'none', maxiter = 100, tol = 1e-5),verbose = verbose)
     
     U <- lapply(fit2$U,function (e) "[["(e,"mat"))
     U <- simplify2array(U)
-    loglik.test[i+1] <- udr:::loglik_ud(X.test, fit2$w, U, fit2$V)
-    if (loglik.test[i+1] < loglik.test[i]){
-      break
+    loglik.test[i] <- udr:::loglik_ud(X.test, fit2$w, U, fit2$V)
+  }
+  return(avg.loglik = mean(loglik.test)/size)
+}
+
+# Function to select best k components by cross-validation. At least, one of ku and k1 
+# should be specified by the user. 
+#' @param X: n by R data matrix
+#' @param V: residual covariance matrix
+#' @param ku: An integer or a list of integers specifying the number of
+#' unconstrained components to experiment with.
+#' @param k1: An integer or a list of integers specifying the number of
+#' rank1 components to experiment with. 
+
+ud_fit_cv = function(X, V, nfold, ku = 0, k1= 0, control=list(), verbose){
+  
+  k = max(length(ku), length(k1))
+  avg_logliks = c(-Inf, rep(NA, k)) # store average loglikelihood under each scenario
+  kmat = matrix(0, nrow = 2, ncol = k) # store the values of ku and k1
+  rownames(kmat) = c("ku", "k1")
+ 
+  # Perform CV on different k and evaluate if average log-likelihood 
+  # increases. Early stop is available if og-likelihood decreases. 
+  for (i in 1:k){
+    n_unconstrained = ifelse(i > length(ku), rev(ku)[1], ku[i])
+    n_rank1 = ifelse(i > length(k1), rev(k1)[1], k1[i])
+    kmat[,i] = c(n_unconstrained, n_rank1) # store n_unconstrained and n_rank1 in curr iteration
+    
+    # Perform CV
+    avg_logliks[i+1]= ud_cv(X, V, nfold, n_unconstrained, n_rank1, control, verbose)
+    diff = avg_logliks[i+1] - avg_logliks[i] # compare average loglik between curr iter and previous iter
+    
+    if (diff < 0){
+      n_unconstrained = kmat[1, i-1]  # obtain n_unconstrained/n_rank1 from prev iter
+      n_rank1 = kmat[2, i-1]
+      break 
     }
   }
-  return(list(k.best = grid_k[i-1], loglik.test = loglik.test))
+  return(list(ku = n_unconstrained, k1 = n_rank1, avg_logliks=  avg_logliks))
 }
