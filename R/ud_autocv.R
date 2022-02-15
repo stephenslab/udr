@@ -21,8 +21,8 @@ ud_cv = function(X, V, nfold, n_unconstrained, n_rank1, control, verbose){
     # fit model 
     fit1 <- ud_init(X.train, n_unconstrained = n_unconstrained, n_rank1 = n_rank1, U_scaled = NULL, V = V)
     fit2 <- ud_fit(fit1,control = list(unconstrained.update = "ted", rank1.update = "ted",
-                                       resid.update = 'none', maxiter = 100, tol = 1e-5),verbose = verbose)
-    
+                                       resid.update = 'none', maxiter = control$maxiter, tol = control$tol),verbose = verbose)
+  
     U <- lapply(fit2$U,function (e) "[["(e,"mat"))
     U <- simplify2array(U)
     loglik.test[i] <- udr:::loglik_ud(X.test, fit2$w, U, fit2$V)
@@ -45,6 +45,10 @@ ud_fit_cv = function(X, V, nfold, ku = 0, k1= 0, control=list(), verbose){
   avg_logliks = c(-Inf, rep(NA, k)) # store average loglikelihood under each scenario
   kmat = matrix(0, nrow = 2, ncol = k) # store the values of ku and k1
   rownames(kmat) = c("ku", "k1")
+  
+  # Modify control list
+  control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
+ 
  
   # Perform CV on different k and evaluate if average log-likelihood 
   # increases. Early stop is available if og-likelihood decreases. 
