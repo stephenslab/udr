@@ -67,5 +67,5 @@ ud_fit_cv = function(X, V, nfold, ku = 0, k1= 0, control=list(), verbose){
       break 
     }
   }
-  return(list(ku = n_unconstrained, k1 = n_rank1, scenario = kmat[,1:i], avg_logliks= avg_logliks[2:i]))
+  return(list(ku = n_unconstrained, k1 = n_rank1, scenario = kmat[,1:i], avg_logliks= avg_logliks[2:(i+1)]))
 }
