@@ -5,7 +5,7 @@
 #' @param nfold: An integer, the number of folds used in CV. 
 #' @param n_unconstrained: An integer, the number of unconstrained matrix to fit
 #' @param n_rank1: An integer, the number of rank1 matrix to fit
-ud_cv = function(X, V, nfold, n_unconstrained, n_rank1, control, verbose){
+cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbose){
   
   n = nrow(X)
   size = round(n / nfold)
@@ -36,14 +36,23 @@ ud_cv = function(X, V, nfold, n_unconstrained, n_rank1, control, verbose){
 #' @param X: n by R data matrix
 #' @param V: residual covariance matrix
 #' @param nfold: An integer, the number of folds used in CV. 
-#' @param ku: An integer or a list of integers specifying the number of
+#' @param ku: An integer or a vector of integers specifying the number of
 #' unconstrained components to experiment with.
-#' @param k1: An integer or a list of integers specifying the number of
+#' @param k1: An integer or a vector of integers specifying the number of
 #' rank1 components to experiment with. 
 
 ud_fit_cv = function(X, V, nfold, ku = 0, k1= 0, control=list(), verbose){
   
+  if (length(ku) == 1 & length(k1) == 1)
+    if (ku == 0 & k1 == 0)
+      stop("At least \"ku\" or \"k1\" has to be specified")
+  
+  if ((length(ku) > 1) & (length(k1) > 1))
+    if (length(ku) != length(k1))
+      stop("\"ku\" and \"k1\" should have the same length if they are both vectors")
+  
   k = max(length(ku), length(k1))
+  
   avg_logliks = c(-Inf, rep(NA, k)) # store average loglikelihood under each scenario
   kmat = matrix(0, nrow = 2, ncol = k) # store the values of ku and k1 under each evaluated scenario
   rownames(kmat) = c("ku", "k1")
@@ -51,14 +60,14 @@ ud_fit_cv = function(X, V, nfold, ku = 0, k1= 0, control=list(), verbose){
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
  
   # Perform CV on different k and evaluate if average log-likelihood 
-  # increases. Early stop is available if og-likelihood decreases. 
+  # increases. Early stop is available if og-likelihood decreases.
   for (i in 1:k){
-    n_unconstrained = ifelse(i > length(ku), rev(ku)[1], ku[i])
-    n_rank1 = ifelse(i > length(k1), rev(k1)[1], k1[i])
+    n_unconstrained = ifelse(i > length(ku), ku, ku[i])
+    n_rank1 = ifelse(i > length(k1), k1, k1[i])
     kmat[,i] = c(n_unconstrained, n_rank1) # store n_unconstrained and n_rank1 in curr iteration
     
     # Perform CV
-    avg_logliks[i+1]= ud_cv(X, V, nfold, n_unconstrained, n_rank1, control, verbose)
+    avg_logliks[i+1]= cv_single_model(X, V, nfold, n_unconstrained, n_rank1, control, verbose)
     diff = avg_logliks[i+1] - avg_logliks[i] # compare average loglik between curr iter and previous iter
     
     if (diff < 0){
