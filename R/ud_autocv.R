@@ -71,8 +71,8 @@ ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(
     diff = avg_logliks[i+1] - avg_logliks[i] # compare average loglik between curr iter and previous iter
     
     if (diff < 0){
-      n_unconstrained = kmat[1, i-1]  # obtain n_unconstrained/n_rank1 from prev iter
-      n_rank1 = kmat[2, i-1]
+      n_unconstrained = unname(kmat[1, i-1])  # obtain n_unconstrained/n_rank1 from prev iter
+      n_rank1 = unname(kmat[2, i-1])
       break 
     }
   }
