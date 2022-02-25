@@ -10,6 +10,7 @@ cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbo
   n = nrow(X)
   size = round(n / nfold)
   loglik.test = rep(NA, nfold)
+  fit_by_fold = c()
   
     # split data
   for (i in 1:nfold){
@@ -26,8 +27,9 @@ cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbo
     U <- lapply(fit2$U,function (e) "[["(e,"mat"))
     U <- simplify2array(U)
     loglik.test[i] <- udr:::loglik_ud(X.test, fit2$w, U, fit2$V)
+    fit_by_fold[[i]] = fit2
   }
-  return(avg.loglik = mean(loglik.test)/size)
+  return(list(fit_by_fold = fit_by_fold, avg.loglik = mean(loglik.test)/size))
 }
 
 
@@ -54,6 +56,7 @@ ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(
   k = max(length(k_unconstrained), length(k_rank1))
   
   avg_logliks = c(-Inf, rep(NA, k)) # store average loglikelihood under each scenario
+  fit_all = c() # store fit object
   kmat = matrix(0, nrow = 2, ncol = k) # store the values of k_unconstrained and k_rank1 under each evaluated scenario
   rownames(kmat) = c("k_unconstrained", "k_rank1")
   
@@ -67,14 +70,29 @@ ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(
     kmat[,i] = c(n_unconstrained, n_rank1) # store n_unconstrained and n_rank1 in curr iteration
     
     # Perform CV
-    avg_logliks[i+1]= cv_single_model(X, V, nfold, n_unconstrained, n_rank1, control, verbose)
+    res = cv_single_model(X, V, nfold, n_unconstrained, n_rank1, control, verbose)
+    # store results
+    avg_logliks[i+1]= res$avg.loglik
+    fit_all[[i]] = res$fit_by_fold
+
     diff = avg_logliks[i+1] - avg_logliks[i] # compare average loglik between curr iter and previous iter
-    
     if (diff < 0){
-      n_unconstrained = unname(kmat[1, i-1])  # obtain n_unconstrained/n_rank1 from prev iter
-      n_rank1 = unname(kmat[2, i-1])
       break 
     }
   }
-  return(list(n_unconstrained = n_unconstrained, n_rank1 = n_rank1, scenario = kmat[,1:i], avg_logliks= avg_logliks[2:(i+1)]))
+  return(list(fit_all = fit_all, scenario = kmat[,1:i], avg_logliks= avg_logliks[2:(i+1)]))
+}
+
+
+#' Function to get the single cv fit results with highest average test log-likelihood.
+#' This function returns the nfold fit object, its corresponding test log-likelihood, 
+#' and corresponding u_unconstrained and n_rank1.
+#' @param res: An object that stores the result of ud_fit_cv(). 
+get.best_fit_cv = function(res){
+
+  indx = which.max(res$avg_logliks)
+  fit_single_model_cv = res$fit_all[[indx]]
+  
+  return(list(fit_single_model_cv = fit_single_model_cv, test.loglik = res$avg_logliks[indx],
+              n_unconstrained = res$scenario[1, indx], n_rank1 = res$scenario[2, indx]))  
 }
