@@ -88,7 +88,7 @@ ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(
 #' @param res: the result from ud_fit_cv(). 
 #' @return best_fit_cv: an object storing training results, its corresponding average 
 #' test loglikelihood and parameter configuration. 
-get.best_fit_cv = function(res){
+get_best_fit_cv = function(res){
   
   best_fit_cv = c()
   indx = which.max(res$avg_logliks)
@@ -104,7 +104,7 @@ get.best_fit_cv = function(res){
 #' @param V: R by R residual covariance matrix
 #' @param best_fit_cv: An object storing the best cv results and its parameter configuration.
 #' @return best_fit: the fit object on whole dataset. 
-get.best_fit = function(X, V, best_fit_cv, control = list(), verbose){
+get_best_fit = function(X, V, best_fit_cv, control = list(), verbose){
   
     control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
     # Initialize with best configuration 
