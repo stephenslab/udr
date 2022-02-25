@@ -84,15 +84,32 @@ ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(
 }
 
 
-#' Function to get the single cv fit results with highest average test log-likelihood.
-#' This function returns the nfold fit object, its corresponding test log-likelihood, 
-#' and corresponding u_unconstrained and n_rank1.
-#' @param res: An object that stores the result of ud_fit_cv(). 
+#' Function to get the best_fit_cv object based on highest average test log-likelihood.
+#' @param res: the result from ud_fit_cv(). 
+#' @return best_fit_cv: an object storing training results, its corresponding average 
+#' test loglikelihood and parameter configuration. 
 get.best_fit_cv = function(res){
-
-  indx = which.max(res$avg_logliks)
-  fit_single_model_cv = res$fit_all[[indx]]
   
-  return(list(fit_single_model_cv = fit_single_model_cv, test.loglik = res$avg_logliks[indx],
-              n_unconstrained = res$scenario[1, indx], n_rank1 = res$scenario[2, indx]))  
+  best_fit_cv = c()
+  indx = which.max(res$avg_logliks)
+  best_fit_cv$res_single_model = res$fit_all[[indx]]
+  best_fit_cv$test.loglik = res$avg_logliks[indx]
+  best_fit_cv$n_unconstrained = unname(res$scenario[1, indx])
+  best_fit_cv$n_rank1 = unname(res$scenario[2, indx])
+  return(best_fit_cv)
+}
+
+#' Function to get the best fit on the whole dataset based on cv results. 
+#' @param X: n by R data matrix
+#' @param V: R by R residual covariance matrix
+#' @param best_fit_cv: An object storing the best cv results and its parameter configuration.
+#' @return best_fit: the fit object on whole dataset. 
+get.best_fit = function(X, V, best_fit_cv, control = list(), verbose){
+  
+    control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
+    # Initialize with best configuration 
+    fit1 <- ud_init(X, n_unconstrained = best_fit_cv$n_unconstrained, n_rank1 = best_fit_cv$n_rank1, U_scaled = NULL, V = V)
+    fit2 <- ud_fit(fit1,control = list(unconstrained.update = "ted", rank_rank1.update = "ted",
+                                       resid.update = 'none', maxiter = control$maxiter, tol = 1e-5),verbose = verbose)
+  return(fit2)  
 }
