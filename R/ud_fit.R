@@ -91,6 +91,11 @@
 #' covariance(s) \code{V} and the prior covariance matrices
 #' \code{U}. Should be a small, positive number.}}
 #'
+#' \item{\code{update.threshold}}{A prior covariance matrix
+#' \code{U[[i]]} is only updated if the total \dQuote{responsibility}
+#' for component \code{i} exceeds \code{update.threshold}; that is,
+#' only if \code{sum(P[,i]) > update.threshold}.}
+#'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
 #' for guidance.
@@ -161,7 +166,7 @@
 #' # This is the simplest invocation of ud_init and ud_fit. 
 #' # It uses the default settings for the prior 
 #' # (which are 2 scaled components, 4 rank-1 components, and 4 unconstrained components)
-#' fit1 <- ud_init(X, V=V)
+#' fit1 <- ud_init(X,V = V)
 #' fit1 <- ud_fit(fit1)
 #' logLik(fit1)
 #' summary(fit1)
@@ -253,7 +258,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-139, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-140, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -314,7 +319,8 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
       fit <- update_resid_covariance(fit,control$resid.update,control$version)
 
     # Update the scaled prior covariance matrices.
-    fit <- update_prior_covariances(fit,covupdates,control$minval)
+    fit <- update_prior_covariances(fit,covupdates,control$minval,
+                                    control$update.threshold)
 
     # Update the mixture weights.
     fit <- update_mixture_weights(fit,control$weights.update)
@@ -368,4 +374,5 @@ ud_fit_control_default <- function()
        minval               = 1e-8,
        tol                  = 1e-6,
        tol.lik              = 1e-3,
-       zero.threshold       = 1e-15)
+       zero.threshold       = 1e-15,
+       update.threshold     = 1e-3)

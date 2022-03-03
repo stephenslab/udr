@@ -146,6 +146,11 @@ less than \code{tol.lik}.}
 covariance(s) \code{V} and the prior covariance matrices
 \code{U}. Should be a small, positive number.}}
 
+\item{\code{update.threshold}}{A prior covariance matrix
+\code{U[[i]]} is only updated if the total \dQuote{responsibility}
+for component \code{i} exceeds \code{update.threshold}; that is,
+only if \code{sum(P[,i]) > update.threshold}.}
+
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples
 for guidance.
@@ -172,7 +177,7 @@ X <- simulate_ud_data(n,w,U,V)
 # This is the simplest invocation of ud_init and ud_fit. 
 # It uses the default settings for the prior 
 # (which are 2 scaled components, 4 rank-1 components, and 4 unconstrained components)
-fit1 <- ud_init(X, V=V)
+fit1 <- ud_init(X,V = V)
 fit1 <- ud_fit(fit1)
 logLik(fit1)
 summary(fit1)

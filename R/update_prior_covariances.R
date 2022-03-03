@@ -60,7 +60,7 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
                             ifelse(is.matrix(fit$V),"_iid","_notiid"),
                             ifelse(control$version == "Rcpp","_rcpp",""))
   names(covupdates) <- names(fit$U)
-  return(list(control = control, covupdates = covupdates))
+  return(list(control = control,covupdates = covupdates))
 }
 
 #' @rdname ud_fit_advanced
@@ -76,7 +76,8 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
 update_prior_covariances <-
   function (fit,            
             covupdates = assign_prior_covariance_updates(fit)$covupdates,
-            minval = 1e-8) {
+            minval = 1e-8,
+            update.threshold = 1e-3) {
 
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
@@ -91,9 +92,10 @@ update_prior_covariances <-
 
     # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
     for (i in 1:k)
-      fit0$U[[i]] <- do.call(covupdates[i],
-                             list(X = fit0$X,U = fit0$U[[i]],
-                                  p = fit0$P[,i],minval = minval))
+      if (sum(fit0$P[,i]) > update.threshold)
+        fit0$U[[i]] <- do.call(covupdates[i],
+                               list(X = fit0$X,U = fit0$U[[i]],
+                                    p = fit0$P[,i],minval = minval))
     
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
     fit0 <- unsimplify_model(fit0)
@@ -118,9 +120,10 @@ update_prior_covariances <-
     if (is.list(V))
       V <- list2array(V)
     for (i in 1:k)
-      fit$U[[i]] <- do.call(covupdates[i],
-                             list(X = fit$X,U = fit$U[[i]],V = V,
-                                  p = fit$P[,i],minval = minval))
+      if (sum(fit$P[,i]) > update.threshold)
+        fit$U[[i]] <- do.call(covupdates[i],
+                               list(X = fit$X,U = fit$U[[i]],V = V,
+                                    p = fit$P[,i],minval = minval))
   }
   
   # Output the updated fit.

@@ -49,8 +49,6 @@ test_that(paste("R and C++ implementations of ud_fit produce same result",
   fit2["V"] <- NULL
   fit3["V"] <- NULL
   fit4["V"] <- NULL
-  removeQ <- function (U)
-    lapply(U,function (x) { x["Q"] <- NULL; return(x) })
   fit1$U <- removeQ(fit1$U)
   fit2$U <- removeQ(fit2$U)
   fit3$U <- removeQ(fit3$U)
@@ -85,8 +83,6 @@ test_that(paste("Check R and C++ implementations of residual covariance",
   
   # The ud_fit outputs should be the same (except for the Q matrices
   # and the timings).
-  removeQ <- function (U)
-    lapply(U,function (x) { x["Q"] <- NULL; return(x) })
   fit1$U <- removeQ(fit1$U)
   fit2$U <- removeQ(fit2$U)
   fit1$progress$timing <- 0
@@ -126,8 +122,6 @@ test_that(paste("Check R and C++ implementations of prior covariance",
   fit2$progress$timing <- 0
   fit3$progress$timing <- 0
   fit3$V <- fit1$V
-  removeQ <- function (U)
-    lapply(U,function (x) { x["Q"] <- NULL; return(x) })
   fit1$U <- removeQ(fit1$U)
   fit2$U <- removeQ(fit2$U)
   fit3$U <- removeQ(fit3$U)
@@ -189,4 +183,24 @@ test_that(paste("Check R and C++ implementations of prior covariance",
   fit2$progress$timing <- 0
   expect_nondecreasing(fit1$progress$loglik)
   expect_equal(fit1,fit2,scale = 1,tolerance = 1e-12)
+})
+
+test_that("U[[i]] does not get updated when sum(P[,i]) is near zero",{
+
+  # Simulate data.
+  set.seed(1)
+  n   <- 100
+  dat <- simulate_ud_data_2d(n)
+  X   <- dat$X
+
+  # Run the R and C++ implementations of ud_fit when V is a matrix or
+  # a list, and V is not updated.
+  ks <- c("indep","rank1_1","unconstrained1")
+  fit0 <- ud_init(X,V = dat$V)
+  fit0$w[ks] <- 1e-8
+  fit0$w <- with(fit0,w/sum(w))
+  capture.output(fit1 <- ud_fit(fit0,control = list(weights.update = "none")))
+  fit0$U <- removeQ(fit1$U)
+  fit1$U <- removeQ(fit1$U)
+  expect_equal(fit0$U[ks],fit1$U[ks],scale = 1,tolerance = 1e-14)
 })
