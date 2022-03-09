@@ -106,6 +106,7 @@ update_prior_covariances <-
       if (covtypes[i] == "scaled")
         fit$U[[i]]$s <- fit0$U[[i]]$s
       fit$U[[i]] <- fit0$U[[i]]
+      fit$U[[i]]$mat <- (fit$U[[i]]$mat + t(fit$U[[i]]$mat))/2  # Make sure U is p.s.d after update.
     }
   } else {
 
