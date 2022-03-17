@@ -96,15 +96,16 @@ fa_unconstrained <- function(X, U, p) {
   r <- nrow(U)
 
   Q <- get_mat_Q(U)
-  r <- ncol(Q)
-  I <- diag(r)
+  d <- ncol(Q)
   
-  Sigma <- solve(crossprod(Q) + I)
+  Sigma <- solve(crossprod(Q) + diag(d))
   bmat  <- X %*% Q %*% Sigma   # n by r matrix
   A     <- crossprod(X,p*bmat) # t(X) %*% (p*bmat)
   B     <- crossprod(bmat,p*bmat) + sum(p)*Sigma
   Q     <- A %*% solve(B)
-  return(tcrossprod(Q))
+  # A bias term added to Unew to prevent Unew having eigenvalues all near zero.
+  Unew <- tcrossprod(Q) + 1e-8*diag(r) 
+  return(Unew)
 }
 
 # Perform an M-step update for estimating the scalar for prior
