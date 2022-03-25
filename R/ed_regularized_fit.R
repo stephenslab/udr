@@ -3,14 +3,13 @@
 #' prior on U. U \sim W_R^{-1}(\Phi, \nu). Here \nu = R-1 and \Phi = (\nu+R+1)*I.
 #' The derivation for U is available in overleaf eq.(33).
 #' https://www.overleaf.com/read/vrgwpskkhbpj
-ed_reg_iid <- function(X, U, p){
+ed_reg_iid <- function(X, U, p, Phi = 2*ncol(U)*diag(ncol(U)), nu = diag(ncol(U)) - 1){
   m  <- ncol(X)
   I  <- diag(m)
   A  <- solve(U + I,U)
   B <- U %*% (I-A)
   bmat <- X %*% A
-  Phi <- 2*m*diag(m)
-  U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+Phi)/(sum(p)+ 2*m)
+  U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+Phi)/(sum(p)+ nu + m + 1)
 }
 
 
