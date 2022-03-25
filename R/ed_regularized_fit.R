@@ -1,3 +1,8 @@
+
+#' Function for regularized ED where we specify an inverse Wishart
+#' prior on U. U \sim W_R^{-1}(\Phi, \nu). Here \nu = R-1 and \Phi = (\nu+R+1)*I.
+#' The derivation for U is available in overleaf eq.(33).
+#' https://www.overleaf.com/read/vrgwpskkhbpj
 ed_reg_iid <- function(X, U, p){
   m  <- ncol(X)
   I  <- diag(m)
