@@ -3,7 +3,7 @@
 #' prior on U. U \sim W_R^{-1}(\Phi, \nu). Here \nu = R-1 and \Phi = (\nu+R+1)*I.
 #' The derivation for U is available in overleaf eq.(33).
 #' https://www.overleaf.com/read/vrgwpskkhbpj
-ed_reg_iid <- function(X, U, p, Phi = (nu+ncol(U)+1)*diag(ncol(U)), nu = diag(ncol(U)) - 1){
+ed_reg_iid <- function(X, U, p, Phi = (nu+ncol(U)+1)*diag(ncol(U)), nu = diag(ncol(U))){
   m  <- ncol(X)
   I  <- diag(m)
   A  <- solve(U + I,U)
