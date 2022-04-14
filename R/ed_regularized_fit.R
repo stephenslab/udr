@@ -1,6 +1,7 @@
 
 #' Function for regularized ED where we specify an inverse Wishart
-#' prior on U. U \sim W_R^{-1}(\Phi, \nu). Here \nu = R-1 and \Phi = (\nu+R+1)*I.
+#' prior on U. U \sim W_R^{-1}(\Phi, \nu). Default parameter values:
+#' \nu = R and \Phi = (\nu+R+1)*I.
 #' The derivation for U is available in overleaf eq.(33).
 #' https://www.overleaf.com/read/vrgwpskkhbpj
 ed_reg_iid <- function(X, U, p, Phi = (nu+ncol(U)+1)*diag(ncol(U)), nu = diag(ncol(U))){
@@ -14,7 +15,7 @@ ed_reg_iid <- function(X, U, p, Phi = (nu+ncol(U)+1)*diag(ncol(U)), nu = diag(nc
 
 
 #' Function to compute log posterior. 
-compute_log_posterior <- function(X, w, U, V, Phi, nu){
+compute_log_posterior_ed <- function(X, w, U, V, Phi, nu){
   log_prior <- 0
   K <- length(w)
   for (k in 1:K){
@@ -57,7 +58,6 @@ em_fit_regularized_ed <- function(X, w, U, V, Phi, nu, maxiter, tol, tol.lik){
     loglik = loglik_ud_iid_helper(X, w, U, V)
     log_posterior = compute_log_posterior(X, w, U, V, Phi, nu)
 
-  
     dw <- max(abs(w - w0))
     dU <- max(abs(U - U0))
     dloglik <- loglik - loglik0
