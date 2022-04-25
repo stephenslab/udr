@@ -83,89 +83,77 @@ em_fit_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxiter, to
     U0  <- U
     # E-step: calculate posterior probabilities using the current mu and sigmas
     P <- compute_posterior_probs_iid(X, w, U, V)
-    f <- compute_F(X, P, U, lambda, alpha)
+    f <- compute_F(X, w, U, V, P, lambda, alpha)
     Fc = c(Fc, f)
     # M-step: 
     # update covariance matrix 
     for (j in 1:k){
       S = get_S(X, P[,j])
-   #  alpha[j] = get_alpha(X, S, P[,j])
+      alpha[j] = get_alpha(X, S, P[,j])
       U[,,j] = regularize_by_nuclear_penalty(X, S, P[, j], lambda, alpha[j])$U
     }
-    f <- compute_F(X, P, U, lambda, alpha)
-    Fc = c(Fc, f)
     # update mixture weight
     w = colSums(P)/n
-    # Compute log-posterior and log-likelihood.
-    log_posterior = compute_penalized_objective_mixture(X, P, U, V, lambda, alpha)
+    f <- compute_F(X, w, U, V, P, lambda, alpha)
+    Fc = c(Fc, f)
+    # Compute log-posterior
+    log_posterior = compute_log_posterior_nuclear(X, w, U, V, lambda, alpha)
+    loglik = loglik_ud_iid_helper(X,w,U,V)
     dw <- max(abs(w - w0))
-    loglik = loglik_ud_iid_helper(X, w, U, V)
-    
     dU <- max(abs(U - U0))
     dloglik <- loglik - loglik0
     progress[iter,"loglik"]  <- loglik
     progress[iter, "log_posterior"] <- log_posterior
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.u"] <- dU 
-    
     dparam  <- max(dw,dU)
     loglik0 <- loglik
     if (dparam < tol | dloglik < log(1 + tol.lik))
       break
     }
-    return(list(w = w, U = U, progress = progress[1:iter, ], Fc = Fc))
+    return(list(w = w, U = U, progress = progress[1:iter, ], alpha = alpha, Fc = Fc))
 }
 
 
-#' Function to compute the objective function which we maximize in mixture model.
-#' See eq.(55) in write-up: https://www.overleaf.com/read/vrgwpskkhbpj
+#' Function to compute F-function after each E-step/M-step.
+#' See eq.(69) in write-up https://www.overleaf.com/read/vrgwpskkhbpj. 
 #' @param X: data matrix of size $n$ by $R$.
-#' @param P: mixture membership matrix
+#' @param w: a vector of length $K$ containing mixture component weights.
 #' @param U: a 3d array contains k prior covariance matrix
 #' @param V: residual covariance matrix, set to be identity matrix.
-#' @param lambda: tuning paramter that controls the strength of penalty
-#' @param alpha: a number that controls the trade-off between the two nuclear norm terms
-compute_penalized_objective_mixture <- function(X, P, U, V, lambda, alpha){
-  k <- ncol(P)
-  objective = 0
-  for (j in 1:k){ 
-    w = sum(P[,j])
-    S = get_S(X, P[,j])
-    d = eigen(S)$values
-    eigenval = eigen(U[,,j])$values
-    objective = objective - w*sum(log(eigenval+1))-w*sum(d/(eigenval+1)) - 
-      lambda*(alpha[j]*sum(eigenval)+(1-alpha[j])*sum(1/eigenval))
-    objective = objective/2
-  }
-  return(objective)
-}
-
-#' Function to compute the objective function which we maximize in single component model.
-#' See eq.(55) in write-up: https://www.overleaf.com/read/vrgwpskkhbpj
-compute_penalized_objective <- function(X, p, U, V, lambda, alpha){
-  objective = 0
-  w = sum(p)
-  S = get_S(X, p)
-  d = eigen(S)$values
-  eigenval = eigen(U)$values
-  objective = objective - w*sum(log(eigenval+1))-w*sum(d/(eigenval+1)) - 
-      lambda*(alpha*sum(eigenval)+(1-alpha)/sum(1/eigenval))
-    objective = objective/2
-  return(objective)
-}
-
-#' Function to compute the F-function. The F-function should always increase after each E/M step. 
-#' This is based on eq.(53) in write-up. And minus the entropy on weight matrix P. 
-compute_F <- function(X, P, U, lambda, alpha){
-  K = ncol(P)
-  R = ncol(X)
-  f = rep(0, K)
-  for (k in 1:K)
+#' @param P: the weight matrix for each observation under each component.
+#' @param lambda: tuning parameter that controls the strength of penalty
+#' @param alpha: tuning parameter controls the strength of two penalty terms. 
+compute_F = function(X, w, U, V, P, lambda, alpha){
+  log_prior = 0
+  weighted_pi = 0
+  loglik_mat = matrix(0, nrow=K, ncol=n)
+  for(k in 1:K){
     eigenval = eigen(U[,,k])$values
-    S = get_S(X, P[,k])
-    fval =sum(P[,k])*sum(log(eigenval+1))/2 + sum(diag(solve(U[,,k]+diag(R)) %*% S))/2 + 
-      lambda*(alpha[k]*sum(eigenval) + (1-alpha[k])*sum(1/eigenval))/2 + sum(P[,k]*log(P[,k]))
-    f[k] = -fval
-  return(sum(f))
+    loglik_mat[k,] <- t(dmvnorm(X,sigma = U[,,k] + V,log = TRUE))
+    log_prior = log_prior -lambda/2*(alpha[k]*sum(eigenval) + (1-alpha[k])*sum(1/eigenval))
+    weighted_pi = weighted_pi + sum(P[,k])*log(w[k])
+  }
+  f = sum(t(loglik_mat)*P) + log_prior + weighted_pi - sum(P*log(P))
+  return(f)
 }
 
+#' Function to compute log-posterior. The log-posterior should increase each iteration.
+#' See eq.(64) in write-up https://www.overleaf.com/read/vrgwpskkhbpj. 
+#' @param X: data matrix of size $n$ by $R$.
+#' @param w: a vector of length $K$ containing mixture component weights.
+#' @param U: a 3d array contains k prior covariance matrix
+#' @param V: residual covariance matrix, set to be identity matrix.
+#' @param lambda: tuning parameter that controls the strength of penalty
+#' @param alpha: tuning parameter controls the strength of two penalty terms. 
+compute_log_posterior_nuclear <- function(X, w, U, V, lambda, alpha){
+  log_prior <- 0
+  K <- length(w)
+  for (k in 1:K){
+    eigenval = eigen(U[,,k])$values
+    log_prior = log_prior -lambda/2*(alpha[k]*sum(eigenval) + (1-alpha[k])*sum(1/eigenval))
+  }
+  loglik <- loglik_ud_iid_helper(X, w, U, V) 
+  log_posterior <- loglik + log_prior
+  return(log_posterior)
+}
