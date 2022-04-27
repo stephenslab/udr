@@ -127,6 +127,7 @@ em_fit_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxiter, to
 compute_F = function(X, w, U, V, P, lambda, alpha){
   log_prior = 0
   weighted_pi = 0
+  n = nrow(X)
   loglik_mat = matrix(0, nrow=K, ncol=n)
   for(k in 1:K){
     eigenval = eigen(U[,,k])$values
