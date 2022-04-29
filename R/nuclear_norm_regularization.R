@@ -43,6 +43,7 @@ regularize_by_nuclear_penalty = function(X, S, p, lambda, alpha){
 #' component for each observation. 
 get_alpha = function(X, S, p){
   m = ncol(X)
+  S = S - diag(m)
   alpha = 1/(1+(sum(diag(S))/m)^2)
   return(alpha)
 }
