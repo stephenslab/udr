@@ -1,35 +1,47 @@
 
 #' Function for regularized ED where we specify an inverse Wishart
-#' prior on U. U \sim W_R^{-1}(\Phi, \nu). Default parameter values:
-#' \nu = R and \Phi = (\nu+R+1)*I.
+#' prior on U. U \sim W_R^{-1}(U0, \nu), where \nu = n0-R-1. 
 #' The derivation for U is available in overleaf eq.(33).
 #' https://www.overleaf.com/read/vrgwpskkhbpj
-ed_reg_iid <- function(X, U, p, Phi = (nu+ncol(U)+1)*diag(ncol(U)), nu = diag(ncol(U))){
+ed_reg_iid <- function(X, U, p, U0, n0){
   m  <- ncol(X)
   I  <- diag(m)
   A  <- solve(U + I,U)
   B <- U %*% (I-A)
   bmat <- X %*% A
-  U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+Phi)/(sum(p)+ nu + m + 1)
+  U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+U0)/(sum(p)+ n0)
 }
 
 
 #' Function to compute log posterior. 
-compute_log_posterior_ed <- function(X, w, U, V, Phi, nu){
+compute_log_posterior_ed <- function(X, w, U, V, U0, n0){
   log_prior <- 0
   K <- length(w)
   for (k in 1:K){
-    log_prior = log_prior + dinvwishart((U[,,k]+t(U[,,k]))/2, nu = nu, S = Phi, log=TRUE)
+    log_prior = log_prior + ldiwishart(W = (U[,,k]+t(U[,,k]))/2, n0, U0)
   }
   loglik <- loglik_ud_iid_helper(X, w, U, V) 
   log_posterior <- loglik + log_prior
   return(log_posterior)
 }
 
+# Compute the log-density of the inverse Wishart at W with n - d - 1
+# degrees of freedom and scale matrix n*S, ignoring terms that do not
+# depend on X.
+ldiwishart <- function (W, n, S)
+  -n/2*(ldet(W) + tr(S %*% solve(W)))
+
+# Compute the log-determinant of matrix A.
+ldet <- function (A)
+  as.numeric(determinant(A,logarithm = TRUE)$modulus)
+
+# Compute trace of matrix A.
+tr <- function (A)
+  sum(diag(A))
 
 #' Function to fit regularized ED. 
 #' @param U: a 3d array contains k prior covariance matrix
-em_fit_regularized_ed <- function(X, w, U, V, Phi, nu, maxiter, tol, tol.lik){
+em_fit_regularized_ed <- function(X, w, U, V, U0, n0, maxiter, tol, tol.lik){
   # initialize progress to store progress at each iteration
   
   progress <- as.data.frame(matrix(0, maxiter,5))
@@ -50,13 +62,13 @@ em_fit_regularized_ed <- function(X, w, U, V, Phi, nu, maxiter, tol, tol.lik){
     # M-step: 
     # update covariance matrix 
     for (j in 1:k){
-      U[,,j] = ed_reg_iid(X, U[,,j], P[,j], Phi, nu)
+      U[,,j] = ed_reg_iid(X, U[,,j], P[,j], U0, n0)
     }
     # update mixture weight
     w = colSums(P)/n
     # Compute log-likelihood.
     loglik = loglik_ud_iid_helper(X, w, U, V)
-    log_posterior = compute_log_posterior(X, w, U, V, Phi, nu)
+    log_posterior = compute_log_posterior_ed(X, w, U, V, U0, n0)
 
     dw <- max(abs(w - w0))
     dU <- max(abs(U - U0))
