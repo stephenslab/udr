@@ -64,7 +64,7 @@ get_S = function(X, p){
 #' @param U: a 3d array contains k prior covariance matrix
 #' @param V: residual covariance matrix, set to be identity matrix.
 #' @param lambda: tuning paramter that controls the strength of penalty
-em_fit_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxiter, tol, tol.lik){
+em_fit_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxiter, tol, tol.obj){
   # initialize progress to store progress at each iteration
   
   progress <- as.data.frame(matrix(0, maxiter,5))
@@ -76,7 +76,7 @@ em_fit_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxiter, to
   k <- length(w)
   m <- ncol(X)
   alpha <- rep(0.1,k)
-  loglik0 = -Inf
+  log_posterior0 = -Inf
   Fc = c()
   for (iter in 1:maxiter){
     # param values at previous iteration
@@ -102,14 +102,14 @@ em_fit_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxiter, to
     loglik = loglik_ud_iid_helper(X,w,U,V)
     dw <- max(abs(w - w0))
     dU <- max(abs(U - U0))
-    dloglik <- loglik - loglik0
+    dlogpost <- log_posterior - log_posterior0
     progress[iter,"loglik"]  <- loglik
     progress[iter, "log_posterior"] <- log_posterior
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.u"] <- dU 
     dparam  <- max(dw,dU)
-    loglik0 <- loglik
-    if (dparam < tol | dloglik < log(1 + tol.lik))
+    log_posterior0 <- log_posterior
+    if (dparam < tol | dlogpost < log(1 + tol.obj))
       break
     }
     return(list(w = w, U = U, progress = progress[1:iter, ], alpha = alpha, Fc = Fc))
