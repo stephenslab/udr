@@ -11,7 +11,7 @@
 #' @param lambda: the strength of penalty
 #' @param alpha: control the trade-off between the two nuclear norm terms.
 #' @param sigma2: the scalar on U.
-grad_loglik_per_eigenval <- function(val, p, d, lambda, alpha, sigma2){
+grad_loglik_per_eigenval_scaled <- function(val, p, d, lambda, alpha, sigma2){
   grad = sum(p)/(val+1)-sum(p)*d/(val+1)^2+lambda*alpha/sigma2-lambda*(1-alpha)*sigma2/val^2
   return(grad)
 }
@@ -32,7 +32,7 @@ regularize_by_nuclear_penalty_scaled = function(X, S, p, lambda, alpha, sigma2){
   d = evd$values
   eigenval = rep(0, m)
   for (i in 1:m){
-    eigenval[i] = uniroot(function(val) grad_loglik_per_eigenval(val, p, d[i],lambda, alpha, sigma2),
+    eigenval[i] = uniroot(function(val) grad_loglik_per_eigenval_scaled(val, p, d[i],lambda, alpha, sigma2),
                    c(1e-6,1e6))$root
   }
   U = evd$vectors %*% diag(eigenval) %*% t(evd$vectors)
