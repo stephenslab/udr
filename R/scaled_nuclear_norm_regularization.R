@@ -68,7 +68,7 @@ em_fit_scaled_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxi
   m <- ncol(X)
   alpha <- rep(0.5,k)
   s <- rep(1, k)
-  loglik0 = -Inf
+  log_posterior0 = -Inf
   Fc = c()
   for (iter in 1:maxiter){
     # param values at previous iteration
