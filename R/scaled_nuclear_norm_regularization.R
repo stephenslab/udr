@@ -133,6 +133,14 @@ compute_F = function(X, w, U, V, P, lambda, alpha){
   return(f)
 }
 
+
+#' Function to compute nuclear penalty for a single U. 
+compute_nuclear_penalty <- function(U, lambda, alpha, sigma2){
+  eigenval = eigen(U)$values
+  pen = -lambda/2*(alpha*sum(eigenval)/sigma2 + (1-alpha)*sigma2*sum(1/eigenval))
+  return(pen)
+}
+
 #' Function to compute log-posterior. The log-posterior should increase each iteration.
 #' See eq.(64) in write-up https://www.overleaf.com/read/vrgwpskkhbpj. 
 #' @param X: data matrix of size $n$ by $R$.
@@ -145,10 +153,22 @@ compute_F = function(X, w, U, V, P, lambda, alpha){
 compute_log_posterior_nuclear_scaled <- function(X, w, U, V, lambda, alpha, s){
   log_prior <- 0
   K <- length(w)
+  log_prior = rep(0, K)
   for (k in 1:K){
-    eigenval = eigen(U[,,k])$values
-    log_prior = log_prior -lambda/2*(alpha[k]*sum(eigenval)/s[k] + (1-alpha[k])*s[k]*sum(1/eigenval))
+    log_prior[k] = compute_nuclear_penalty(U, lambda, alpha, sigma2)
   }
+  loglik <- loglik_ud_iid_helper(X, w, U, V) 
+  log_posterior <- loglik + sum(log_prior)
+  return(log_posterior)
+}
+
+
+compute_log_posterior_nuclear_scaled_one_comp <- function(X, p, U, V, lambda, alpha, sigma2){
+  log_prior <- 0
+  K <- length(w)
+  log_prior = -lambda/2*(alpha[k]*sum(eigenval)/s[k] + (1-alpha[k])*s[k]*sum(1/eigenval))
+    eigenval = eigen(U[,,k])$values
+    log_prior = log_prior 
   loglik <- loglik_ud_iid_helper(X, w, U, V) 
   log_posterior <- loglik + log_prior
   return(log_posterior)
