@@ -76,3 +76,18 @@ simulate_ud_data <- function (n, w, U, V) {
   return(X)
 }
 
+
+#' Function to simulate data from EBNM model for one component.
+#' It first simulate the true mean and then observed data. 
+#' @param n Number of data points to simulate.
+#' @param U Prior covariance matrix
+#' @param V Residual covariance matrix
+simulate_ebmn_data <- function(n, U, V){
+  m = ncol(U)
+  X = matrix(NA, nrow = n, ncol = m)
+  theta <- rmvnorm(n, sigma = U)
+  for (i in 1:n)
+    X[i, ] <- rmvnorm(1, theta[i, ], sigma = V)
+  return(list(X = X, theta = theta))
+}
+
