@@ -155,7 +155,7 @@ compute_log_posterior_nuclear_scaled <- function(X, w, U, V, lambda, alpha, s){
   K <- length(w)
   log_prior = rep(0, K)
   for (k in 1:K){
-    log_prior[k] = compute_nuclear_penalty(U, lambda, alpha, sigma2)
+    log_prior[k] = compute_nuclear_penalty(U[,,k], lambda, alpha[k], s[k])
   }
   loglik <- loglik_ud_iid_helper(X, w, U, V) 
   log_posterior <- loglik + sum(log_prior)
