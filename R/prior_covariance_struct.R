@@ -58,7 +58,7 @@ update_prior_covariance_struct_rank1 <- function (U, vec) {
 # matrix. Input "U" is the current data structure, and "mat" is the
 # newly estimated matrix. This function is used in the
 # update_prior_covariance_unconstrained_* functions.
-update_prior_covariance_struct_unconstrained <- function (U, mat, s) {
+update_prior_covariance_struct_unconstrained <- function (U, mat, s = 1) {
   rownames(mat) <- rownames(U$mat)
   colnames(mat) <- colnames(U$mat)
   U$mat <- mat
