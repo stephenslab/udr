@@ -21,10 +21,10 @@ create_prior_covariance_struct_rank1  <- function (X, U) {
 
 # Initialize the data structure for an unconstrained prior covariance
 # matrix.
-create_prior_covariance_struct_unconstrained <- function (X, U) {
+create_prior_covariance_struct_unconstrained <- function (X, U, s = 1) {
   rownames(U) <- colnames(X)
   colnames(U) <- colnames(X)
-  U <- list(mat = U)
+  U <- list(s = s, mat = U)
   attr(U,"covtype") <- "unconstrained"
   return(U)
 }
@@ -58,10 +58,11 @@ update_prior_covariance_struct_rank1 <- function (U, vec) {
 # matrix. Input "U" is the current data structure, and "mat" is the
 # newly estimated matrix. This function is used in the
 # update_prior_covariance_unconstrained_* functions.
-update_prior_covariance_struct_unconstrained <- function (U, mat) {
+update_prior_covariance_struct_unconstrained <- function (U, mat, s) {
   rownames(mat) <- rownames(U$mat)
   colnames(mat) <- colnames(U$mat)
   U$mat <- mat
+  U$s <- s
   return(U)
 }
 

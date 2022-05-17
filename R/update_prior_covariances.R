@@ -76,8 +76,7 @@ assign_prior_covariance_updates <- function (fit, control = list()) {
 update_prior_covariances <-
   function (fit,            
             covupdates = assign_prior_covariance_updates(fit)$covupdates,
-            minval = 1e-8,
-            update.threshold = 1e-3) {
+            control = assign_prior_covariance_updates(fit)$control) {
 
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
@@ -89,13 +88,13 @@ update_prior_covariances <-
     
     # Transform the data x to x' so that x' ~ N(0,U' + I).
     fit0 <- simplify_model(fit)
-
+      
     # Update the prior covariances U for the simpler model, x' ~ N(0,U' + I).
     for (i in 1:k)
-      if (sum(fit0$P[,i]) > update.threshold)
+      if (sum(fit0$P[,i]) > control$update.threshold)
         fit0$U[[i]] <- do.call(covupdates[i],
-                               list(X = fit0$X,U = fit0$U[[i]],
-                                    p = fit0$P[,i],minval = minval))
+                               list(X = fit0$X, U = fit0$U[[i]],
+                                    p = fit0$P[,i], minval = control$minval, n0 = control$n0, S0 = control$S0))
     
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
     fit0 <- unsimplify_model(fit0)
@@ -121,10 +120,10 @@ update_prior_covariances <-
     if (is.list(V))
       V <- list2array(V)
     for (i in 1:k)
-      if (sum(fit$P[,i]) > update.threshold)
+      if (sum(fit$P[,i]) > control$update.threshold)
         fit$U[[i]] <- do.call(covupdates[i],
                                list(X = fit$X,U = fit$U[[i]],V = V,
-                                    p = fit$P[,i],minval = minval))
+                                    p = fit$P[,i],minval = control$minval))
   }
   
   # Output the updated fit.

@@ -251,6 +251,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   if (!is.matrix(fit$V) & control$resid.update != "none")
     stop("Residual covariance V can only be updated when it is the same ",
          "for all data points")
+  if (is.null(control$S0)) control$S0 = diag(m)
   out        <- assign_prior_covariance_updates(fit,control)
   control    <- out$control
   covupdates <- out$covupdates
@@ -319,8 +320,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
       fit <- update_resid_covariance(fit,control$resid.update,control$version)
 
     # Update the scaled prior covariance matrices.
-    fit <- update_prior_covariances(fit,covupdates,control$minval,
-                                    control$update.threshold)
+    fit <- update_prior_covariances(fit,covupdates,control)
 
     # Update the mixture weights.
     fit <- update_mixture_weights(fit,control$weights.update)
@@ -375,4 +375,6 @@ ud_fit_control_default <- function()
        tol                  = 1e-6,
        tol.lik              = 1e-3,
        zero.threshold       = 1e-15,
-       update.threshold     = 1e-3)
+       update.threshold     = 1e-3,
+       n0                   = 0,   # Any number for penalty strength
+       S0                   = NULL) # prior matrix in IW

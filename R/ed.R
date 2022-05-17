@@ -1,8 +1,11 @@
 # Perform an M-step update for a prior covariance (U) using the update
 # formula derived in Bovy et al (2011), for the special case when V =
 # I for all samples; that is, the model is x ~ N(0,U + I).
-update_prior_covariance_unconstrained_ed_iid <- function (X, U, p, ...)
-  update_prior_covariance_struct_unconstrained(U,ed_iid(X,U$mat,p))
+update_prior_covariance_unconstrained_ed_iid <- function (X, U, p, n0, S0, ...){
+  res <- ed_reg_iid(X, U$mat, p, S0, n0, U$s)
+  return(update_prior_covariance_struct_unconstrained(U, res$U, res$sigma2))
+}
+  
 
 # This is a more efficient C++ implementation of 
 # update_prior_covariance_unconstrained_ed_iid.
@@ -50,12 +53,36 @@ update_prior_covariance_rank1_ed_notiid_rcpp  <- function (X, U, V, p, ...)
 # Update the prior covariance matrix (U) in the model x ~ N(0,U + I)
 # using the update formula derived in Bovy et al (2011). Input p is a
 # vector of weights associated with the rows of X.
+
 ed_iid <- function (X, U, p) {
   m  <- ncol(X)
   I  <- diag(m)
   B  <- solve(U + I,U)
   X1 <- crossprod((sqrt(safenormalize(p))*X) %*% B)
   return(U - U %*% B + X1)
+}
+
+
+#' Function for scaled regularized ED with an inverse Wishart
+#' prior on \tilde U. \tilde U \sim W_R^{-1}(S0, \nu), where \nu = n0-R-1. 
+#' U = \sigma^2*\tilde U.
+#' The derivation is available in write-up: Notes on estimation of 
+#' large covariance matrices.
+#' @param X: data matrix of size $n$ by $R$.
+#' @param U: initialization of U or estimate from previous iteration
+#' @param p: the weight vector for a component
+#' @param S0: a covariance matrix in inverse-Wishart prior
+#' @param n0: parameter in inverse-Wishart prior, n0 = \nu + R + 1
+#' @param sigma2: initialization of the scalar value or estimate from previous iteration.
+ed_reg_iid <- function(X, U, p, S0, n0, sigma2){
+  m  <- ncol(X)
+  I  <- diag(m)
+  A  <- solve(U + I,U)
+  B <- U %*% (I-A)
+  bmat <- X %*% A
+  U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+sigma2*n0*S0)/(sum(p)+ n0)
+  sigma2 <- m/sum(diag(S0 %*% solve(U)))
+  return(list(U = U, sigma2 = sigma2))
 }
 
 # Perform an M-step update for a prior covariance matrix (U) using the
