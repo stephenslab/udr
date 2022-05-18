@@ -81,7 +81,8 @@ ed_reg_iid <- function(X, U, p, S0, n0, sigma2){
   B <- U %*% (I-A)
   bmat <- X %*% A
   U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+sigma2*n0*S0)/(sum(p)+ n0)
-  sigma2 <- m/sum(diag(S0 %*% solve(U)))
+  if (n0 != 0)
+    sigma2 <- m/sum(diag(S0 %*% solve(U)))
   return(list(U = U, sigma2 = sigma2))
 }
 
