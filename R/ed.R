@@ -53,7 +53,6 @@ update_prior_covariance_rank1_ed_notiid_rcpp  <- function (X, U, V, p, ...)
 # Update the prior covariance matrix (U) in the model x ~ N(0,U + I)
 # using the update formula derived in Bovy et al (2011). Input p is a
 # vector of weights associated with the rows of X.
-
 ed_iid <- function (X, U, p) {
   m  <- ncol(X)
   I  <- diag(m)

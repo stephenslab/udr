@@ -3,8 +3,19 @@
 # (2013). Note that input U is not used, and is included only for
 # consistency with the other update functions.
 update_prior_covariance_unconstrained_ted_iid <- function (X, U, p,
-                                                           minval = 0, ...)
-  update_prior_covariance_struct_unconstrained(U,ted(X,p,minval))
+                                                           minval = 0, lambda, ...){
+  if (lambda == 0){
+    return(update_prior_covariance_struct_unconstrained(U, ted(X,p,minval), s = 1))
+  }
+  else{
+    S <- get_S(X, p)
+    # Update U and store penalized eigenvalues
+    res <- ted_penalized(X, S, p, lambda, alpha = 0.5, U$s) 
+    sigma2 <- get_sigma2(alpha = 0.5, res$shrinked_eigenval)
+    return(update_prior_covariance_struct_unconstrained(U, res$U, sigma2))
+  }
+}
+  
 
 # This is a more efficient C++ implementation of 
 # update_prior_covariance_unconstrained_ted_iid.
@@ -60,4 +71,68 @@ ted <- function (X, p, minval = 0, r = ncol(X)) {
   # and with the additional constraint that at most r of its
   # eigenvalues are positive.
   return(shrink_cov(T,minval,r))
+}
+
+
+
+
+#' The following functions implement nuclear norm penalty to covariance estimation
+#' under scaled model, x_j\sim N(0, \sigma^2\tilde U + I). 
+#' The nuclear norm penalty is specified on \tilde U. 
+
+
+#' Function to calculate the partial derivative w.r.t. one eigenvalue
+#' of U. See equation (80) in https://www.overleaf.com/read/vrgwpskkhbpj.
+#' @param val: the ith eigenvalue that we want to solve for
+#' @param d: the ith eigenvalue of weighted empirical covariance matrix.
+#' @param p: the weight vector for a component
+#' @param lambda: the strength of penalty
+#' @param alpha: control the trade-off between the two nuclear norm terms.
+#' @param sigma2: the scalar on U.
+grad_loglik_per_eigenval_scaled <- function(val, p, d, lambda, alpha, sigma2){
+  grad = sum(p)/(val+1)-sum(p)*d/(val+1)^2+lambda*alpha/sigma2-lambda*(1-alpha)*sigma2/val^2
+  return(grad)
+}
+
+#' Function to regularize U by nuclear penalty from Chi and Lange (2014).
+#' Here I assume V_j = I.
+#' @param X: data matrix of size $n$ by $R$.
+#' @param S: weighted empirical covariance matrix
+#' @param p: a vector of size $n$, containing the posterior weight for a certain 
+#' component for each observation. 
+#' @param lambda: the strength of penalty
+#' @param alpha: a number that controls the trade-off between the two nuclear norm terms.
+#' @param sigma2: the scalar on U.
+ted_penalized <- function(X, S, p, lambda, alpha, sigma2){
+  n = nrow(X)
+  m = ncol(X)
+  evd = eigen(S)
+  d = evd$values
+  eigenval = rep(0, m)
+  for (i in 1:m){
+    eigenval[i] = uniroot(function(val) grad_loglik_per_eigenval_scaled(val, p, d[i],lambda, alpha, sigma2),
+                          c(1e-6,1e6))$root
+  }
+  U = evd$vectors %*% diag(eigenval) %*% t(evd$vectors)
+  return(list(U = U, shrinked_eigenval = eigenval))
+}
+
+#' Function to update sigma2 in M-step optimization given 
+#' all the eigenvalues of U. See eq.(82) in the writeup. 
+#' @param alpha: a number that controls the trade-off between the two nuclear norm terms.
+#' @param eigenvals: the eigenvalues of U.
+get_sigma2 = function(alpha, eigenvals){
+  sigma2 = alpha/(1-alpha)*sum(eigenvals)/(sum(1/eigenvals))
+  sigma2 = sqrt(sigma2)
+  return(sigma2)
+}
+
+#' Function to calculate weighted empirical covariance matrix. Each data point 
+#' is weighted by its posterior weight for a certain component.
+#' @param X: data matrix of size $n$ by $R$.
+#' @param p: a vector of size $n$, containing the posterior weight for a certain 
+#' component for each observation. 
+get_S = function(X, p){
+  S = crossprod(sqrt(p)*X)/sum(p) 
+  return(S)
 }
