@@ -93,11 +93,12 @@ update_prior_covariances <-
     for (i in 1:k)
       if (sum(fit0$P[,i]) > control$update.threshold)
         fit0$U[[i]] <- do.call(covupdates[i],
-                               list(X = fit0$X, U = fit0$U[[i]],
-                                    p = fit0$P[,i], minval = control$minval, 
+                               list(X = fit0$X, U = fit0$U[[i]], p = fit0$P[,i], minval = control$minval, 
                                     n0 = control$n0, S0 = control$S0, lambda = control$lambda))
     
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
+    fit0 <- unsimplify_model(fit0)
+    
     # Update the updated prior covariances U in original fit object
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     for (i in 1:k){
