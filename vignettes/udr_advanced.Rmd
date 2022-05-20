@@ -1,0 +1,118 @@
+---
+title: "udr_advanced"
+author: "Yunqi Yang"
+date: "5/19/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(mvtnorm)
+devtools::load_all("/Users/nicholeyang/Desktop/udr")
+```
+
+```{r simulate data}
+set.seed(1)
+R = 5
+K = 2
+Vt = diag(R)
+wt = rep(1/K, K)
+n.train = 50
+
+Ut = c()
+for (k in 1:K){
+  Ut[[k]] <- sim_unconstrained(R)
+}
+X <- simulate_ud_data(n.train,wt,Ut,Vt)
+```
+
+```{r initialization for fit udr model}
+
+# Initialization
+set.seed(999)
+U.init = c()
+for (k in 1:K){
+  U.init[[k]] <- sim_unconstrained(R)
+}
+f0 = ud_init(X = X, V = Vt, U_scaled = NULL, U_unconstrained = U.init)
+```
+
+
+#### Example 1: run TED
+```{r ted-update}
+
+fit1 = ud_fit(f0, control = list(unconstrained.update = "ted", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 1,
+                                   lambda = 0), verbose=TRUE)
+```
+```{r }
+par(mfrow = c(1,2))
+plot(fit1$progress$loglik, cex = 0.5, ylab = "log-likelihood")
+plot(fit1$progress$loglik.p, cex = 0.5, ylab = "penalized log-likelihood")
+```
+
+#### Example 2: run TED with nuclear norm penalty 
+
+In this case, log-likelihood might not be always increasing, but penalized log-likelihood is expected to increase all the time. 
+```{r ted.reg-update}
+set.seed(1)
+f0 = ud_init(X = X, V = Vt, U_scaled = NULL, U_unconstrained = U.init)
+fit2 = ud_fit(f0, control = list(unconstrained.update = "ted", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 1,
+                                   lambda = 5), verbose=TRUE)
+```
+
+```{r }
+par(mfrow = c(1,2))
+plot(fit2$progress$loglik, cex = 0.5, ylab = "log-likelihood")
+plot(fit2$progress$loglik.p, cex = 0.5, ylab = "penalized log-likelihood")
+```
+
+
+
+
+### Example 3: run ED
+
+In this case, log-likelihood might not be always increasing, but penalized log-likelihood is expected to increase all the time. 
+```{r  }
+
+fit3 = ud_fit(f0, control = list(unconstrained.update = "ed", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 0,
+                                   lambda = 5), verbose=TRUE)
+```
+
+```{r }
+par(mfrow = c(1,2))
+plot(fit1$progress$loglik, cex = 0.5, xlim = c(0, 20), ylab = "log-likelihood")
+points(fit3$progress$loglik, cex = 0.5, col = "red")
+legend("bottomright", legend = c("TED", "ED"), col = c("black", "red"), lty = 1)
+plot(fit1$progress$loglik.p, cex = 0.5, xlim = c(0, 20), ylab = "penalized log-likelihood")
+points(fit3$progress$loglik.p, cex = 0.5, col = "red")
+legend("bottomright", legend = c("TED", "ED"), col = c("black", "red"), lty = 1)
+```
+We can see here TED achieves higher log-likelihood then ED. 
+
+
+
+
+#### Example 4: run regularized ED 
+
+```{r }
+
+fit4 = ud_fit(f0, control = list(unconstrained.update = "ed", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 5,
+                                   lambda = 5), verbose=TRUE)
+```
+
+```{r }
+par(mfrow = c(1,2))
+plot(fit4$progress$loglik, cex = 0.5, xlim = c(0, 20), ylab = "log-likelihood")
+plot(fit4$progress$loglik.p, cex = 0.5, xlim = c(0, 20), ylab = "penalized log-likelihood")
+
+```
+
+
+
+
+
+
+
+
+
