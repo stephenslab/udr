@@ -15,10 +15,10 @@ test_that("ud_fit works as expected when k = 1",{
                   U_scaled = NULL)
   capture.output(
     fit1 <- ud_fit(fit0,control = list(unconstrained.update = "ted",
-                                       version = "R")))
+                                       version = "R", lambda = 0)))
   capture.output(
     fit2 <- ud_fit(fit0,control = list(unconstrained.update = "ted",
-                                       version = "Rcpp")))
+                                       version = "Rcpp", lambda = 0)))
 
   # The likelihoods should be non-decreasing.
   expect_nondecreasing(fit1$progress$loglik)
