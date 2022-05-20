@@ -8,8 +8,7 @@ output:
 ---
 
 ```{r}
-library(mvtnorm)
-devtools::load_all("/Users/nicholeyang/Desktop/udr")
+library(udr)
 ```
 
 ```{r simulate data}
