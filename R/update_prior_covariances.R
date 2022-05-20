@@ -96,11 +96,21 @@ update_prior_covariances <-
                                list(X = fit0$X, U = fit0$U[[i]], p = fit0$P[,i], minval = control$minval, 
                                     n0 = control$n0, S0 = control$S0, lambda = control$lambda))
     
+    covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
+
+    # Compute log-penalty for regularized covariance matrices, 
+    # and add the penalty into fit object. 
+    indx_unconstrained <- which(covtypes == "unconstrained")
+    penalty = 0
+    for (i in indx_unconstrained){
+      penalty <- penalty + compute_penalty(fit0$U[[i]]$mat, fit0$U[[i]]$s, 
+                                           n0 = control$n0 , lambda = control$lambda, S0 = control$S0, alpha = 0.5)
+    }
+    fit$logplt = penalty
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
     fit0 <- unsimplify_model(fit0)
     
     # Update the updated prior covariances U in original fit object
-    covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
     for (i in 1:k){
       if (covtypes[i] == "scaled")
         fit$U[[i]]$s <- fit0$U[[i]]$s
@@ -108,7 +118,6 @@ update_prior_covariances <-
       fit$U[[i]]$mat <- (fit$U[[i]]$mat + t(fit$U[[i]]$mat))/2  # Make sure U is p.s.d after update.
     }
   } else {
-
     # Update the prior covariances in the non-i.i.d. case (when the
     # residual variances V are not all the same). The inputs to each
     # update are: X, the data matrix; U, the current covariance matrix

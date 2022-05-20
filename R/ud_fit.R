@@ -251,7 +251,17 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   if (!is.matrix(fit$V) & control$resid.update != "none")
     stop("Residual covariance V can only be updated when it is the same ",
          "for all data points")
-  if (is.null(control$S0)) control$S0 = diag(m)
+  
+  # Check if update type matches with penalty type
+  if (control$unconstrained.update == "ed"){
+    message("Nuclear norm penalty can't be used in ED update, lambda will be set to 0")
+    control$lambda = 0
+    if (is.null(control$S0)) control$S0 = diag(m)
+  }
+  if (control$unconstrained.update == "ted"){
+    message("Inverse Wishart penalty can't be used in TED update, n0 will be set to 0")
+    control$n0 = 0
+  }
   out        <- assign_prior_covariance_updates(fit,control)
   control    <- out$control
   covupdates <- out$covupdates
@@ -329,6 +339,8 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # other quantities, and report the algorithm's progress to the
     # console if requested.
     loglik <- loglik_ud(fit$X,fit$w,fit$U,fit$V,control$version)
+    loglik_penalized <- compute_loglik_penalized(loglik, fit$logplt)
+    
     dw <- max(abs(fit$w - w0))
     dU <- max(abs(ulist2array(fit$U) - ulist2array(U0)))
     if (is.matrix(fit$V))
@@ -337,6 +349,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
       dV <- 0
     t2 <- proc.time()
     progress[iter,"loglik"]  <- loglik
+    progress[iter,"loglik.p"]  <- loglik_penalized
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.u"] <- dU 
     progress[iter,"delta.v"] <- dV 
@@ -346,9 +359,9 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
 
     # Check convergence.
     dparam     <- max(dw,dU,dV)
-    dloglik    <- loglik - fit$loglik
-    fit$loglik <- loglik
-    if (dparam < control$tol | dloglik < log(1 + control$tol.lik))
+    diff_obj <- loglik_penalized - fit$loglik_penalized
+    fit$loglik_penalized <- loglik_penalized
+    if (dparam < control$tol |  diff_obj < log(1 + control$tol.lik))
       break
   }
 

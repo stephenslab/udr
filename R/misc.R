@@ -135,3 +135,12 @@ sim_rank1 <- function (m)
 #' @importFrom stats rWishart
 sim_unconstrained <- function (m)
   drop(rWishart(1,max(4,m),diag(m)))
+
+
+# Compute the log-determinant of matrix A.
+ldet <- function (A)
+  as.numeric(determinant(A,logarithm = TRUE)$modulus)
+
+# Compute trace of matrix A.
+tr <- function (A)
+  sum(diag(A))
