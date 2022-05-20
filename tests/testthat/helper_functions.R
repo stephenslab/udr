@@ -40,31 +40,6 @@ simulate_ud_data_2d <- function (n) {
   return(list(X = X,w = w,U = U,V = V))
 }
 
-#' Function to simulate a single component data. 
-#' @param seed A random number
-#' @param n Number of data points to simulate.
-#' @param U The covariance matrix in the prior of size m \times m. 
-#' @param V The residual covariance matrix, whether a single matrix or a list of matrices.
-#' @return X: An n x m matrix in which each row is a draw from the 
-#' single component model.
-#' @importFrom mvtnorm rmvnorm
-simulate_one_component <- function(seed, n, U, V) {
-  set.seed(seed)
-  m = nrow(U)
-  
-  X = matrix(NA, ncol = m, nrow = n) # store simulated data
-  
-  if (is.matrix(V)){
-    X = rmvnorm(n, mean = rep(0,m), sigma = U + V)
-  }
-  else{
-    for (i in 1:n){
-    X[i, ] = rmvnorm(1, mean = rep(0,m), sigma = U + V)
-    }
-  }
-  return(X)
-}
-
 
 #' function for computing the weighted log-likelihood for one single component
 loglik_weighted_single_component <- function (X, U, V, p) {
