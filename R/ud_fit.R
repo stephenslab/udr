@@ -254,13 +254,15 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   
   # Check if update type matches with penalty type
   if (control$unconstrained.update == "ed"){
-    message("Nuclear norm penalty can't be used in ED update, lambda will be set to 0")
-    control$lambda = 0
+    if (control$lambda != 0)
+      message("Nuclear norm penalty can't be used in ED update, lambda will be set to 0")
+      control$lambda = 0
     if (is.null(control$S0)) control$S0 = diag(m)
   }
   if (control$unconstrained.update == "ted"){
-    message("Inverse Wishart penalty can't be used in TED update, n0 will be set to 0")
-    control$n0 = 0
+    if (control$n0 != 0)
+      message("Inverse Wishart penalty can't be used in TED update, n0 will be set to 0")
+      control$n0 = 0
   }
   out        <- assign_prior_covariance_updates(fit,control)
   control    <- out$control
