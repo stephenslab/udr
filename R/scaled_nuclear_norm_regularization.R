@@ -16,6 +16,18 @@ grad_loglik_per_eigenval_scaled <- function(val, p, d, lambda, alpha, sigma2){
   return(grad)
 }
 
+#' The negative of objective function to be minimized. 
+#' @param val: the ith eigenvalue that we want to solve for
+#' @param d: the ith eigenvalue of weighted empirical covariance matrix.
+#' @param p: the weight vector for a component
+#' @param lambda: the strength of penalty
+#' @param alpha: control the trade-off between the two nuclear norm terms.
+#' @param sigma2: the scalar on U.
+loglik_neg_per_eigenval_scaled <- function(val, p, d, lambda, alpha, sigma2){
+  obj = sum(p)*log(val+1) + sum(p)*d/(val + 1) + lambda * (alpha/sigma2*val+(1-alpha)*sigma2/val)
+  return(obj/2)
+}
+
 #' Function to regularize U by nuclear penalty from Chi and Lange (2014).
 #' Here I assume V_j = I.
 #' @param X: data matrix of size $n$ by $R$.
@@ -38,6 +50,31 @@ regularize_by_nuclear_penalty_scaled = function(X, S, p, lambda, alpha, sigma2){
   U = evd$vectors %*% diag(eigenval) %*% t(evd$vectors)
   return(list(U = U, shrinked_eigenval = eigenval))
 }
+
+
+#' Function to regularize U by nuclear penalty from Chi and Lange (2014).
+#' Here I assume V_j = I.
+#' @param X: data matrix of size $n$ by $R$.
+#' @param S: weighted empirical covariance matrix
+#' @param p: a vector of size $n$, containing the posterior weight for a certain 
+#' component for each observation. 
+#' @param lambda: the strength of penalty
+#' @param alpha: a number that controls the trade-off between the two nuclear norm terms.
+#' @param sigma2: the scalar on U.
+regularize_by_nuclear_penalty_scaled2 = function(X, S, p, lambda, alpha, sigma2){
+  n = nrow(X)
+  m = ncol(X)
+  evd = eigen(S)
+  d = evd$values
+  eigenval = rep(0, m)
+  for (i in 1:m){
+    eigenval[i] = optim(par = 1, fn = loglik_neg_per_eigenval_scaled, gr = grad_loglik_per_eigenval_scaled,
+                        p, d[i], lambda, alpha, sigma2, method = "L-BFGS-B", lower = 1e-8, upper = 1e6)$par
+  }
+  U = evd$vectors %*% diag(eigenval) %*% t(evd$vectors)
+  return(list(U = U, shrinked_eigenval = eigenval))
+}
+
 
 #' Function to update sigma2 in M-step optimization given 
 #' all the eigenvalues of U. See eq.(82) in the writeup. 
