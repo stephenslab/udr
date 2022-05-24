@@ -21,8 +21,8 @@ cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbo
     
     # fit model 
     fit1 <- ud_init(X.train, n_unconstrained = n_unconstrained, n_rank1 = n_rank1, U_scaled = NULL, V = V)
-    fit2 <- ud_fit(fit1,control = list(unconstrained.update = "ted", rank_rank1.update = "ted",
-                                       resid.update = 'none', maxiter = control$maxiter, tol = 1e-5),verbose = verbose)
+    fit2 <- ud_fit(fit1, control = list(unconstrained.update = control$unconstrained.update, rank1.update = control$rank1.update,
+                                       resid.update = 'none', maxiter = control$maxiter, tol = control$tol), verbose = verbose)
     
     U <- lapply(fit2$U,function (e) "[["(e,"mat"))
     U <- simplify2array(U)
