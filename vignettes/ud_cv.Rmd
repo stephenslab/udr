@@ -60,7 +60,7 @@ best_fit_cv$n_unconstrained
 best_fit_cv$n_rank1
 
 # Refit based on best parameter settings
-best_fit = get_best_fit(X, V, best_fit_cv, control = control, verbose = TRUE)
+best_fit = udr:::get_best_fit(X, V, best_fit_cv, control = control, verbose = TRUE)
 
 ```
 
@@ -79,7 +79,7 @@ best_fit_cv$test.loglik
 best_fit_cv$n_unconstrained
 best_fit_cv$n_rank1
 
-best_fit = get_best_fit(X, V, best_fit_cv, control = control, verbose = TRUE)
+best_fit = udr:::get_best_fit(X, V, best_fit_cv, control = control, verbose = TRUE)
 
 ```
 
@@ -99,7 +99,7 @@ best_fit_cv$test.loglik
 best_fit_cv$n_unconstrained
 best_fit_cv$n_rank1
 
-best_fit = get_best_fit(X, V, best_fit_cv, control = control, verbose = TRUE)
+best_fit = udr:::get_best_fit(X, V, best_fit_cv, control = control, verbose = TRUE)
 ```
 
 
