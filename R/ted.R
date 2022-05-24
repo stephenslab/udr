@@ -81,6 +81,20 @@ ted <- function (X, p, minval = 0, r = ncol(X)) {
 #' The nuclear norm penalty is specified on \tilde U. 
 
 
+
+#' Function to compute the negative of objective function to be minimized. 
+#' @param val: the ith eigenvalue that we want to solve for
+#' @param d: the ith eigenvalue of weighted empirical covariance matrix.
+#' @param p: the weight vector for a component
+#' @param lambda: the strength of penalty
+#' @param alpha: control the trade-off between the two nuclear norm terms.
+#' @param sigma2: the scalar on U.
+loglik_neg_per_eigenval <- function(val, p, d, lambda, alpha, sigma2){
+  obj = sum(p)*log(val+1) + sum(p)*d/(val + 1) + lambda * (alpha/sigma2*val+(1-alpha)*sigma2/val)
+  return(obj/2)
+}
+
+
 #' Function to calculate the partial derivative w.r.t. one eigenvalue
 #' of U. See equation (80) in https://www.overleaf.com/read/vrgwpskkhbpj.
 #' @param val: the ith eigenvalue that we want to solve for
@@ -89,7 +103,7 @@ ted <- function (X, p, minval = 0, r = ncol(X)) {
 #' @param lambda: the strength of penalty
 #' @param alpha: control the trade-off between the two nuclear norm terms.
 #' @param sigma2: the scalar on U.
-grad_loglik_per_eigenval_scaled <- function(val, p, d, lambda, alpha, sigma2){
+grad_loglik_per_eigenval <- function(val, p, d, lambda, alpha, sigma2){
   grad = sum(p)/(val+1)-sum(p)*d/(val+1)^2+lambda*alpha/sigma2-lambda*(1-alpha)*sigma2/val^2
   return(grad)
 }
@@ -110,8 +124,8 @@ ted_penalized <- function(X, S, p, lambda, alpha, sigma2){
   d = evd$values
   eigenval = rep(0, m)
   for (i in 1:m){
-    eigenval[i] = uniroot(function(val) grad_loglik_per_eigenval_scaled(val, p, d[i],lambda, alpha, sigma2),
-                          c(1e-6,1e6))$root
+    eigenval[i] = optim(par = 1, fn = loglik_neg_per_eigenval, gr = grad_loglik_per_eigenval,
+                        p, d[i], lambda, alpha, sigma2, method = "L-BFGS-B", lower = 1e-8, upper = 1e6)$par
   }
   U = evd$vectors %*% diag(eigenval) %*% t(evd$vectors)
   return(list(U = U, shrinked_eigenval = eigenval))
