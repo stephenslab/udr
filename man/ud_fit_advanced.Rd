@@ -18,8 +18,7 @@ assign_prior_covariance_updates(fit, control = list())
 update_prior_covariances(
   fit,
   covupdates = assign_prior_covariance_updates(fit)$covupdates,
-  minval = 1e-08,
-  update.threshold = 0.001
+  control = assign_prior_covariance_updates(fit)$control
 )
 
 update_resid_covariance(

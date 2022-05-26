@@ -89,12 +89,12 @@
 #'
 #' \item{\code{minval}}{Minimum eigenvalue allowed in the residual
 #' covariance(s) \code{V} and the prior covariance matrices
-#' \code{U}. Should be a small, positive number.}}
+#' \code{U}. Should be a small, positive number.}
 #'
 #' \item{\code{update.threshold}}{A prior covariance matrix
 #' \code{U[[i]]} is only updated if the total \dQuote{responsibility}
 #' for component \code{i} exceeds \code{update.threshold}; that is,
-#' only if \code{sum(P[,i]) > update.threshold}.}
+#' only if \code{sum(P[,i]) > update.threshold}.}}
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
