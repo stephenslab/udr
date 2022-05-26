@@ -42,6 +42,7 @@ cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbo
 #' unconstrained components to experiment with.
 #' @param k_rank1: An integer or a vector of integers specifying the number of
 #' rank1 components to experiment with. 
+#' @export
 ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(), verbose){
   
   if (length(k_unconstrained) == 1 & length(k_rank1) == 1)
