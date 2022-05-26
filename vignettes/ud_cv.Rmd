@@ -6,7 +6,7 @@ output:
   html_document:
     theme: readable
 vignette: >
-  %\VignetteIndexEntry{Introduction to Ultimate Deconvolution}
+  %\VignetteIndexEntry{udr: cross-validation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

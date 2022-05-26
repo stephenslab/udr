@@ -6,7 +6,7 @@ output:
   html_document:
     theme: readable
 vignette: >
-  %\VignetteIndexEntry{Introduction to Ultimate Deconvolution}
+  %\VignetteIndexEntry{udr advanced}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,23 +15,26 @@ vignette: >
 knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
                       fig.align = "center")
 ```
+
 ```{r}
 library(udr)
 ```
 
 ```{r simulate data}
 set.seed(1)
-R = 5
-K = 2
-Vt = diag(R)
-wt = rep(1/K, K)
-n.train = 50
-
-Ut = c()
-for (k in 1:K){
-  Ut[[k]] <- sim_unconstrained(R)
-}
-X <- simulate_ud_data(n.train,wt,Ut,Vt)
+n <- 50
+R <- 2
+V <- diag(R)
+U <- list(none   = rbind(c(0.5,0),
+                         c(0,0.5)),
+          shared = rbind(c(1.0,0.9),
+                         c(0.9,1.0)),
+          only1  = rbind(c(1,0),
+                         c(0,0)),
+          only2  = rbind(c(0,0),
+                         c(0,1)))
+w <- c(0.8,0.1,0.075,0.025)
+X <- simulate_ud_data(n,w,U,V)
 ```
 
 ```{r initialization for fit udr model}
@@ -39,17 +42,18 @@ X <- simulate_ud_data(n.train,wt,Ut,Vt)
 # Initialization
 set.seed(999)
 U.init = c()
+K = length(w)
 for (k in 1:K){
-  U.init[[k]] <- sim_unconstrained(R)
+  U.init[[k]] <- udr:::sim_unconstrained(R)
 }
-f0 = ud_init(X = X, V = Vt, U_scaled = NULL, U_unconstrained = U.init)
+f0 = ud_init(X = X, V = V, U_scaled = NULL, U_unconstrained = U.init)
 ```
 
 
 #### Example 1: run TED
 ```{r ted-update}
 
-fit1 = ud_fit(f0, control = list(unconstrained.update = "ted", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 1,
+fit1 = ud_fit(f0, control = list(unconstrained.update = "ted", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 0,
                                    lambda = 0), verbose=TRUE)
 ```
 ```{r }
@@ -63,8 +67,7 @@ plot(fit1$progress$loglik.p, cex = 0.5, ylab = "penalized log-likelihood")
 In this case, log-likelihood might not be always increasing, but penalized log-likelihood is expected to increase all the time. 
 ```{r ted.reg-update}
 set.seed(1)
-f0 = ud_init(X = X, V = Vt, U_scaled = NULL, U_unconstrained = U.init)
-fit2 = ud_fit(f0, control = list(unconstrained.update = "ted", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 1,
+fit2 = ud_fit(f0, control = list(unconstrained.update = "ted", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 0,
                                    lambda = 5), verbose=TRUE)
 ```
 
@@ -75,23 +78,26 @@ plot(fit2$progress$loglik.p, cex = 0.5, ylab = "penalized log-likelihood")
 ```
 
 
-
-
 ### Example 3: run ED
 
 In this case, log-likelihood might not be always increasing, but penalized log-likelihood is expected to increase all the time. 
 ```{r  }
 
 fit3 = ud_fit(f0, control = list(unconstrained.update = "ed", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 0,
-                                   lambda = 5), verbose=TRUE)
+                                   lambda = 0), verbose=TRUE)
 ```
 
 ```{r }
 par(mfrow = c(1,2))
-plot(fit1$progress$loglik, cex = 0.5, xlim = c(0, 20), ylab = "log-likelihood")
+
+ymin = min(fit1$progress$loglik, fit3$progress$loglik) - 1
+ymax = max(fit1$progress$loglik, fit3$progress$loglik) + 1
+
+
+plot(fit1$progress$loglik, cex = 0.5, xlim = c(0, 18), ylim = c(ymin, ymax), ylab = "log-likelihood")
 points(fit3$progress$loglik, cex = 0.5, col = "red")
 legend("bottomright", legend = c("TED", "ED"), col = c("black", "red"), lty = 1)
-plot(fit1$progress$loglik.p, cex = 0.5, xlim = c(0, 20), ylab = "penalized log-likelihood")
+plot(fit1$progress$loglik.p, cex = 0.5, xlim = c(0, 18), ylim = c(ymin, ymax), ylab = "penalized log-likelihood")
 points(fit3$progress$loglik.p, cex = 0.5, col = "red")
 legend("bottomright", legend = c("TED", "ED"), col = c("black", "red"), lty = 1)
 ```
@@ -105,7 +111,7 @@ We can see here TED achieves higher log-likelihood then ED.
 ```{r }
 
 fit4 = ud_fit(f0, control = list(unconstrained.update = "ed", rank1.update = "ted", resid.update = 'none', scaled.update = "fa", maxiter=20, tol = 1e-02, tol.lik = 1e-2, n0 = 5,
-                                   lambda = 5), verbose=TRUE)
+                                   lambda = 0), verbose=TRUE)
 ```
 
 ```{r }
