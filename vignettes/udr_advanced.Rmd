@@ -1,12 +1,20 @@
 ---
 title: "udr_advanced"
 author: "Yunqi Yang"
-date: "5/19/2022"
+date: "`r Sys.Date()`"
 output:
-  pdf_document: default
-  html_document: default
+  html_document:
+    theme: readable
+vignette: >
+  %\VignetteIndexEntry{Introduction to Ultimate Deconvolution}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
+```{r knitr-opts, include=FALSE}
+knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
+                      fig.align = "center")
+```
 ```{r}
 library(udr)
 ```

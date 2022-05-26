@@ -1,9 +1,16 @@
 ---
 title: "udr: cross-validation"
 author: "Yunqi Yang"
-date: "5/24/2022"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: readable
+vignette: >
+  %\VignetteIndexEntry{Introduction to Ultimate Deconvolution}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
+
 
 ## Description: 
 
