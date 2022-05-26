@@ -61,7 +61,7 @@ res1$scenario
 res1$avg_logliks
 
 # Get best parameter settings
-best_fit_cv = get_best_fit_cv(res1)
+best_fit_cv = udr:::get_best_fit_cv(res1)
 best_fit_cv$test.loglik
 best_fit_cv$n_unconstrained
 best_fit_cv$n_rank1
@@ -81,7 +81,7 @@ res2$scenario
 res2$avg_logliks
 
 
-best_fit_cv = get_best_fit_cv(res2)
+best_fit_cv = udr:::get_best_fit_cv(res2)
 best_fit_cv$test.loglik
 best_fit_cv$n_unconstrained
 best_fit_cv$n_rank1
