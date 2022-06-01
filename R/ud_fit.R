@@ -393,4 +393,4 @@ ud_fit_control_default <- function()
        update.threshold     = 1e-3,
        n0                   = 0,   # Any number for penalty strength
        S0                   = NULL, # prior matrix in IW
-       lambda               = 1   ) 
+       lambda               = 0   ) 
