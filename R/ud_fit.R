@@ -303,13 +303,13 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
   k <- length(fit$w)
   
   # Set up data structures used in the loop below.
-  progress <- as.data.frame(matrix(0,control$maxiter,6))
-  names(progress) <- c("iter","loglik","delta.w","delta.v","delta.u","timing")
+  progress <- as.data.frame(matrix(0,control$maxiter,7))
+  names(progress) <- c("iter","loglik", "loglik.pen", "delta.w","delta.v","delta.u","timing")
   progress$iter <- 1:control$maxiter
   
   # Iterate the EM updates.
   if (verbose)
-    cat("iter          log-likelihood |w - w'| |U - U'| |V - V'|\n")
+    cat("iter          log-likelihood    log-likelihood.pen   |w - w'| |U - U'| |V - V'|\n")
   for (iter in 1:control$maxiter) {
     t1 <- proc.time()
 
@@ -351,13 +351,13 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
       dV <- 0
     t2 <- proc.time()
     progress[iter,"loglik"]  <- loglik
-    progress[iter,"loglik.p"]  <- loglik_penalized
+    progress[iter,"loglik.pen"]  <- loglik_penalized
     progress[iter,"delta.w"] <- dw 
     progress[iter,"delta.u"] <- dU 
     progress[iter,"delta.v"] <- dV 
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
-      cat(sprintf("%4d %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik,dw,dU,dV))
+      cat(sprintf("%4d %+0.16e %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik, loglik_penalized, dw,dU,dV))
 
     # Check convergence.
     dparam     <- max(dw,dU,dV)
@@ -388,7 +388,7 @@ ud_fit_control_default <- function()
        maxiter              = 20,
        minval               = 1e-8,
        tol                  = 1e-6,
-       tol.lik              = 1e-3,
+       tol.lik              = 1e-3, # tolerance for the change in objective function
        zero.threshold       = 1e-15,
        update.threshold     = 1e-3,
        n0                   = 0,   # Any number for penalty strength
