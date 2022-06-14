@@ -112,12 +112,15 @@ update_prior_covariances <-
     
     # Update the updated prior covariances U in original fit object
     for (i in 1:k){
-      if (covtypes[i] == "scaled")
+      if (covtypes[i] == "scaled"){
         fit$U[[i]]$s <- fit0$U[[i]]$s
-      fit$U[[i]] <- fit0$U[[i]]
-      fit$U[[i]]$mat <- (fit$U[[i]]$mat + t(fit$U[[i]]$mat))/2  # Make sure U is p.s.d after update.
-    }
-  } else {
+      } else{
+        fit$U[[i]] <- fit0$U[[i]]
+        fit$U[[i]]$mat <- (fit$U[[i]]$mat + t(fit$U[[i]]$mat))/2  # Make sure U is p.s.d after update.
+      }
+    } 
+  }
+    else{
     # Update the prior covariances in the non-i.i.d. case (when the
     # residual variances V are not all the same). The inputs to each
     # update are: X, the data matrix; U, the current covariance matrix
