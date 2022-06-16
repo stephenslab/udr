@@ -8,17 +8,16 @@
 cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbose){
   
   n = nrow(X)
-  size = round(n / nfold)
-  loglik.test = rep(NA, nfold)
+  loglik.test = rep(NA, nfold) 
   fit_by_fold = c()
   
-    # split data
-  for (i in 1:nfold){
-    start = 1+(i-1)*size
-    end = ifelse(i==nfold, n, i*size)
-    X.test = X[start:end, ]
-    X.train = X[-c(start:end), ]
-    
+  # split data
+  foldid <- rep(seq(nfolds), length = n)
+  if (shuffle == TRUE) foldid <- sample(foldid) # randomly permute foldid
+  for (i in 1:nfolds){
+    X.test <- X[foldid == i, ]
+    X.train <- X[foldid != i, ]    
+
     # fit model 
     fit1 <- ud_init(X.train, n_unconstrained = n_unconstrained, n_rank1 = n_rank1, U_scaled = NULL, V = V)
     fit2 <- ud_fit(fit1, control = list(unconstrained.update = control$unconstrained.update, rank1.update = control$rank1.update,
@@ -26,10 +25,11 @@ cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbo
     
     U <- lapply(fit2$U,function (e) "[["(e,"mat"))
     U <- simplify2array(U)
-    loglik.test[i] <- udr:::loglik_ud(X.test, fit2$w, U, fit2$V)
+    # Compute test log-likelihood per data point
+    loglik.test[i] <- udr:::loglik_ud(X.test, fit2$w, U, fit2$V)/nrow(X.test)
     fit_by_fold[[i]] = fit2
   }
-  return(list(fit_by_fold = fit_by_fold, avg.loglik = mean(loglik.test)/size))
+  return(list(fit_by_fold = fit_by_fold, avg.loglik = mean(loglik.test)))
 }
 
 
