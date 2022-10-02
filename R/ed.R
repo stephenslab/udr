@@ -63,15 +63,15 @@ ed_iid <- function (X, U, p) {
 
 
 #' Function for scaled regularized ED with an inverse Wishart
-#' prior on \tilde U. \tilde U \sim W_R^{-1}(S0, \nu), where \nu = n0-R-1. 
-#' U = \sigma^2*\tilde U.
+#' prior on U.tilde. U.tilde ~ W_R^{-1}(S0, nu), where nu = n0-R-1. 
+#' U = sigma^2*U.tilde.
 #' The derivation is available in write-up: Notes on estimation of 
 #' large covariance matrices.
 #' @param X: data matrix of size $n$ by $R$.
 #' @param U: initialization of U or estimate from previous iteration
 #' @param p: the weight vector for a component
 #' @param S0: a covariance matrix in inverse-Wishart prior
-#' @param n0: parameter in inverse-Wishart prior, n0 = \nu + R + 1
+#' @param n0: parameter in inverse-Wishart prior, n0 = nu + R + 1
 #' @param sigma2: initialization of the scalar value or estimate from previous iteration.
 ed_reg_iid <- function(X, U, p, S0, n0, sigma2){
   m  <- ncol(X)
