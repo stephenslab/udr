@@ -3,8 +3,8 @@
 \name{ed_reg_iid}
 \alias{ed_reg_iid}
 \title{Function for scaled regularized ED with an inverse Wishart
-prior on \tilde U. \tilde U \sim W_R^{-1}(S0, \nu), where \nu = n0-R-1. 
-U = \sigma^2*\tilde U.
+prior on U.tilde. U.tilde ~ W_R^{-1}(S0, nu), where nu = n0-R-1. 
+U = sigma^2*U.tilde.
 The derivation is available in write-up: Notes on estimation of 
 large covariance matrices.}
 \usage{
@@ -19,14 +19,14 @@ ed_reg_iid(X, U, p, S0, n0, sigma2)
 
 \item{S0:}{a covariance matrix in inverse-Wishart prior}
 
-\item{n0:}{parameter in inverse-Wishart prior, n0 = \nu + R + 1}
+\item{n0:}{parameter in inverse-Wishart prior, n0 = nu + R + 1}
 
 \item{sigma2:}{initialization of the scalar value or estimate from previous iteration.}
 }
 \description{
 Function for scaled regularized ED with an inverse Wishart
-prior on \tilde U. \tilde U \sim W_R^{-1}(S0, \nu), where \nu = n0-R-1. 
-U = \sigma^2*\tilde U.
+prior on U.tilde. U.tilde ~ W_R^{-1}(S0, nu), where nu = n0-R-1. 
+U = sigma^2*U.tilde.
 The derivation is available in write-up: Notes on estimation of 
 large covariance matrices.
 }
