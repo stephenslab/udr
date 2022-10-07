@@ -76,33 +76,30 @@ ted <- function (X, p, minval = 0, r = ncol(X)) {
 
 
 
-#' The following functions implement nuclear norm penalty to covariance estimation
-#' under scaled model, x_j\sim N(0, \sigma^2\tilde U + I). 
-#' The nuclear norm penalty is specified on \tilde U. 
+# The following functions implement nuclear norm penalty to covariance
+# estimation under scaled model, x_j ~ N(0, \sigma^2\tilde U + I).
+# The nuclear norm penalty is specified on \tilde{U}.
 
-
-
-#' Function to compute the negative of objective function to be minimized. 
-#' @param val: the ith eigenvalue that we want to solve for
-#' @param d: the ith eigenvalue of weighted empirical covariance matrix.
-#' @param p: the weight vector for a component
-#' @param lambda: the strength of penalty
-#' @param alpha: control the trade-off between the two nuclear norm terms.
-#' @param sigma2: the scalar on U.
+# Function to compute the negative of objective function to be minimized. 
+# @param val: the ith eigenvalue that we want to solve for
+# @param d: the ith eigenvalue of weighted empirical covariance matrix.
+# @param p: the weight vector for a component
+# @param lambda: the strength of penalty
+# @param alpha: control the trade-off between the two nuclear norm terms.
+# @param sigma2: the scalar on U.
 loglik_neg_per_eigenval <- function(val, p, d, lambda, alpha, sigma2){
   obj = sum(p)*log(val+1) + sum(p)*d/(val + 1) + lambda * (alpha/sigma2*val+(1-alpha)*sigma2/val)
   return(obj/2)
 }
 
-
-#' Function to calculate the partial derivative w.r.t. one eigenvalue
-#' of U. See equation (80) in https://www.overleaf.com/read/vrgwpskkhbpj.
-#' @param val: the ith eigenvalue that we want to solve for
-#' @param d: the ith eigenvalue of weighted empirical covariance matrix.
-#' @param p: the weight vector for a component
-#' @param lambda: the strength of penalty
-#' @param alpha: control the trade-off between the two nuclear norm terms.
-#' @param sigma2: the scalar on U.
+# Function to calculate the partial derivative w.r.t. one eigenvalue
+# of U. See equation (80) in https://www.overleaf.com/read/vrgwpskkhbpj.
+# @param val: the ith eigenvalue that we want to solve for
+# @param d: the ith eigenvalue of weighted empirical covariance matrix.
+# @param p: the weight vector for a component
+# @param lambda: the strength of penalty
+# @param alpha: control the trade-off between the two nuclear norm terms.
+# @param sigma2: the scalar on U.
 grad_loglik_per_eigenval <- function(val, p, d, lambda, alpha, sigma2){
   grad = sum(p)/(val+1)-sum(p)*d/(val+1)^2+lambda*alpha/sigma2-lambda*(1-alpha)*sigma2/val^2
   return(grad)

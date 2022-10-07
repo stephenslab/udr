@@ -14,9 +14,9 @@
 #' 
 #' Independently for \eqn{j=1,\dots,n},
 #' 
-#' \eqn{x_j | theta_j, V_j ~ N_m(theta_j, V_j)};  
+#' \eqn{x_j | \theta_j, V_j ~ N_m(\theta_j, V_j)};  
 #' 
-#' \eqn{theta_j | V_j ~ w_1 N_m(0, U_1) + \dots + w_k N_m(0,U_K)}.
+#' \eqn{\theta_j | V_j ~ w_1 N_m(0, U_1) + \dots + w_k N_m(0,U_K)}.
 #' 
 #' Here the variances \eqn{V_j} are usually considered known, and may be equal (\eqn{V_j=V})
 #' which can greatly simplify computation. The prior on \eqn{theta_j} is a mixture of \eqn{K \ge 2} multivariate normals, with 
