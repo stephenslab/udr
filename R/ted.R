@@ -105,15 +105,15 @@ grad_loglik_per_eigenval <- function(val, p, d, lambda, alpha, sigma2){
   return(grad)
 }
 
-#' Function to regularize U by nuclear penalty from Chi and Lange (2014).
-#' Here I assume V_j = I.
-#' @param X: data matrix of size $n$ by $R$.
-#' @param S: weighted empirical covariance matrix
-#' @param p: a vector of size $n$, containing the posterior weight for a certain 
-#' component for each observation. 
-#' @param lambda: the strength of penalty
-#' @param alpha: a number that controls the trade-off between the two nuclear norm terms.
-#' @param sigma2: the scalar on U.
+# Function to regularize U by nuclear penalty from Chi and Lange (2014).
+# Here I assume V_j = I.
+# @param X: data matrix of size $n$ by $R$.
+# @param S: weighted empirical covariance matrix
+# @param p: a vector of size $n$, containing the posterior weight for a certain 
+# component for each observation. 
+# @param lambda: the strength of penalty
+# @param alpha: a number that controls the trade-off between the two nuclear norm terms.
+# @param sigma2: the scalar on U.
 ted_penalized <- function(X, S, p, lambda, alpha, sigma2){
   n = nrow(X)
   m = ncol(X)
@@ -128,21 +128,21 @@ ted_penalized <- function(X, S, p, lambda, alpha, sigma2){
   return(list(U = U, shrinked_eigenval = eigenval))
 }
 
-#' Function to update sigma2 in M-step optimization given 
-#' all the eigenvalues of U. See eq.(82) in the writeup. 
-#' @param alpha: a number that controls the trade-off between the two nuclear norm terms.
-#' @param eigenvals: the eigenvalues of U.
+# Function to update sigma2 in M-step optimization given 
+# all the eigenvalues of U. See eq.(82) in the writeup. 
+# @param alpha: a number that controls the trade-off between the two nuclear norm terms.
+# @param eigenvals: the eigenvalues of U.
 get_sigma2 = function(alpha, eigenvals){
   sigma2 = alpha/(1-alpha)*sum(eigenvals)/(sum(1/eigenvals))
   sigma2 = sqrt(sigma2)
   return(sigma2)
 }
 
-#' Function to calculate weighted empirical covariance matrix. Each data point 
-#' is weighted by its posterior weight for a certain component.
-#' @param X: data matrix of size $n$ by $R$.
-#' @param p: a vector of size $n$, containing the posterior weight for a certain 
-#' component for each observation. 
+# Function to calculate weighted empirical covariance matrix. Each data point 
+# is weighted by its posterior weight for a certain component.
+# @param X: data matrix of size $n$ by $R$.
+# @param p: a vector of size $n$, containing the posterior weight for a certain 
+# component for each observation. 
 get_S = function(X, p){
   S = crossprod(sqrt(p)*X)/sum(p) 
   return(S)

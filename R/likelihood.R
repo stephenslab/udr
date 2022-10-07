@@ -91,15 +91,15 @@ loglik_ud_notiid_helper <- function (X, w, U, V) {
 
 
 
-#' Function to compute log-penalty for one prior covariance in the transformed
-#' space if the transformation is applied. 
-#' @param U: prior covariance matrix (in the transformed space). 
-#' U has to be unconstrained covariance, otherwise makes no sense to penalize.
-#' @param sigma2: The scalar attached to U.
-#' @param n0: the penalty strength of inverse-Wishart prior used in ED updates.
-#' @param lambda: the penalty strength of nuclear norm function used in TED updates.
-#' @param S0: a positive definite matrix used as the parameter of inverse-Wishart distribution. 
-#' @param alpha: a tuning parameter used in nuclear norm penalty function. 
+# Function to compute log-penalty for one prior covariance in the transformed
+# space if the transformation is applied. 
+# @param U: prior covariance matrix (in the transformed space). 
+# U has to be unconstrained covariance, otherwise makes no sense to penalize.
+# @param sigma2: The scalar attached to U.
+# @param n0: the penalty strength of inverse-Wishart prior used in ED updates.
+# @param lambda: the penalty strength of nuclear norm function used in TED updates.
+# @param S0: a positive definite matrix used as the parameter of inverse-Wishart distribution. 
+# @param alpha: a tuning parameter used in nuclear norm penalty function. 
 #' Default of 0.5 is recommended. 
 compute_penalty <- function(U, sigma2, n0 = 0, lambda = 0, S0, alpha = 0.5){
   penalty_iw <- 0
@@ -114,9 +114,9 @@ compute_penalty <- function(U, sigma2, n0 = 0, lambda = 0, S0, alpha = 0.5){
   return(log_penalty)
 }
 
-#' Function to compute penalized log-likelihood.
-#' @param loglik: the log-likelihood calculated on fitted mixture model.
-#' @param logplt: log of the penality
+# Function to compute penalized log-likelihood.
+# @param loglik: the log-likelihood calculated on fitted mixture model.
+# @param logplt: log of the penality
 compute_loglik_penalized <- function(loglik, logplt){
   loglik_penalized <- loglik + logplt
   return(loglik_penalized)

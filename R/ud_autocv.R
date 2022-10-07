@@ -1,10 +1,10 @@
 
 # Function to perform n-fold cross-validation
-#' @param X: n by R data matrix
-#' @param V: R by R residual covariance matrix
-#' @param nfold: An integer, the number of folds used in CV. 
-#' @param n_unconstrained: An integer, the number of unconstrained matrix to fit
-#' @param n_rank1: An integer, the number of rank_rank1 matrix to fit
+# @param X: n by R data matrix
+# @param V: R by R residual covariance matrix
+# @param nfold: An integer, the number of folds used in CV. 
+# @param n_unconstrained: An integer, the number of unconstrained matrix to fit
+# @param n_rank1: An integer, the number of rank_rank1 matrix to fit
 cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbose){
   
   n = nrow(X)
