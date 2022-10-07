@@ -26,7 +26,7 @@
 #' Fitting the UD model involves
 #' i) obtaining maximum likelihood estimates \eqn{\hat{w}} and \eqn{\hat{U}} for
 #' the prior parameters \eqn{w} and \eqn{U}; ii) computing the posterior distributions
-#' \eqn{p(theta_j | x_j, \hat{w}, \hat{U})}. 
+#' \eqn{p(\theta_j | x_j, \hat{w}, \hat{U})}. 
 #'    
 #' The UD model is fit by an iterative expectation-maximization (EM)-based
 #' algorithm. Various updates are implemented to deal with different constraints
@@ -69,7 +69,7 @@
 #' which the M-step update for each covariance matrix \code{U[[j]]} is
 #' solved by truncating the eigenvalues in a spectral decomposition of
 #' the unconstrained maximimum likelihood estimate (MLE) of
-#' \code{U[j]]}. Other possible settings include \code{"none"} or
+#' \code{U[[j]]}. Other possible settings include \code{"none"} or
 #' code{NA}.}
 #'
 #' \item{\code{version}}{R and C++ implementations of the model
