@@ -16,7 +16,7 @@
 #' 
 #' \eqn{x_j | \theta_j, V_j ~ N_m(\theta_j, V_j)};  
 #' 
-#' \eqn{\theta_j | V_j ~ w_1 N_m(0, U_1) + \dots + w_k N_m(0,U_K)}.
+#' \eqn{\theta_j | V_j ~ w_1 N_m(0, U_1) + \dots + w_K N_m(0,U_K)}.
 #' 
 #' Here the variances \eqn{V_j} are usually considered known, and may be equal (\eqn{V_j=V})
 #' which can greatly simplify computation. The prior on \eqn{theta_j} is a mixture of \eqn{K \ge 2} multivariate normals, with 
@@ -190,7 +190,7 @@
 #' J. Bovy, D. W. Hogg and S. T. Roweis (2011). Extreme Deconvolution:
 #' inferring complete distribution functions from noisy, heterogeneous
 #' and incomplete observations. \emph{Annals of Applied Statistics},
-#' \bold{5}, 1657–1677. doi:10.1214/10-AOAS439
+#' \bold{5}, 1657???1677. doi:10.1214/10-AOAS439
 #'
 #' D. B. Rubin and D. T. Thayer (1982). EM algorithms for ML factor
 #' analysis. Psychometrika \bold{47}, 69-76. doi:10.1007/BF02293851
@@ -198,12 +198,12 @@
 #' A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
 #' (2018). Bayesian semiparametric multivariate density deconvolution.
 #' \emph{Journal of the American Statistical Association} \bold{113},
-#' 401–416. doi:10.1080/01621459.2016.1260467
+#' 401???416. doi:10.1080/01621459.2016.1260467
 #'
 #' J. Won, J. Lim, S. Kim and B. Rajaratnam (2013).
 #' Condition-number-regularized covariance estimation. \emph{Journal
 #' of the Royal Statistical Society, Series B} \bold{75},
-#' 427–450. doi:10.1111/j.1467-9868.2012.01049.x
+#' 427???450. doi:10.1111/j.1467-9868.2012.01049.x
 #' 
 #' @useDynLib udr
 #'
