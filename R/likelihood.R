@@ -100,7 +100,7 @@ loglik_ud_notiid_helper <- function (X, w, U, V) {
 # @param lambda: the penalty strength of nuclear norm function used in TED updates.
 # @param S0: a positive definite matrix used as the parameter of inverse-Wishart distribution. 
 # @param alpha: a tuning parameter used in nuclear norm penalty function. 
-#' Default of 0.5 is recommended. 
+# Default of 0.5 is recommended. 
 compute_penalty <- function(U, sigma2, n0 = 0, lambda = 0, S0, alpha = 0.5){
   penalty_iw <- 0
   penalty_nu <- 0
