@@ -113,8 +113,8 @@ em_fit_scaled_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxi
     U0  <- U
     # E-step: calculate posterior probabilities using the current mu and sigmas
     P <- compute_posterior_probs_iid(X, w, U, V)
-    #f <- compute_F(X, w, U, V, P, lambda, alpha)
-    #Fc = c(Fc, f)
+    f <- compute_F(X, w, U, V, P, lambda, alpha, s)
+    Fc = c(Fc, f)
     # M-step: 
     # update covariance matrix 
     for (j in 1:k){
@@ -125,8 +125,8 @@ em_fit_scaled_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxi
     }
     # update mixture weight
     w = colSums(P)/n
-    #f <- compute_F(X, w, U, V, P, lambda, alpha)
-    #Fc = c(Fc, f)
+    f <- compute_F(X, w, U, V, P, lambda, alpha, s)
+    Fc = c(Fc, f)
     # Compute log-posterior
     log_posterior = compute_log_posterior_nuclear_scaled(X, w, U, V, lambda, alpha, s)
     loglik = loglik_ud_iid_helper(X,w,U,V)
@@ -155,7 +155,7 @@ em_fit_scaled_nuclear_norm_penalized_update <- function(X, w, U, V, lambda, maxi
 #' @param P: the weight matrix for each observation under each component.
 #' @param lambda: tuning parameter that controls the strength of penalty
 #' @param alpha: tuning parameter controls the strength of two penalty terms. 
-compute_F = function(X, w, U, V, P, lambda, alpha){
+compute_F = function(X, w, U, V, P, lambda, alpha, s){
   log_prior = 0
   weighted_pi = 0
   n = nrow(X)
@@ -163,7 +163,7 @@ compute_F = function(X, w, U, V, P, lambda, alpha){
   for(k in 1:K){
     eigenval = eigen(U[,,k])$values
     loglik_mat[k,] <- t(dmvnorm(X,sigma = U[,,k] + V,log = TRUE))
-    log_prior = log_prior -lambda/2*(alpha[k]*sum(eigenval) + (1-alpha[k])*sum(1/eigenval))
+    log_prior = log_prior + compute_nuclear_penalty(U[,,k], lambda, alpha[k], s[k])
     weighted_pi = weighted_pi + sum(P[,k])*log(w[k])
   }
   f = sum(t(loglik_mat)*P) + log_prior + weighted_pi - sum(P*log(P))
