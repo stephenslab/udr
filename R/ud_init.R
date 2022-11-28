@@ -64,6 +64,8 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # Check the input data matrix, "X".
   if (!(is.matrix(X) & is.numeric(X)))
     stop("Input argument \"X\" should be a numeric matrix")
+  if (sum(is.na(X))!= 0 | sum(is.infinite(X))!= 0)
+    stop("Input argument \"X\" cannot contain missing/infinite values")
   n <- nrow(X)
   m <- ncol(X)
   if (n < 2 | m < 2)
@@ -76,6 +78,8 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # Check input argument "V".
   modified <- FALSE
   if (is.matrix(V)) {
+    if (sum(is.na(V))!= 0 | sum(is.infinite(V))!= 0)
+      stop("Input argument \"V\" cannot contain missing/infinite values")
     if (!issemidef(V)) {
       V <- makeposdef(V)
       modified <- TRUE
@@ -86,6 +90,8 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
            "semi-definite matrix, or a list of positive semi-definite ",
            "matrices, with one matrix per row of \"X\"")
     for (i in 1:n)
+      if (sum(is.na(V[[i]]))!= 0 | sum(is.infinite(V[[i]]))!= 0)
+        stop("Input argument \"V\" cannot contain missing/infinite values")
       if (!issemidef(V[[i]])) {
          V[[i]] <- makeposdef(V[[i]])
          modified <- TRUE
@@ -142,11 +148,20 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   n_rank1         <- length(U_rank1)
   n_unconstrained <- length(U_unconstrained)
 
+  # Verify there is no missing/infinite values in U_rank1 if there are rank1 matrices.
+  if (n_rank1 != 0){
+    for (i in 1:n_rank1)
+      if (sum(is.na(U_rank1[[i]]))!= 0 | sum(is.infinite(U_rank1[[i]]))!= 0)
+        stop("Input argument \"U\" cannot contain missing/infinite values")
+  }
+  
   # Verify that all scaled and unconstrained matrices are
   # positive semi-definite.
   modified <- FALSE
   if (n_scaled > 0)
     for (i in 1:n_scaled)
+      if (sum(is.na(U_scaled[[i]]))!= 0 | sum(is.infinite(U_scaled[[i]]))!= 0)
+        stop("Input argument \"U\" cannot contain missing/infinite values")
       if (!issemidef(U_scaled[[i]])) {
         U_scaled[[i]] <- makeposdef(U_scaled[[i]])
         modified <- TRUE
@@ -158,6 +173,8 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   modified <- FALSE
   if (n_unconstrained > 0)
     for (i in 1:n_unconstrained)
+      if (sum(is.na(U_unconstrained[[i]]))!= 0 | sum(is.infinite(U_unconstrained[[i]]))!= 0)
+        stop("Input argument \"U\" cannot contain missing/infinite values")
       if (!issemidef(U_unconstrained[[i]])) {
         U_unconstrained[[i]] <- makeposdef(U_unconstrained[[i]])
         modified <- TRUE
