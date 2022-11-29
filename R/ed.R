@@ -1,8 +1,8 @@
 # Perform an M-step update for a prior covariance (U) using the update
 # formula derived in Bovy et al (2011), for the special case when V =
 # I for all samples; that is, the model is x ~ N(0,U + I).
-update_prior_covariance_unconstrained_ed_iid <- function (X, U, p, n0, S0, ...){
-  res <- ed_reg_iid(X, U$mat, p, S0, n0, U$s)
+update_prior_covariance_unconstrained_ed_iid <- function (X, U, p, lambda, ...){
+  res <- ed_reg_iid(X, U$mat, p, lambda, U$s)
   return(update_prior_covariance_struct_unconstrained(U, res$U, res$sigma2))
 }
   
@@ -71,16 +71,16 @@ ed_iid <- function (X, U, p) {
 # @param U: initialization of U or estimate from previous iteration
 # @param p: the weight vector for a component
 # @param S0: a covariance matrix in inverse-Wishart prior
-# @param n0: parameter in inverse-Wishart prior, n0 = nu + R + 1
+# @param lambda: parameter in inverse-Wishart prior, n0 = nu + R + 1
 # @param sigma2: initialization of the scalar value or estimate from previous iteration.
-ed_reg_iid <- function(X, U, p, S0, n0, sigma2){
+ed_reg_iid <- function(X, U, p, lambda, sigma2, S0 = diag(nrow(U))){
   m  <- ncol(X)
   I  <- diag(m)
   A  <- solve(U + I,U)
   B <- U %*% (I-A)
   bmat <- X %*% A
-  U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+sigma2*n0*S0)/(sum(p)+ n0)
-  if (n0 != 0)
+  U <- (crossprod(sqrt(p)*bmat)+sum(p)*B+sigma2*lambda*S0)/(sum(p)+ lambda)
+  if (lambda != 0)
     sigma2 <- m/sum(diag(S0 %*% solve(U)))
   return(list(U = U, sigma2 = sigma2))
 }

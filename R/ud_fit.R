@@ -252,18 +252,6 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
     stop("Residual covariance V can only be updated when it is the same ",
          "for all data points")
   
-  # Check if update type matches with penalty type
-  if (control$unconstrained.update == "ed"){
-    if (control$lambda != 0)
-      message("Nuclear norm penalty can't be used in ED update, lambda will be set to 0")
-      control$lambda = 0
-    if (is.null(control$S0)) control$S0 = diag(m)
-  }
-  if (control$unconstrained.update == "ted"){
-    if (control$n0 != 0)
-      message("Inverse Wishart penalty can't be used in TED update, n0 will be set to 0")
-      control$n0 = 0
-  }
   out        <- assign_prior_covariance_updates(fit,control)
   control    <- out$control
   covupdates <- out$covupdates
@@ -331,7 +319,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     if (is.matrix(fit$V))
       fit <- update_resid_covariance(fit,control$resid.update,control$version)
 
-    # Update the scaled prior covariance matrices.
+    # Update prior covariance matrices.
     fit <- update_prior_covariances(fit,covupdates,control)
 
     # Update the mixture weights.
@@ -391,6 +379,6 @@ ud_fit_control_default <- function()
        tol.lik              = 1e-3, # tolerance for the change in objective function
        zero.threshold       = 1e-15,
        update.threshold     = 1e-3,
-       n0                   = 0,   # Any number for penalty strength
-       S0                   = NULL, # prior matrix in IW
-       lambda               = 0   ) 
+       lambda               = 0, # penalty strength
+       S0                   = NULL) # prior matrix in IW
+

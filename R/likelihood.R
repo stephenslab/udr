@@ -96,21 +96,18 @@ loglik_ud_notiid_helper <- function (X, w, U, V) {
 # @param U: prior covariance matrix (in the transformed space). 
 # U has to be unconstrained covariance, otherwise makes no sense to penalize.
 # @param sigma2: The scalar attached to U.
-# @param n0: the penalty strength of inverse-Wishart prior used in ED updates.
-# @param lambda: the penalty strength of nuclear norm function used in TED updates.
+# @param lambda: the penalty strength.
 # @param S0: a positive definite matrix used as the parameter of inverse-Wishart distribution. 
 # @param alpha: a tuning parameter used in nuclear norm penalty function. 
 # Default of 0.5 is recommended. 
-compute_penalty <- function(U, sigma2, n0 = 0, lambda = 0, S0, alpha = 0.5){
-  penalty_iw <- 0
-  penalty_nu <- 0
-  if (n0 != 0)
-    penalty_iw = ldiwishart(W = U/sigma2, n0, S0)
-  if (lambda != 0){
+compute_penalty <- function(U, sigma2, lambda = 0, S0 = diag(nrow(U)), alpha = 0.5, update.type){
+  if (update.type == "ted"){
     eigenval = eigen(U)$values
-    penalty_nu = -lambda/2*(alpha*sum(eigenval)/sigma2 + (1-alpha)*sigma2*sum(1/eigenval))
+    log_penalty = -lambda/2*(alpha*sum(eigenval)/sigma2 + (1-alpha)*sigma2*sum(1/eigenval))
   }
-  log_penalty <- penalty_iw + penalty_nu
+  if (update.type == "ed"){
+    log_penalty = ldiwishart(W = U/sigma2, lambda, S0)
+  }
   return(log_penalty)
 }
 
@@ -126,5 +123,6 @@ compute_loglik_penalized <- function(loglik, logplt){
 # Compute the log-density of the inverse Wishart at W with n - d - 1
 # degrees of freedom and scale matrix n*S, ignoring terms that do not
 # depend on X.
-ldiwishart <- function (W, n, S)
-  -n/2*(ldet(W) + tr(S %*% solve(W)))
+ldiwishart <- function (W, n, S){
+  return(-n/2*(ldet(W) + tr(S %*% solve(W))))
+}
