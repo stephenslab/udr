@@ -158,30 +158,36 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   # Verify that all scaled and unconstrained matrices are
   # positive semi-definite.
   modified <- FALSE
-  if (n_scaled > 0)
-    for (i in 1:n_scaled)
+  if (n_scaled > 0){
+    for (i in 1:n_scaled){
       if (sum(is.na(U_scaled[[i]]))!= 0 | sum(is.infinite(U_scaled[[i]]))!= 0)
         stop("Input argument \"U\" cannot contain missing/infinite values")
       if (!issemidef(U_scaled[[i]])) {
         U_scaled[[i]] <- makeposdef(U_scaled[[i]])
         modified <- TRUE
-      }
-  if (modified)
-    warning("Input argument \"U_scaled\" was modified because one or more ",
-            "matrices were not positive semi-definite")
-  
+        } 
+    }
+    if (modified)
+      warning("Input argument \"U_scaled\" was modified because one or more ",
+              "matrices were not positive semi-definite")
+  }
+    
   modified <- FALSE
-  if (n_unconstrained > 0)
-    for (i in 1:n_unconstrained)
+  if (n_unconstrained > 0){
+    for (i in 1:n_unconstrained){
       if (sum(is.na(U_unconstrained[[i]]))!= 0 | sum(is.infinite(U_unconstrained[[i]]))!= 0)
         stop("Input argument \"U\" cannot contain missing/infinite values")
       if (!issemidef(U_unconstrained[[i]])) {
         U_unconstrained[[i]] <- makeposdef(U_unconstrained[[i]])
         modified <- TRUE
-      }
-  if (modified)
-    warning("Input argument \"U_unconstrained\" was modified because one ",
-            "or more matrices were not positive semi-definite")
+        }
+    }
+    if (modified)
+      warning("Input argument \"U_unconstrained\" was modified because one ",
+              "or more matrices were not positive semi-definite")
+  }
+    
+  
 
   # Set up the data structure for the scaled covariance matrices.
   if (n_scaled > 0) {
