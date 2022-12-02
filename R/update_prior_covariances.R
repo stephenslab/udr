@@ -94,7 +94,7 @@ update_prior_covariances <-
       if (sum(fit0$P[,i]) > control$update.threshold)
         fit0$U[[i]] <- do.call(covupdates[i],
                                list(X = fit0$X, U = fit0$U[[i]], p = fit0$P[,i], 
-                                    minval = control$minval, lambda = control$lambda))
+                                    minval = control$minval, lambda = control$lambda, penalty.type = control$penalty.type))
     covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
 
     # Compute log-penalty for regularized covariance matrices, 
@@ -102,8 +102,8 @@ update_prior_covariances <-
     indx_unconstrained <- which(covtypes == "unconstrained")
     penalty = 0
     for (i in indx_unconstrained){
-      penalty <- penalty + compute_penalty(fit0$U[[i]]$mat, fit0$U[[i]]$s, 
-                                           lambda = control$lambda, update.type = control$unconstrained.update)
+      penalty <- penalty + compute_penalty(fit0$U[[i]]$mat, fit0$U[[i]]$s, lambda = control$lambda, 
+                                           update.type = control$unconstrained.update, penalty.type = control$penalty.type)
     }
     fit$logplt = penalty
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).

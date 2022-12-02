@@ -98,12 +98,17 @@ loglik_ud_notiid_helper <- function (X, w, U, V) {
 # @param sigma2: The scalar attached to U.
 # @param lambda: the penalty strength.
 # @param S0: a positive definite matrix used as the parameter of inverse-Wishart distribution. 
-# @param alpha: a tuning parameter used in nuclear norm penalty function. 
-# Default of 0.5 is recommended. 
-compute_penalty <- function(U, sigma2, lambda = 0, S0 = diag(nrow(U)), alpha = 0.5, update.type){
+# @param alpha: a tuning parameter used in nuclear norm penalty function. Default of 0.5 is recommended. 
+# @param update.type: the type of unconstrained update, either "ted" or "ed"
+# @param penalty.type: the type of penalty used, either "nu" or "iw"
+compute_penalty <- function(U, sigma2, lambda = 0, S0 = diag(nrow(U)), alpha = 0.5, update.type, penalty.type){
   if (update.type == "ted"){
     eigenval = eigen(U)$values
-    log_penalty = -lambda/2*(alpha*sum(eigenval)/sigma2 + (1-alpha)*sigma2*sum(1/eigenval))
+    if (penalty.type == "nu"){
+      log_penalty = -lambda/2*(alpha*sum(eigenval)/sigma2 + (1-alpha)*sigma2*sum(1/eigenval))
+    }else{
+      log_penalty = -lambda/2*(sum(log(eigenval))- R*log(sigma2) + sigma2*sum(1/eigenval))
+    }
   }
   if (update.type == "ed"){
     log_penalty = ldiwishart(W = U/sigma2, lambda, S0)
