@@ -259,7 +259,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
-    cat(sprintf("(udr 0.3-143, \"%s\"):\n",control$version))
+    cat(sprintf("(udr 0.3-144, \"%s\"):\n",control$version))
     if (is.matrix(fit$V))
       cat("data points are i.i.d. (same V)\n")
     else
@@ -273,6 +273,9 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
                 control$scaled.update,
                 control$rank1.update,
                 control$unconstrained.update))
+    if (control$lambda!=0)
+      cat(sprintf("covariance regularization: penalty strength = %d, method = %s\n",
+                  control$lambda, control$penalty.type))
     cat(sprintf("mixture weights update: %s\n",control$weights.update))
     if (is.matrix(fit$V))
       cat(sprintf("residual covariance update: %s\n",control$resid.update))
