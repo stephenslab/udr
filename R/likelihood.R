@@ -102,6 +102,7 @@ loglik_ud_notiid_helper <- function (X, w, U, V) {
 # @param update.type: the type of unconstrained update, either "ted" or "ed"
 # @param penalty.type: the type of penalty used, either "nu" or "iw"
 compute_penalty <- function(U, sigma2, lambda = 0, S0 = diag(nrow(U)), alpha = 0.5, update.type, penalty.type){
+  R = nrow(U)
   if (update.type == "ted"){
     eigenval = eigen(U)$values
     if (penalty.type == "nu"){

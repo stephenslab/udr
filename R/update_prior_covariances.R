@@ -101,9 +101,11 @@ update_prior_covariances <-
     # and add the penalty into fit object. 
     indx_unconstrained <- which(covtypes == "unconstrained")
     penalty = 0
-    for (i in indx_unconstrained){
-      penalty <- penalty + compute_penalty(fit0$U[[i]]$mat, fit0$U[[i]]$s, lambda = control$lambda, 
-                                           update.type = control$unconstrained.update, penalty.type = control$penalty.type)
+    if (control$lambda != 0){
+      for (i in indx_unconstrained){
+        penalty <- penalty + compute_penalty(fit0$U[[i]]$mat, fit0$U[[i]]$s, lambda = control$lambda, 
+                                             update.type = control$unconstrained.update, penalty.type = control$penalty.type)
+      }
     }
     fit$logplt = penalty
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
