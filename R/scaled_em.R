@@ -50,6 +50,8 @@ em_scaled_iid <- function (X, U, p, minval) {
 
 # Update the scaling factor for a prior canonical covariance (U)
 # matrix in non-iid case.
+#
+#' @importFrom stats optim
 em_scaled_notiid <- function (X, U, V, p, s)
   optim(par = 10,fn = weighted_loglik_negative,gr = grad_loglik_scaled_notiid,
         X = X,U = U,V = V,p = p,method = "L-BFGS-B",lower = 0,upper = 1e6)$par

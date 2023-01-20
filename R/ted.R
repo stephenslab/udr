@@ -121,6 +121,8 @@ grad_loglik_per_eigenval_nu <- function(val, p, d, lambda, alpha, sigma2){
 # @param lambda: the strength of penalty
 # @param alpha: a number that controls the trade-off between the two nuclear norm terms.
 # @param sigma2: the scalar on U.
+#
+#' @importFrom stats optim
 ted_penalized_nu <- function(X, S, p, lambda, alpha, sigma2){
   n = nrow(X)
   m = ncol(X)
@@ -195,6 +197,8 @@ get_sigma2_iw = function(eigenvals){
 # component for each observation. 
 # @param lambda: the strength of penalty
 # @param sigma2: the scalar on U.
+#
+#' @importFrom stats optim
 ted_penalized_iw <- function(X, S, p, lambda, sigma2){
   n = nrow(X)
   m = ncol(X)

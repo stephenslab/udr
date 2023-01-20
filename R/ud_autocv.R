@@ -26,7 +26,7 @@ cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbo
     
     U <- lapply(fit2$U,function (e) "[["(e,"mat"))
     U <- simplify2array(U)
-    loglik.test[i] <- udr:::loglik_ud(X.test, fit2$w, U, fit2$V)
+    loglik.test[i] <- loglik_ud(X.test, fit2$w, U, fit2$V)
     fit_by_fold[[i]] = fit2
   }
   return(list(fit_by_fold = fit_by_fold, avg.loglik = mean(loglik.test)/size))
