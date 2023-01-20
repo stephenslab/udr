@@ -6,5 +6,4 @@
 ^appveyor\.yml$
 ^\.circleci$
 ^\.circleci/config\.yml$
-
 ^\.Rproj\.user$
