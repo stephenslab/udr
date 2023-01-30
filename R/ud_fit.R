@@ -1,5 +1,5 @@
 #' @rdname ud_fit
-#' 
+#'
 #' @title Fit Ultimate Deconvolution Model
 #'
 #' @description This function implements
@@ -9,38 +9,38 @@
 #' it can also be viewed as a method for multivariate density
 #' deconvolution.
 #'
-#' @details The udr package fits the following 
-#' Empirical Bayes version of the multivariate normal means model: 
-#' 
+#' @details The udr package fits the following
+#' Empirical Bayes version of the multivariate normal means model:
+#'
 #' Independently for \eqn{j=1,\dots,n},
-#' 
-#' \eqn{x_j | \theta_j, V_j ~ N_m(\theta_j, V_j)};  
-#' 
+#'
+#' \eqn{x_j | \theta_j, V_j ~ N_m(\theta_j, V_j)};
+#'
 #' \eqn{\theta_j | V_j ~ w_1 N_m(0, U_1) + \dots + w_K N_m(0,U_K)}.
-#' 
+#'
 #' Here the variances \eqn{V_j} are usually considered known, and may be equal (\eqn{V_j=V})
-#' which can greatly simplify computation. The prior on \eqn{theta_j} is a mixture of \eqn{K \ge 2} multivariate normals, with 
+#' which can greatly simplify computation. The prior on \eqn{theta_j} is a mixture of \eqn{K \ge 2} multivariate normals, with
 #' unknown mixture proportions \eqn{w=(w_1,...,w_K)} and covariance matrices \eqn{U=(U_1,...,U_K)}.
 #' We call this the ``Ultimate Deconvolution" (UD) model.
-#' 
+#'
 #' Fitting the UD model involves
 #' i) obtaining maximum likelihood estimates \eqn{\hat{w}} and \eqn{\hat{U}} for
 #' the prior parameters \eqn{w} and \eqn{U}; ii) computing the posterior distributions
-#' \eqn{p(\theta_j | x_j, \hat{w}, \hat{U})}. 
-#'    
+#' \eqn{p(\theta_j | x_j, \hat{w}, \hat{U})}.
+#'
 #' The UD model is fit by an iterative expectation-maximization (EM)-based
 #' algorithm. Various updates are implemented to deal with different constraints
 #' on each \eqn{U_k}. Specifically, each \eqn{U_k} can be i) constrained to be a scalar multiple of a
 #' pre-specified matrix; or ii) constrained to be a rank-1 matrix; or iii)
 #' unconstrained. How many mixture components to use and which constraints to apply
 #' to each \eqn{U_k} are specified using \link{ud_init}.
-#' 
+#'
 #' The \code{control} argument can be used to adjust the algorithm
-#' settings, although the default settings should suffice for most users. 
+#' settings, although the default settings should suffice for most users.
 #' It is a list in which any of the following named components
 #' will override the default algorithm settings (as they are defined
 #' by \code{ud_fit_control_default}):
-#' 
+#'
 #' \describe{
 #'
 #' \item{\code{weights.update}}{When \code{weights.update = "em"}, the
@@ -56,11 +56,11 @@
 #' \item{\code{scaled.update}}{This setting specifies the updates for
 #' the scaled prior covariance matrices. Possible settings are
 #' \code{"fa"}, \code{"none"} or \code{NA}.}
-#' 
+#'
 #' \item{\code{rank1.update}}{This setting specifies the updates for
 #' the rank-1 prior covariance matrices. Possible settings are
 #' \code{"ed"}, \code{"ted"}, \code{"none"} or \code{NA}.}
-#' 
+#'
 #' \item{\code{unconstrained.update}}{This setting determines the
 #' updates used to estimate the unconstrained prior covariance
 #' matrices. Two variants of EM are implemented: \code{update.U =
@@ -75,7 +75,7 @@
 #' \item{\code{version}}{R and C++ implementations of the model
 #' fitting algorithm are provided; these are selected with
 #' \code{version = "R"} and \code{version = "Rcpp"}.}
-#' 
+#'
 #' \item{\code{maxiter}}{The upper limit on the number of updates
 #' to perform.}
 #'
@@ -107,7 +107,7 @@
 #' @param X Optional n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point. The number of rows and columns should
 #'   be 2 or more. When not provided, \code{fit$X} is used.
-#' 
+#'
 #' @param control A list of parameters controlling the behaviour of
 #'   the model fitting and initialization. See \sQuote{Details}.
 #'
@@ -120,21 +120,21 @@
 #' with the following elements:
 #'
 #' \item{X}{The data matrix used to fix the model.}
-#' 
+#'
 #' \item{w}{A vector containing the estimated mixture weights \eqn{w}}
 #'
 #' \item{U}{A list containing the estimated prior covariance matrices \eqn{U}}
-#' 
+#'
 #' \item{V}{The residual covariance matrix \eqn{V}, or a list of
 #'   \eqn{V_j} used in the model fit.}
 #'
 #' \item{P}{The responsibilities matrix in which \code{P[i,j]} is the
 #'   posterior mixture probability for data point i and mixture
 #'   component j.}
-#'  
+#'
 #' \item{loglik}{The log-likelihood at the current settings of the
 #'   model parameters.}
-#'   
+#'
 #' \item{progress}{A data frame containing detailed information about
 #'   the algorithm's progress. The columns of the data frame are:
 #'   "iter", the iteration number; "loglik", the log-likelihood at the
@@ -162,9 +162,9 @@
 #' rownames(V) <- c("d1","d2")
 #' colnames(V) <- c("d1","d2")
 #' X <- simulate_ud_data(n,w,U,V)
-#' 
-#' # This is the simplest invocation of ud_init and ud_fit. 
-#' # It uses the default settings for the prior 
+#'
+#' # This is the simplest invocation of ud_init and ud_fit.
+#' # It uses the default settings for the prior
 #' # (which are 2 scaled components, 4 rank-1 components, and 4 unconstrained components)
 #' fit1 <- ud_init(X,V = V)
 #' fit1 <- ud_fit(fit1)
@@ -185,7 +185,7 @@
 #'      max(fit2$progress$loglik) - fit2$progress$loglik + 0.1,
 #'      type = "l",col = "dodgerblue",lwd = 2,log = "y",xlab = "iteration",
 #'      ylab = "dist to best loglik")
-#' 
+#'
 #' @references
 #' J. Bovy, D. W. Hogg and S. T. Roweis (2011). Extreme Deconvolution:
 #' inferring complete distribution functions from noisy, heterogeneous
@@ -194,7 +194,7 @@
 #'
 #' D. B. Rubin and D. T. Thayer (1982). EM algorithms for ML factor
 #' analysis. Psychometrika \bold{47}, 69-76. doi:10.1007/BF02293851
-#' 
+#'
 #' A. Sarkar, D. Pati, A. Chakraborty, B. K. Mallick and R. J. Carroll
 #' (2018). Bayesian semiparametric multivariate density deconvolution.
 #' \emph{Journal of the American Statistical Association} \bold{113},
@@ -204,20 +204,20 @@
 #' Condition-number-regularized covariance estimation. \emph{Journal
 #' of the Royal Statistical Society, Series B} \bold{75},
 #' 427???450. doi:10.1111/j.1467-9868.2012.01049.x
-#' 
+#'
 #' @useDynLib udr
 #'
 #' @importFrom utils modifyList
 #' @importFrom Rcpp evalCpp
-#' 
+#'
 #' @export
-#' 
+#'
 ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
-    
+
   # Check input argument "fit".
   if (!(is.list(fit) & inherits(fit,"ud_fit")))
     stop("Input argument \"fit\" should be an object of class \"ud_fit\"")
-  
+
   # Check the input data matrix, "X".
   if (!missing(X)) {
     if (!(is.matrix(X) & is.numeric(X)))
@@ -236,7 +236,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   # Extract the "covtype" attribute from the prior covariance (U)
   # matrices.
   covtypes <- sapply(fit$U,function (x) attr(x,"covtype"))
-  
+
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
   if (is.na(control$weights.update)) {
@@ -251,11 +251,11 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
   if (!is.matrix(fit$V) & control$resid.update != "none")
     stop("Residual covariance V can only be updated when it is the same ",
          "for all data points")
-  
+
   out        <- assign_prior_covariance_updates(fit,control)
   control    <- out$control
   covupdates <- out$covupdates
-  
+
   # Give an overview of the model fitting.
   if (verbose) {
     cat(sprintf("Performing Ultimate Deconvolution on %d x %d matrix ",n,m))
@@ -292,12 +292,12 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
 
   # Get the number of components in the mixture prior.
   k <- length(fit$w)
-  
+
   # Set up data structures used in the loop below.
   progress <- as.data.frame(matrix(0,control$maxiter,7))
   names(progress) <- c("iter","loglik", "loglik.pen", "delta.w","delta.v","delta.u","timing")
   progress$iter <- 1:control$maxiter
-  
+
   # Iterate the EM updates.
   if (verbose)
     cat("iter          log-likelihood    log-likelihood.pen   |w - w'| |U - U'| |V - V'|\n")
@@ -308,7 +308,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     V0 <- fit$V
     U0 <- fit$U
     w0 <- fit$w
-    
+
     # E-step
     # ------
     # Compute the n x k matrix of posterior mixture assignment
@@ -333,7 +333,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     # console if requested.
     loglik <- loglik_ud(fit$X,fit$w,fit$U,fit$V,control$version)
     loglik_penalized <- compute_loglik_penalized(loglik, fit$logplt)
-    
+
     dw <- max(abs(fit$w - w0))
     dU <- max(abs(ulist2array(fit$U) - ulist2array(U0)))
     if (is.matrix(fit$V))
@@ -343,9 +343,9 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     t2 <- proc.time()
     progress[iter,"loglik"]  <- loglik
     progress[iter,"loglik.pen"]  <- loglik_penalized
-    progress[iter,"delta.w"] <- dw 
-    progress[iter,"delta.u"] <- dU 
-    progress[iter,"delta.v"] <- dV 
+    progress[iter,"delta.w"] <- dw
+    progress[iter,"delta.u"] <- dU
+    progress[iter,"delta.v"] <- dV
     progress[iter,"timing"]  <- t2["elapsed"] - t1["elapsed"]
     if (verbose)
       cat(sprintf("%4d %+0.16e %+0.16e %0.2e %0.2e %0.2e\n",iter,loglik, loglik_penalized, dw,dU,dV))
@@ -354,6 +354,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     dparam     <- max(dw,dU,dV)
     diff_obj <- loglik_penalized - fit$loglik_penalized
     fit$loglik_penalized <- loglik_penalized
+    fit$loglik <- loglik
     if (dparam < control$tol |  diff_obj < log(1 + control$tol.lik))
       break
   }
@@ -368,7 +369,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
 #' @rdname ud_fit
 #'
 #' @export
-#' 
+#'
 ud_fit_control_default <- function()
   list(weights.update       = NA,   # "em" or "none"
        resid.update         = NA,   # "em", "none" or NA
