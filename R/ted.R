@@ -190,7 +190,7 @@ get_sigma2_iw = function(eigenvals){
   return(sigma2)
 }
 
-#' Function to regularize U by IW penalty. Here I assume V_j = I.
+# Function to regularize U by IW penalty. Here I assume V_j = I.
 # @param X: data matrix of size $n$ by $R$.
 # @param S: weighted empirical covariance matrix
 # @param p: a vector of size $n$, containing the posterior weight for a certain 

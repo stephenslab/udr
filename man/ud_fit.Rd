@@ -42,14 +42,16 @@ with the following elements:
 \item{P}{The responsibilities matrix in which \code{P[i,j]} is the
   posterior mixture probability for data point i and mixture
   component j.}
- 
+
 \item{loglik}{The log-likelihood at the current settings of the
   model parameters.}
-  
+
 \item{progress}{A data frame containing detailed information about
   the algorithm's progress. The columns of the data frame are:
   "iter", the iteration number; "loglik", the log-likelihood at the
-  current estimates of the model parameters; "delta.w", the largest
+  current estimates of the model parameters; "loglik.pen", the penalized
+  log-likelihood at the current estimates of the model parameters. It is equal
+  to "loglik" when no covariance regularization is used. "delta.w", the largest
   change in the mixture weights; "delta.u", the largest change in the
   prior covariance matrices; "delta.v", the largest change in the
   residual covariance matrix; and "timing", the elapsed time in
@@ -58,40 +60,46 @@ with the following elements:
 \description{
 This function implements
 empirical Bayes methods for fitting a multivariate version of the normal means
-model. These methods are closely related to approaches for
+model with flexible prior. These methods are closely related to approaches for
 multivariate density deconvolution (Sarkar \emph{et al}, 2018), so
 it can also be viewed as a method for multivariate density
 deconvolution.
 }
 \details{
-The udr package fits the following 
-Empirical Bayes version of the multivariate normal means model: 
+The udr package fits the following
+Empirical Bayes version of the multivariate normal means model:
 
 Independently for \eqn{j=1,\dots,n},
 
-\eqn{x_j | \theta_j, V_j ~ N_m(\theta_j, V_j)};  
+\eqn{x_j | \theta_j, V_j ~ N_m(\theta_j, V_j)};
 
 \eqn{\theta_j | V_j ~ w_1 N_m(0, U_1) + \dots + w_K N_m(0,U_K)}.
 
 Here the variances \eqn{V_j} are usually considered known, and may be equal (\eqn{V_j=V})
-which can greatly simplify computation. The prior on \eqn{theta_j} is a mixture of \eqn{K \ge 2} multivariate normals, with 
+which can greatly simplify computation. The prior on \eqn{theta_j} is a mixture of \eqn{K \ge 2} multivariate normals, with
 unknown mixture proportions \eqn{w=(w_1,...,w_K)} and covariance matrices \eqn{U=(U_1,...,U_K)}.
 We call this the ``Ultimate Deconvolution" (UD) model.
 
 Fitting the UD model involves
 i) obtaining maximum likelihood estimates \eqn{\hat{w}} and \eqn{\hat{U}} for
 the prior parameters \eqn{w} and \eqn{U}; ii) computing the posterior distributions
-\eqn{p(\theta_j | x_j, \hat{w}, \hat{U})}. 
-   
+\eqn{p(\theta_j | x_j, \hat{w}, \hat{U})}.
+
 The UD model is fit by an iterative expectation-maximization (EM)-based
-algorithm. Various updates are implemented to deal with different constraints
+algorithm. Various algorithms are implemented to deal with different constraints
 on each \eqn{U_k}. Specifically, each \eqn{U_k} can be i) constrained to be a scalar multiple of a
 pre-specified matrix; or ii) constrained to be a rank-1 matrix; or iii)
 unconstrained. How many mixture components to use and which constraints to apply
-to each \eqn{U_k} are specified using \link{ud_init}.
+to each \eqn{U_k} are specified using \link{ud_init}. 
+
+In addition, we introduced two covariance regularization approaches to handle the high dimensional
+challenges, where sample size is relatively small compared with data dimension. 
+One is called nucler norm regularization, short for \code{"nu"}. 
+The other is called inverse-Wishart regularization, short for \code{"iw"}.
+
 
 The \code{control} argument can be used to adjust the algorithm
-settings, although the default settings should suffice for most users. 
+settings, although the default settings should suffice for most users.
 It is a list in which any of the following named components
 will override the default algorithm settings (as they are defined
 by \code{ud_fit_control_default}):
@@ -151,6 +159,12 @@ covariance(s) \code{V} and the prior covariance matrices
 for component \code{i} exceeds \code{update.threshold}; that is,
 only if \code{sum(P[,i]) > update.threshold}.}}
 
+#' \item{\code{lambda}}{Parameter to control the strength of covariance
+regularization. \code{\lambda = 0} indicates no covariance regularization.}
+
+#' \item{\code{penalty.type}}{Specifies the type of covariance regularization to use.
+Either \code{iw} (inverse Wishart regularization) or \code{nu} (nuclear norm regularization).}
+
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples
 for guidance.
@@ -174,8 +188,8 @@ rownames(V) <- c("d1","d2")
 colnames(V) <- c("d1","d2")
 X <- simulate_ud_data(n,w,U,V)
 
-# This is the simplest invocation of ud_init and ud_fit. 
-# It uses the default settings for the prior 
+# This is the simplest invocation of ud_init and ud_fit.
+# It uses the default settings for the prior
 # (which are 2 scaled components, 4 rank-1 components, and 4 unconstrained components)
 fit1 <- ud_init(X,V = V)
 fit1 <- ud_fit(fit1)

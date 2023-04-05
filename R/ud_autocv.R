@@ -35,14 +35,14 @@ cv_single_model = function(X, V, nfold, n_unconstrained, n_rank1, control, verbo
 
 # Function to select best k components by cross-validation. At least, one of k_unconstrained and k_rank1 
 # should be specified by the user. 
-#' @param X: n by R data matrix
-#' @param V: residual covariance matrix
-#' @param nfold: An integer, the number of folds used in CV. 
-#' @param k_unconstrained: An integer or a vector of integers specifying the number of
-#' unconstrained components to experiment with.
-#' @param k_rank1: An integer or a vector of integers specifying the number of
-#' rank1 components to experiment with. 
-#' @export
+# @param X: n by R data matrix
+# @param V: residual covariance matrix
+# @param nfold: An integer, the number of folds used in CV. 
+# @param k_unconstrained: An integer or a vector of integers specifying the number of
+# unconstrained components to experiment with.
+# @param k_rank1: An integer or a vector of integers specifying the number of
+# rank1 components to experiment with. 
+# @export
 ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(), verbose){
   
   if (length(k_unconstrained) == 1 & length(k_rank1) == 1)
@@ -84,10 +84,10 @@ ud_fit_cv = function(X, V, nfold, k_unconstrained = 0, k_rank1= 0, control=list(
 }
 
 
-#' Function to get the best_fit_cv object based on highest average test log-likelihood.
-#' @param res: the result from ud_fit_cv(). 
-#' @return best_fit_cv: an object storing training results, its corresponding average 
-#' test loglikelihood and parameter configuration. 
+# Function to get the best_fit_cv object based on highest average test log-likelihood.
+# @param res: the result from ud_fit_cv(). 
+# @return best_fit_cv: an object storing training results, its corresponding average 
+# test loglikelihood and parameter configuration. 
 get_best_fit_cv = function(res){
   best_fit_cv = c()
   indx = which.max(res$avg_logliks)
@@ -98,11 +98,11 @@ get_best_fit_cv = function(res){
   return(best_fit_cv)
 }
 
-#' Function to get the best fit on the whole dataset based on cv results. 
-#' @param X: n by R data matrix
-#' @param V: R by R residual covariance matrix
-#' @param best_fit_cv: An object storing the best cv results and its parameter configuration.
-#' @return best_fit: the fit object on whole dataset. 
+# Function to get the best fit on the whole dataset based on cv results. 
+# @param X: n by R data matrix
+# @param V: R by R residual covariance matrix
+# @param best_fit_cv: An object storing the best cv results and its parameter configuration.
+# @return best_fit: the fit object on whole dataset. 
 get_best_fit = function(X, V, best_fit_cv, control = list(), verbose){
   
     control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)

@@ -4,7 +4,7 @@
 #'
 #' @description This function implements
 #' empirical Bayes methods for fitting a multivariate version of the normal means
-#' model. These methods are closely related to approaches for
+#' model with flexible prior. These methods are closely related to approaches for
 #' multivariate density deconvolution (Sarkar \emph{et al}, 2018), so
 #' it can also be viewed as a method for multivariate density
 #' deconvolution.
@@ -29,11 +29,17 @@
 #' \eqn{p(\theta_j | x_j, \hat{w}, \hat{U})}.
 #'
 #' The UD model is fit by an iterative expectation-maximization (EM)-based
-#' algorithm. Various updates are implemented to deal with different constraints
+#' algorithm. Various algorithms are implemented to deal with different constraints
 #' on each \eqn{U_k}. Specifically, each \eqn{U_k} can be i) constrained to be a scalar multiple of a
 #' pre-specified matrix; or ii) constrained to be a rank-1 matrix; or iii)
 #' unconstrained. How many mixture components to use and which constraints to apply
-#' to each \eqn{U_k} are specified using \link{ud_init}.
+#' to each \eqn{U_k} are specified using \link{ud_init}. 
+#' 
+#' In addition, we introduced two covariance regularization approaches to handle the high dimensional
+#' challenges, where sample size is relatively small compared with data dimension. 
+#' One is called nucler norm regularization, short for \code{"nu"}. 
+#' The other is called inverse-Wishart regularization, short for \code{"iw"}.
+#' 
 #'
 #' The \code{control} argument can be used to adjust the algorithm
 #' settings, although the default settings should suffice for most users.
@@ -95,6 +101,12 @@
 #' \code{U[[i]]} is only updated if the total \dQuote{responsibility}
 #' for component \code{i} exceeds \code{update.threshold}; that is,
 #' only if \code{sum(P[,i]) > update.threshold}.}}
+#' 
+#' #' \item{\code{lambda}}{Parameter to control the strength of covariance
+#' regularization. \code{\lambda = 0} indicates no covariance regularization.}
+#' 
+#' #' \item{\code{penalty.type}}{Specifies the type of covariance regularization to use.
+#' Either \code{iw} (inverse Wishart regularization) or \code{nu} (nuclear norm regularization).}
 #'
 #' Using this function requires some care; currently only minimal
 #' argument checking is performed. See the documentation and examples
@@ -138,7 +150,9 @@
 #' \item{progress}{A data frame containing detailed information about
 #'   the algorithm's progress. The columns of the data frame are:
 #'   "iter", the iteration number; "loglik", the log-likelihood at the
-#'   current estimates of the model parameters; "delta.w", the largest
+#'   current estimates of the model parameters; "loglik.pen", the penalized
+#'   log-likelihood at the current estimates of the model parameters. It is equal
+#'   to "loglik" when no covariance regularization is used. "delta.w", the largest
 #'   change in the mixture weights; "delta.u", the largest change in the
 #'   prior covariance matrices; "delta.v", the largest change in the
 #'   residual covariance matrix; and "timing", the elapsed time in
