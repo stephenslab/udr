@@ -94,8 +94,8 @@ to each \eqn{U_k} are specified using \link{ud_init}.
 
 In addition, we introduced two covariance regularization approaches to handle the high dimensional
 challenges, where sample size is relatively small compared with data dimension. 
-One is called nucler norm regularization, short for \code{"nu"}. 
-The other is called inverse-Wishart regularization, short for \code{"iw"}.
+One is called nucler norm regularization, short for "nu". 
+The other is called inverse-Wishart regularization, short for "iw".
 
 
 The \code{control} argument can be used to adjust the algorithm
@@ -159,10 +159,10 @@ covariance(s) \code{V} and the prior covariance matrices
 for component \code{i} exceeds \code{update.threshold}; that is,
 only if \code{sum(P[,i]) > update.threshold}.}}
 
-#' \item{\code{lambda}}{Parameter to control the strength of covariance
+\item{\code{lambda}}{Parameter to control the strength of covariance
 regularization. \code{\lambda = 0} indicates no covariance regularization.}
 
-#' \item{\code{penalty.type}}{Specifies the type of covariance regularization to use.
+\item{\code{penalty.type}}{Specifies the type of covariance regularization to use.
 Either \code{iw} (inverse Wishart regularization) or \code{nu} (nuclear norm regularization).}
 
 Using this function requires some care; currently only minimal
