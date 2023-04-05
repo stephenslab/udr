@@ -157,13 +157,13 @@ covariance(s) \code{V} and the prior covariance matrices
 \item{\code{update.threshold}}{A prior covariance matrix
 \code{U[[i]]} is only updated if the total \dQuote{responsibility}
 for component \code{i} exceeds \code{update.threshold}; that is,
-only if \code{sum(P[,i]) > update.threshold}.}}
+only if \code{sum(P[,i]) > update.threshold}.}
 
 \item{\code{lambda}}{Parameter to control the strength of covariance
 regularization. \code{\lambda = 0} indicates no covariance regularization.}
 
 \item{\code{penalty.type}}{Specifies the type of covariance regularization to use.
-Either \code{iw} (inverse Wishart regularization) or \code{nu} (nuclear norm regularization).}
+"iw": inverse Wishart regularization, "nu": nuclear norm regularization.}}
 
 Using this function requires some care; currently only minimal
 argument checking is performed. See the documentation and examples
