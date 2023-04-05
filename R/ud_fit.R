@@ -103,7 +103,7 @@
 #' only if \code{sum(P[,i]) > update.threshold}.}
 #' 
 #' \item{\code{lambda}}{Parameter to control the strength of covariance
-#' regularization. \code{\lambda = 0} indicates no covariance regularization.}
+#' regularization. \code{lambda = 0} indicates no covariance regularization.}
 #' 
 #' \item{\code{penalty.type}}{Specifies the type of covariance regularization to use.
 #' "iw": inverse Wishart regularization, "nu": nuclear norm regularization.}}
