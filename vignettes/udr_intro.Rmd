@@ -48,13 +48,15 @@ X <- simulate_ud_data(n,w,U,V)
 
 This is the most basic usage, using the default settings:
 
+Note: in this toy simulation example, we set model parameter $V$ to $V$ as we know the simulation truth. In practice, it's likely one needs to estimate $V$ and use $\hat V$ for $V$.
+
 ```{r ud-fit-1}
-fit0 <- ud_init(X)
+fit0 <- ud_init(X, V = V)
 fit1 <- ud_fit(fit0)
 ```
 
 The default model is a mixture with $K = 10$ mixture components: 2 scaled
-scaled, 4 rank-1 and 4 unconstrained prior covariance matrices $U_k$:
+scaled and 8 unconstrained prior covariance matrices $U_k$:
 
 ```{r ud-fit-2}
 summary(fit1)

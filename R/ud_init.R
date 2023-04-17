@@ -127,7 +127,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
          "provided")
   if (missing(U_unconstrained)) {
     if (missing(n_unconstrained))
-      n_unconstrained <- 4
+      n_unconstrained <- 8
     if (n_unconstrained == 0)
       U_unconstrained <- NULL
     else {

@@ -100,14 +100,14 @@ update_prior_covariances <-
     # Compute log-penalty for regularized covariance matrices, 
     # and add the penalty into fit object. 
     indx_unconstrained <- which(covtypes == "unconstrained")
-    penalty = 0
+    log_penalty = 0
     if (control$lambda != 0){
       for (i in indx_unconstrained){
-        penalty <- penalty + compute_penalty(fit0$U[[i]]$mat, fit0$U[[i]]$s, lambda = control$lambda, 
+        log_penalty <- log_penalty + compute_penalty(fit0$U[[i]]$mat, fit0$U[[i]]$s, lambda = control$lambda, 
                                              update.type = control$unconstrained.update, penalty.type = control$penalty.type)
       }
     }
-    fit$logplt = penalty
+    fit$logplt = log_penalty
     # Transform the data x' ~ N(0,U' + I) back to x ~ N(0,U + V).
     fit0 <- unsimplify_model(fit0)
     
@@ -137,6 +137,7 @@ update_prior_covariances <-
         fit$U[[i]] <- do.call(covupdates[i],
                                list(X = fit$X,U = fit$U[[i]],V = V,
                                     p = fit$P[,i],minval = control$minval))
+    fit$logplt = 0
   }
   
   # Output the updated fit.

@@ -7,3 +7,5 @@
 ^\.circleci$
 ^\.circleci/config\.yml$
 ^\.Rproj\.user$
+^doc$
+^Meta$
