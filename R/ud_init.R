@@ -107,7 +107,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     stop("At most one of n_rank1 and U_rank1 should be provided")
   if (missing(U_rank1)) {
     if (missing(n_rank1))
-      n_rank1 <- 4
+      n_rank1 <- 0
     if (n_rank1 == 0) 
       U_rank1 <- NULL
     else {
