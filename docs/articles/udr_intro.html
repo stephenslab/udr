@@ -19,6 +19,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -31,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3-85</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3-147</span>
       </span>
     </div>
 
@@ -49,7 +51,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/stephenslab/udr">Source</a>
+  <a href="https://github.com/stephenslab/udr" class="external-link">Source</a>
 </li>
       </ul>
 </div>
@@ -65,222 +67,269 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Introduction to Ultimate Deconvolution</h1>
-                        <h4 class="author">Peter Carbonetto</h4>
+                        <h4 data-toc-skip class="author">Peter
+Carbonetto</h4>
             
-            <h4 class="date">2021-05-18</h4>
+            <h4 data-toc-skip class="date">2023-04-18</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/stephenslab/udr/blob/master/vignettes/udr_intro.Rmd"><code>vignettes/udr_intro.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/stephenslab/udr/blob/HEAD/vignettes/udr_intro.Rmd" class="external-link"><code>vignettes/udr_intro.Rmd</code></a></small>
       <div class="hidden name"><code>udr_intro.Rmd</code></div>
 
     </div>
 
     
     
-<p>Here we illustrate the features of the Ultimate Deconvolution (UD) package.</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">udr</span>)</pre></body></html></div>
-<p>We simulate 4,000 data points from a UD model with 4 mixture components: <span class="math display">\[
+<p>Here we illustrate the features of the Ultimate Deconvolution (UD)
+package.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/stephenslab/udr" class="external-link">udr</a></span><span class="op">)</span></span></code></pre></div>
+<p>We simulate 4,000 data points from a UD model with 4 mixture
+components: <span class="math display">\[
 x_i \sim w_1 N(0,V + U_1) + \cdots + w_4 N(0,V + U_4).
 \]</span></p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
-<span class="no">n</span> <span class="kw">&lt;-</span> <span class="fl">4000</span>
-<span class="no">V</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.8</span>,<span class="fl">0.2</span>),
-           <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.2</span>,<span class="fl">1.5</span>))
-<span class="no">U</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">none</span>   <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">0</span>),
-                         <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">0</span>)),
-          <span class="kw">shared</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1.0</span>,<span class="fl">0.9</span>),
-                         <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.9</span>,<span class="fl">1.0</span>)),
-          <span class="kw">only1</span>  <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>,<span class="fl">0</span>),
-                         <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">0</span>)),
-          <span class="kw">only2</span>  <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">0</span>),
-                         <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0</span>,<span class="fl">1</span>)))
-<span class="no">w</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">0.8</span>,<span class="fl">0.1</span>,<span class="fl">0.075</span>,<span class="fl">0.025</span>)
-<span class="no">X</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/simulate_ud_data.html">simulate_ud_data</a></span>(<span class="no">n</span>,<span class="no">w</span>,<span class="no">U</span>,<span class="no">V</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">4000</span></span>
+<span><span class="va">V</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>,<span class="fl">0.2</span><span class="op">)</span>,</span>
+<span>           <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>,<span class="fl">1.5</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">U</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>none   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span>,</span>
+<span>                         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>          shared <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>,<span class="fl">0.9</span><span class="op">)</span>,</span>
+<span>                         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.9</span>,<span class="fl">1.0</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>          only1  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0</span><span class="op">)</span>,</span>
+<span>                         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>          only2  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span>,</span>
+<span>                         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>,<span class="fl">0.1</span>,<span class="fl">0.075</span>,<span class="fl">0.025</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_ud_data.html">simulate_ud_data</a></span><span class="op">(</span><span class="va">n</span>,<span class="va">w</span>,<span class="va">U</span>,<span class="va">V</span><span class="op">)</span></span></code></pre></div>
 <p>This is the most basic usage, using the default settings:</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">fit0</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span>(<span class="no">X</span>)
-<span class="no">fit1</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>)
-<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-85, "R"):</span>
-<span class="co"># data points are i.i.d. (same V)</span>
-<span class="co"># prior covariances: 2 scaled, 4 rank-1, 4 unconstrained</span>
-<span class="co"># prior covariance updates: scaled (fa), rank-1 (ted), unconstrained (ted)</span>
-<span class="co"># mixture weights update: em</span>
-<span class="co"># residual covariance update: em</span>
-<span class="co"># max 20 updates, conv tol 1.0e-06</span>
-<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
-<span class="co">#    1 -1.2218124901048504e+04 4.09e-02 4.70e+00 2.63e-01</span>
-<span class="co">#    2 -1.2207202968003554e+04 2.24e-03 1.61e-01 4.94e-02</span>
-<span class="co">#    3 -1.2204417672445234e+04 7.66e-04 2.46e-01 1.24e-02</span>
-<span class="co">#    4 -1.2202886598844168e+04 2.11e-04 8.83e-02 7.27e-03</span>
-<span class="co">#    5 -1.2201796622401382e+04 1.74e-04 8.06e-02 5.84e-03</span>
-<span class="co">#    6 -1.2200987449361346e+04 1.72e-04 7.07e-02 4.87e-03</span>
-<span class="co">#    7 -1.2200370063898208e+04 1.56e-04 5.97e-02 4.65e-03</span>
-<span class="co">#    8 -1.2199885683989782e+04 1.54e-04 4.76e-02 4.19e-03</span>
-<span class="co">#    9 -1.2199491766510911e+04 1.50e-04 4.50e-02 3.78e-03</span>
-<span class="co">#   10 -1.2199159264518366e+04 1.45e-04 4.61e-02 3.36e-03</span>
-<span class="co">#   11 -1.2198869698996561e+04 1.43e-04 4.65e-02 2.97e-03</span>
-<span class="co">#   12 -1.2198612551558699e+04 1.55e-04 4.59e-02 2.60e-03</span>
-<span class="co">#   13 -1.2198382689153303e+04 1.61e-04 4.43e-02 2.25e-03</span>
-<span class="co">#   14 -1.2198177932000039e+04 1.63e-04 4.18e-02 1.92e-03</span>
-<span class="co">#   15 -1.2197997324019223e+04 1.60e-04 3.83e-02 1.60e-03</span>
-<span class="co">#   16 -1.2197839686357604e+04 1.55e-04 3.43e-02 1.30e-03</span>
-<span class="co">#   17 -1.2197703188908119e+04 1.49e-04 3.00e-02 1.03e-03</span>
-<span class="co">#   18 -1.2197585426841866e+04 1.42e-04 2.57e-02 7.91e-04</span>
-<span class="co">#   19 -1.2197483771764697e+04 1.35e-04 2.16e-02 5.82e-04</span>
-<span class="co">#   20 -1.2197395696869638e+04 1.30e-04 2.00e-02 5.33e-04</span></pre></body></html></div>
-<p>The default model is a mixture with <span class="math inline">\(K = 10\)</span> mixture components: 2 scaled scaled, 4 rank-1 and 4 unconstrained prior covariance matrices <span class="math inline">\(U_k\)</span>:</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">fit1</span>)
-<span class="co"># Model overview:</span>
-<span class="co">#   Number of data points: 4000</span>
-<span class="co">#   Dimension of data points: 2</span>
-<span class="co"># Data points are i.i.d. (same V)</span>
-<span class="co">#   Number of scaled prior covariances: 2</span>
-<span class="co">#   Number of rank-1 prior covariances: 4</span>
-<span class="co">#   Number of unconstrained prior covariances: 4</span>
-<span class="co"># Evaluation of fit (20 updates performed):</span>
-<span class="co">#   Log-likelihood: -1.219739569687e+04</span></pre></body></html></div>
-<p>The function <code>ud_init</code> is a flexible interface for defining a variety of UD models. For example,</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">fit0</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span>(<span class="no">X</span>,<span class="kw">U_scaled</span> <span class="kw">=</span> <span class="no">U</span>,<span class="kw">n_rank1</span> <span class="kw">=</span> <span class="fl">1</span>,<span class="kw">n_unconstrained</span> <span class="kw">=</span> <span class="fl">1</span>,<span class="kw">V</span> <span class="kw">=</span> <span class="no">V</span>)
-<span class="no">fit2</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">fit2</span>)
-<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-85, "R"):</span>
-<span class="co"># data points are i.i.d. (same V)</span>
-<span class="co"># prior covariances: 4 scaled, 1 rank-1, 1 unconstrained</span>
-<span class="co"># prior covariance updates: scaled (fa), rank-1 (ted), unconstrained (ted)</span>
-<span class="co"># mixture weights update: em</span>
-<span class="co"># residual covariance update: em</span>
-<span class="co"># max 20 updates, conv tol 1.0e-06</span>
-<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
-<span class="co">#    1 -1.2211234169952773e+04 7.30e-02 6.88e+00 2.57e-01</span>
-<span class="co">#    2 -1.2203118709196298e+04 3.35e-03 2.02e-01 8.16e-02</span>
-<span class="co">#    3 -1.2201982742279066e+04 1.03e-03 1.07e-01 8.71e-03</span>
-<span class="co">#    4 -1.2201482431507115e+04 3.31e-04 3.16e-02 1.17e-02</span>
-<span class="co">#    5 -1.2201141974419708e+04 2.34e-04 3.54e-02 5.07e-03</span>
-<span class="co">#    6 -1.2200891544388001e+04 1.89e-04 2.79e-02 5.81e-03</span>
-<span class="co">#    7 -1.2200699430870367e+04 1.73e-04 2.47e-02 4.86e-03</span>
-<span class="co">#    8 -1.2200547790124814e+04 1.65e-04 2.15e-02 4.53e-03</span>
-<span class="co">#    9 -1.2200425168914082e+04 1.62e-04 1.90e-02 4.15e-03</span>
-<span class="co">#   10 -1.2200323997214227e+04 1.59e-04 1.69e-02 3.87e-03</span>
-<span class="co">#   11 -1.2200239004257683e+04 1.58e-04 1.52e-02 3.62e-03</span>
-<span class="co">#   12 -1.2200166538989928e+04 1.57e-04 1.37e-02 3.42e-03</span>
-<span class="co">#   13 -1.2200103923338407e+04 1.55e-04 1.24e-02 3.24e-03</span>
-<span class="co">#   14 -1.2200049181168368e+04 1.55e-04 1.13e-02 3.09e-03</span>
-<span class="co">#   15 -1.2200000828293631e+04 1.54e-04 1.03e-02 2.96e-03</span>
-<span class="co">#   16 -1.2199957731849045e+04 1.54e-04 9.49e-03 2.84e-03</span>
-<span class="co">#   17 -1.2199919014627860e+04 1.53e-04 8.75e-03 2.73e-03</span>
-<span class="co">#   18 -1.2199883988086289e+04 1.53e-04 8.09e-03 2.63e-03</span>
-<span class="co">#   19 -1.2199852125100053e+04 1.53e-04 7.51e-03 2.54e-03</span>
-<span class="co">#   20 -1.2199822962554748e+04 1.52e-04 6.98e-03 2.46e-03</span>
-<span class="co"># Model overview:</span>
-<span class="co">#   Number of data points: 4000</span>
-<span class="co">#   Dimension of data points: 2</span>
-<span class="co"># Data points are i.i.d. (same V)</span>
-<span class="co">#   Number of scaled prior covariances: 4</span>
-<span class="co">#   Number of rank-1 prior covariances: 1</span>
-<span class="co">#   Number of unconstrained prior covariances: 1</span>
-<span class="co"># Evaluation of fit (20 updates performed):</span>
-<span class="co">#   Log-likelihood: -1.219982296255e+04</span></pre></body></html></div>
-<p>The <code>ud_fit</code> interface also allows for flexibly re-fitting a model; that is, a <code>ud_fit</code> output can be used in another call to <code>ud_fit</code>. There is also a more advanced model fitting interface for more fine-grained control; see <code>help(ud_fit_advanced)</code> for details.</p>
-<p>Notice that the data do not need to be passed to <code>ud_fit</code> because they are already embedded in the <code>ud_fit</code> output. However, one can also pass a new data set <code>X</code> to <code>ud_fit</code>.</p>
-<p>The <code>control</code> argument to <code>ud_fit</code> controls the optimization of the model parameters. For example, the unconstrained prior covariance matrices are by default optimized using the “truncated eigenvalue decomposition” (TED) updates, and we can replace these with the Extreme Deconvolution (ED) updates:</p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">fit3</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>,<span class="kw">control</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw">unconstrained.update</span> <span class="kw">=</span> <span class="st">"ed"</span>))
-<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-85, "R"):</span>
-<span class="co"># data points are i.i.d. (same V)</span>
-<span class="co"># prior covariances: 4 scaled, 1 rank-1, 1 unconstrained</span>
-<span class="co"># prior covariance updates: scaled (fa), rank-1 (ted), unconstrained (ed)</span>
-<span class="co"># mixture weights update: em</span>
-<span class="co"># residual covariance update: em</span>
-<span class="co"># max 20 updates, conv tol 1.0e-06</span>
-<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
-<span class="co">#    1 -1.2221998458988757e+04 7.30e-02 5.73e+00 2.57e-01</span>
-<span class="co">#    2 -1.2210890268724970e+04 5.06e-03 4.39e-01 4.27e-02</span>
-<span class="co">#    3 -1.2206854475940198e+04 3.34e-03 2.07e-01 1.01e-02</span>
-<span class="co">#    4 -1.2204743334297273e+04 2.24e-03 1.23e-01 8.30e-03</span>
-<span class="co">#    5 -1.2203477139814677e+04 1.68e-03 8.29e-02 6.79e-03</span>
-<span class="co">#    6 -1.2202648629072834e+04 1.32e-03 6.56e-02 5.96e-03</span>
-<span class="co">#    7 -1.2202071514242472e+04 1.08e-03 5.33e-02 5.34e-03</span>
-<span class="co">#    8 -1.2201649840103219e+04 9.03e-04 4.43e-02 4.87e-03</span>
-<span class="co">#    9 -1.2201329840717446e+04 7.75e-04 3.74e-02 4.50e-03</span>
-<span class="co">#   10 -1.2201079368312345e+04 6.78e-04 3.20e-02 4.20e-03</span>
-<span class="co">#   11 -1.2200878194168239e+04 6.02e-04 2.77e-02 3.95e-03</span>
-<span class="co">#   12 -1.2200713054479536e+04 5.41e-04 2.42e-02 3.74e-03</span>
-<span class="co">#   13 -1.2200574951155500e+04 4.92e-04 2.13e-02 3.56e-03</span>
-<span class="co">#   14 -1.2200457601652250e+04 4.52e-04 1.89e-02 3.40e-03</span>
-<span class="co">#   15 -1.2200356513289757e+04 4.18e-04 1.69e-02 3.26e-03</span>
-<span class="co">#   16 -1.2200268394067429e+04 3.90e-04 1.52e-02 3.13e-03</span>
-<span class="co">#   17 -1.2200190770525827e+04 3.66e-04 1.37e-02 3.02e-03</span>
-<span class="co">#   18 -1.2200121798846558e+04 3.45e-04 1.24e-02 2.92e-03</span>
-<span class="co">#   19 -1.2200060038330006e+04 3.28e-04 1.13e-02 2.82e-03</span>
-<span class="co">#   20 -1.2200004360202158e+04 3.12e-04 1.03e-02 2.73e-03</span></pre></body></html></div>
-<p>Notice that the likelihood is slightly higher with the TED updates, reflecting the fact that the TED updates have greater freedom to optimize the covariance matrices.</p>
+<p>Note: in this toy simulation example, we set model parameter <span class="math inline">\(V\)</span> to <span class="math inline">\(V\)</span> as we know the simulation truth. In
+practice, it’s likely one needs to estimate <span class="math inline">\(V\)</span> and use <span class="math inline">\(\hat V\)</span> for <span class="math inline">\(V\)</span>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span><span class="op">(</span><span class="va">X</span>, V <span class="op">=</span> <span class="va">V</span><span class="op">)</span></span>
+<span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span><span class="op">(</span><span class="va">fit0</span><span class="op">)</span></span>
+<span><span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-144, "R"):</span></span>
+<span><span class="co"># data points are i.i.d. (same V)</span></span>
+<span><span class="co"># prior covariances: 2 scaled, 0 rank-1, 8 unconstrained</span></span>
+<span><span class="co"># prior covariance updates: scaled (fa), rank-1 (none), unconstrained (ted)</span></span>
+<span><span class="co"># mixture weights update: em</span></span>
+<span><span class="co"># residual covariance update: none</span></span>
+<span><span class="co"># max 20 updates, tol=1.0e-06, tol.lik=1.0e-03</span></span>
+<span><span class="co"># iter          log-likelihood    log-likelihood.pen   |w - w'| |U - U'| |V - V'|</span></span>
+<span><span class="co">#    1 -1.2279801614499656e+04 -1.2279801614499656e+04 4.68e-02 1.28e+01 0.00e+00</span></span>
+<span><span class="co">#    2 -1.2223121182887791e+04 -1.2223121182887791e+04 8.81e-03 5.10e-01 0.00e+00</span></span>
+<span><span class="co">#    3 -1.2212190514096219e+04 -1.2212190514096219e+04 6.38e-03 1.89e-01 0.00e+00</span></span>
+<span><span class="co">#    4 -1.2208915989941652e+04 -1.2208915989941652e+04 4.86e-03 8.34e-02 0.00e+00</span></span>
+<span><span class="co">#    5 -1.2207216178055960e+04 -1.2207216178055960e+04 4.05e-03 4.79e-02 0.00e+00</span></span>
+<span><span class="co">#    6 -1.2206156194755680e+04 -1.2206156194755680e+04 3.50e-03 3.68e-02 0.00e+00</span></span>
+<span><span class="co">#    7 -1.2205420599827859e+04 -1.2205420599827859e+04 3.08e-03 3.03e-02 0.00e+00</span></span>
+<span><span class="co">#    8 -1.2204895950208514e+04 -1.2204895950208514e+04 2.74e-03 2.46e-02 0.00e+00</span></span>
+<span><span class="co">#    9 -1.2204481484151787e+04 -1.2204481484151787e+04 2.48e-03 1.95e-02 0.00e+00</span></span>
+<span><span class="co">#   10 -1.2204146611350558e+04 -1.2204146611350558e+04 2.26e-03 1.51e-02 0.00e+00</span></span>
+<span><span class="co">#   11 -1.2203869862004891e+04 -1.2203869862004891e+04 2.07e-03 1.14e-02 0.00e+00</span></span>
+<span><span class="co">#   12 -1.2203634312857637e+04 -1.2203634312857637e+04 1.91e-03 8.31e-03 0.00e+00</span></span>
+<span><span class="co">#   13 -1.2203423126633246e+04 -1.2203423126633246e+04 1.78e-03 5.97e-03 0.00e+00</span></span>
+<span><span class="co">#   14 -1.2203229410058899e+04 -1.2203229410058899e+04 1.67e-03 4.45e-03 0.00e+00</span></span>
+<span><span class="co">#   15 -1.2203050790905421e+04 -1.2203050790905421e+04 1.59e-03 3.40e-03 0.00e+00</span></span>
+<span><span class="co">#   16 -1.2202885720507049e+04 -1.2202885720507049e+04 1.51e-03 2.64e-03 0.00e+00</span></span>
+<span><span class="co">#   17 -1.2202732934351641e+04 -1.2202732934351641e+04 1.43e-03 2.23e-03 0.00e+00</span></span>
+<span><span class="co">#   18 -1.2202591340657174e+04 -1.2202591340657174e+04 1.37e-03 2.09e-03 0.00e+00</span></span>
+<span><span class="co">#   19 -1.2202459977936309e+04 -1.2202459977936309e+04 1.30e-03 1.98e-03 0.00e+00</span></span>
+<span><span class="co">#   20 -1.2202337990145770e+04 -1.2202337990145770e+04 1.24e-03 1.89e-03 0.00e+00</span></span></code></pre></div>
+<p>The default model is a mixture with <span class="math inline">\(K =
+10\)</span> mixture components: 2 scaled scaled and 8 unconstrained
+prior covariance matrices <span class="math inline">\(U_k\)</span>:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span></span>
+<span><span class="co"># Model overview:</span></span>
+<span><span class="co">#   Number of data points: 4000</span></span>
+<span><span class="co">#   Dimension of data points: 2</span></span>
+<span><span class="co"># Data points are i.i.d. (same V)</span></span>
+<span><span class="co">#   Number of scaled prior covariances: 2</span></span>
+<span><span class="co">#   Number of rank-1 prior covariances: 0</span></span>
+<span><span class="co">#   Number of unconstrained prior covariances: 8</span></span>
+<span><span class="co"># Evaluation of fit (20 updates performed):</span></span>
+<span><span class="co">#   Log-likelihood: -1.220233799015e+04</span></span></code></pre></div>
+<p>The function <code>ud_init</code> is a flexible interface for
+defining a variety of UD models. For example,</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span><span class="op">(</span><span class="va">X</span>,U_scaled <span class="op">=</span> <span class="va">U</span>,n_rank1 <span class="op">=</span> <span class="fl">1</span>,n_unconstrained <span class="op">=</span> <span class="fl">1</span>,V <span class="op">=</span> <span class="va">V</span><span class="op">)</span></span>
+<span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span><span class="op">(</span><span class="va">fit0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span></span>
+<span><span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-144, "R"):</span></span>
+<span><span class="co"># data points are i.i.d. (same V)</span></span>
+<span><span class="co"># prior covariances: 4 scaled, 1 rank-1, 1 unconstrained</span></span>
+<span><span class="co"># prior covariance updates: scaled (fa), rank-1 (ted), unconstrained (ted)</span></span>
+<span><span class="co"># mixture weights update: em</span></span>
+<span><span class="co"># residual covariance update: none</span></span>
+<span><span class="co"># max 20 updates, tol=1.0e-06, tol.lik=1.0e-03</span></span>
+<span><span class="co"># iter          log-likelihood    log-likelihood.pen   |w - w'| |U - U'| |V - V'|</span></span>
+<span><span class="co">#    1 -1.2254274362870696e+04 -1.2254274362870696e+04 2.15e-02 1.01e+00 0.00e+00</span></span>
+<span><span class="co">#    2 -1.2234214947219918e+04 -1.2234214947219918e+04 7.12e-03 2.99e-01 0.00e+00</span></span>
+<span><span class="co">#    3 -1.2224394571088986e+04 -1.2224394571088986e+04 5.32e-03 1.62e-01 0.00e+00</span></span>
+<span><span class="co">#    4 -1.2219820969075176e+04 -1.2219820969075176e+04 4.73e-03 1.00e-01 0.00e+00</span></span>
+<span><span class="co">#    5 -1.2216889113988313e+04 -1.2216889113988313e+04 4.15e-03 6.61e-02 0.00e+00</span></span>
+<span><span class="co">#    6 -1.2214904923232063e+04 -1.2214904923232063e+04 3.61e-03 4.32e-02 0.00e+00</span></span>
+<span><span class="co">#    7 -1.2213781656532648e+04 -1.2213781656532648e+04 3.12e-03 4.90e-03 0.00e+00</span></span>
+<span><span class="co">#    8 -1.2212842079018839e+04 -1.2212842079018839e+04 2.83e-03 5.29e-09 0.00e+00</span></span>
+<span><span class="co">#    9 -1.2211992244080759e+04 -1.2211992244080759e+04 2.66e-03 1.01e-08 0.00e+00</span></span>
+<span><span class="co">#   10 -1.2211222160321957e+04 -1.2211222160321957e+04 2.53e-03 9.72e-09 0.00e+00</span></span>
+<span><span class="co">#   11 -1.2210522990459391e+04 -1.2210522990459391e+04 2.41e-03 9.72e-09 0.00e+00</span></span>
+<span><span class="co">#   12 -1.2209886923631164e+04 -1.2209886923631164e+04 2.30e-03 3.31e-24 0.00e+00</span></span>
+<span><span class="co">#   13 -1.2209307059168852e+04 -1.2209307059168852e+04 2.19e-03 3.31e-24 0.00e+00</span></span>
+<span><span class="co">#   14 -1.2208777302101074e+04 -1.2208777302101074e+04 2.09e-03 1.08e-08 0.00e+00</span></span>
+<span><span class="co">#   15 -1.2208292268713056e+04 -1.2208292268713056e+04 2.07e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   16 -1.2207847203500649e+04 -1.2207847203500649e+04 2.06e-03 1.08e-08 0.00e+00</span></span>
+<span><span class="co">#   17 -1.2207437904917895e+04 -1.2207437904917895e+04 2.04e-03 5.63e-09 0.00e+00</span></span>
+<span><span class="co">#   18 -1.2207060657974238e+04 -1.2207060657974238e+04 2.02e-03 5.63e-09 0.00e+00</span></span>
+<span><span class="co">#   19 -1.2206712178043186e+04 -1.2206712178043186e+04 2.00e-03 1.08e-08 0.00e+00</span></span>
+<span><span class="co">#   20 -1.2206389557276261e+04 -1.2206389557276261e+04 1.97e-03 3.31e-24 0.00e+00</span></span>
+<span><span class="co"># Model overview:</span></span>
+<span><span class="co">#   Number of data points: 4000</span></span>
+<span><span class="co">#   Dimension of data points: 2</span></span>
+<span><span class="co"># Data points are i.i.d. (same V)</span></span>
+<span><span class="co">#   Number of scaled prior covariances: 4</span></span>
+<span><span class="co">#   Number of rank-1 prior covariances: 1</span></span>
+<span><span class="co">#   Number of unconstrained prior covariances: 1</span></span>
+<span><span class="co"># Evaluation of fit (20 updates performed):</span></span>
+<span><span class="co">#   Log-likelihood: -1.220638955728e+04</span></span></code></pre></div>
+<p>The <code>ud_fit</code> interface also allows for flexibly re-fitting
+a model; that is, a <code>ud_fit</code> output can be used in another
+call to <code>ud_fit</code>. There is also a more advanced model fitting
+interface for more fine-grained control; see
+<code>help(ud_fit_advanced)</code> for details.</p>
+<p>Notice that the data do not need to be passed to <code>ud_fit</code>
+because they are already embedded in the <code>ud_fit</code> output.
+However, one can also pass a new data set <code>X</code> to
+<code>ud_fit</code>.</p>
+<p>The <code>control</code> argument to <code>ud_fit</code> controls the
+optimization of the model parameters. For example, the unconstrained
+prior covariance matrices are by default optimized using the “truncated
+eigenvalue decomposition” (TED) updates, and we can replace these with
+the Extreme Deconvolution (ED) updates:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span><span class="op">(</span><span class="va">fit0</span>,control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>unconstrained.update <span class="op">=</span> <span class="st">"ed"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-144, "R"):</span></span>
+<span><span class="co"># data points are i.i.d. (same V)</span></span>
+<span><span class="co"># prior covariances: 4 scaled, 1 rank-1, 1 unconstrained</span></span>
+<span><span class="co"># prior covariance updates: scaled (fa), rank-1 (ted), unconstrained (ed)</span></span>
+<span><span class="co"># mixture weights update: em</span></span>
+<span><span class="co"># residual covariance update: none</span></span>
+<span><span class="co"># max 20 updates, tol=1.0e-06, tol.lik=1.0e-03</span></span>
+<span><span class="co"># iter          log-likelihood    log-likelihood.pen   |w - w'| |U - U'| |V - V'|</span></span>
+<span><span class="co">#    1 -1.2287368932550235e+04 -1.2287368932550235e+04 2.15e-02 5.02e-01 0.00e+00</span></span>
+<span><span class="co">#    2 -1.2267084706127493e+04 -1.2267084706127493e+04 1.19e-02 2.29e-01 0.00e+00</span></span>
+<span><span class="co">#    3 -1.2254869264065783e+04 -1.2254869264065783e+04 8.55e-03 1.37e-01 0.00e+00</span></span>
+<span><span class="co">#    4 -1.2246443004794617e+04 -1.2246443004794617e+04 7.70e-03 9.27e-02 0.00e+00</span></span>
+<span><span class="co">#    5 -1.2240164280190913e+04 -1.2240164280190913e+04 7.05e-03 6.75e-02 0.00e+00</span></span>
+<span><span class="co">#    6 -1.2235254049624667e+04 -1.2235254049624667e+04 6.52e-03 5.16e-02 0.00e+00</span></span>
+<span><span class="co">#    7 -1.2231287048520800e+04 -1.2231287048520800e+04 6.07e-03 4.08e-02 0.00e+00</span></span>
+<span><span class="co">#    8 -1.2228007009908366e+04 -1.2228007009908366e+04 5.68e-03 3.31e-02 0.00e+00</span></span>
+<span><span class="co">#    9 -1.2225247786758919e+04 -1.2225247786758919e+04 5.33e-03 2.73e-02 0.00e+00</span></span>
+<span><span class="co">#   10 -1.2222895469731768e+04 -1.2222895469731768e+04 5.01e-03 2.30e-02 0.00e+00</span></span>
+<span><span class="co">#   11 -1.2220868482802136e+04 -1.2220868482802136e+04 4.72e-03 1.95e-02 0.00e+00</span></span>
+<span><span class="co">#   12 -1.2219106350217282e+04 -1.2219106350217282e+04 4.46e-03 1.68e-02 0.00e+00</span></span>
+<span><span class="co">#   13 -1.2217562978153386e+04 -1.2217562978153386e+04 4.22e-03 1.45e-02 0.00e+00</span></span>
+<span><span class="co">#   14 -1.2216202436938260e+04 -1.2216202436938260e+04 3.99e-03 1.27e-02 0.00e+00</span></span>
+<span><span class="co">#   15 -1.2214996199525513e+04 -1.2214996199525513e+04 3.78e-03 1.12e-02 0.00e+00</span></span>
+<span><span class="co">#   16 -1.2213921270641369e+04 -1.2213921270641369e+04 3.59e-03 9.87e-03 0.00e+00</span></span>
+<span><span class="co">#   17 -1.2212958877040135e+04 -1.2212958877040135e+04 3.41e-03 8.76e-03 0.00e+00</span></span>
+<span><span class="co">#   18 -1.2212093527740029e+04 -1.2212093527740029e+04 3.24e-03 7.82e-03 0.00e+00</span></span>
+<span><span class="co">#   19 -1.2211312324993052e+04 -1.2211312324993052e+04 3.08e-03 7.13e-03 0.00e+00</span></span>
+<span><span class="co">#   20 -1.2210604444683637e+04 -1.2210604444683637e+04 2.93e-03 6.61e-03 0.00e+00</span></span></code></pre></div>
+<p>Notice that the likelihood is slightly higher with the TED updates,
+reflecting the fact that the TED updates have greater freedom to
+optimize the covariance matrices.</p>
 <p>These are the current model fitting defaults:</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span>(<span class="fu"><a href="../reference/ud_fit.html">ud_fit_control_default</a></span>())
-<span class="co">#       weights.update         resid.update        scaled.update </span>
-<span class="co">#                 "em"                   NA                   NA </span>
-<span class="co">#         rank1.update unconstrained.update              version </span>
-<span class="co">#                   NA                   NA                  "R" </span>
-<span class="co">#              maxiter               minval                  tol </span>
-<span class="co">#                 "20"              "1e-14"              "1e-06"</span></pre></body></html></div>
-<p>The most intensive computations are implemented in R (<code>control$version = R</code>) and C++ (<code>control$version = Rcpp</code>); both versions should return the same, or nearly the same output, but the C++ version can sometimes be much faster.</p>
-<p>In some cases each sample might have different measurement error, and udr can handle such cases by specifying <code>V</code> as a list instead of a matrix:</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">fit0</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span>(<span class="no">X</span>,<span class="kw">V</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="no">V</span>),<span class="no">n</span>))
-<span class="no">fit4</span> <span class="kw">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span>(<span class="no">fit0</span>)
-<span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-85, "R"):</span>
-<span class="co"># data points are not i.i.d. (different Vs)</span>
-<span class="co"># prior covariances: 2 scaled, 4 rank-1, 4 unconstrained</span>
-<span class="co"># prior covariance updates: scaled (none), rank-1 (ed), unconstrained (none)</span>
-<span class="co"># mixture weights update: em</span>
-<span class="co"># max 20 updates, conv tol 1.0e-06</span>
-<span class="co"># iter          log-likelihood |w - w'| |U - U'| |V - V'|</span>
-<span class="co">#    1 -1.2595771029107718e+04 3.24e-02 3.92e-01 0.00e+00</span>
-<span class="co">#    2 -1.2472681387371726e+04 2.27e-02 1.83e-01 0.00e+00</span>
-<span class="co">#    3 -1.2389557167919127e+04 1.83e-02 9.46e-02 0.00e+00</span>
-<span class="co">#    4 -1.2333633731635140e+04 1.49e-02 5.37e-02 0.00e+00</span>
-<span class="co">#    5 -1.2295817525492766e+04 1.20e-02 3.30e-02 0.00e+00</span>
-<span class="co">#    6 -1.2269977961113211e+04 9.61e-03 2.15e-02 0.00e+00</span>
-<span class="co">#    7 -1.2252085619353546e+04 7.74e-03 1.48e-02 0.00e+00</span>
-<span class="co">#    8 -1.2239513718016704e+04 6.26e-03 1.06e-02 0.00e+00</span>
-<span class="co">#    9 -1.2230546378733525e+04 5.10e-03 7.81e-03 0.00e+00</span>
-<span class="co">#   10 -1.2224053790409498e+04 4.18e-03 5.95e-03 0.00e+00</span>
-<span class="co">#   11 -1.2219283653189903e+04 3.46e-03 4.64e-03 0.00e+00</span>
-<span class="co">#   12 -1.2215728600207625e+04 2.88e-03 3.69e-03 0.00e+00</span>
-<span class="co">#   13 -1.2213041871541596e+04 2.41e-03 2.99e-03 0.00e+00</span>
-<span class="co">#   14 -1.2210983325657480e+04 2.03e-03 2.46e-03 0.00e+00</span>
-<span class="co">#   15 -1.2209384527747397e+04 1.71e-03 2.05e-03 0.00e+00</span>
-<span class="co">#   16 -1.2208125906348687e+04 1.46e-03 1.73e-03 0.00e+00</span>
-<span class="co">#   17 -1.2207121616339131e+04 1.30e-03 1.47e-03 0.00e+00</span>
-<span class="co">#   18 -1.2206309378479667e+04 1.16e-03 1.27e-03 0.00e+00</span>
-<span class="co">#   19 -1.2205643571939110e+04 1.04e-03 1.10e-03 0.00e+00</span>
-<span class="co">#   20 -1.2205090479898661e+04 9.32e-04 1.13e-03 0.00e+00</span></pre></body></html></div>
-<p>The TED updates cannot be applied to this setting, so the ED updates must be used instead.</p>
-<div id="session-info" class="section level2">
-<h2 class="hasAnchor">
-<a href="#session-info" class="anchor"></a>Session info</h2>
-<p>This is the version of R and the packages that were used to generate these results:</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span>()
-<span class="co"># R version 3.6.2 (2019-12-12)</span>
-<span class="co"># Platform: x86_64-apple-darwin15.6.0 (64-bit)</span>
-<span class="co"># Running under: macOS Catalina 10.15.7</span>
-<span class="co"># </span>
-<span class="co"># Matrix products: default</span>
-<span class="co"># BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib</span>
-<span class="co"># LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib</span>
-<span class="co"># </span>
-<span class="co"># locale:</span>
-<span class="co"># [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8</span>
-<span class="co"># </span>
-<span class="co"># attached base packages:</span>
-<span class="co"># [1] stats     graphics  grDevices utils     datasets  methods   base     </span>
-<span class="co"># </span>
-<span class="co"># other attached packages:</span>
-<span class="co"># [1] udr_0.3-85</span>
-<span class="co"># </span>
-<span class="co"># loaded via a namespace (and not attached):</span>
-<span class="co">#  [1] Rcpp_1.0.5       mvtnorm_1.0-11   rprojroot_1.3-2  crayon_1.3.4    </span>
-<span class="co">#  [5] digest_0.6.23    assertthat_0.2.1 MASS_7.3-51.4    R6_2.4.1        </span>
-<span class="co">#  [9] backports_1.1.5  magrittr_1.5     evaluate_0.14    stringi_1.4.3   </span>
-<span class="co"># [13] rlang_0.4.5      fs_1.3.1         rmarkdown_2.3    pkgdown_1.5.1   </span>
-<span class="co"># [17] desc_1.2.0       tools_3.6.2      stringr_1.4.0    yaml_2.2.0      </span>
-<span class="co"># [21] xfun_0.11        compiler_3.6.2   memoise_1.1.0    htmltools_0.4.0 </span>
-<span class="co"># [25] knitr_1.26</span></pre></body></html></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/ud_fit.html">ud_fit_control_default</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#       weights.update         resid.update        scaled.update </span></span>
+<span><span class="co">#                   NA                   NA                   NA </span></span>
+<span><span class="co">#         rank1.update unconstrained.update              version </span></span>
+<span><span class="co">#                   NA                   NA                  "R" </span></span>
+<span><span class="co">#              maxiter               minval                  tol </span></span>
+<span><span class="co">#                 "20"              "1e-08"              "1e-06" </span></span>
+<span><span class="co">#              tol.lik       zero.threshold     update.threshold </span></span>
+<span><span class="co">#              "0.001"              "1e-15"              "0.001" </span></span>
+<span><span class="co">#               lambda         penalty.type </span></span>
+<span><span class="co">#                  "0"                 "iw"</span></span></code></pre></div>
+<p>The most intensive computations are implemented in R
+(<code>control$version = R</code>) and C++
+(<code>control$version = Rcpp</code>); both versions should return the
+same, or nearly the same output, but the C++ version can sometimes be
+much faster.</p>
+<p>In some cases each sample might have different measurement error, and
+udr can handle such cases by specifying <code>V</code> as a list instead
+of a matrix:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit0</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ud_init.html">ud_init</a></span><span class="op">(</span><span class="va">X</span>,V <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">V</span><span class="op">)</span>,<span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">fit4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ud_fit.html">ud_fit</a></span><span class="op">(</span><span class="va">fit0</span><span class="op">)</span></span>
+<span><span class="co"># Performing Ultimate Deconvolution on 4000 x 2 matrix (udr 0.3-144, "R"):</span></span>
+<span><span class="co"># data points are not i.i.d. (different Vs)</span></span>
+<span><span class="co"># prior covariances: 2 scaled, 0 rank-1, 8 unconstrained</span></span>
+<span><span class="co"># prior covariance updates: scaled (none), rank-1 (none), unconstrained (none)</span></span>
+<span><span class="co"># mixture weights update: em</span></span>
+<span><span class="co"># max 20 updates, tol=1.0e-06, tol.lik=1.0e-03</span></span>
+<span><span class="co"># iter          log-likelihood    log-likelihood.pen   |w - w'| |U - U'| |V - V'|</span></span>
+<span><span class="co">#    1 -1.3805879530064036e+04 -1.3805879530064036e+04 5.94e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    2 -1.3490340592972956e+04 -1.3490340592972956e+04 6.76e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    3 -1.3250364428611714e+04 -1.3250364428611714e+04 6.86e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    4 -1.3071921980151610e+04 -1.3071921980151610e+04 6.37e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    5 -1.2941705117707856e+04 -1.2941705117707856e+04 5.54e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    6 -1.2847990772326337e+04 -1.2847990772326337e+04 4.59e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    7 -1.2781081111651431e+04 -1.2781081111651431e+04 3.70e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    8 -1.2733419541665267e+04 -1.2733419541665267e+04 2.94e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#    9 -1.2699392526575763e+04 -1.2699392526575763e+04 2.31e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   10 -1.2674965124613851e+04 -1.2674965124613851e+04 1.82e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   11 -1.2657294509511747e+04 -1.2657294509511747e+04 1.44e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   12 -1.2644397982178429e+04 -1.2644397982178429e+04 1.15e-02 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   13 -1.2634896984685392e+04 -1.2634896984685392e+04 9.24e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   14 -1.2627831240020840e+04 -1.2627831240020840e+04 7.53e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   15 -1.2622528327349333e+04 -1.2622528327349333e+04 6.20e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   16 -1.2618513854100438e+04 -1.2618513854100438e+04 5.18e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   17 -1.2615450149042339e+04 -1.2615450149042339e+04 4.38e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   18 -1.2613094535230090e+04 -1.2613094535230090e+04 3.75e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   19 -1.2611270880733064e+04 -1.2611270880733064e+04 3.25e-03 0.00e+00 0.00e+00</span></span>
+<span><span class="co">#   20 -1.2609850106127040e+04 -1.2609850106127040e+04 2.85e-03 0.00e+00 0.00e+00</span></span></code></pre></div>
+<p>The TED updates cannot be applied to this setting, so the ED updates
+must be used instead.</p>
+<div class="section level2">
+<h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
+</h2>
+<p>This is the version of R and the packages that were used to generate
+these results:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># R version 4.2.0 (2022-04-22)</span></span>
+<span><span class="co"># Platform: x86_64-pc-linux-gnu (64-bit)</span></span>
+<span><span class="co"># Running under: CentOS Linux 7 (Core)</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># Matrix products: default</span></span>
+<span><span class="co"># BLAS/LAPACK: /software/openblas-0.3.13-el7-x86_64/lib/libopenblas_haswellp-r0.3.13.so</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># locale:</span></span>
+<span><span class="co">#  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              </span></span>
+<span><span class="co">#  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    </span></span>
+<span><span class="co">#  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   </span></span>
+<span><span class="co">#  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 </span></span>
+<span><span class="co">#  [9] LC_ADDRESS=C               LC_TELEPHONE=C            </span></span>
+<span><span class="co"># [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       </span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># attached base packages:</span></span>
+<span><span class="co"># [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># other attached packages:</span></span>
+<span><span class="co"># [1] udr_0.3-147</span></span>
+<span><span class="co"># </span></span>
+<span><span class="co"># loaded via a namespace (and not attached):</span></span>
+<span><span class="co">#  [1] Rcpp_1.0.8.3      knitr_1.39        magrittr_2.0.3    R6_2.5.1         </span></span>
+<span><span class="co">#  [5] ragg_1.2.5        rlang_1.0.2       fastmap_1.1.0     stringr_1.4.0    </span></span>
+<span><span class="co">#  [9] tools_4.2.0       xfun_0.30         cli_3.3.0         jquerylib_0.1.4  </span></span>
+<span><span class="co"># [13] htmltools_0.5.2   systemfonts_1.0.4 yaml_2.3.5        digest_0.6.29    </span></span>
+<span><span class="co"># [17] rprojroot_2.0.3   pkgdown_2.0.7     textshaping_0.3.6 purrr_0.3.4      </span></span>
+<span><span class="co"># [21] sass_0.4.1        fs_1.5.2          memoise_2.0.1     cachem_1.0.6     </span></span>
+<span><span class="co"># [25] evaluate_0.15     rmarkdown_2.14    stringi_1.7.6     compiler_4.2.0   </span></span>
+<span><span class="co"># [29] bslib_0.3.1       desc_1.4.1        mvtnorm_1.1-3     jsonlite_1.8.0</span></span></code></pre></div>
 </div>
   </div>
 
@@ -295,11 +344,13 @@ x_i \sim w_1 N(0,V + U_1) + \cdots + w_4 N(0,V + U_4).
 
 
       <footer><div class="copyright">
-  <p>Developed by Peter Carbonetto, Yunqi Yang, Matthew Stephens.</p>
+  <p></p>
+<p>Developed by Peter Carbonetto, Yunqi Yang, Matthew Stephens.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
@@ -307,6 +358,8 @@ x_i \sim w_1 N(0,V + U_1) + \cdots + w_4 N(0,V + U_4).
 
   
 
+
+  
 
   </body>
 </html>
