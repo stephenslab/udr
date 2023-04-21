@@ -67,8 +67,10 @@ ud_init <- function (data = NULL, X, V = diag(ncol(X)), n_rank1, n_unconstrained
   if (inherits(data, "mash")){
     X = data$Bhat
     if (data$commonV){
+      # check if shat is the same across j. 
       Shat = unique(simdata$Shat)
       if (nrow(Shat) == 1){
+        # V is a matrix here.
         Shat = as.vector(Shat)
         V = diag(Shat) %*% data$V %*% diag(Shat)
       }else{
