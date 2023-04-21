@@ -3,10 +3,13 @@
 #' @description Initialize an Ultimate Deconvolution model fit. See
 #'   \code{\link{ud_fit}} for background and model definition.
 #' 
+#' @param dat A mashr object created by mash_set_data() in mashr.
+#' It at least contains elements Bhat, Shat, Shat_alpha, V, commonV, alpha. 
+#' 
 #' @param X An n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point. \code{X} should have at least 2 rows
 #'   and 2 columns.
-#'
+#'   
 #' @param V Either an m x m matrix giving the residual covariance
 #'   matrix for all n data points, or a list of m x m covariance
 #'   matrices of length n.
@@ -55,12 +58,33 @@
 #' 
 #' @export
 #'
-ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
+ud_init <- function (data = NULL, X, V = diag(ncol(X)), n_rank1, n_unconstrained,
                      U_scaled = list(indep = diag(ncol(X)),
                                      equal = matrix(1,ncol(X),ncol(X)) +
-                                                    1e-8 * diag(ncol(X))),
+                                       1e-8 * diag(ncol(X))),
                      U_rank1, U_unconstrained, control = list()) {
-
+  
+  if (inherits(data, "mash")){
+    X = data$Bhat
+    if (data$commonV){
+      Shat = unique(simdata$Shat)
+      if (nrow(Shat) == 1){
+        Shat = as.vector(Shat)
+        V = diag(Shat) %*% data$V %*% diag(Shat)
+      }else{
+        V = list()
+        for (i in 1:nrow(data$Shat)){
+          V[[i]] = diag(Shat[i, ]) %*% data$V %*% diag(Shat[i, ])
+        }
+      }
+    }else{
+      V = list()
+      for (i in 1:nrow(data$Shat)){
+        V[[i]] = diag(Shat[i, ]) %*% data$V[,,i] %*% diag(Shat[i, ])
+      }
+    }
+  }
+  
   # Check the input data matrix, "X".
   if (!(is.matrix(X) & is.numeric(X)))
     stop("Input argument \"X\" should be a numeric matrix")
@@ -92,10 +116,10 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     for (i in 1:n)
       if (sum(is.na(V[[i]]))!= 0 | sum(is.infinite(V[[i]]))!= 0)
         stop("Input argument \"V\" cannot contain missing/infinite values")
-      if (!issemidef(V[[i]])) {
-         V[[i]] <- makeposdef(V[[i]])
-         modified <- TRUE
-      }
+    if (!issemidef(V[[i]])) {
+      V[[i]] <- makeposdef(V[[i]])
+      modified <- TRUE
+    }
   }
   if (modified)
     warning("Input argument \"V\" was modified because one or more ",
@@ -138,7 +162,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   }
   if (is.matrix(U_unconstrained))
     U_unconstrained <- list(U_unconstrained)
-
+  
   # Process input U_scaled.
   if (is.matrix(U_scaled))
     U_scaled <- list(U_scaled)
@@ -147,7 +171,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
   n_scaled        <- length(U_scaled)
   n_rank1         <- length(U_rank1)
   n_unconstrained <- length(U_unconstrained)
-
+  
   # Verify there is no missing/infinite values in U_rank1 if there are rank1 matrices.
   if (n_rank1 != 0){
     for (i in 1:n_rank1)
@@ -165,13 +189,13 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       if (!issemidef(U_scaled[[i]])) {
         U_scaled[[i]] <- makeposdef(U_scaled[[i]])
         modified <- TRUE
-        } 
+      } 
     }
     if (modified)
       warning("Input argument \"U_scaled\" was modified because one or more ",
               "matrices were not positive semi-definite")
   }
-    
+  
   modified <- FALSE
   if (n_unconstrained > 0){
     for (i in 1:n_unconstrained){
@@ -180,15 +204,15 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       if (!issemidef(U_unconstrained[[i]])) {
         U_unconstrained[[i]] <- makeposdef(U_unconstrained[[i]])
         modified <- TRUE
-        }
+      }
     }
     if (modified)
       warning("Input argument \"U_unconstrained\" was modified because one ",
               "or more matrices were not positive semi-definite")
   }
-    
   
-
+  
+  
   # Set up the data structure for the scaled covariance matrices.
   if (n_scaled > 0) {
     if (is.null(names(U_scaled)))
@@ -196,7 +220,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     for (i in 1:n_scaled)
       U_scaled[[i]] <- create_prior_covariance_struct_scaled(X,U_scaled[[i]])
   }
-
+  
   # Set up the data structure for the rank-1 covariance matrices.
   if (n_rank1 > 0) {
     if (is.null(names(U_rank1)))
@@ -204,7 +228,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
     for (i in 1:n_rank1)
       U_rank1[[i]] <- create_prior_covariance_struct_rank1(X,U_rank1[[i]])
   }
-
+  
   # Set up the data structure for the unconstrained covariance matrices.
   if (n_unconstrained > 0) {
     if (is.null(names(U_unconstrained)))
@@ -213,11 +237,11 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       U_unconstrained[[i]] <-
         create_prior_covariance_struct_unconstrained(X,U_unconstrained[[i]])
   }
-
+  
   # Combine the prior covariances matrices into a single list.
   U <- c(U_scaled,U_rank1,U_unconstrained)
   k <- length(U)
-
+  
   # Initialize the mixture weights.
   w        <- rep(1,k)/k
   names(w) <- names(U)
@@ -233,7 +257,7 @@ ud_init <- function (X, V = diag(ncol(X)), n_rank1, n_unconstrained,
       colnames(V[[i]]) <- colnames(X)
     }
   }
-
+  
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.
   progress        <- as.data.frame(matrix(0,0,7))
