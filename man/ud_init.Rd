@@ -72,11 +72,46 @@ Initialize an Ultimate Deconvolution model fit. See
   \code{\link{ud_fit}} for background and model definition.
 }
 \examples{
-# In this invocation of ud_init, "dat" is a data matrix.
+# Here we illustrate the different ways to initialize a UD model fit,
+# with and without mashr. In the very simplest invocation, we supply a
+# data matrix X.
+set.seed(1)
 X <- matrix(rnorm(2000),200,10)
 fit <- ud_init(X)
 
-# MORE EXAMPLES...
+# For more sophisticated usage, first create a mash data object with
+# mash_set_data, then call ud_init. By setting alpha = 1, we invoke
+# the EZ ("exchangeable z-scores") model, and with the model the
+# residual covariance matrix is the same for all effects (rows of
+# Bhat), and is the same as the V in the mash object.
+library(mashr)
+V <- matrix(0.1,10,10)
+diag(V) <- 1
+Shat <- sqrt(matrix(rexp(2000),200,10))
+out <- simple_sims(200,10,Shat)
+dat <- mash_set_data(out$Bhat,out$Shat,V = V,alpha = 1)
+fit <- ud_init(dat)
+all.equal(dat$V,fit$V,check.attributes = FALSE)
+
+# By setting alpha = 0, we instead use the EE ("exchangeable effects")
+# model. Now the residual covariance is different for each effect, and
+# these covariances are now stored in a list with one element for
+# every row of Bhat (or X).
+dat <- mash_set_data(out$Bhat,out$Shat,V = V,alpha = 0)
+fit <- ud_init(dat)
+class(fit$V)
+
+# Again we use the EE model, but since the standard errors are the
+# same for all the effects (and the s.e.'s are equal to 1), the
+# residual covariance matrix is now the same for all effects.
+dat <- mash_set_data(out$Bhat,Shat = 1,V = V,alpha = 0)
+fit <- ud_init(dat)
+all.equal(dat$V,fit$V,check.attributes = FALSE)
+
+# In this final example, we customize the mixture prior to include
+# different numbers of unconstrained and rank-1 matrices.
+fit <- ud_init(dat,n_rank1 = 2,n_unconstrained = 4)
+names(fit$U)
 
 }
 \seealso{
