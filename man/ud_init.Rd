@@ -5,8 +5,8 @@
 \title{Initialize Ultimate Deconvolution Model Fit}
 \usage{
 ud_init(
-  X,
-  V = diag(ncol(X)),
+  dat,
+  V,
   n_rank1,
   n_unconstrained,
   U_scaled = list(indep = diag(ncol(X)), equal = matrix(1, ncol(X), ncol(X)) + 1e-08 *
@@ -17,9 +17,8 @@ ud_init(
 )
 }
 \arguments{
-\item{X}{An n x m data matrix, in which each row of the matrix is
-an m-dimensional data point. \code{X} should have at least 2 rows
-and 2 columns.}
+\item{dat}{A mashr object created by mash_set_data() in mashr.
+It at least contains elements Bhat, Shat, Shat_alpha, V, commonV, alpha.}
 
 \item{V}{Either an m x m matrix giving the residual covariance
 matrix for all n data points, or a list of m x m covariance
@@ -61,6 +60,10 @@ matrix, \code{U_unconstrained} may be a matrix instead of a list.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model initialization. See \code{\link{ud_fit}} for details.}
+
+\item{X}{An n x m data matrix, in which each row of the matrix is
+an m-dimensional data point. \code{X} should have at least 2 rows
+and 2 columns.}
 }
 \value{
 An Ultimate Deconvolution model fit. See
@@ -69,6 +72,14 @@ An Ultimate Deconvolution model fit. See
 \description{
 Initialize an Ultimate Deconvolution model fit. See
   \code{\link{ud_fit}} for background and model definition.
+}
+\examples{
+# In this invocation of ud_init, "dat" is a data matrix.
+X <- matrix(rnorm(2000),200,10)
+fit <- ud_init(X)
+
+# ANOTHER EXAMPLE.
+
 }
 \seealso{
 \code{\link{ud_fit}}

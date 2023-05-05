@@ -1,8 +1,8 @@
 Encoding: UTF-8
 Type: Package
 Package: udr
-Version: 0.3-147
-Date: 2023-04-05
+Version: 0.3-148
+Date: 2023-05-05
 Title: Ultimate Deconvolution for Multivariate Normal Means
 Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
                     email="peter.carbonetto@gmail.com"),
@@ -13,9 +13,10 @@ Authors@R: c(person("Peter","Carbonetto",role=c("aut","cre"),
              person("Gao","Wang",role="ctb"))
 URL: https://github.com/stephenslab/udr
 BugReports: https://github.com/stephenslab/udr/issues
-Description: Implements algorithms for solving the
-    multivariate normal means problem via empirical Bayes. The ``Ultimate Deconvolution" name comes its connection to the 
-    "Extreme Deconvolution" method <DOI:10.1214/10-AOAS439>. The main function is \link{ud_fit}.
+Description: Implements algorithms for solving the multivariate normal
+    means problem via empirical Bayes. The "Ultimate Deconvolution"
+    name comes its connection to the "Extreme Deconvolution" method
+    <DOI:10.1214/10-AOAS439>.
 License: MIT + file LICENSE
 Imports: 
     stats,
@@ -26,6 +27,7 @@ LinkingTo:
     Rcpp, 
     RcppArmadillo
 Suggests:
+    mashr,
     testthat,
     knitr,
     rmarkdown

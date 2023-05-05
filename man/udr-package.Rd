@@ -6,7 +6,10 @@
 \alias{udr-package}
 \title{udr: Ultimate Deconvolution for Multivariate Normal Means}
 \description{
-Implements algorithms for solving the multivariate normal means problem via empirical Bayes. The ``Ultimate Deconvolution" name comes its connection to the "Extreme Deconvolution" method <DOI:10.1214/10-AOAS439>. The main function is \link{ud_fit}.
+Implements algorithms for solving the multivariate normal
+    means problem via empirical Bayes. The "Ultimate Deconvolution"
+    name comes its connection to the "Extreme Deconvolution" method
+    <DOI:10.1214/10-AOAS439>.
 }
 \seealso{
 Useful links:

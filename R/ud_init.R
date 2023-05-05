@@ -4,7 +4,7 @@
 #'   \code{\link{ud_fit}} for background and model definition.
 #' 
 #' @param dat A mashr object created by mash_set_data() in mashr.
-#' It at least contains elements Bhat, Shat, Shat_alpha, V, commonV, alpha. 
+#'   It at least contains elements Bhat, Shat, Shat_alpha, V, commonV, alpha. 
 #' 
 #' @param X An n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point. \code{X} should have at least 2 rows
@@ -55,77 +55,108 @@
 #'   \code{\link{ud_fit}} for details.
 #'
 #' @seealso \code{\link{ud_fit}}
+#'
+#' @examples
+#' # In this invocation of ud_init, "dat" is a data matrix.
+#' X <- matrix(rnorm(2000),200,10)
+#' fit <- ud_init(X)
+#'
+#' # ANOTHER EXAMPLE.
 #' 
 #' @export
 #'
-ud_init <- function (data = NULL, X, V = diag(ncol(X)), n_rank1, n_unconstrained,
+ud_init <- function (dat, V, n_rank1, n_unconstrained,
                      U_scaled = list(indep = diag(ncol(X)),
                                      equal = matrix(1,ncol(X),ncol(X)) +
-                                       1e-8 * diag(ncol(X))),
+                                             1e-8 * diag(ncol(X))),
                      U_rank1, U_unconstrained, control = list()) {
-  
-  if (inherits(data, "mash")){
-    X = data$Bhat
-    if (data$commonV){
-      # check if shat is the same across j. 
-      Shat = unique(simdata$Shat)
-      if (nrow(Shat) == 1){
-        # V is a matrix here.
-        Shat = as.vector(Shat)
-        V = diag(Shat) %*% data$V %*% diag(Shat)
-      }else{
-        V = list()
-        for (i in 1:nrow(data$Shat)){
-          V[[i]] = diag(Shat[i, ]) %*% data$V %*% diag(Shat[i, ])
+
+  # Check and process input arguments "dat" and "V".
+  if (inherits(dat,"mash")) {
+    if (!missing(V))
+      warning("Input argument V is ignored because it is already supplied ",
+              "by the \"dat\" argument")
+    if (dat$alpha == 1) {
+
+      # Use the "Exchangeable Z-scores" (EZ) model: the data matrix is
+      # set to the z-scores, and V is common to all rows of X.
+      X <- dat$Bhat/dat$Shat
+      V <- dat$V  
+    } else if (dat$alpha == 0) {
+
+      # Use the "Exchangeable Effects" (EE) model: the data matrix is
+      # set to the effect estimates (Bhat), and there is (potentially)
+      # a different V for each row of X.
+      X <- dat$Bhat  
+      n <- nrow(X)
+      if (dat$commonV) {
+        
+        # Check if shat is the same for all rows.
+        shat <- dat$Shat[1,]
+        if (max(abs(shat - dat$Shat)) < 1e-15)
+
+          # All the rows of X share the same V.
+          V <- diag(shat) %*% dat$V %*% diag(shat)
+        else {
+
+          # Each row of X has a different V.
+          V <- vector("list",n)
+          for (i in 1:n)
+            V[[i]] = diag(dat$Shat[i,]) %*% dat$V %*% diag(dat$Shat[i,])
         }
+      } else {
+
+        # We have a different V for each row of X.
+        V <- vector("list",n)
+        for (i in 1:n)
+          V[[i]] = diag(dat$Shat[i,]) %*% dat$V[,,i] %*% diag(dat$Shat[i,])
       }
-    }else{
-      V = list()
-      for (i in 1:nrow(data$Shat)){
-        V[[i]] = diag(Shat[i, ]) %*% data$V[,,i] %*% diag(Shat[i, ])
-      }
-    }
-  }
-  
-  # Check the input data matrix, "X".
+    } else
+      stop("Invalid value of \"alpha\" in mash object \"dat\"; should be ",
+           "0 or 1 (see mashr function mash_set_data for more information)")
+  } else if (is.matrix(dat) & is.numeric(dat))
+    X <- dat
+  else
+    stop("Input argument \"dat\" should be a \"mash\" object or a ",
+         "numeric matrix")
+      
+  # Perform some more checks of X.
   if (!(is.matrix(X) & is.numeric(X)))
-    stop("Input argument \"X\" should be a numeric matrix")
-  if (sum(is.na(X))!= 0 | sum(is.infinite(X))!= 0)
-    stop("Input argument \"X\" cannot contain missing/infinite values")
+    stop("X should be a numeric matrix")
+  if (any(is.na(X)) | any(is.infinite(X)))
+    stop("X should not have missing or infinite values")
   n <- nrow(X)
   m <- ncol(X)
   if (n < 2 | m < 2)
-    stop("Input argument \"X\" should have at least 2 columns and ",
-         "at least 2 rows")
+    stop("X should have at least 2 columns and at least 2 rows")
   
   # Check and process the optimization settings.
   control <- modifyList(ud_fit_control_default(),control,keep.null = TRUE)
-  
-  # Check input argument "V".
+
+  # Perform some more checks of V.
   modified <- FALSE
   if (is.matrix(V)) {
-    if (sum(is.na(V))!= 0 | sum(is.infinite(V))!= 0)
-      stop("Input argument \"V\" cannot contain missing/infinite values")
+    if (any(is.na(V)) | any(is.infinite(V)))
+      stop("V should not contain missing or infinite values")
     if (!issemidef(V)) {
       V <- makeposdef(V)
       modified <- TRUE
     }
   } else {
     if (length(V) != n)
-      stop("Input argument \"V\" should either be a positive ",
-           "semi-definite matrix, or a list of positive semi-definite ",
-           "matrices, with one matrix per row of \"X\"")
+      stop("V should either be a positive semi-definite matrix, or a list ",
+           "of positive semi-definite matrices, with one matrix per row of X")
     for (i in 1:n)
-      if (sum(is.na(V[[i]]))!= 0 | sum(is.infinite(V[[i]]))!= 0)
-        stop("Input argument \"V\" cannot contain missing/infinite values")
+      if (any(is.na(V[[i]])) | any(is.infinite(V[[i]])))
+        stop("V should not contain missing or infinite values")
     if (!issemidef(V[[i]])) {
       V[[i]] <- makeposdef(V[[i]])
       modified <- TRUE
     }
   }
   if (modified)
-    warning("Input argument \"V\" was modified because one or more ",
-            "matrices were not positive semi-definite")
+    warning("V was modified because one or more matrices were not ",
+            "positive semi-definite")
   
   # Process inputs n_rank1 and U_rank1. If U_rank1 is not provided,
   # randomly initialize the rank-1 covariance matrices.
@@ -174,46 +205,44 @@ ud_init <- function (data = NULL, X, V = diag(ncol(X)), n_rank1, n_unconstrained
   n_rank1         <- length(U_rank1)
   n_unconstrained <- length(U_unconstrained)
   
-  # Verify there is no missing/infinite values in U_rank1 if there are rank1 matrices.
-  if (n_rank1 != 0){
+  # Verify there are no missing or infinite values in U_rank1.
+  if (n_rank1 != 0)
     for (i in 1:n_rank1)
-      if (sum(is.na(U_rank1[[i]]))!= 0 | sum(is.infinite(U_rank1[[i]]))!= 0)
-        stop("Input argument \"U\" cannot contain missing/infinite values")
-  }
+      if (any(is.na(U_rank1[[i]])) | any(is.infinite(U_rank1[[i]])))
+        stop("U_rank1 should not contain missing or infinite values")
   
   # Verify that all scaled and unconstrained matrices are
   # positive semi-definite.
   modified <- FALSE
-  if (n_scaled > 0){
-    for (i in 1:n_scaled){
-      if (sum(is.na(U_scaled[[i]]))!= 0 | sum(is.infinite(U_scaled[[i]]))!= 0)
-        stop("Input argument \"U\" cannot contain missing/infinite values")
+  if (n_scaled > 0) {
+    for (i in 1:n_scaled) {
+      if (any(is.na(U_scaled[[i]])) | any(is.infinite(U_scaled[[i]])))
+        stop("U_scaled should not contain missing or infinite values")
       if (!issemidef(U_scaled[[i]])) {
         U_scaled[[i]] <- makeposdef(U_scaled[[i]])
         modified <- TRUE
       } 
     }
     if (modified)
-      warning("Input argument \"U_scaled\" was modified because one or more ",
-              "matrices were not positive semi-definite")
+      warning("U_scaled was modified because one or more matrices were not ",
+              "positive semi-definite")
   }
   
   modified <- FALSE
   if (n_unconstrained > 0){
-    for (i in 1:n_unconstrained){
-      if (sum(is.na(U_unconstrained[[i]]))!= 0 | sum(is.infinite(U_unconstrained[[i]]))!= 0)
-        stop("Input argument \"U\" cannot contain missing/infinite values")
+    for (i in 1:n_ unconstrained){
+      if (any(is.na(U_unconstrained[[i]])) |
+          any(is.infinite(U_unconstrained[[i]])))
+        stop("U_unconstrained should not contain missing or infinite values")
       if (!issemidef(U_unconstrained[[i]])) {
         U_unconstrained[[i]] <- makeposdef(U_unconstrained[[i]])
         modified <- TRUE
       }
     }
     if (modified)
-      warning("Input argument \"U_unconstrained\" was modified because one ",
-              "or more matrices were not positive semi-definite")
+      warning("U_unconstrained was modified because one or more matrices ",
+              "were not positive semi-definite")
   }
-  
-  
   
   # Set up the data structure for the scaled covariance matrices.
   if (n_scaled > 0) {
@@ -263,13 +292,15 @@ ud_init <- function (data = NULL, X, V = diag(ncol(X)), n_rank1, n_unconstrained
   # Initialize the data frame for keeping track of the algorithm's
   # progress over time.
   progress        <- as.data.frame(matrix(0,0,7))
-  names(progress) <- c("iter","loglik","loglik.pen","delta.w","delta.v","delta.u","timing")
+  names(progress) <- c("iter","loglik","loglik.pen","delta.w","delta.v",
+                       "delta.u","timing")
   
   # Compute the log-likelihood and the responsibilities matrix (P), and
   # finalize the output.
   loglik     <- loglik_ud(X,w,U,V,control$version)
-  fit        <- list(X = X,V = V,U = U,w = w, loglik = loglik, 
-                     loglik_penalized = -Inf, logplt = NULL, progress = progress)
+  fit        <- list(X = X,V = V,U = U,w = w,loglik = loglik, 
+                     loglik_penalized = -Inf,logplt = as.numeric(NA),
+                     progress = progress)
   class(fit) <- c("ud_fit","list")
   fit        <- compute_posterior_probs(fit,control$version)
   return(fit)
