@@ -2,14 +2,14 @@
 % Please edit documentation in R/ud_init.R
 \name{ud_init}
 \alias{ud_init}
-\title{Initialize Ultimate Deconvolution Model Fit}
+\title{Initialize Ultimate Deconvolution Model}
 \usage{
 ud_init(
   dat,
   V,
   n_rank1,
   n_unconstrained,
-  U_scaled = list(indep = diag(ncol(X)), equal = matrix(1, ncol(X), ncol(X)) + 1e-08 *
+  U_scaled = list(indep = diag(ncol(X)), equal = matrix(1, ncol(X), ncol(X)) + 0.0001 *
     diag(ncol(X))),
   U_rank1,
   U_unconstrained,
@@ -17,8 +17,10 @@ ud_init(
 )
 }
 \arguments{
-\item{dat}{A mashr object created by mash_set_data() in mashr.
-It at least contains elements Bhat, Shat, Shat_alpha, V, commonV, alpha.}
+\item{dat}{An n x m data matrix, in which each row of the matrix is
+an m-dimensional data point, or a \dQuote{mash} object, for example
+created by \code{\link[mashr]{mash_set_data}}. When \code{X} is a
+matrix it should have at least 2 rows and at least 2 columns.}
 
 \item{V}{Either an m x m matrix giving the residual covariance
 matrix for all n data points, or a list of m x m covariance
@@ -28,7 +30,7 @@ matrices of length n.}
 rank-1 covariance matrices included in the mixture prior. Initial
 estimates of the m x m rank-1 covariance matrices are generated at
 random. At most one of \code{n_rank1} and \code{U_rank1} should be
-provided. If neither are specified, 4 random rank-1 matrices will be
+provided. If neither are specified, rank-1 matrices will not be
 included.}
 
 \item{n_unconstrained}{A non-negative integer specifying the number
@@ -60,10 +62,6 @@ matrix, \code{U_unconstrained} may be a matrix instead of a list.}
 
 \item{control}{A list of parameters controlling the behaviour of
 the model initialization. See \code{\link{ud_fit}} for details.}
-
-\item{X}{An n x m data matrix, in which each row of the matrix is
-an m-dimensional data point. \code{X} should have at least 2 rows
-and 2 columns.}
 }
 \value{
 An Ultimate Deconvolution model fit. See
@@ -78,7 +76,7 @@ Initialize an Ultimate Deconvolution model fit. See
 X <- matrix(rnorm(2000),200,10)
 fit <- ud_init(X)
 
-# ANOTHER EXAMPLE.
+# MORE EXAMPLES...
 
 }
 \seealso{

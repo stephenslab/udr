@@ -1,14 +1,12 @@
-#' @title Initialize Ultimate Deconvolution Model Fit
+#' @title Initialize Ultimate Deconvolution Model
 #'
 #' @description Initialize an Ultimate Deconvolution model fit. See
 #'   \code{\link{ud_fit}} for background and model definition.
 #' 
-#' @param dat A mashr object created by mash_set_data() in mashr.
-#'   It at least contains elements Bhat, Shat, Shat_alpha, V, commonV, alpha. 
-#' 
-#' @param X An n x m data matrix, in which each row of the matrix is
-#'   an m-dimensional data point. \code{X} should have at least 2 rows
-#'   and 2 columns.
+#' @param dat An n x m data matrix, in which each row of the matrix is
+#'   an m-dimensional data point, or a \dQuote{mash} object, for example
+#'   created by \code{\link[mashr]{mash_set_data}}. When \code{X} is a
+#'   matrix it should have at least 2 rows and at least 2 columns.
 #'   
 #' @param V Either an m x m matrix giving the residual covariance
 #'   matrix for all n data points, or a list of m x m covariance
@@ -18,7 +16,7 @@
 #'   rank-1 covariance matrices included in the mixture prior. Initial
 #'   estimates of the m x m rank-1 covariance matrices are generated at
 #'   random. At most one of \code{n_rank1} and \code{U_rank1} should be
-#'   provided. If neither are specified, 4 random rank-1 matrices will be
+#'   provided. If neither are specified, rank-1 matrices will not be
 #'   included.
 #' 
 #' @param n_unconstrained A non-negative integer specifying the number
@@ -61,14 +59,14 @@
 #' X <- matrix(rnorm(2000),200,10)
 #' fit <- ud_init(X)
 #'
-#' # ANOTHER EXAMPLE.
+#' # MORE EXAMPLES...
 #' 
 #' @export
 #'
 ud_init <- function (dat, V, n_rank1, n_unconstrained,
                      U_scaled = list(indep = diag(ncol(X)),
                                      equal = matrix(1,ncol(X),ncol(X)) +
-                                             1e-8 * diag(ncol(X))),
+                                             1e-4 * diag(ncol(X))),
                      U_rank1, U_unconstrained, control = list()) {
 
   # Check and process input arguments "dat" and "V".
@@ -230,7 +228,7 @@ ud_init <- function (dat, V, n_rank1, n_unconstrained,
   
   modified <- FALSE
   if (n_unconstrained > 0){
-    for (i in 1:n_ unconstrained){
+    for (i in 1:n_unconstrained) {
       if (any(is.na(U_unconstrained[[i]])) |
           any(is.infinite(U_unconstrained[[i]])))
         stop("U_unconstrained should not contain missing or infinite values")
