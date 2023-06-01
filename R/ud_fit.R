@@ -288,7 +288,7 @@ ud_fit <- function (fit, X, control = list(), verbose = TRUE) {
                 control$rank1.update,
                 control$unconstrained.update))
     if (control$lambda!=0)
-      cat(sprintf("covariance regularization: penalty strength = %d, method = %s\n",
+      cat(sprintf("covariance regularization: penalty strength = %0.2e, method = %s\n",
                   control$lambda, control$penalty.type))
     cat(sprintf("mixture weights update: %s\n",control$weights.update))
     if (is.matrix(fit$V))
