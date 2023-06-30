@@ -18,7 +18,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">udr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3-150</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3-152</span>
       </span>
     </div>
 
@@ -60,8 +60,7 @@
   <span class="va">V</span>,
   <span class="va">n_rank1</span>,
   <span class="va">n_unconstrained</span>,
-  U_scaled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>indep <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>, equal <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.0001</span> <span class="op">*</span>
-    <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,
+  <span class="va">U_scaled</span>,
   <span class="va">U_rank1</span>,
   <span class="va">U_unconstrained</span>,
   control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
@@ -103,8 +102,8 @@ specified, 4 random unconstrained matrices will be included.</p></dd>
 
 <dt>U_scaled</dt>
 <dd><p>A list specifying initial estimates of the scaled
-covariance matrices in the mixture prior. (The default setting
-specifies two commonly used covariance matrices.) In the case of a
+covariance matrices in the mixture prior. The default setting
+specifies two commonly used covariance matrices. In the case of a
 single scaled matrix, <code>U_scaled</code> may be a matrix instead of a
 list.</p></dd>
 
