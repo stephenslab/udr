@@ -27,8 +27,8 @@
 #'   specified, 4 random unconstrained matrices will be included.
 #'
 #' @param U_scaled A list specifying initial estimates of the scaled
-#'   covariance matrices in the mixture prior. (The default setting
-#'   specifies two commonly used covariance matrices.) In the case of a
+#'   covariance matrices in the mixture prior. The default setting
+#'   specifies two commonly used covariance matrices. In the case of a
 #'   single scaled matrix, \code{U_scaled} may be a matrix instead of a
 #'   list.
 #' 
@@ -98,11 +98,8 @@
 #' 
 #' @export
 #'
-ud_init <- function (dat, V, n_rank1, n_unconstrained,
-                     U_scaled = list(indep = diag(ncol(X)),
-                                     equal = matrix(1,ncol(X),ncol(X)) +
-                                             1e-4 * diag(ncol(X))),
-                     U_rank1, U_unconstrained, control = list()) {
+ud_init <- function (dat, V, n_rank1, n_unconstrained, U_scaled, U_rank1,
+                     U_unconstrained, control = list()) {
 
   # Check and process input arguments "dat" and "V".
   if (inherits(dat,"mash")) {
@@ -232,6 +229,9 @@ ud_init <- function (dat, V, n_rank1, n_unconstrained,
     U_unconstrained <- list(U_unconstrained)
   
   # Process input U_scaled.
+  if (missing(U_scaled))
+    U_scaled <- list(indep = diag(m),
+                     equal = matrix(1,m,m) + 1e-4 * diag(m))
   if (is.matrix(U_scaled))
     U_scaled <- list(U_scaled)
   

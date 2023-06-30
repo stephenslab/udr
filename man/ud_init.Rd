@@ -9,8 +9,7 @@ ud_init(
   V,
   n_rank1,
   n_unconstrained,
-  U_scaled = list(indep = diag(ncol(X)), equal = matrix(1, ncol(X), ncol(X)) + 0.0001 *
-    diag(ncol(X))),
+  U_scaled,
   U_rank1,
   U_unconstrained,
   control = list()
@@ -41,8 +40,8 @@ generated at random. At most one of \code{n_unconstrained} and
 specified, 4 random unconstrained matrices will be included.}
 
 \item{U_scaled}{A list specifying initial estimates of the scaled
-covariance matrices in the mixture prior. (The default setting
-specifies two commonly used covariance matrices.) In the case of a
+covariance matrices in the mixture prior. The default setting
+specifies two commonly used covariance matrices. In the case of a
 single scaled matrix, \code{U_scaled} may be a matrix instead of a
 list.}
 
