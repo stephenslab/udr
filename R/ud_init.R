@@ -5,8 +5,8 @@
 #' 
 #' @param dat An n x m data matrix, in which each row of the matrix is
 #'   an m-dimensional data point, or a \dQuote{mash} object, for example
-#'   created by \code{\link[mashr]{mash_set_data}}. When \code{X} is a
-#'   matrix it should have at least 2 rows and at least 2 columns.
+#'   created by \code{\link[mashr]{mash_set_data}}. When \code{dat} is a
+#'   matrix, it should have at least 2 rows and at least 2 columns.
 #'   
 #' @param V Either an m x m matrix giving the residual covariance
 #'   matrix for all n data points, or a list of m x m covariance
