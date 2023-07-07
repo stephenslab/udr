@@ -371,7 +371,7 @@ ud_fit_em <- function (fit, covupdates, control, verbose) {
     diff_obj <- loglik_penalized - fit$loglik_penalized
     fit$loglik_penalized <- loglik_penalized
     fit$loglik <- loglik
-    if (dparam < control$tol |  diff_obj < log(1 + control$tol.lik))
+    if (diff_obj < control$tol.lik)
       break
   }
 
