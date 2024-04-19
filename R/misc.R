@@ -40,15 +40,15 @@ makeposdef <- function (X, minval = 1e-8) {
     return(tcrossprod(out$vectors %*% diag(sqrt(d))))
   }
 }
-  
+
 # For symmetric semi-definite matrix X, return u such that
 # tcrossprod(u) is the nearest rank-1 matrix.
 getrank1 <- function (X) {
   out <- eigen(X)
   return(with(out,sqrt(values[1]) * vectors[,1]))
 }
-                    
-# Function to calculate matrix Q where U=QQ^T when U is rank-deficient. 
+
+# Function to calculate matrix Q where U=QQ^T when U is rank-deficient.
 # @param U is the rank-deficient matrix to decompose
 # @param r is the rank of U.
 get_mat_Q <- function (U, minval = 1e-8) {
@@ -144,3 +144,11 @@ ldet <- function (A)
 # Compute trace of matrix A.
 tr <- function (A)
   sum(diag(A))
+
+#' Extract the list of fitted U from udr fit object
+#' @param fit udr object
+#' @export
+get_Ulist <- function(fit){
+  U <- lapply(fit$U,function (e) "[["(e,"mat"))
+  return(U)
+}
