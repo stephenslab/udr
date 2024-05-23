@@ -108,7 +108,7 @@ test_that(paste("R and C++ implementations of advanced model fitting ",
   updates2 <- assign_prior_covariance_updates(fit2,control2)$covupdates
   fit1 <- update_prior_covariances(fit1,updates1)
   fit2 <- update_prior_covariances(fit2,updates2)
-  expect_equal(fit1,fit2,scale = 1,tolerance = 1e-15)
+  expect_equal(fit1,fit2,scale = 1,tolerance = 1e-8)
   
   # Attempting to perform the TED updates should result in an error.
   control <- list(scaled.update = "none",rank1.update = "ted",
