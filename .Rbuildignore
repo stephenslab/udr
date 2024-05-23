@@ -1,4 +1,5 @@
 ^TODO\.txt$
+^LICENSE\.md$
 ^docs$
 ^udr\.Rproj$
 ^_pkgdown\.yml$
