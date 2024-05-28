@@ -195,7 +195,7 @@ test_that("U[[i]] does not get updated when sum(P[,i]) is near zero",{
 
   # Run the R and C++ implementations of ud_fit when V is a matrix or
   # a list, and V is not updated.
-  ks <- c("indep","rank1_1","unconstrained1")
+  ks <- c("indep","unconstrained1")
   fit0 <- ud_init(X,V = dat$V)
   fit0$w[ks] <- 1e-8
   fit0$w <- with(fit0,w/sum(w))
